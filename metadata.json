@@ -1,0 +1,6 @@
+{
+  "name": "SG-FFE: Sistema de Gestión de FFE",
+  "description": "Sistema completo para la gestión de la fase de formación en empresa (FFE), permitiendo administrar tutores, cursos, alumnos, empresas y convenios con seguimiento de estados.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
