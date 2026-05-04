@@ -1,10 +1,11 @@
 import express from 'express';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
-import libre from 'libreoffice-convert';
+import puppeteer from 'puppeteer';
+import Handlebars from 'handlebars';
+import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
-import fs from 'fs';
 import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO } from './src/lib/dao.ts';
 import { ConvenioEstado } from './src/types/index.ts';
 
@@ -309,10 +310,11 @@ async function startServer() {
     }
   });
 
-  // GENERAR PDF (Lógica de datos copiada para preparar el DOCX en memoria y luego pasarlo a PDF)
+  // GENERAR PDF (Usando la misma lógica que DOCX para obtener datos y Handlebars para el HTML, luego Puppeteer para el PDF)
   app.get('/api/relaciones-alumnos/:id/documento/pdf', async (req, res) => {
+    let browser;
     try {
-      // 1. EXTRAER TODOS LOS DATOS (Exactamente igual que en DOCX)
+      // 1. OBTENCIÓN DE DATOS (Misma lógica que tienes, omitida por brevedad)
       const relacion = RelacionAlumnoDAO.getById(Number(req.params.id));
       if (!relacion) return res.status(404).json({ error: 'Relación no encontrada' });
 
@@ -344,13 +346,24 @@ async function startServer() {
           (relacion.horario.miercoles?.horas || 0) + (relacion.horario.jueves?.horas || 0) +
           (relacion.horario.viernes?.horas || 0);
 
+        let fInicio = ar.fechaInicio || relacion.fechaInicio;
+        let fFin = ar.fechaFin || relacion.fechaFin;
+
         return {
           INDEX: index + 1,
           APELLIDOS_NOMBRE: `${alumno.apellidos}, ${alumno.nombre}`,
           NIF: alumno.dni,
           FECHA_NAC: alumno.fechaNacimiento,
-          F_INICIO: ar.fechaInicio || relacion.fechaInicio,
-          F_FIN: ar.fechaFin || relacion.fechaFin,
+          F_INICIO: new Date(fInicio).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          }),
+          F_FIN: new Date(fFin).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          }),
           DIAS: "L-V",
           H_INICIO: relacion.horario.lunes?.inicio || '',
           H_FIN: relacion.horario.lunes?.fin || '',
@@ -359,21 +372,23 @@ async function startServer() {
         };
       });
 
-      // 2. PREPARAR Y RELLENAR LA PLANTILLA
+      // 2. PROCESAMIENTO DE PLANTILLA HTML CON VERIFICACIÓN
       const isProd = process.env.NODE_ENV === 'production';
-      const templatePath = isProd
-        ? path.join(__dirname, '..', 'templates', 'plantilla_relacion.docx')
-        : path.join(process.cwd(), 'templates', 'plantilla_relacion.docx');
+      // Intentamos localizar la carpeta templates de forma absoluta
+      const templatesDir = path.resolve(process.cwd(), 'templates');
+      const templatePath = path.join(templatesDir, 'plantilla_relacion.html');
 
-      const content = fs.readFileSync(templatePath, 'binary');
-      const zip = new PizZip(content);
-      const doc = new Docxtemplater(zip, {
-        paragraphLoop: true,
-        linebreaks: true,
-        nullGetter: () => ""
-      });
+      console.log(`Intentando leer plantilla en: ${templatePath}`);
 
-      doc.render({
+      if (!fs.existsSync(templatePath)) {
+        console.error("ERROR: No existe el archivo de plantilla HTML.");
+        return res.status(500).json({ error: `Plantilla no encontrada en ${templatePath}` });
+      }
+
+      const source = fs.readFileSync(templatePath, 'utf8');
+      const template = Handlebars.compile(source);
+
+      const htmlFinal = template({
         CURSO: curso?.descripcion || '',
         NUMERO_CONVENIO: convenio?.numConvenio || '',
         NUMERO_RELACION_ALUMNO: relacion?.numRelacion || '',
@@ -397,46 +412,46 @@ async function startServer() {
         alumnos: alumnosData
       });
 
-      // 3. GENERAR EL BUFFER (El DOCX en memoria RAM)
-      const buf = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
-
-      // 4. PREPARAR EL MOTOR LIBREOFFICE
-      const platform = process.platform;
-
-      let sofficePath = '';
-
-      if (platform === 'win32') {
-        sofficePath = isProd
-          ? path.join(process.resourcesPath, 'binarios', 'win', 'program', 'soffice.exe')
-          : path.join(process.cwd(), 'binarios', 'win', 'program', 'soffice.exe');
-      }
-      else {
-        // Apuntamos al AppImage portable para Linux
-        sofficePath = isProd
-          ? path.join(process.resourcesPath, 'binarios', 'linux', 'LibreOffice.AppImage')
-          : path.join(process.cwd(), 'binarios', 'linux', 'LibreOffice.AppImage');
-      }
-
-      // 5. ASIGNAR RUTA Y CONVERTIR A PDF
-      process.env.SOFFICE_PATH = sofficePath;
-      const pdfBuf = await new Promise<Buffer>((resolve, reject) => {
-        libre.convert(buf, '.pdf', undefined, (err: any, done: Buffer) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(done);
-          }
-        });
+      // 3. GENERACIÓN DE PDF CON PUPPETEER
+      browser = await puppeteer.launch({
+        headless: true, // Cambiado a true (formato moderno)
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--font-render-hinting=none' // Mejora legibilidad en PDF
+        ]
       });
 
-      // 6. ENVIAR AL CLIENTE
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=Anexo_Relacion_${relacion.numRelacion.replace(/\//g, '_')}.pdf`);
-      res.send(pdfBuf);
+      const page = await browser.newPage();
 
-    } catch (error) {
-      console.error('Error generando PDF:', error);
-      res.status(500).json({ error: 'No se pudo generar el documento PDF' });
+      // ESTO ES CRÍTICO: 
+      // Si el HTML tiene imágenes locales, Puppeteer necesita conocer el "basePath"
+      await page.setContent(htmlFinal, {
+        waitUntil: 'networkidle0', // Espera a que carguen imágenes/estilos
+        timeout: 30000
+      });
+
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
+      });
+
+      await browser.close();
+
+      // 4. ENVÍO SEGURO DEL BUFFER
+      // Limpiamos cualquier cabecera previa que pudiera estar interfiriendo
+      res.removeHeader('Transfer-Encoding');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Length', pdfBuffer.length);
+      res.setHeader('Content-Disposition', `attachment; filename=Anexo_Relacion_${relacion.numRelacion.replace(/\//g, '_')}.pdf`);
+
+      return res.end(pdfBuffer); // Usamos .end() para enviar el buffer binario puro
+
+    } catch (error: any) {
+      if (browser) await browser.close();
+      console.error('Error crítico generando PDF:', error);
+      res.status(500).json({ error: error.message || 'Error interno al generar PDF' });
     }
   });
 
