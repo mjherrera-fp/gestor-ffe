@@ -246,13 +246,28 @@ async function startServer() {
           (relacion.horario.miercoles?.horas || 0) + (relacion.horario.jueves?.horas || 0) +
           (relacion.horario.viernes?.horas || 0);
 
+        let fInicio = ar.fechaInicio || relacion.fechaInicio;
+        let fFin = ar.fechaFin || relacion.fechaFin;
+
         return {
           INDEX: index + 1,
           APELLIDOS_NOMBRE: `${alumno.apellidos}, ${alumno.nombre}`,
           NIF: alumno.dni,
-          FECHA_NAC: alumno.fechaNacimiento,
-          F_INICIO: ar.fechaInicio || relacion.fechaInicio,
-          F_FIN: ar.fechaFin || relacion.fechaFin,
+          FECHA_NAC: new Date(alumno.fechaNacimiento).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          }),
+          F_INICIO: new Date(fInicio).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          }),
+          F_FIN: new Date(fFin).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          }),
           DIAS: "L-V",
           H_INICIO: relacion.horario.lunes?.inicio || '',
           H_FIN: relacion.horario.lunes?.fin || '',
@@ -353,7 +368,11 @@ async function startServer() {
           INDEX: index + 1,
           APELLIDOS_NOMBRE: `${alumno.apellidos}, ${alumno.nombre}`,
           NIF: alumno.dni,
-          FECHA_NAC: alumno.fechaNacimiento,
+          FECHA_NAC: new Date(alumno.fechaNacimiento).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          }),
           F_INICIO: new Date(fInicio).toLocaleDateString('es-ES', {
             day: '2-digit',
             month: '2-digit',

@@ -186,12 +186,13 @@ export default function App() {
               <Menu className="h-6 w-6" />
             </button>
             <div className="hidden sm:block">
+              <p className="text-[10px] lg:text-xs text-text-muted mt-1">
+                {profesor ? `Bienvenido, ${profesor.nombre}` : `Bienvenido al Gestor FFE`}
+              </p>
               <h2 className="text-lg lg:text-xl font-bold text-text-main leading-none">
                 {navItems.find(i => i.id === activeTab)?.label}
               </h2>
-              <p className="text-[10px] lg:text-xs text-text-muted mt-1">
-                {activeTab === 'convenios' ? 'Seguimiento de procesos de formación' : 'Control del sistema de gestión'}
-              </p>
+              
             </div>
             <div className="sm:hidden">
               <h2 className="text-base font-bold text-text-main">
