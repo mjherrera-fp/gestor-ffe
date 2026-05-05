@@ -249,7 +249,7 @@ export default function App() {
               <AlumnosView cursoId={activeCurso.id!} />
             )}
             {activeTab === 'empresas' && activeCurso && (
-              <EmpresasView />
+              <EmpresasView cursoId={activeCurso.id!} />
             )}
             {activeTab === 'intereses' && activeCurso && (
               <InteresesView cursoId={activeCurso.id!} />

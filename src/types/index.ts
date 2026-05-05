@@ -81,6 +81,14 @@ export enum PlanFormativoEstado {
   COMPLETADO = 'COMPLETADO'
 }
 
+export enum ConvenioEstado {
+  PENDIENTE_ENVIAR = 'PENDIENTE_ENVIAR',
+  PENDIENTE_FIRMA_EMPRESA = 'PENDIENTE_FIRMA_EMPRESA',
+  PENDIENTE_ENVIAR_DIRECTOR = 'PENDIENTE_ENVIAR_DIRECTOR',
+  PENDIENTE_FIRMA_DIRECTOR = 'PENDIENTE_FIRMA_DIRECTOR',
+  COMPLETADO = 'COMPLETADO'
+}
+
 // 2. DICCIONARIOS DE TEXTO (Lo que ve el usuario en la Interfaz)
 export const RelacionEstadoLabels: Record<RelacionEstado, string> = {
   [RelacionEstado.PENDIENTE_ENVIAR_EMPRESA]: 'Pendiente enviar a empresa',
@@ -97,6 +105,14 @@ export const PlanFormativoEstadoLabels: Record<PlanFormativoEstado, string> = {
   [PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente firma empresa',
   [PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR]: 'Pendiente firma tutor',
   [PlanFormativoEstado.COMPLETADO]: 'Completado'
+};
+
+export const ConvenioEstadoLabels: Record<ConvenioEstado, string> = {
+  [ConvenioEstado.PENDIENTE_ENVIAR]: 'Pendiente de enviar a empresa',
+  [ConvenioEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente de firmar por empresa',
+  [ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'Pendiente de enviar al director',
+  [ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR]: 'Pendiente de firmar por dirección',
+  [ConvenioEstado.COMPLETADO]: 'Completado'
 };
 
 export interface RelacionAlumno {
@@ -152,14 +168,6 @@ export interface TutorEmpresa {
   nif: string;
   email: string;
   tlfn: string;
-}
-
-export enum ConvenioEstado {
-  PENDIENTE_ENVIAR = 'Pendiente de enviar a empresa',
-  PENDIENTE_FIRMA_EMPRESA = 'Pendiente de firmar por empresa',
-  PENDIENTE_ENVIAR_DIRECTOR = 'Pendiente de enviar al director',
-  PENDIENTE_FIRMA_DIRECTOR = 'Pendiente de firmar por dirección',
-  COMPLETADO = 'Completado'
 }
 
 export interface Convenio {

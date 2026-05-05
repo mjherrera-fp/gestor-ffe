@@ -868,7 +868,7 @@ export default function RelacionesView({ cursoId }: Props) {
                         key={rel.id}
                         onClick={() => setSelectedRelacion(rel)}
                         // 2. Añadimos un borde inferior muy grueso (border-b-8) y de un gris claro (border-slate-100) para hacer de separador físico
-                        className={`cursor-pointer transition-colors group align-top border-b-[12px] border-slate-50 last:border-b-0 ${selectedRelacion?.id === rel.id ? 'bg-primary/5' : 'hover:bg-slate-50/80'}`}
+                        className={`cursor-pointer transition-colors group align-top border-b-12 border-slate-50 last:border-b-0 ${selectedRelacion?.id === rel.id ? 'bg-primary/5' : 'hover:bg-slate-50/80'}`}
                       >
                         {/* 3. Aumentamos un poco el padding vertical (py-6 en vez de py-4) para que respire más */}
                         <td colSpan={2} className="px-5 py-6 w-full">

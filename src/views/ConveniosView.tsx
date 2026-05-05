@@ -4,7 +4,7 @@ import {
   ArrowRight, CheckCircle2, Clock, Send, ShieldCheck, Mail, Briefcase, Trash2, ArrowLeft,
   Pencil, X, GraduationCap
 } from 'lucide-react';
-import { Convenio, Alumno, Empresa, TutorEmpresa, ConvenioEstado, Curso, CentroEducativo } from '../types/index.ts';
+import { Convenio, Alumno, Empresa, TutorEmpresa, ConvenioEstado, ConvenioEstadoLabels, Curso, CentroEducativo } from '../types/index.ts';
 
 interface Props {
   cursoId: number;
@@ -183,7 +183,7 @@ export default function ConveniosView({ cursoId }: Props) {
       [ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR]: 'status-pending bg-indigo-50 text-indigo-700',
       [ConvenioEstado.COMPLETADO]: 'status-done bg-emerald-50 text-emerald-700'
     };
-    return <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${styles[estado]}`}>{estado}</span>;
+    return <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${styles[estado]}`}>{ConvenioEstadoLabels[estado]}</span>;
   };
 
   const filteredAndSortedConvenios = convenios
@@ -258,7 +258,7 @@ export default function ConveniosView({ cursoId }: Props) {
             >
               <option value="all">Todos los estados</option>
               {Object.values(ConvenioEstado).map(e => (
-                <option key={e} value={e}>{e}</option>
+                <option key={e} value={e}>{ConvenioEstadoLabels[e as ConvenioEstado]}</option>
               ))}
             </select>
 
@@ -392,7 +392,7 @@ export default function ConveniosView({ cursoId }: Props) {
             <div className="p-6 flex-1 overflow-y-auto space-y-6">
               <div>
                 <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Estado Actual</div>
-                <div className="text-sm font-bold text-warning">{selectedConvenio.estado}</div>
+                <div className="text-sm font-bold text-warning">{ConvenioEstadoLabels[selectedConvenio.estado]}</div>
               </div>
 
               <div>
