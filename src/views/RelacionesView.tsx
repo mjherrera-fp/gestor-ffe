@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
   Download, FileText, File as FilePdf, Plus, Edit2, Trash2, Calendar,
   ChevronRight, Building2, User, Hash, X, Info, ArrowLeftRight,
-  Send, Clock, ShieldCheck, CheckCircle2, ArrowLeft, Loader2
+  Send, Clock, ShieldCheck, CheckCircle2, ArrowLeft, Loader2, Search
 } from 'lucide-react';
 import { RelacionAlumno, Convenio, TutorEmpresa, Empresa, Curso, HorarioSemanal, HorarioDia, Alumno, RelacionEstado } from '../types/index.ts';
-import { BotonDescargaPDF } from '../components/BotonDescargarPDF.tsx';
+import { BotonDescargaPDF } from '../components/BotonDescargaPDF.tsx';
 import { BotonDescargaDOCX } from '../components/BotonDescargaDOCX.tsx';
 import { CustomSelect } from '../components/CustomSelect.tsx';
 
@@ -41,6 +41,8 @@ export default function RelacionesView({ cursoId }: Props) {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isConvenioDropdownOpen, setIsConvenioDropdownOpen] = useState(false);
 
+  const [selectedRelacion, setSelectedRelacion] = useState<RelacionAlumno | null>(null);
+
   const [formData, setFormData] = useState<Partial<RelacionAlumno>>({
     alumnosRelacion: [],
     numRelacion: '',
@@ -68,6 +70,21 @@ export default function RelacionesView({ cursoId }: Props) {
     setAlumnos(allAlumnos);
     setCurso(allCursos.find((c: Curso) => c.id === cursoId));
   };
+
+  const [bulkHorario, setBulkHorario] = useState({
+    inicio: '08:00',
+    fin: '17:00',
+    horas: 8,
+    dias: {
+      lunes: true,
+      martes: true,
+      miercoles: true,
+      jueves: true,
+      viernes: true,
+      sabado: false,
+      domingo: false
+    }
+  });
 
   useEffect(() => {
     fetchData();
@@ -119,7 +136,6 @@ export default function RelacionesView({ cursoId }: Props) {
         remainingHoras -= dailyHoras;
       }
 
-      // If we still have hours, move to next day
       if (remainingHoras > 0) {
         current.setDate(current.getDate() + 1);
       }
@@ -163,6 +179,37 @@ export default function RelacionesView({ cursoId }: Props) {
     }
     return formatDateLocal(current);
   };
+
+  const applyBulkHorario = () => {
+    setFormData((prev) => {
+      // Clonamos el horario actual para no mutar el estado directamente
+      const newHorario = { ...prev.horario } as HorarioSemanal;
+
+      // Obtenemos las claves de los días (lunes, martes, etc.)
+      const diasKeys = Object.keys(bulkHorario.dias) as Array<keyof typeof bulkHorario.dias>;
+
+      diasKeys.forEach((day) => {
+        if (bulkHorario.dias[day]) {
+          // Si el día está seleccionado, aplicamos los valores del panel
+          newHorario[day] = {
+            inicio: bulkHorario.inicio,
+            fin: bulkHorario.fin,
+            horas: bulkHorario.horas
+          };
+        } else {
+          // Si NO está seleccionado, reseteamos a cero
+          newHorario[day] = {
+            inicio: '00:00',
+            fin: '00:00',
+            horas: 0
+          };
+        }
+      });
+
+      return { ...prev, horario: newHorario };
+    });
+  };
+
 
   const [targetEndDate, setTargetEndDate] = useState('');
 
@@ -222,6 +269,8 @@ export default function RelacionesView({ cursoId }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...rel, estado: nextEstado })
     });
+
+    setSelectedRelacion({ ...rel, estado: nextEstado });
     fetchData();
   };
 
@@ -241,6 +290,8 @@ export default function RelacionesView({ cursoId }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...rel, estado: prevEstado })
     });
+
+    setSelectedRelacion({ ...rel, estado: prevEstado });
     fetchData();
   };
 
@@ -264,13 +315,15 @@ export default function RelacionesView({ cursoId }: Props) {
       const conv = convenios.find(c => c.id === rel.convenioId);
       if (!conv) return false;
 
+      const alumnoMatch = rel.alumnosRelacion.some(ar => {
+        const a = alumnos.find(al => al.id === ar.alumnoId);
+        return a && (a.nombre + ' ' + a.apellidos).toLowerCase().includes(listSearchTerm.toLowerCase());
+      });
+
       const searchMatch = !listSearchTerm ||
         conv.empresaNombre.toLowerCase().includes(listSearchTerm.toLowerCase()) ||
         rel.numRelacion.toLowerCase().includes(listSearchTerm.toLowerCase()) ||
-        rel.alumnosRelacion.some(ar => {
-          const a = alumnos.find(al => al.id === ar.alumnoId);
-          return a && (a.nombre + ' ' + a.apellidos).toLowerCase().includes(listSearchTerm.toLowerCase());
-        });
+        alumnoMatch;
 
       const statusMatch = statusFilter === 'all' || rel.estado === statusFilter;
 
@@ -357,7 +410,7 @@ export default function RelacionesView({ cursoId }: Props) {
         alumnosRelacion: [...current, {
           alumnoId: alumno.id!,
           totalHoras: alumno.horasPendientesFFE || 0,
-          fechaInicio: prev.fechaInicio // Use default from form as initial value
+          fechaInicio: prev.fechaInicio
         }]
       };
     });
@@ -399,17 +452,11 @@ export default function RelacionesView({ cursoId }: Props) {
 
   const filteredAlumnos = searchTermAlumno.trim().length > 0
     ? alumnos.filter(a => {
-      // 1. Verificar si el nombre coincide con la búsqueda
       const matchesSearch = (a.nombre + ' ' + a.apellidos).toLowerCase().includes(searchTermAlumno.toLowerCase());
-
-      // 2. Verificar si el alumno ya está en el formulario actual (evitar duplicados en la misma relación)
       const isAlreadyInForm = (formData.alumnosRelacion || []).some(ar => ar.alumnoId === a.id);
-
-      // 3. Verificar si el alumno ya tiene una relación guardada en la base de datos
       const hasExistingRelacion = relaciones.some(rel =>
         rel.alumnosRelacion.some(ar => ar.alumnoId === a.id)
       );
-
       return matchesSearch && !isAlreadyInForm && !hasExistingRelacion;
     })
     : [];
@@ -423,6 +470,7 @@ export default function RelacionesView({ cursoId }: Props) {
       const res = await fetch(`/api/relaciones-alumnos/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Error al eliminar relational data');
       setShowDeleteConfirm(null);
+      if (selectedRelacion?.id === id) setSelectedRelacion(null);
       fetchData();
     } catch (error) {
       console.error(error);
@@ -438,21 +486,18 @@ export default function RelacionesView({ cursoId }: Props) {
     return names[day];
   };
 
-  // Opciones para Convenios
   const conveniosOptions = convenios.map(c => ({
     id: c.id,
     label: `${c.empresaNombre} (Ref: ${c.numConvenio})`
   }));
 
-  // Opciones para Tutores (filtrados por la empresa seleccionada)
   const tutoresOptions = tutores.map(t => ({
     id: t.id,
     label: `${t.nombre} ${t.apellidos}`
   }));
 
-  // Opciones para Estados
   const estadosOptions = [
-    { id: 'all', label: 'Cualquier estado' }, // <--- Añadimos esta línea
+    { id: 'all', label: 'Cualquier estado' },
     ...Object.values(RelacionEstado).map(e => ({
       id: e,
       label: e
@@ -460,7 +505,9 @@ export default function RelacionesView({ cursoId }: Props) {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 flex flex-col h-full animate-in fade-in duration-500">
+
+      {/* Header superior */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl lg:text-2xl font-bold text-slate-900 tracking-tight">Relación de Alumnos</h1>
@@ -474,9 +521,258 @@ export default function RelacionesView({ cursoId }: Props) {
         </button>
       </div>
 
+      {/* CONTENEDOR PRINCIPAL DOS COLUMNAS */}
+      <div className="flex flex-col lg:flex-row gap-6 h-full items-start">
+
+        {/* COLUMNA IZQUIERDA: Listado y Búsqueda */}
+        <div className="w-full lg:flex-1 bg-white rounded-xl lg:rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
+
+          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+              <div className="md:col-span-5 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar empresa, relación, o alumno..."
+                  className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                  value={listSearchTerm}
+                  onChange={(e) => setListSearchTerm(e.target.value)}
+                />
+                {listSearchTerm && (
+                  <button onClick={() => setListSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+
+              <div className="md:col-span-3">
+                <CustomSelect
+                  options={estadosOptions}
+                  value={statusFilter}
+                  onChange={(val) => setStatusFilter(val)}
+                  name="estadoFilter"
+                />
+              </div>
+
+              <div className="md:col-span-4 flex bg-white border border-slate-200 rounded-lg p-1">
+                <button
+                  onClick={() => {
+                    if (sortBy === 'empresa') setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                    else { setBy('empresa'); setSortOrder('asc'); }
+                  }}
+                  className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all ${sortBy === 'empresa' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Empresa {sortBy === 'empresa' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </button>
+                <button
+                  onClick={() => {
+                    if (sortBy === 'estado') setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                    else { setBy('estado'); setSortOrder('asc'); }
+                  }}
+                  className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all ${sortBy === 'estado' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabla de Listado */}
+          <div className="overflow-auto flex-1">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100">
+                  <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Empresa / Alumnos
+                  </th>
+                  <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filteredAndSortedRelaciones.length > 0 ? (
+                  filteredAndSortedRelaciones.map(rel => {
+                    const conv = convenios.find(c => c.id === rel.convenioId);
+                    return (
+                      <tr
+                        key={rel.id}
+                        onClick={() => setSelectedRelacion(rel)}
+                        className={`cursor-pointer transition-colors group align-top ${selectedRelacion?.id === rel.id ? 'bg-primary/5' : 'hover:bg-slate-50/80'}`}
+                      >
+                        <td className="px-5 py-4">
+                          <div className="flex flex-col gap-1 mb-3">
+                            <div className="text-[13px] font-black text-slate-800 leading-tight">{conv?.empresaNombre}</div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-mono font-bold text-primary">Ref: {rel.numRelacion}</span>
+                              {statusBadge(rel.estado)}
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            {rel.alumnosRelacion.map((ar, idx) => {
+                              const a = alumnos.find(al => al.id === ar.alumnoId);
+                              const studentStartDate = ar.fechaInicio || rel.fechaInicio || '';
+                              const studentEndDate = calculateEndDateForHours(studentStartDate, ar.totalHoras, rel.horario);
+                              return (
+                                <div key={idx} className="bg-white border border-slate-100 p-2.5 rounded-lg">
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-xs font-bold text-slate-700">{a?.nombre} {a?.apellidos}</span>
+                                    <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded">
+                                      {ar.totalHoras}h
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
+                                    <Calendar className="h-3 w-3" />
+                                    <span>{studentStartDate ? new Date(studentStartDate).toLocaleDateString() : '—'}</span>
+                                    <span className="text-slate-300">-</span>
+                                    <span className="text-emerald-600">{studentEndDate ? new Date(studentEndDate).toLocaleDateString() : '—'}</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => handleOpenForm(rel)}
+                              className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => setShowDeleteConfirm(rel.id!)}
+                              className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={2} className="px-6 py-20 text-center">
+                      <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                        <FileText className="h-8 w-8" />
+                      </div>
+                      <p className="text-sm text-slate-400 font-bold uppercase tracking-widest italic">No se encontraron relaciones</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* COLUMNA DERECHA: Tarjeta de Detalles y Acciones */}
+        <div className="w-full lg:w-96 lg:shrink-0 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden min-h-[600px]">
+          {selectedRelacion ? (
+            <div className="flex flex-col h-full animate-in slide-in-from-right-4 duration-300">
+              <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                <h2 className="text-lg font-bold text-slate-800 leading-tight">Gestión de Documentación</h2>
+                <p className="text-xs font-mono text-slate-500 mt-1">Ref: {selectedRelacion.numRelacion}</p>
+              </div>
+
+              <div className="p-6 space-y-6 overflow-y-auto flex-1">
+
+                {/* BLOQUE 1: ANEXO DE RELACIÓN */}
+                <section className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">1. Anexo de Relación</label>
+                    {statusBadge(selectedRelacion.estado)}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <BotonDescargaDOCX
+                      url={`/api/relaciones-alumnos/${selectedRelacion.id}/documento`}
+                      name={`Anexo_${selectedRelacion.numRelacion.replace(/\//g, '_')}.docx`}
+                      showText={true}
+                    />
+                    <BotonDescargaPDF
+                      url={`/api/relaciones-alumnos/${selectedRelacion.id}/documento/pdf`}
+                      name={`Anexo_${selectedRelacion.numRelacion.replace(/\//g, '_')}.pdf`}
+                      showText={true}
+                    />
+                  </div>
+
+                  {getStatusButton(selectedRelacion.estado) ? (
+                    <button
+                      onClick={() => advanceStatus(selectedRelacion)}
+                      className={`w-full py-2.5 rounded-xl text-white font-bold text-[10px] uppercase flex items-center justify-center gap-2 shadow-lg transition-all ${getStatusButton(selectedRelacion.estado)!.color}`}
+                    >
+                      {React.createElement(getStatusButton(selectedRelacion.estado)!.icon, { className: 'h-4 w-4' })}
+                      {getStatusButton(selectedRelacion.estado)!.label}
+                    </button>
+                  ) : (
+                    <div className="bg-emerald-50 text-emerald-700 p-2.5 rounded-xl text-center font-bold text-[10px] border border-emerald-100 uppercase">
+                      Anexo Completado
+                    </div>
+                  )}
+                </section>
+
+                {/* BLOQUE 2: PLAN FORMATIVO (Dependiente de selectedRelacion pero con flujo propio) */}
+                <section className="bg-blue-50/30 border border-blue-100 rounded-2xl p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
+                      <FileText className="h-3.5 w-3.5" /> 2. Plan Formativo
+                    </label>
+                    {/* Aquí usarías un badge para el estado específico del plan si lo tienes */}
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase border bg-blue-50 text-blue-600 border-blue-100">
+                      {selectedRelacion.estado || 'Pendiente'}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <BotonDescargaDOCX
+                      url={`/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`}
+                      name={`Plan_Formativo_${selectedRelacion.numRelacion.replace(/\//g, '_')}.docx`}
+                      showText={true}
+                    />
+                    <BotonDescargaPDF
+                      url={`/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo/pdf`}
+                      name={`Plan_Formativo_${selectedRelacion.numRelacion.replace(/\//g, '_')}.pdf`}
+                      showText={true}
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => {/* Tu función independiente: advancePlanStatus(selectedRelacion) */ }}
+                    className="w-full py-2.5 rounded-xl bg-slate-800 text-white font-bold text-[10px] uppercase flex items-center justify-center gap-2 shadow-lg hover:bg-slate-900 transition-all"
+                  >
+                    <Send className="h-4 w-4" />
+                    Tramitar Plan Formativo
+                  </button>
+                </section>
+
+                {/* Botón para regresar estado (General para la relación) */}
+                {selectedRelacion.estado !== RelacionEstado.PENDIENTE_ENVIAR && (
+                  <button
+                    onClick={() => moveBackStatus(selectedRelacion)}
+                    className="w-full py-2.5 border border-slate-200 text-slate-500 rounded-xl font-bold text-[10px] uppercase flex items-center justify-center gap-2 hover:bg-slate-50"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" /> Regresar Estado Anterior
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-slate-400">
+              <div className="bg-slate-50 p-6 rounded-full mb-4">
+                <FileText className="h-12 w-12 text-slate-200" />
+              </div>
+              <h3 className="text-base font-bold text-slate-700 mb-2">Selecciona una relación</h3>
+              <p className="text-xs text-slate-500">Para gestionar los Anexos y Planes Formativos asociados.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {showDeleteConfirm !== null && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-60 p-4 text-center">
-          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative p-8 transition-all">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4 text-center">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative p-8 transition-all">
             <button onClick={() => setShowDeleteConfirm(null)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors">
               <Plus className="rotate-45 h-5 w-5" />
             </button>
@@ -504,308 +800,12 @@ export default function RelacionesView({ cursoId }: Props) {
         </div>
       )}
 
-      <div className="bg-white rounded-xl lg:rounded-4xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-            <div className="md:col-span-5 relative">
-              <Plus className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 rotate-45" />
-              <input
-                type="text"
-                placeholder="Buscar por empresa, alumno o relación..."
-                className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
-                value={listSearchTerm}
-                onChange={(e) => setListSearchTerm(e.target.value)}
-              />
-              {listSearchTerm && (
-                <button onClick={() => setListSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
-                  <X className="h-3 w-3" />
-                </button>
-              )}
-            </div>
-
-            <div className="md:col-span-3">
-              <CustomSelect
-                options={estadosOptions}
-                value={statusFilter}
-                onChange={(val) => setStatusFilter(val)}
-                name="estado"
-              />
-            </div>
-
-            <div className="md:col-span-4 flex bg-white border border-slate-200 rounded-xl p-1">
-              <button
-                onClick={() => {
-                  if (sortBy === 'empresa') setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                  else { setBy('empresa'); setSortOrder('asc'); }
-                }}
-                className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-lg transition-all ${sortBy === 'empresa' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-              >
-                Empresa {sortBy === 'empresa' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </button>
-              <button
-                onClick={() => {
-                  if (sortBy === 'estado') setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                  else { setBy('estado'); setSortOrder('asc'); }
-                }}
-                className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-lg transition-all ${sortBy === 'estado' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-              >
-                Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Views for Relaciones */}
-        <div className="lg:hidden divide-y divide-slate-100">
-          {filteredAndSortedRelaciones.length > 0 ? (
-            filteredAndSortedRelaciones.map(rel => {
-              const conv = convenios.find(c => c.id === rel.convenioId);
-              return (
-                <div key={rel.id} className="p-5 space-y-5 bg-white">
-                  {/* Cabecera: Empresa y Estado */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div>
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Empresa / Convenio</span>
-                      <h3 className="text-sm font-black text-slate-800 leading-tight">{conv?.empresaNombre}</h3>
-                      <p className="text-[10px] text-primary font-bold">Convenio: {conv?.numConvenio}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {statusBadge(rel.estado)}
-                    </div>
-                  </div>
-
-                  {/* Alumnos y Periodos en Grid para Tablets */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {rel.alumnosRelacion.map((ar, idx) => {
-                      const a = alumnos.find(al => al.id === ar.alumnoId);
-                      const studentStartDate = ar.fechaInicio || rel.fechaInicio || '';
-                      const studentEndDate = calculateEndDateForHours(studentStartDate, ar.totalHoras, rel.horario);
-                      return (
-                        <div key={idx} className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                          <div className="flex justify-between items-start">
-                            <span className="text-xs font-black text-slate-800">{a?.nombre} {a?.apellidos}</span>
-                            <span className="text-[10px] font-bold text-primary bg-white px-2 py-0.5 rounded-lg border border-slate-100">
-                              {ar.totalHoras}h
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 mt-2">
-                            <Calendar className="h-3 w-3 text-slate-400" />
-                            <span>{studentStartDate ? new Date(studentStartDate).toLocaleDateString() : '—'}</span>
-                            <span className="text-slate-300">/</span>
-                            <span className="text-emerald-600">{studentEndDate ? new Date(studentEndDate).toLocaleDateString() : '—'}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Barra de Acciones: Centrada y aprovechando el ancho */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-50">
-                    <div className="flex items-center gap-2">
-                      {/* Grupo Edición/Borrado */}
-                      <button onClick={() => handleOpenForm(rel)} className="p-3 text-slate-500 hover:text-primary bg-slate-50 rounded-xl border border-slate-200 transition-all">
-                        <Edit2 className="h-4 w-4" />
-                      </button>
-                      <button onClick={() => setShowDeleteConfirm(rel.id!)} className="p-3 text-slate-500 hover:text-red-500 bg-slate-50 rounded-xl border border-slate-200 transition-all">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-
-                      <div className="w-px h-6 bg-slate-200 mx-1" />
-
-                      {/* Grupo Documentos */}
-                      <BotonDescargaDOCX
-                        url={`/api/relaciones-alumnos/${rel.id}/documento`}
-                        name={`Anexo_Relacion_${rel.numRelacion.replace(/\//g, '_')}.docx`}
-                        showText={true}
-                      />
-
-                      <BotonDescargaPDF
-                        url={`/api/relaciones-alumnos/${rel.id}/documento/pdf`}
-                        name={`Anexo_Relacion_${rel.numRelacion.replace(/\//g, '_')}.pdf`}
-                        showText={true}
-                      />
-                    </div>
-
-                    {/* Grupo Flujo de Estado */}
-                    <div className="flex items-center gap-2 ml-auto">
-                      {rel.estado !== RelacionEstado.PENDIENTE_ENVIAR && (
-                        <button
-                          onClick={() => moveBackStatus(rel)}
-                          className="p-3 bg-white text-slate-400 rounded-xl border border-slate-200 hover:bg-slate-50 transition-all"
-                        >
-                          <ArrowLeft className="h-4 w-4" />
-                        </button>
-                      )}
-                      {getStatusButton(rel.estado) ? (
-                        <button
-                          onClick={() => advanceStatus(rel)}
-                          className={`flex items-center gap-2 px-4 py-3 text-white rounded-xl font-bold text-[10px] uppercase tracking-wider shadow-md ${getStatusButton(rel.estado)!.color}`}
-                        >
-                          {React.createElement(getStatusButton(rel.estado)!.icon, { className: 'h-4 w-4' })}
-                          <span className="md:inline hidden">{getStatusButton(rel.estado)!.label}</span>
-                        </button>
-                      ) : (
-                        <div className="flex items-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-600 rounded-xl font-bold text-[10px] uppercase tracking-wider border border-emerald-100">
-                          <CheckCircle2 className="h-4 w-4" />
-                          <span>Completado</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-[9px] font-mono text-slate-300 text-right uppercase italic">Ref: {rel.numRelacion}</div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="px-5 py-20 text-center">
-              <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                <FileText className="h-8 w-8" />
-              </div>
-              <p className="text-sm text-slate-400 font-bold uppercase tracking-widest italic">No se encontraron relaciones</p>
-            </div>
-          )}
-        </div>
-
-        {/* Desktop Table View */}
-        <div className="hidden lg:block overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hover:text-primary transition-colors" onClick={() => { setBy('empresa'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }}>
-                  Información General {sortBy === 'empresa' && (sortOrder === 'asc' ? '↑' : '↓')}
-                </th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Detalle de Alumnos y Periodos</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right cursor-pointer hover:text-primary transition-colors" onClick={() => { setBy('estado'); setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); }}>
-                  Estado / Acciones {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {filteredAndSortedRelaciones.length > 0 ? (
-                filteredAndSortedRelaciones.map(rel => {
-                  const conv = convenios.find(c => c.id === rel.convenioId);
-                  return (
-                    <tr key={rel.id} className="hover:bg-slate-50/50 transition-colors group align-top">
-                      <td className="px-6 py-6">
-                        <div className="flex flex-col gap-2">
-                          <div>
-                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">Empresa / Convenio</div>
-                            <div className="text-[13px] font-black text-slate-800 leading-tight">{conv?.empresaNombre}</div>
-                            <div className="text-[10px] font-bold text-slate-400">Convenio: {conv?.numConvenio}</div>
-                          </div>
-                          <div className="pt-2 border-t border-slate-50">
-                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">Relación Nº</div>
-                            <div className="text-[11px] font-mono font-bold text-primary">{rel.numRelacion}</div>
-                          </div>
-                          <div className="pt-2">
-                            {statusBadge(rel.estado)}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-6">
-                        <div className="space-y-4">
-                          {rel.alumnosRelacion.map((ar, idx) => {
-                            const a = alumnos.find(al => al.id === ar.alumnoId);
-                            const studentStartDate = ar.fechaInicio || rel.fechaInicio || '';
-                            const studentEndDate = calculateEndDateForHours(studentStartDate, ar.totalHoras, rel.horario);
-                            return (
-                              <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                                <div className="flex flex-col">
-                                  <span className="text-[11px] font-black text-slate-800">{a?.nombre} {a?.apellidos}</span>
-                                  <span className="text-[10px] font-bold text-slate-400">{ar.totalHoras} horas FFEE</span>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                  <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Periodo</div>
-                                  <div className="flex items-center gap-2 text-[11px] font-black text-slate-600 bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
-                                    <Calendar className="h-3.5 w-3.5 text-slate-300" />
-                                    <span>{studentStartDate ? new Date(studentStartDate).toLocaleDateString() : '—'}</span>
-                                    <span className="text-slate-300 mx-1">/</span>
-                                    <span className="text-emerald-600">{studentEndDate ? new Date(studentEndDate).toLocaleDateString() : '—'}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </td>
-                      <td className="px-6 py-6 text-right">
-                        <div className="flex items-center justify-end gap-2 mb-4">
-                          <button
-                            onClick={() => handleOpenForm(rel)}
-                            className="p-2.5 text-slate-400 hover:text-primary transition-all hover:bg-slate-100 rounded-xl border border-slate-100 shadow-sm"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => setShowDeleteConfirm(rel.id!)}
-                            className="p-2.5 text-slate-400 hover:text-red-500 transition-all hover:bg-red-50 rounded-xl border border-slate-100 shadow-sm"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                        <div className="flex items-center justify-end gap-2 mb-4">
-                          {/* Botón DOCX */}
-                          <BotonDescargaDOCX
-                            url={`/api/relaciones-alumnos/${rel.id}/documento`}
-                            name={`Anexo_Relacion_${rel.numRelacion.replace(/\//g, '_')}.docx`}
-                            showText={true}
-                          />
-
-                          {/* Botón PDF (Preparado para cuando hagamos el backend) */}
-                          <BotonDescargaPDF
-                            url={`/api/relaciones-alumnos/${rel.id}/documento/pdf`}
-                            name={`Anexo_Relacion_${rel.numRelacion.replace(/\//g, '_')}.pdf`}
-                            showText={true}
-                          />
-                        </div>
-                        <div className="flex items-center justify-end gap-2">
-                          {rel.estado !== RelacionEstado.PENDIENTE_ENVIAR && (
-                            <button
-                              onClick={() => moveBackStatus(rel)}
-                              className="p-2 bg-slate-100 text-slate-500 rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center"
-                              title="Retroceder estado"
-                            >
-                              <ArrowLeft className="h-4 w-4" />
-                            </button>
-                          )}
-                          {getStatusButton(rel.estado) ? (
-                            <button
-                              onClick={() => advanceStatus(rel)}
-                              className={`flex items-center gap-2 px-3 py-2 text-white rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all shadow-sm ${getStatusButton(rel.estado)!.color}`}
-                            >
-                              {React.createElement(getStatusButton(rel.estado)!.icon, { className: 'h-3.5 w-3.5' })}
-                              {getStatusButton(rel.estado)!.label}
-                            </button>
-                          ) : (
-                            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-xl font-bold text-[10px] uppercase tracking-wider border border-emerald-100">
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                              Completado
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={3} className="px-6 py-20 text-center">
-                    <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                      <FileText className="h-8 w-8" />
-                    </div>
-                    <p className="text-sm text-slate-400 font-bold uppercase tracking-widest italic">No se encontraron relaciones para mostrar</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       {showForm && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-5xl overflow-hidden animate-in zoom-in-95 duration-300 my-8">
-            <div className="px-10 py-8 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-slate-900/60 backdrop-blur-md">
+          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+
+            {/* Modal Header Fijo */}
+            <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
               <div>
                 <h3 className="text-xl font-black text-slate-900 tracking-tight">
                   {editing ? 'Editar Relación' : 'Nueva Relación'}
@@ -817,296 +817,375 @@ export default function RelacionesView({ cursoId }: Props) {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-10">
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-                <div className="lg:col-span-2 space-y-8">
-                  <div className="bg-slate-50 rounded-3xl p-6 space-y-6">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <User className="h-3.5 w-3.5" /> Selección de Alumno(s)
-                    </h4>
+            {/* Formulario con Body Scrolleable y Footer Fijo */}
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
 
-                    <div className="space-y-4">
-                      <div className="relative">
-                        <input
-                          type="text"
-                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
-                          placeholder="Buscar por nombre..."
-                          value={searchTermAlumno}
-                          onChange={(e) => setSearchTermAlumno(e.target.value)}
-                        />
-                        {/* Aviso informativo */}
-                        <p className="text-[10px] text-slate-400 mt-1 ml-1 italic">
-                          * Solo se muestran alumnos sin relación asignada.
-                        </p>
+              {/* Modal Body (Scrolleable) */}
+              <div className="p-8 overflow-y-auto flex-1">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
 
-                        {/* Lista de resultados (el resto del código se mantiene igual) */}
-                        {filteredAlumnos.length > 0 && (
-                          <div className="absolute z-20 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-48 overflow-y-auto py-2">
-                            {filteredAlumnos.map(a => (
-                              <button
-                                key={a.id}
-                                type="button"
-                                className="w-full text-left px-5 py-3 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between"
-                                onClick={() => addAlumnoToRelacion(a)}
-                              >
-                                <span className="font-bold text-slate-700">{a.nombre} {a.apellidos}</span>
-                                <Plus className="h-4 w-4 text-primary" />
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                  {/* Izquierda */}
+                  <div className="lg:col-span-2 space-y-8">
+                    <div className="bg-slate-50 rounded-3xl p-6 space-y-6">
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <User className="h-3.5 w-3.5" /> Selección de Alumno(s)
+                      </h4>
 
-                      <div className="space-y-3">
-                        {formData.alumnosRelacion?.map(ar => {
-                          const alum = alumnos.find(a => a.id === ar.alumnoId);
-                          const studentStartDate = ar.fechaInicio || formData.fechaInicio || '';
-                          const studentEndDate = calculateEndDateForHours(studentStartDate, ar.totalHoras);
-                          return (
-                            <div key={ar.alumnoId} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm font-black text-slate-800">{alum?.nombre} {alum?.apellidos}</span>
-                                <button type="button" onClick={() => removeAlumnoFromRelacion(ar.alumnoId)} className="text-red-400 hover:text-red-500 transition-colors">
-                                  <X className="h-4 w-4" />
+                      <div className="space-y-4">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                            placeholder="Buscar por nombre..."
+                            value={searchTermAlumno}
+                            onChange={(e) => setSearchTermAlumno(e.target.value)}
+                          />
+                          <p className="text-[10px] text-slate-400 mt-1 ml-1 italic">
+                            * Solo se muestran alumnos sin relación asignada.
+                          </p>
+
+                          {filteredAlumnos.length > 0 && (
+                            <div className="absolute z-20 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-48 overflow-y-auto py-2">
+                              {filteredAlumnos.map(a => (
+                                <button
+                                  key={a.id}
+                                  type="button"
+                                  className="w-full text-left px-5 py-3 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between"
+                                  onClick={() => addAlumnoToRelacion(a)}
+                                >
+                                  <span className="font-bold text-slate-700">{a.nombre} {a.apellidos}</span>
+                                  <Plus className="h-4 w-4 text-primary" />
                                 </button>
-                              </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Horas FFE</label>
-                                  <input
-                                    type="number"
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold text-primary focus:ring-2 focus:ring-primary/10 outline-none"
-                                    value={ar.totalHoras}
-                                    onChange={e => updateStudentHours(ar.alumnoId, Number(e.target.value))}
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Fecha Inicio</label>
-                                  <input
-                                    type="date"
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold text-slate-600 focus:ring-2 focus:ring-primary/10 outline-none"
-                                    value={ar.fechaInicio || ''}
-                                    onChange={e => updateStudentStartDate(ar.alumnoId, e.target.value)}
-                                  />
-                                </div>
-                              </div>
-                              <div className="flex items-center justify-between pt-1 border-t border-slate-50">
-                                <span className="text-[9px] font-bold text-slate-400 uppercase">Fin Estimado</span>
-                                <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
-                                  {studentEndDate ? new Date(studentEndDate).toLocaleDateString() : '—'}
-                                </span>
-                              </div>
+                              ))}
                             </div>
-                          );
-                        })}
-                        {(!formData.alumnosRelacion || formData.alumnosRelacion.length === 0) && (
-                          <div className="py-8 text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest italic bg-white rounded-2xl border border-dashed border-slate-200">
-                            No hay alumnos seleccionados
+                          )}
+                        </div>
+
+                        {/* LISTA DE ALUMNOS CON SCROLL INDEPENDIENTE */}
+                        <div className="space-y-3 max-h-[35vh] overflow-y-auto pr-2">
+                          {formData.alumnosRelacion?.map(ar => {
+                            const alum = alumnos.find(a => a.id === ar.alumnoId);
+                            const studentStartDate = ar.fechaInicio || formData.fechaInicio || '';
+                            const studentEndDate = calculateEndDateForHours(studentStartDate, ar.totalHoras);
+                            return (
+                              <div key={ar.alumnoId} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-black text-slate-800">{alum?.nombre} {alum?.apellidos}</span>
+                                  <button type="button" onClick={() => removeAlumnoFromRelacion(ar.alumnoId)} className="text-red-400 hover:text-red-500 transition-colors">
+                                    <X className="h-4 w-4" />
+                                  </button>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Horas FFE</label>
+                                    <input
+                                      type="number"
+                                      className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold text-primary focus:ring-2 focus:ring-primary/10 outline-none"
+                                      value={ar.totalHoras}
+                                      onChange={e => updateStudentHours(ar.alumnoId, Number(e.target.value))}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Fecha Inicio</label>
+                                    <input
+                                      type="date"
+                                      className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold text-slate-600 focus:ring-2 focus:ring-primary/10 outline-none"
+                                      value={ar.fechaInicio || ''}
+                                      onChange={e => updateStudentStartDate(ar.alumnoId, e.target.value)}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-between pt-1 border-t border-slate-50">
+                                  <span className="text-[9px] font-bold text-slate-400 uppercase">Fin Estimado</span>
+                                  <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                                    {studentEndDate ? new Date(studentEndDate).toLocaleDateString() : '—'}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {(!formData.alumnosRelacion || formData.alumnosRelacion.length === 0) && (
+                            <div className="py-8 text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest italic bg-white rounded-2xl border border-dashed border-slate-200">
+                              No hay alumnos seleccionados
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 rounded-3xl p-6 space-y-4">
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <Calendar className="h-3.5 w-3.5" /> Periodo general
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Fecha Inicio General</label>
+                            <button
+                              type="button"
+                              onClick={applyStartDateToAll}
+                              disabled={!formData.alumnosRelacion?.length}
+                              className="text-[9px] font-bold text-primary hover:underline uppercase tracking-tight disabled:text-slate-300 disabled:no-underline disabled:cursor-not-allowed"
+                            >
+                              Aplicar a todos
+                            </button>
                           </div>
-                        )}
+                          <input
+                            type="date"
+                            disabled={!formData.alumnosRelacion?.length}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                            value={formData.fechaInicio}
+                            onChange={e => setFormData({ ...formData, fechaInicio: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Fecha Fin Objetivo</label>
+                            <button
+                              type="button"
+                              onClick={applyTargetEndDate}
+                              disabled={!formData.alumnosRelacion?.length}
+                              className="text-[9px] font-bold text-emerald-600 hover:underline uppercase tracking-tight disabled:text-slate-300 disabled:no-underline disabled:cursor-not-allowed"
+                            >
+                              Cálculo retroactivo
+                            </button>
+                          </div>
+                          <input
+                            type="date"
+                            disabled={!formData.alumnosRelacion?.length}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                            value={targetEndDate}
+                            onChange={e => setTargetEndDate(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 rounded-3xl p-6 space-y-4">
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <Building2 className="h-3.5 w-3.5" /> Entidad Colaboradora
+                      </h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Relación Nº</label>
+                          <input
+                            required
+                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                            value={formData.numRelacion}
+                            onChange={e => setFormData({ ...formData, numRelacion: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="relative">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Convenio</label>
+                          <input
+                            type="text"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                            placeholder="Buscar convenio..."
+                            value={searchTermConvenio}
+                            onChange={(e) => {
+                              setSearchTermConvenio(e.target.value);
+                              setFormData(prev => ({ ...prev, convenioId: undefined }));
+                              setIsConvenioDropdownOpen(true);
+                            }}
+                            onFocus={() => setIsConvenioDropdownOpen(true)}
+                          />
+                          {isConvenioDropdownOpen && (searchTermConvenio || filteredConvenios.length > 0) && (
+                            <div className="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-48 overflow-y-auto">
+                              {filteredConvenios.map(c => (
+                                <button
+                                  key={c.id}
+                                  type="button"
+                                  className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
+                                  onClick={() => {
+                                    setFormData({ ...formData, convenioId: c.id });
+                                    setSearchTermConvenio(`${c.empresaNombre} (Ref: ${c.numConvenio})`);
+                                    setIsConvenioDropdownOpen(false);
+                                  }}
+                                >
+                                  <div className="font-bold">{c.empresaNombre}</div>
+                                  <div className="text-[10px] text-slate-400">Ref: {c.numConvenio}</div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <CustomSelect
+                            label="Tutor Empresa"
+                            options={tutoresOptions}
+                            value={formData.tutorEmpresaId || ''}
+                            onChange={(val) => setFormData({ ...formData, tutorEmpresaId: Number(val) })}
+                            required={true}
+                            name="tutorEmpresaId"
+                          />
+                        </div>
+
+                        <div>
+                          <CustomSelect
+                            label="Estado de Tramitación"
+                            options={estadosOptions.filter(o => o.id !== 'all')}
+                            value={formData.estado || ''}
+                            onChange={(val) => setFormData({ ...formData, estado: val as RelacionEstado })}
+                            required={true}
+                            name="estado"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 rounded-3xl p-6 space-y-4">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <Calendar className="h-3.5 w-3.5" /> Periodo general
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Fecha Inicio General</label>
-                          <button
-                            type="button"
-                            onClick={applyStartDateToAll}
-                            disabled={!formData.alumnosRelacion?.length}
-                            className="text-[9px] font-bold text-primary hover:underline uppercase tracking-tight disabled:text-slate-300 disabled:no-underline disabled:cursor-not-allowed"
-                          >
-                            Aplicar a todos
-                          </button>
+                  {/* Derecha */}
+                  <div className="lg:col-span-3 space-y-6">
+                    <div className="bg-slate-50 border border-primary/20 rounded-3xl p-6 shadow-sm">
+                      <h4 className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-2 mb-4">
+                        <Clock className="h-3.5 w-3.5" /> Configuración rápida de horario
+                      </h4>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Hora Inicio</label>
+                          <input
+                            type="time"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary"
+                            value={bulkHorario.inicio}
+                            onChange={(e) => setBulkHorario({ ...bulkHorario, inicio: e.target.value })}
+                          />
                         </div>
-                        <input
-                          type="date"
-                          disabled={!formData.alumnosRelacion?.length}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
-                          value={formData.fechaInicio}
-                          onChange={e => setFormData({ ...formData, fechaInicio: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Fecha Fin Objetivo</label>
-                          <button
-                            type="button"
-                            onClick={applyTargetEndDate}
-                            disabled={!formData.alumnosRelacion?.length}
-                            className="text-[9px] font-bold text-emerald-600 hover:underline uppercase tracking-tight disabled:text-slate-300 disabled:no-underline disabled:cursor-not-allowed"
-                          >
-                            Cálculo retroactivo
-                          </button>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Hora Fin</label>
+                          <input
+                            type="time"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary"
+                            value={bulkHorario.fin}
+                            onChange={(e) => setBulkHorario({ ...bulkHorario, fin: e.target.value })}
+                          />
                         </div>
-                        <input
-                          type="date"
-                          disabled={!formData.alumnosRelacion?.length}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
-                          value={targetEndDate}
-                          onChange={e => setTargetEndDate(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-50 rounded-3xl p-6 space-y-4">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <Building2 className="h-3.5 w-3.5" /> Entidad Colaboradora
-                    </h4>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Relación Nº</label>
-                        <input
-                          required
-                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
-                          value={formData.numRelacion}
-                          onChange={e => setFormData({ ...formData, numRelacion: e.target.value })}
-                        />
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Total Horas</label>
+                          <input
+                            type="number"
+                            step="0.5"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary font-bold text-primary"
+                            value={bulkHorario.horas}
+                            onChange={(e) => setBulkHorario({ ...bulkHorario, horas: Number(e.target.value) })}
+                          />
+                        </div>
                       </div>
 
-                      <div className="relative">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Convenio</label>
-                        <input
-                          type="text"
-                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
-                          placeholder="Buscar convenio..."
-                          value={searchTermConvenio}
-                          onChange={(e) => {
-                            setSearchTermConvenio(e.target.value);
-                            setFormData(prev => ({ ...prev, convenioId: undefined }));
-                            setIsConvenioDropdownOpen(true);
-                          }}
-                          onFocus={() => setIsConvenioDropdownOpen(true)}
-                        />
-                        {isConvenioDropdownOpen && (searchTermConvenio || filteredConvenios.length > 0) && (
-                          <div className="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-48 overflow-y-auto">
-                            {filteredConvenios.map(c => (
+                      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100">
+                        <div className="flex gap-2">
+                          {Object.keys(bulkHorario.dias).map((day) => {
+                            const labels: any = { lunes: 'L', martes: 'M', miercoles: 'X', jueves: 'J', viernes: 'V', sabado: 'S', domingo: 'D' };
+                            const isChecked = (bulkHorario.dias as any)[day];
+                            return (
                               <button
-                                key={c.id}
+                                key={day}
                                 type="button"
-                                className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
                                 onClick={() => {
-                                  setFormData({ ...formData, convenioId: c.id });
-                                  setSearchTermConvenio(`${c.empresaNombre} (Ref: ${c.numConvenio})`);
-                                  setIsConvenioDropdownOpen(false);
+                                  const newDias = { ...bulkHorario.dias } as any;
+                                  newDias[day] = !newDias[day];
+                                  setBulkHorario({ ...bulkHorario, dias: newDias });
                                 }}
+                                className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all border ${isChecked
+                                  ? 'bg-primary text-white border-primary shadow-md shadow-primary/20'
+                                  : 'bg-slate-50 text-slate-400 border-slate-200'
+                                  }`}
                               >
-                                <div className="font-bold">{c.empresaNombre}</div>
-                                <div className="text-[10px] text-slate-400">Ref: {c.numConvenio}</div>
+                                {labels[day]}
                               </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <CustomSelect
-                          label="Tutor Empresa"
-                          options={tutoresOptions}
-                          value={formData.tutorEmpresaId || ''}
-                          onChange={(val) => setFormData({ ...formData, tutorEmpresaId: Number(val) })}
-                          required={true}
-                          name="tutorEmpresaId"
-                        />
-                      </div>
-
-                      <div>
-                        <CustomSelect
-                          label="Estado de Tramitación"
-                          options={estadosOptions}
-                          value={formData.estado || ''}
-                          onChange={(val) => setFormData({ ...formData, estado: val as RelacionEstado })}
-                          required={true}
-                          name="estado"
-                        />
+                            );
+                          })}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={applyBulkHorario}
+                          className="px-4 py-2 bg-primary text-white text-[10px] font-bold uppercase rounded-xl hover:bg-primary/90 transition-all shadow-md shadow-primary/20 border border-primary"
+                        >
+                          Aplicar horario a la semana
+                        </button>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="lg:col-span-3 space-y-6">
-                  <div className="flex items-center justify-between px-2">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <ArrowLeftRight className="h-3.5 w-3.5" /> Horario de Trabajo
-                    </h4>
-                  </div>
+                    <div className="flex items-center justify-between px-2">
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <ArrowLeftRight className="h-3.5 w-3.5" /> Detalle por día
+                      </h4>
+                    </div>
 
-                  <div className="grid grid-cols-1 gap-3">
-                    {Object.keys(DEFAULT_HORARIO).map((day) => {
-                      const d = day as keyof HorarioSemanal;
-                      return (
-                        <div key={day} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 hover:border-slate-200 transition-all">
-                          <div className="flex items-center gap-4">
-                            <h5 className="text-[11px] font-black text-slate-700 w-24">
-                              {getDayName(day)}
-                            </h5>
-                            <div className="grid grid-cols-3 gap-4 flex-1">
-                              <input
-                                type="time"
-                                className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-primary font-medium"
-                                value={formData.horario?.[d].inicio}
-                                onChange={e => {
-                                  const h = { ...formData.horario! };
-                                  h[d].inicio = e.target.value;
-                                  setFormData({ ...formData, horario: h });
-                                }}
-                              />
-                              <input
-                                type="time"
-                                className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-primary font-medium"
-                                value={formData.horario?.[d].fin}
-                                onChange={e => {
-                                  const h = { ...formData.horario! };
-                                  h[d].fin = e.target.value;
-                                  setFormData({ ...formData, horario: h });
-                                }}
-                              />
-                              <div className="relative">
+                    <div className="grid grid-cols-1 gap-3">
+                      {Object.keys(DEFAULT_HORARIO).map((day) => {
+                        const d = day as keyof HorarioSemanal;
+                        return (
+                          <div key={day} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 hover:border-slate-200 transition-all">
+                            <div className="flex items-center gap-4">
+                              <h5 className="text-[11px] font-black text-slate-700 w-24">
+                                {getDayName(day)}
+                              </h5>
+                              <div className="grid grid-cols-3 gap-4 flex-1">
                                 <input
-                                  type="number"
-                                  step="0.5"
-                                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-primary outline-none focus:border-primary"
-                                  value={formData.horario?.[d].horas}
+                                  type="time"
+                                  className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-primary font-medium"
+                                  value={formData.horario?.[d].inicio}
                                   onChange={e => {
                                     const h = { ...formData.horario! };
-                                    h[d].horas = Number(e.target.value);
+                                    h[d].inicio = e.target.value;
                                     setFormData({ ...formData, horario: h });
                                   }}
                                 />
-                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400">h</span>
+                                <input
+                                  type="time"
+                                  className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-primary font-medium"
+                                  value={formData.horario?.[d].fin}
+                                  onChange={e => {
+                                    const h = { ...formData.horario! };
+                                    h[d].fin = e.target.value;
+                                    setFormData({ ...formData, horario: h });
+                                  }}
+                                />
+                                <div className="relative">
+                                  <input
+                                    type="number"
+                                    step="0.5"
+                                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-primary outline-none focus:border-primary"
+                                    value={formData.horario?.[d].horas}
+                                    onChange={e => {
+                                      const h = { ...formData.horario! };
+                                      h[d].horas = Number(e.target.value);
+                                      setFormData({ ...formData, horario: h });
+                                    }}
+                                  />
+                                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400">h</span>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowForm(false)}
-                      className="w-full sm:flex-1 py-4 bg-slate-50 text-slate-600 font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-100 transition-all border border-slate-200"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      className="w-full sm:flex-2 py-4 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-primary-dark transition-all shadow-xl shadow-primary/20"
-                    >
-                      {editing ? 'Guardar Cambios' : 'Crear Relación'}
-                    </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Modal Footer Fijo */}
+              <div className="px-8 py-5 border-t border-slate-100 bg-white shrink-0 flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="px-8 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-all uppercase tracking-widest"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-8 py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all uppercase tracking-widest"
+                >
+                  {editing ? 'Guardar Cambios' : 'Crear Relación'}
+                </button>
+              </div>
+
             </form>
           </div>
         </div>
