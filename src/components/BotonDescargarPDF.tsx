@@ -43,7 +43,7 @@ export function BotonDescargaPDF({ url, name, showText = false }: { url: string,
       ) : (
         <FilePdf className="h-4 w-4" />
       )}
-      {showText && <span className="text-xs font-semibold">{estaCargando ? 'Generando...' : 'PDF'}</span>}
+      {showText && <span className="text-xs font-semibold md:inline hidden ml-1.5">{estaCargando ? 'Generando...' : 'PDF'}</span>}
     </button>
   );
 }

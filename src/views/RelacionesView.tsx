@@ -5,8 +5,8 @@ import {
   Send, Clock, ShieldCheck, CheckCircle2, ArrowLeft, Loader2
 } from 'lucide-react';
 import { RelacionAlumno, Convenio, TutorEmpresa, Empresa, Curso, HorarioSemanal, HorarioDia, Alumno, RelacionEstado } from '../types/index.ts';
-import { BotonDescargaPDF } from '../components/BotonDescargarPDF';
-import { CustomSelect } from '../components/CustomSelect';
+import { BotonDescargaPDF } from '../components/BotonDescargarPDF.tsx';
+import { CustomSelect } from '../components/CustomSelect.tsx';
 
 interface Props {
   cursoId: number;
@@ -525,9 +525,8 @@ export default function RelacionesView({ cursoId }: Props) {
             <div className="md:col-span-3">
               <CustomSelect
                 options={estadosOptions}
-                value={formData.estado || ''}
-                onChange={(val) => setFormData({ ...formData, estado: val as RelacionEstado })}
-                required={true}
+                value={statusFilter}
+                onChange={(val) => setStatusFilter(val)}
                 name="estado"
               />
             </div>
@@ -620,6 +619,7 @@ export default function RelacionesView({ cursoId }: Props) {
                         <FileText className="h-4 w-4" />
                         <span className="text-[10px] font-bold uppercase md:inline hidden">DOCX</span>
                       </button>
+                      
                       <BotonDescargaPDF
                         url={`/api/relaciones-alumnos/${rel.id}/documento/pdf`}
                         name={`Anexo_Relacion_${rel.numRelacion.replace(/\//g, '_')}.pdf`}

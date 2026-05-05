@@ -25,13 +25,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Profesor, Curso, Alumno, Empresa, Convenio, ConvenioEstado } from './types/index.ts';
 
 // Components
-import ProfesorView from './components/ProfesorView.tsx';
-import CursosView from './components/CursosView.tsx';
-import AlumnosView from './components/AlumnosView.tsx';
-import EmpresasView from './components/EmpresasView.tsx';
-import ConveniosView from './components/ConveniosView.tsx';
-import InteresesView from './components/InteresesView.tsx';
-import RelacionesView from './components/RelacionesView.tsx';
+import ProfesorView from './views/ProfesorView.tsx';
+import CursosView from './views/CursosView.tsx';
+import AlumnosView from './views/AlumnosView.tsx';
+import EmpresasView from './views/EmpresasView.tsx';
+import ConveniosView from './views/ConveniosView.tsx';
+import InteresesView from './views/InteresesView.tsx';
+import RelacionesView from './views/RelacionesView.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
