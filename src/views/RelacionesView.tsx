@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { RelacionAlumno, Convenio, TutorEmpresa, Empresa, Curso, HorarioSemanal, HorarioDia, Alumno, RelacionEstado } from '../types/index.ts';
 import { BotonDescargaPDF } from '../components/BotonDescargarPDF.tsx';
+import { BotonDescargaDOCX } from '../components/BotonDescargaDOCX.tsx';
 import { CustomSelect } from '../components/CustomSelect.tsx';
 
 interface Props {
@@ -612,17 +613,16 @@ export default function RelacionesView({ cursoId }: Props) {
                       <div className="w-px h-6 bg-slate-200 mx-1" />
 
                       {/* Grupo Documentos */}
-                      <button
-                        onClick={() => { window.location.href = `/api/relaciones-alumnos/${rel.id}/documento`; }}
-                        className="p-3 text-blue-600 bg-blue-50 rounded-xl border border-blue-100 transition-all flex items-center gap-2"
-                      >
-                        <FileText className="h-4 w-4" />
-                        <span className="text-[10px] font-bold uppercase md:inline hidden">DOCX</span>
-                      </button>
-                      
+                      <BotonDescargaDOCX
+                        url={`/api/relaciones-alumnos/${rel.id}/documento`}
+                        name={`Anexo_Relacion_${rel.numRelacion.replace(/\//g, '_')}.docx`}
+                        showText={true}
+                      />
+
                       <BotonDescargaPDF
                         url={`/api/relaciones-alumnos/${rel.id}/documento/pdf`}
                         name={`Anexo_Relacion_${rel.numRelacion.replace(/\//g, '_')}.pdf`}
+                        showText={true}
                       />
                     </div>
 
@@ -745,14 +745,11 @@ export default function RelacionesView({ cursoId }: Props) {
                         </div>
                         <div className="flex items-center justify-end gap-2 mb-4">
                           {/* Botón DOCX */}
-                          <button
-                            onClick={() => { window.location.href = `/api/relaciones-alumnos/${rel.id}/documento`; }}
-                            className="p-2.5 text-blue-600 hover:text-blue-700 transition-all hover:bg-blue-50 rounded-xl border border-blue-100 shadow-sm flex items-center gap-1.5"
-                            title="Descargar Anexo en Word"
-                          >
-                            <FileText className="h-4 w-4" />
-                            <span className="text-xs font-semibold">DOCX</span>
-                          </button>
+                          <BotonDescargaDOCX
+                            url={`/api/relaciones-alumnos/${rel.id}/documento`}
+                            name={`Anexo_Relacion_${rel.numRelacion.replace(/\//g, '_')}.docx`}
+                            showText={true}
+                          />
 
                           {/* Botón PDF (Preparado para cuando hagamos el backend) */}
                           <BotonDescargaPDF
