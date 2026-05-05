@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Edit2, User, Phone, Mail, Calendar, Hash, FileUp, Download, CheckCircle, FileText, GraduationCap, X, Clock, FileSpreadsheet, LayoutGrid, List, Search, ArrowUpDown } from 'lucide-react';
 import { Alumno, DetalleAcademico, RelacionAlumno } from '../types/index.ts';
-import DetalleAcademicoModal from '../components/DetalleAcademicoModal.tsx';
+import DetalleAcademicoModal from '../views/DetalleAcademicoModal.tsx';
 import * as XLSX from 'xlsx';
 
 interface Props {
