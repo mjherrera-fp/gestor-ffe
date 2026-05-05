@@ -200,7 +200,7 @@ export default function CursosView({ cursos, onUpdate }: Props) {
               </div>
 
               <div className="pt-4 border-t border-slate-100">
-                <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center justify-between">
+                <label className="block text-sm font-medium text-slate-700 mb-3 items-center justify-between">
                   Días Festivos
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{formData.festivos?.length || 0} añadidos</span>
                 </label>
@@ -254,7 +254,7 @@ export default function CursosView({ cursos, onUpdate }: Props) {
 
       <div className="bg-white rounded-xl border border-border-base shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-border-base bg-slate-50/50 flex justify-between items-center">
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest text-slate-400">Historial de Cursos</span>
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Historial de Cursos</span>
           {showArchived && (
             <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 uppercase tracking-widest">Mostrando Histórico</span>
           )}
@@ -271,7 +271,7 @@ export default function CursosView({ cursos, onUpdate }: Props) {
               <div key={curso.id} className={`p-5 space-y-4 ${curso.archivado ? 'bg-slate-50/50 opacity-60' : ''}`}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <div className="font-bold text-sm text-text-main break-words">
+                    <div className="font-bold text-sm text-text-main wrap-break-word">
                       {curso.descripcion}
                     </div>
                     <div className="flex items-center gap-2 mt-1 text-[10px] text-text-muted font-medium">

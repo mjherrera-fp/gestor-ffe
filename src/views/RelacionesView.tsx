@@ -475,8 +475,8 @@ export default function RelacionesView({ cursoId }: Props) {
       </div>
 
       {showDeleteConfirm !== null && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4 text-center">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative p-8 transition-all">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-60 p-4 text-center">
+          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative p-8 transition-all">
             <button onClick={() => setShowDeleteConfirm(null)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors">
               <Plus className="rotate-45 h-5 w-5" />
             </button>
@@ -504,7 +504,7 @@ export default function RelacionesView({ cursoId }: Props) {
         </div>
       )}
 
-      <div className="bg-white rounded-xl lg:rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-xl lg:rounded-4xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
             <div className="md:col-span-5 relative">
@@ -1100,7 +1100,7 @@ export default function RelacionesView({ cursoId }: Props) {
                     </button>
                     <button
                       type="submit"
-                      className="w-full sm:flex-[2] py-4 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-primary-dark transition-all shadow-xl shadow-primary/20"
+                      className="w-full sm:flex-2 py-4 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-primary-dark transition-all shadow-xl shadow-primary/20"
                     >
                       {editing ? 'Guardar Cambios' : 'Crear Relación'}
                     </button>

@@ -388,8 +388,8 @@ export default function AlumnosView({ cursoId }: Props) {
       </div>
 
       {showDeleteConfirm !== null && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-60 p-4">
+          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative">
             <button onClick={() => setShowDeleteConfirm(null)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors">
               <X className="h-5 w-5" />
             </button>
@@ -508,7 +508,7 @@ export default function AlumnosView({ cursoId }: Props) {
 
             return (
               <div key={alumno.id} className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group overflow-hidden flex flex-col h-full">
-                <div className="p-6 flex flex-col flex-grow">
+                <div className="p-6 flex flex-col grow">
                   <div className="flex items-start justify-between mb-4">
                     <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 group-hover:bg-primary/5 transition-colors">
                       <User className="h-6 w-6 text-slate-400 group-hover:text-primary transition-colors" />
@@ -578,8 +578,8 @@ export default function AlumnosView({ cursoId }: Props) {
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1000px]">
+        <div className="bg-white rounded-4xl border border-slate-100 shadow-sm overflow-hidden overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-250">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
                 <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Alumno</th>
@@ -619,7 +619,7 @@ export default function AlumnosView({ cursoId }: Props) {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-slate-500 truncate max-w-[180px] font-medium">
+                      <div className="text-sm text-slate-500 truncate max-w-45 font-medium">
                         {alumno.emailEduca}
                       </div>
                     </td>

@@ -223,8 +223,8 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
     <div className="space-y-12">
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative text-center p-8 transition-all">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-60 p-4">
+          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative text-center p-8 transition-all">
             <button onClick={() => setShowDeleteConfirm(null)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors">
               <Plus className="rotate-45 h-5 w-5" />
             </button>
@@ -455,7 +455,7 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
       {/* Centro Modal */}
       {showCentroForm && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
               <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
                 {editingCentro ? 'Editar Centro' : 'Añadir Nuevo Centro'}
@@ -492,7 +492,7 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
       {/* Detalle Modal */}
       {showDetalleForm && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
+          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
             <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
               <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
                  Configuración de Ciclo (Detalle Académico)
@@ -610,7 +610,7 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
                 </div>
 
                 {/* RA scrolling list */}
-                <div className="mt-4 space-y-2 max-h-[180px] overflow-y-auto pr-1">
+                <div className="mt-4 space-y-2 max-h-45 overflow-y-auto pr-1">
                   {detalleFormData.resultadosAprendizaje?.map((ra) => (
                     <div key={ra.id} className="bg-white border border-slate-100 rounded-lg p-3 shadow-sm flex items-start justify-between gap-3 group">
                       <div className="flex-1 min-w-0">

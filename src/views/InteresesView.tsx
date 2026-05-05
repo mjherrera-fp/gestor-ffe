@@ -66,7 +66,7 @@ export default function InteresesView({ cursoId }: Props) {
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-full items-start">
       {/* Alumnos Sidebar Card */}
-      <div className="w-full lg:w-[300px] lg:shrink-0 bg-white rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col h-full">
+      <div className="w-full lg:w-75 lg:shrink-0 bg-white rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col h-full">
         <div className="px-6 py-4 border-b border-border-base bg-slate-50/50 flex flex-col gap-3">
           <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Alumnado</span>
           <div className="relative">
@@ -88,7 +88,7 @@ export default function InteresesView({ cursoId }: Props) {
             )}
           </div>
         </div>
-        <div className="lg:overflow-y-auto divide-y divide-border-base max-h-[300px] lg:max-h-full">
+        <div className="lg:overflow-y-auto divide-y divide-border-base max-h-75 lg:max-h-full">
           {filteredAlumnos.map(al => {
             const alumnoMatches = intereses.filter(i => i.alumnoId === al.id && i.interesado === 'alumno').length;
             const companyInterests = intereses.filter(i => i.alumnoId === al.id && i.interesado === 'empresa').length;

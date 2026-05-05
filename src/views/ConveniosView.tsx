@@ -341,7 +341,7 @@ export default function ConveniosView({ cursoId }: Props) {
                 >
                   <td className="px-5 py-4">
                     <p className="text-[9px] text-primary font-bold uppercase tracking-tight mb-0.5">{conv.centroNombre}</p>
-                    <p className="font-bold text-text-main text-sm truncate max-w-[200px]">{conv.empresaNombre}</p>
+                    <p className="font-bold text-text-main text-sm truncate max-w-50">{conv.empresaNombre}</p>
                   </td>
                   <td className="px-5 py-4">
                     <p className="text-xs font-bold text-text-muted">{conv.numConvenio}</p>
@@ -364,7 +364,7 @@ export default function ConveniosView({ cursoId }: Props) {
       </div>
 
       {/* Detail View Card */}
-      <div className="w-full lg:w-[340px] lg:shrink-0 bg-white rounded-xl border border-border-base shadow-sm flex flex-col h-full overflow-hidden min-h-[300px]">
+      <div className="w-full lg:w-85 lg:shrink-0 bg-white rounded-xl border border-border-base shadow-sm flex flex-col h-full overflow-hidden min-h-75">
         {selectedConvenio ? (
           <div className="flex-1 flex flex-col">
             <div className="p-6 border-b border-border-base">
@@ -455,8 +455,8 @@ export default function ConveniosView({ cursoId }: Props) {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm !== null && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-60 p-4">
+          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative">
             <button onClick={() => setShowDeleteConfirm(null)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors">
               <X className="h-5 w-5" />
             </button>
@@ -489,7 +489,7 @@ export default function ConveniosView({ cursoId }: Props) {
       {/* Convenio Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-3xl my-8 overflow-hidden">
+          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-3xl my-8 overflow-hidden">
             <div className="px-10 py-8 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                <div>
                   <h3 className="text-2xl font-black text-slate-900 tracking-tight">{isEditing ? 'Editar Convenio' : 'Nuevo Convenio de Prácticas'}</h3>
@@ -540,7 +540,7 @@ export default function ConveniosView({ cursoId }: Props) {
                       </div>
                       
                       {searchTermEmpresa && !selectedEmpresa && (
-                        <div className="absolute z-10 w-full bg-white border border-slate-200 rounded-xl shadow-xl mt-[-8px] max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="absolute z-10 w-full bg-white border border-slate-200 rounded-xl shadow-xl -mt-2 max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
                           {empresas
                             .filter(e => e.nombre.toLowerCase().includes(searchTermEmpresa.toLowerCase()))
                             .map(e => (
@@ -611,7 +611,7 @@ export default function ConveniosView({ cursoId }: Props) {
                           checked={formData.isActive}
                           onChange={e => setFormData({...formData, isActive: e.target.checked})}
                         />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                       </div>
                       <div className="flex flex-col">
                         <span className="text-sm font-bold text-emerald-900">Convenio Activo</span>

@@ -177,7 +177,7 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 bg-bg-base overflow-hidden relative">
         {/* Header */}
-        <header className="h-[72px] lg:h-20 bg-white border-b border-border-base flex items-center justify-between px-4 lg:px-8 z-10 shrink-0">
+        <header className="h-18 lg:h-20 bg-white border-b border-border-base flex items-center justify-between px-4 lg:px-8 z-10 shrink-0">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
