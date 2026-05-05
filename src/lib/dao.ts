@@ -229,13 +229,13 @@ export const RelacionAlumnoDAO = {
     horario: JSON.parse(r.horario)
   })),
   create: (rel: RelacionAlumno) => {
-    const stmt = db.prepare('INSERT INTO relaciones_alumnos (alumnosRelacion, convenioId, numRelacion, tutorEmpresaId, fechaInicio, fechaFin, horario, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(JSON.stringify(rel.alumnosRelacion), rel.convenioId, rel.numRelacion, rel.tutorEmpresaId, rel.fechaInicio, rel.fechaFin, JSON.stringify(rel.horario), rel.estado);
+    const stmt = db.prepare('INSERT INTO relaciones_alumnos (alumnosRelacion, convenioId, numRelacion, tutorEmpresaId, fechaInicio, fechaFin, horario, estado, estadoPlanFormativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(JSON.stringify(rel.alumnosRelacion), rel.convenioId, rel.numRelacion, rel.tutorEmpresaId, rel.fechaInicio, rel.fechaFin, JSON.stringify(rel.horario), rel.estado, rel.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE');
     return info.lastInsertRowid;
   },
   update: (id: number, rel: RelacionAlumno) => {
-    const stmt = db.prepare('UPDATE relaciones_alumnos SET alumnosRelacion = ?, convenioId = ?, numRelacion = ?, tutorEmpresaId = ?, fechaInicio = ?, fechaFin = ?, horario = ?, estado = ? WHERE id = ?');
-    stmt.run(JSON.stringify(rel.alumnosRelacion), rel.convenioId, rel.numRelacion, rel.tutorEmpresaId, rel.fechaInicio, rel.fechaFin, JSON.stringify(rel.horario), rel.estado, id);
+    const stmt = db.prepare('UPDATE relaciones_alumnos SET alumnosRelacion = ?, convenioId = ?, numRelacion = ?, tutorEmpresaId = ?, fechaInicio = ?, fechaFin = ?, horario = ?, estado = ?, estadoPlanFormativo = ? WHERE id = ?');
+    stmt.run(JSON.stringify(rel.alumnosRelacion), rel.convenioId, rel.numRelacion, rel.tutorEmpresaId, rel.fechaInicio, rel.fechaFin, JSON.stringify(rel.horario), rel.estado, rel.estadoPlanFormativo, id);
   },
   delete: (id: number) => {
     db.prepare('DELETE FROM relaciones_alumnos WHERE id = ?').run(id);

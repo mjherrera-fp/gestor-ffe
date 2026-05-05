@@ -4,7 +4,7 @@ import {
   ChevronRight, Building2, User, Hash, X, Info, ArrowLeftRight,
   Send, Clock, ShieldCheck, CheckCircle2, ArrowLeft, Loader2, Search
 } from 'lucide-react';
-import { RelacionAlumno, Convenio, TutorEmpresa, Empresa, Curso, HorarioSemanal, HorarioDia, Alumno, RelacionEstado } from '../types/index.ts';
+import { RelacionAlumno, Convenio, TutorEmpresa, Empresa, RelacionEstado, PlanFormativoEstado, RelacionEstadoLabels, PlanFormativoEstadoLabels, Curso, HorarioSemanal, HorarioDia, Alumno } from '../types/index.ts';
 import { BotonDescargaPDF } from '../components/BotonDescargaPDF.tsx';
 import { BotonDescargaDOCX } from '../components/BotonDescargaDOCX.tsx';
 import { CustomSelect } from '../components/CustomSelect.tsx';
@@ -49,7 +49,8 @@ export default function RelacionesView({ cursoId }: Props) {
     fechaInicio: '',
     fechaFin: '',
     horario: { ...DEFAULT_HORARIO },
-    estado: RelacionEstado.PENDIENTE_ENVIAR
+    estado: RelacionEstado.PENDIENTE_ENVIAR_EMPRESA,
+    estadoPlanFormativo: PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE
   });
 
   const fetchData = async () => {
@@ -256,7 +257,7 @@ export default function RelacionesView({ cursoId }: Props) {
   const advanceStatus = async (rel: RelacionAlumno) => {
     let nextEstado = rel.estado;
     switch (rel.estado) {
-      case RelacionEstado.PENDIENTE_ENVIAR: nextEstado = RelacionEstado.PENDIENTE_FIRMA_EMPRESA; break;
+      case RelacionEstado.PENDIENTE_ENVIAR_EMPRESA: nextEstado = RelacionEstado.PENDIENTE_FIRMA_EMPRESA; break;
       case RelacionEstado.PENDIENTE_FIRMA_EMPRESA: nextEstado = RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR; break;
       case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR: nextEstado = RelacionEstado.PENDIENTE_FIRMA_DIRECTOR; break;
       case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR: nextEstado = RelacionEstado.COMPLETADO; break;
@@ -275,37 +276,177 @@ export default function RelacionesView({ cursoId }: Props) {
   };
 
   const moveBackStatus = async (rel: RelacionAlumno) => {
+    console.log("👉 [ANEXO] Intentando retroceder. Estado actual:", rel.estado);
     let prevEstado = rel.estado;
+
     switch (rel.estado) {
-      case RelacionEstado.PENDIENTE_FIRMA_EMPRESA: prevEstado = RelacionEstado.PENDIENTE_ENVIAR; break;
-      case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR: prevEstado = RelacionEstado.PENDIENTE_FIRMA_EMPRESA; break;
-      case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR: prevEstado = RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR; break;
-      case RelacionEstado.COMPLETADO: prevEstado = RelacionEstado.PENDIENTE_FIRMA_DIRECTOR; break;
+      case RelacionEstado.PENDIENTE_FIRMA_EMPRESA:
+        prevEstado = RelacionEstado.PENDIENTE_ENVIAR_EMPRESA; break;
+
+      case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR:
+        prevEstado = RelacionEstado.PENDIENTE_FIRMA_EMPRESA; break;
+
+      case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR:
+        prevEstado = RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR; break;
+
+      case RelacionEstado.COMPLETADO:
+        prevEstado = RelacionEstado.PENDIENTE_FIRMA_DIRECTOR; break;
     }
 
-    if (prevEstado === rel.estado) return;
+    if (prevEstado === rel.estado) {
+      console.warn("⚠️ No se puede retroceder. El estado no se reconoce o ya es el inicial.");
+      return;
+    }
 
-    await fetch(`/api/relaciones-alumnos/${rel.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...rel, estado: prevEstado })
-    });
+    try {
+      const res = await fetch(`/api/relaciones-alumnos/${rel.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...rel, estado: prevEstado })
+      });
 
-    setSelectedRelacion({ ...rel, estado: prevEstado });
-    fetchData();
+      if (res.ok) {
+        setSelectedRelacion({ ...rel, estado: prevEstado });
+        fetchData();
+      } else {
+        console.error("❌ Error del servidor al retroceder:", await res.text());
+      }
+    } catch (error) {
+      console.error("💥 Error de red:", error);
+    }
   };
 
-  const statusBadge = (estado: RelacionEstado) => {
-    const styles = {
-      [RelacionEstado.PENDIENTE_ENVIAR]: 'bg-orange-50 text-orange-700 border-orange-100',
-      [RelacionEstado.PENDIENTE_FIRMA_EMPRESA]: 'bg-amber-50 text-amber-700 border-amber-100',
-      [RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'bg-blue-50 text-blue-700 border-blue-100',
-      [RelacionEstado.PENDIENTE_FIRMA_DIRECTOR]: 'bg-indigo-50 text-indigo-700 border-indigo-100',
-      [RelacionEstado.COMPLETADO]: 'bg-emerald-50 text-emerald-700 border-emerald-100'
-    };
+  const moveBackPlanStatus = async (rel: RelacionAlumno) => {
+    console.log("👉 [PLAN FORMATIVO] Intentando retroceder. Estado actual:", rel.estadoPlanFormativo);
+    const currentState = rel.estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
+    let prevEstado = currentState;
+
+    switch (currentState) {
+      case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
+      case 'PENDIENTE_FIRMAR_ESTUDIANTE':
+        prevEstado = PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE; break;
+
+      case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
+      case 'PENDIENTE_ENVIAR_EMPRESA':
+        prevEstado = PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE; break;
+
+      case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
+      case 'PENDIENTE_FIRMA_EMPRESA':
+        prevEstado = PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA; break;
+
+      case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
+      case 'PENDIENTE_FIRMA_TUTOR':
+        prevEstado = PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA; break;
+
+      case PlanFormativoEstado.COMPLETADO:
+      case 'COMPLETADO':
+        prevEstado = PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR; break;
+    }
+
+    if (prevEstado === currentState) {
+      console.warn("⚠️ No se puede retroceder en el Plan Formativo. Ya está en el estado inicial.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/relaciones-alumnos/${rel.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...rel, estadoPlanFormativo: prevEstado })
+      });
+
+      if (res.ok) {
+        setSelectedRelacion({ ...rel, estadoPlanFormativo: prevEstado });
+        fetchData();
+      } else {
+        console.error("❌ Error del servidor al retroceder el plan:", await res.text());
+      }
+    } catch (error) {
+      console.error("💥 Error de red:", error);
+    }
+  };
+
+  // ESTADOS (PLAN FORMATIVO)
+  const advancePlanStatus = async (rel: RelacionAlumno) => {
+    // 1. Vemos qué estado tiene exactamente al pulsar
+    const currentState = rel.estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
+    console.log("👉 Estado ACTUAL antes de pulsar:", currentState);
+
+    let nextEstado = currentState;
+
+    switch (currentState) {
+      case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE:
+        nextEstado = PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE; break;
+
+      case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
+        nextEstado = PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA; break;
+
+      case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
+        nextEstado = PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA; break;
+
+      case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
+        nextEstado = PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR; break;
+
+      case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
+        nextEstado = PlanFormativoEstado.COMPLETADO; break;
+    }
+
+    console.log("👉 Estado SIGUIENTE calculado:", nextEstado);
+
+    if (nextEstado === currentState) {
+      console.warn("⚠️ El estado no ha cambiado. Me salgo de la función.");
+      return;
+    }
+
+    try {
+      console.log("🚀 Enviando petición al servidor...");
+      const res = await fetch(`/api/relaciones-alumnos/${rel.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...rel, estadoPlanFormativo: nextEstado })
+      });
+
+      if (res.ok) {
+        console.log("✅ Servidor respondió OK. Actualizando vista.");
+        setSelectedRelacion({ ...rel, estadoPlanFormativo: nextEstado });
+        fetchData();
+      } else {
+        console.error("❌ El servidor devolvió un error:", await res.text());
+      }
+    } catch (error) {
+      console.error("💥 Error crítico de red:", error);
+    }
+  };
+
+  // --- LÓGICA DE ETIQUETAS (BADGES) ---
+  const statusBadge = (estado: string, isPlan: boolean = false) => {
+    let color = 'bg-slate-50 text-slate-500 border-slate-200';
+    let displayText = estado;
+
+    if (!isPlan) {
+      if (estado === RelacionEstado.PENDIENTE_ENVIAR_EMPRESA) color = 'bg-blue-50 text-blue-700 border-blue-100';
+      else if (estado === RelacionEstado.PENDIENTE_FIRMA_EMPRESA) color = 'bg-amber-50 text-amber-700 border-amber-100';
+      else if (estado === RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR) color = 'bg-blue-50 text-blue-700 border-blue-100';
+      else if (estado === RelacionEstado.PENDIENTE_FIRMA_DIRECTOR) color = 'bg-indigo-50 text-indigo-700 border-indigo-100';
+      else if (estado === RelacionEstado.COMPLETADO) color = 'bg-emerald-50 text-emerald-700 border-emerald-100';
+
+      // Obtenemos el texto bonito del diccionario
+      displayText = RelacionEstadoLabels[estado as RelacionEstado] || estado;
+    } else {
+      if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE) color = 'bg-blue-50 text-blue-700 border-blue-100';
+      else if (estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE) color = 'bg-amber-50 text-amber-700 border-amber-100';
+      else if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA) color = 'bg-blue-50 text-blue-700 border-blue-100';
+      else if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA) color = 'bg-emerald-50 text-emerald-700 border-emerald-100';
+      else if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR) color = 'bg-teal-50 text-teal-700 border-teal-100';
+      else if (estado === PlanFormativoEstado.COMPLETADO) color = 'bg-emerald-50 text-emerald-700 border-emerald-100';
+
+      // Obtenemos el texto bonito del diccionario
+      displayText = PlanFormativoEstadoLabels[estado as PlanFormativoEstado] || estado;
+    }
+
     return (
-      <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${styles[estado] || 'bg-slate-50 text-slate-500'}`}>
-        {estado}
+      <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${color}`}>
+        {displayText}
       </span>
     );
   };
@@ -341,13 +482,41 @@ export default function RelacionesView({ cursoId }: Props) {
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
-  const getStatusButton = (estado: RelacionEstado) => {
+  // --- LÓGICA DE BOTONES PARA ANEXO ---
+  const getAnexoStatusButton = (estado: string) => {
     switch (estado) {
-      case RelacionEstado.PENDIENTE_ENVIAR: return { label: 'Enviar a Empresa', icon: Send, color: 'bg-blue-600' };
+      case RelacionEstado.PENDIENTE_ENVIAR_EMPRESA: return { label: 'Enviar Doc. a Empresa', icon: Send, color: 'bg-blue-600' };
       case RelacionEstado.PENDIENTE_FIRMA_EMPRESA: return { label: 'Recibido de Empresa', icon: Clock, color: 'bg-amber-500' };
       case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR: return { label: 'Enviar a Dirección', icon: Send, color: 'bg-indigo-600' };
       case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR: return { label: 'Recibido de Dirección', icon: ShieldCheck, color: 'bg-emerald-600' };
       default: return null;
+    }
+  };
+
+  // --- LÓGICA DE BOTONES PARA PLAN FORMATIVO ---
+  const getPlanStatusButton = (estado: string) => {
+    switch (estado) {
+      case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE:
+      case 'PENDIENTE_ENVIAR_ESTUDIANTE':
+        return { label: 'Enviar Doc. a Estudiante', icon: Send, color: 'bg-blue-600' };
+
+      case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
+      case 'PENDIENTE_FIRMAR_ESTUDIANTE':
+        return { label: 'Recibir Firma Estudiante', icon: Clock, color: 'bg-amber-600' };
+
+      case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
+      case 'PENDIENTE_ENVIAR_EMPRESA':
+        return { label: 'Enviar a Empresa', icon: Send, color: 'bg-indigo-600' };
+
+      case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
+      case 'PENDIENTE_FIRMA_EMPRESA':
+        return { label: 'Recibir Firma Empresa', icon: Clock, color: 'bg-emerald-600' };
+
+      case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
+      case 'PENDIENTE_FIRMA_TUTOR':
+        return { label: 'Recibir Firma Tutor', icon: ShieldCheck, color: 'bg-teal-600' };
+
+      default: return null; // Si es COMPLETADO o no coincide, no muestra botón
     }
   };
 
@@ -393,7 +562,7 @@ export default function RelacionesView({ cursoId }: Props) {
         fechaInicio: '',
         fechaFin: '',
         horario: { ...DEFAULT_HORARIO },
-        estado: RelacionEstado.PENDIENTE_ENVIAR
+        estado: RelacionEstado.PENDIENTE_ENVIAR_EMPRESA
       });
       setSearchTermAlumno('');
       setSearchTermConvenio('');
@@ -500,7 +669,7 @@ export default function RelacionesView({ cursoId }: Props) {
     { id: 'all', label: 'Cualquier estado' },
     ...Object.values(RelacionEstado).map(e => ({
       id: e,
-      label: e
+      label: RelacionEstadoLabels[e as RelacionEstado] // <-- Usamos el diccionario aquí
     }))
   ];
 
@@ -605,7 +774,7 @@ export default function RelacionesView({ cursoId }: Props) {
                             <div className="text-[13px] font-black text-slate-800 leading-tight">{conv?.empresaNombre}</div>
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] font-mono font-bold text-primary">Ref: {rel.numRelacion}</span>
-                              {statusBadge(rel.estado)}
+                              
                             </div>
                           </div>
 
@@ -681,7 +850,7 @@ export default function RelacionesView({ cursoId }: Props) {
                 {/* BLOQUE 1: ANEXO DE RELACIÓN */}
                 <section className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">1. Anexo de Relación</label>
+                    <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest">1. Anexo de Relación</label>
                     {statusBadge(selectedRelacion.estado)}
                   </div>
 
@@ -698,64 +867,60 @@ export default function RelacionesView({ cursoId }: Props) {
                     />
                   </div>
 
-                  {getStatusButton(selectedRelacion.estado) ? (
+                  {getAnexoStatusButton(selectedRelacion.estado) ? (
                     <button
                       onClick={() => advanceStatus(selectedRelacion)}
-                      className={`w-full py-2.5 rounded-xl text-white font-bold text-[10px] uppercase flex items-center justify-center gap-2 shadow-lg transition-all ${getStatusButton(selectedRelacion.estado)!.color}`}
+                      className={`w-full py-2.5 rounded-xl text-white font-bold text-[10px] uppercase flex items-center justify-center gap-2 shadow-lg transition-all ${getAnexoStatusButton(selectedRelacion.estado)!.color}`}
                     >
-                      {React.createElement(getStatusButton(selectedRelacion.estado)!.icon, { className: 'h-4 w-4' })}
-                      {getStatusButton(selectedRelacion.estado)!.label}
+                      {React.createElement(getAnexoStatusButton(selectedRelacion.estado)!.icon, { className: 'h-4 w-4' })}
+                      {getAnexoStatusButton(selectedRelacion.estado)!.label}
                     </button>
                   ) : (
                     <div className="bg-emerald-50 text-emerald-700 p-2.5 rounded-xl text-center font-bold text-[10px] border border-emerald-100 uppercase">
                       Anexo Completado
                     </div>
                   )}
+
+                  {/* Botón para regresar estado (General para la relación) */}
+                  {selectedRelacion.estado !== RelacionEstado.PENDIENTE_ENVIAR_EMPRESA && (
+                    <button
+                      onClick={() => moveBackStatus(selectedRelacion)}
+                      className="w-full py-2.5 border border-slate-200 text-slate-500 rounded-xl font-bold text-[10px] uppercase flex items-center justify-center gap-2 hover:bg-slate-50"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" /> Regresar Estado Anterior
+                    </button>
+                  )}
                 </section>
 
                 {/* BLOQUE 2: PLAN FORMATIVO (Dependiente de selectedRelacion pero con flujo propio) */}
                 <section className="bg-blue-50/30 border border-blue-100 rounded-2xl p-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
-                      <FileText className="h-3.5 w-3.5" /> 2. Plan Formativo
-                    </label>
-                    {/* Aquí usarías un badge para el estado específico del plan si lo tienes */}
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase border bg-blue-50 text-blue-600 border-blue-100">
-                      {selectedRelacion.estado || 'Pendiente'}
-                    </span>
+                    <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5"><FileText className="h-3.5 w-3.5" /> 2. Plan Formativo</label>
+                    {statusBadge(selectedRelacion.estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE, true)}
                   </div>
-
                   <div className="flex gap-2">
-                    <BotonDescargaDOCX
-                      url={`/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`}
-                      name={`Plan_Formativo_${selectedRelacion.numRelacion.replace(/\//g, '_')}.docx`}
-                      showText={true}
-                    />
-                    <BotonDescargaPDF
-                      url={`/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo/pdf`}
-                      name={`Plan_Formativo_${selectedRelacion.numRelacion.replace(/\//g, '_')}.pdf`}
-                      showText={true}
-                    />
+                    <BotonDescargaDOCX url={`/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`} name={`Plan_${selectedRelacion.numRelacion}.docx`} showText />
+                    <BotonDescargaPDF url={`/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo/pdf`} name={`Plan_${selectedRelacion.numRelacion}.pdf`} showText />
                   </div>
-
-                  <button
-                    onClick={() => {/* Tu función independiente: advancePlanStatus(selectedRelacion) */ }}
-                    className="w-full py-2.5 rounded-xl bg-slate-800 text-white font-bold text-[10px] uppercase flex items-center justify-center gap-2 shadow-lg hover:bg-slate-900 transition-all"
-                  >
-                    <Send className="h-4 w-4" />
-                    Tramitar Plan Formativo
-                  </button>
+                  {getPlanStatusButton(selectedRelacion.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE') ? (
+                    <button
+                      onClick={() => advancePlanStatus(selectedRelacion)}
+                      className={`w-full py-2.5 rounded-xl text-white font-bold text-[10px] uppercase flex items-center justify-center gap-2 shadow-lg transition-all hover:brightness-90 ${getPlanStatusButton(selectedRelacion.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE')!.color}`}>
+                      {React.createElement(getPlanStatusButton(selectedRelacion.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE')!.icon, { className: 'h-4 w-4' })}
+                      {getPlanStatusButton(selectedRelacion.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE')!.label}
+                    </button>
+                  ) : <div className="bg-emerald-50 text-emerald-700 p-2.5 rounded-xl text-center font-bold text-[10px] border border-emerald-100">COMPLETADO</div>}
+                  {/* NUEVO BOTÓN PARA RETROCEDER ESTADO DEL PLAN FORMATIVO */}
+                  {(selectedRelacion.estadoPlanFormativo &&
+                    selectedRelacion.estadoPlanFormativo !== PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE) && (
+                      <button
+                        onClick={() => moveBackPlanStatus(selectedRelacion)}
+                        className="w-full py-2.5 border border-slate-200 text-slate-500 rounded-xl font-bold text-[10px] uppercase flex items-center justify-center gap-2 hover:bg-slate-50"
+                      >
+                        <ArrowLeft className="h-3.5 w-3.5" /> Regresar Estado Anterior
+                      </button>
+                    )}
                 </section>
-
-                {/* Botón para regresar estado (General para la relación) */}
-                {selectedRelacion.estado !== RelacionEstado.PENDIENTE_ENVIAR && (
-                  <button
-                    onClick={() => moveBackStatus(selectedRelacion)}
-                    className="w-full py-2.5 border border-slate-200 text-slate-500 rounded-xl font-bold text-[10px] uppercase flex items-center justify-center gap-2 hover:bg-slate-50"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" /> Regresar Estado Anterior
-                  </button>
-                )}
               </div>
             </div>
           ) : (

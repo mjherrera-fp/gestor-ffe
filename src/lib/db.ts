@@ -140,16 +140,17 @@ db.exec(`
 
   CREATE TABLE IF NOT EXISTS relaciones_alumnos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    alumnosRelacion TEXT NOT NULL,
     convenioId INTEGER NOT NULL,
-    numRelacion TEXT NOT NULL,
     tutorEmpresaId INTEGER NOT NULL,
+    alumnosRelacion TEXT NOT NULL,
+    numRelacion TEXT NOT NULL,
     fechaInicio TEXT NOT NULL,
     fechaFin TEXT NOT NULL,
     horario TEXT NOT NULL,
-    estado TEXT NOT NULL DEFAULT 'Pendiente de enviar a empresa',
-    FOREIGN KEY(convenioId) REFERENCES convenios(id) ON DELETE CASCADE,
-    FOREIGN KEY(tutorEmpresaId) REFERENCES tutores_empresa(id)
+    estado TEXT NOT NULL,
+    estadoPlanFormativo TEXT NOT NULL DEFAULT 'PENDIENTE_ENVIAR_ESTUDIANTE', -- <--- AÑADIR ESTO
+    FOREIGN KEY (convenioId) REFERENCES convenios(id),
+    FOREIGN KEY (tutorEmpresaId) REFERENCES tutores_empresa(id)
   );
 
   CREATE TABLE IF NOT EXISTS intereses (

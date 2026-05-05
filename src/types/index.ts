@@ -63,13 +63,41 @@ export interface HorarioSemanal {
   domingo: HorarioDia;
 }
 
+// 1. ENUMS (Lo que se guarda en Base de Datos y se usa en la lógica)
 export enum RelacionEstado {
-  PENDIENTE_ENVIAR = 'Pendiente de enviar a empresa',
-  PENDIENTE_FIRMA_EMPRESA = 'Pendiente de firmar por empresa',
-  PENDIENTE_ENVIAR_DIRECTOR = 'Pendiente de enviar al director',
-  PENDIENTE_FIRMA_DIRECTOR = 'Pendiente de firmar por dirección',
-  COMPLETADO = 'Completado'
+  PENDIENTE_ENVIAR_EMPRESA = 'PENDIENTE_ENVIAR_EMPRESA',
+  PENDIENTE_FIRMA_EMPRESA = 'PENDIENTE_FIRMA_EMPRESA',
+  PENDIENTE_ENVIAR_DIRECTOR = 'PENDIENTE_ENVIAR_DIRECTOR',
+  PENDIENTE_FIRMA_DIRECTOR = 'PENDIENTE_FIRMA_DIRECTOR',
+  COMPLETADO = 'COMPLETADO'
 }
+
+export enum PlanFormativoEstado {
+  PENDIENTE_ENVIAR_ESTUDIANTE = 'PENDIENTE_ENVIAR_ESTUDIANTE',
+  PENDIENTE_FIRMAR_ESTUDIANTE = 'PENDIENTE_FIRMAR_ESTUDIANTE',
+  PENDIENTE_ENVIAR_EMPRESA = 'PENDIENTE_ENVIAR_EMPRESA',
+  PENDIENTE_FIRMA_EMPRESA = 'PENDIENTE_FIRMA_EMPRESA',
+  PENDIENTE_FIRMA_TUTOR = 'PENDIENTE_FIRMA_TUTOR',
+  COMPLETADO = 'COMPLETADO'
+}
+
+// 2. DICCIONARIOS DE TEXTO (Lo que ve el usuario en la Interfaz)
+export const RelacionEstadoLabels: Record<RelacionEstado, string> = {
+  [RelacionEstado.PENDIENTE_ENVIAR_EMPRESA]: 'Pendiente enviar a empresa',
+  [RelacionEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente firma empresa',
+  [RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'Pendiente enviar a director',
+  [RelacionEstado.PENDIENTE_FIRMA_DIRECTOR]: 'Pendiente firma director',
+  [RelacionEstado.COMPLETADO]: 'Completado'
+};
+
+export const PlanFormativoEstadoLabels: Record<PlanFormativoEstado, string> = {
+  [PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE]: 'Pendiente enviar a estudiante',
+  [PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE]: 'Pendiente firma estudiante',
+  [PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA]: 'Pendiente enviar a empresa',
+  [PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente firma empresa',
+  [PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR]: 'Pendiente firma tutor',
+  [PlanFormativoEstado.COMPLETADO]: 'Completado'
+};
 
 export interface RelacionAlumno {
   id?: number;
@@ -87,6 +115,7 @@ export interface RelacionAlumno {
   horario: HorarioSemanal;
   totalHoras: number;
   estado: RelacionEstado;
+  estadoPlanFormativo: PlanFormativoEstado;
 }
 
 export interface Alumno {
