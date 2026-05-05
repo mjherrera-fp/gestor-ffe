@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  FileText, Plus, Search, ChevronRight, User, Building2, Calendar, 
+  FileText, Plus, Search, ChevronRight, User, Edit2, Building2, Calendar, 
   ArrowRight, CheckCircle2, Clock, Send, ShieldCheck, Mail, Briefcase, Trash2, ArrowLeft,
   Pencil, X, GraduationCap
 } from 'lucide-react';
@@ -330,6 +330,7 @@ export default function ConveniosView({ cursoId }: Props) {
                 >
                   Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
+                <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider text-right">Acciones</th>                
               </tr>
             </thead>
             <tbody className="divide-y divide-border-base">
@@ -348,6 +349,22 @@ export default function ConveniosView({ cursoId }: Props) {
                   </td>
                   <td className="px-5 py-4">
                     {statusBadge(conv.estado)}
+                  </td>
+                  <td className="px-5 py-4 text-right">
+                    <div className="flex items-center justify-end">
+                      <button
+                        onClick={() => handleEdit(conv)}
+                        className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(conv.id!)}
+                        className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -414,25 +431,7 @@ export default function ConveniosView({ cursoId }: Props) {
                       Regresar Estado Anterior
                     </button>
                   )}
-                </div>
-                
-                <div className="pt-6 border-t border-border-base space-y-3">
-                  <button 
-                    onClick={() => handleEdit(selectedConvenio as any)}
-                    className="w-full py-3 border border-border-base text-text-main rounded-lg font-bold text-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    Editar Datos del Convenio
-                  </button>
-
-                  <button 
-                    onClick={() => setShowDeleteConfirm(selectedConvenio.id!)}
-                    className="w-full py-3 border border-red-100 text-red-500 rounded-lg font-bold text-sm hover:bg-red-50 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Eliminar Convenio
-                  </button>
-                </div>
+                </div>    
                 
                 {getStatusButton(selectedConvenio.estado) && (
                   <p className="text-[10px] text-text-muted text-center mt-4">

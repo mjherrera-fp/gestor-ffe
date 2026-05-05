@@ -391,6 +391,22 @@ async function startServer() {
         };
       });
 
+      app.get('/api/relaciones-alumnos/:id/plan-formativo', async (req, res) => {
+        const relacionId = req.params.id;
+        const alumnoId = req.query.alumnoId; // <--- Debes capturar esto
+
+        // Aquí generas el Word/PDF usando los datos de 'relacionId' y filtrando por 'alumnoId'
+        // ...
+      });
+
+      app.get('/api/relaciones-alumnos/:id/plan-formativo/pdf', async (req, res) => {
+        const relacionId = req.params.id;
+        const alumnoId = req.query.alumnoId; // <--- Debes capturar esto
+
+        // Aquí generas el Word/PDF usando los datos de 'relacionId' y filtrando por 'alumnoId'
+        // ...
+      });
+
       // 2. PROCESAMIENTO DE PLANTILLA HTML CON VERIFICACIÓN
       const isProd = process.env.NODE_ENV === 'production';
       // Intentamos localizar la carpeta templates de forma absoluta

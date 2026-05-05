@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Download, FileText, File as FilePdf, Plus, Edit2, Trash2, Calendar,
+  Download, FileText, File as FilePdf, FileArchive, Plus, Edit2, Trash2, Calendar,
   ChevronRight, Building2, User, Hash, X, Info, ArrowLeftRight,
   Send, Clock, ShieldCheck, CheckCircle2, ArrowLeft, Loader2, Search
 } from 'lucide-react';
+import JSZip from 'jszip';
 import { RelacionAlumno, Convenio, TutorEmpresa, Empresa, RelacionEstado, PlanFormativoEstado, RelacionEstadoLabels, PlanFormativoEstadoLabels, Curso, HorarioSemanal, HorarioDia, Alumno } from '../types/index.ts';
 import { BotonDescargaPDF } from '../components/BotonDescargaPDF.tsx';
 import { BotonDescargaDOCX } from '../components/BotonDescargaDOCX.tsx';
@@ -363,6 +364,104 @@ export default function RelacionesView({ cursoId }: Props) {
       }
     } catch (error) {
       console.error("💥 Error de red:", error);
+    }
+  };
+
+  // --- LÓGICA DE DESCARGA MÚLTIPLE (PLAN FORMATIVO) ---
+  // --- LÓGICA DE DESCARGA (PLAN FORMATIVO) ---
+  const descargarPlanesFormativos = async (tipo: 'docx' | 'pdf') => {
+    if (!selectedRelacion || !selectedRelacion.alumnosRelacion || selectedRelacion.alumnosRelacion.length === 0) {
+      alert("No hay alumnos en esta relación.");
+      return;
+    }
+
+    const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+
+    // ==========================================
+    // CASO A: SOLO 1 ALUMNO (Descarga directa)
+    // ==========================================
+    if (selectedRelacion.alumnosRelacion.length === 1) {
+      const ar = selectedRelacion.alumnosRelacion[0];
+      const alumno = alumnos.find(a => a.id === ar.alumnoId);
+      const nombreAlumno = alumno
+        ? `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_')
+        : `Alumno_${ar.alumnoId}`;
+
+      const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`;
+      const url = tipo === 'pdf'
+        ? `${baseUrl}/pdf?alumnoId=${ar.alumnoId}`
+        : `${baseUrl}?alumnoId=${ar.alumnoId}`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `Plan_${numRelacionLimpio}_${nombreAlumno}.${tipo}`; // ej: Plan_123_20_Juan_Perez.pdf
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+      } catch (error) {
+        console.error(`Error descargando el plan de ${nombreAlumno}:`, error);
+        alert(`Hubo un error al descargar el plan de ${nombreAlumno}`);
+      }
+      return; // Cortamos la ejecución aquí
+    }
+
+    // ==========================================
+    // CASO B: MÚLTIPLES ALUMNOS (Descarga en ZIP)
+    // ==========================================
+    const zip = new JSZip();
+    let archivosAñadidos = 0;
+
+    for (let i = 0; i < selectedRelacion.alumnosRelacion.length; i++) {
+      const ar = selectedRelacion.alumnosRelacion[i];
+      const alumno = alumnos.find(a => a.id === ar.alumnoId);
+      const nombreAlumno = alumno
+        ? `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_')
+        : `Alumno_${ar.alumnoId}`;
+
+      const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`;
+      const url = tipo === 'pdf'
+        ? `${baseUrl}/pdf?alumnoId=${ar.alumnoId}`
+        : `${baseUrl}?alumnoId=${ar.alumnoId}`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+        const blob = await response.blob();
+        const nombreArchivo = `Plan_${numRelacionLimpio}_${nombreAlumno}.${tipo}`;
+        zip.file(nombreArchivo, blob);
+        archivosAñadidos++;
+      } catch (error) {
+        console.error(`Error procesando el plan de ${nombreAlumno}:`, error);
+      }
+    }
+
+    if (archivosAñadidos > 0) {
+      try {
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const downloadUrl = window.URL.createObjectURL(zipBlob);
+
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `Planes_Formativos_${numRelacionLimpio}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+      } catch (error) {
+        console.error("Error al generar el archivo ZIP:", error);
+        alert("Hubo un problema al comprimir los archivos.");
+      }
+    } else {
+      alert("No se pudo descargar ningún archivo del servidor.");
     }
   };
 
@@ -751,7 +850,7 @@ export default function RelacionesView({ cursoId }: Props) {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-full">
                     Empresa / Alumnos
                   </th>
                   <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">
@@ -759,7 +858,8 @@ export default function RelacionesView({ cursoId }: Props) {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              {/* 1. Quitamos el divide-y débil de aquí */}
+              <tbody className="bg-white">
                 {filteredAndSortedRelaciones.length > 0 ? (
                   filteredAndSortedRelaciones.map(rel => {
                     const conv = convenios.find(c => c.id === rel.convenioId);
@@ -767,24 +867,46 @@ export default function RelacionesView({ cursoId }: Props) {
                       <tr
                         key={rel.id}
                         onClick={() => setSelectedRelacion(rel)}
-                        className={`cursor-pointer transition-colors group align-top ${selectedRelacion?.id === rel.id ? 'bg-primary/5' : 'hover:bg-slate-50/80'}`}
+                        // 2. Añadimos un borde inferior muy grueso (border-b-8) y de un gris claro (border-slate-100) para hacer de separador físico
+                        className={`cursor-pointer transition-colors group align-top border-b-[12px] border-slate-50 last:border-b-0 ${selectedRelacion?.id === rel.id ? 'bg-primary/5' : 'hover:bg-slate-50/80'}`}
                       >
-                        <td className="px-5 py-4">
-                          <div className="flex flex-col gap-1 mb-3">
-                            <div className="text-[13px] font-black text-slate-800 leading-tight">{conv?.empresaNombre}</div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-mono font-bold text-primary">Ref: {rel.numRelacion}</span>
-                              
+                        {/* 3. Aumentamos un poco el padding vertical (py-6 en vez de py-4) para que respire más */}
+                        <td colSpan={2} className="px-5 py-6 w-full">
+                          
+                          {/* CABECERA DE LA FILA: Empresa a la izq, Botones a la derecha */}
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex flex-col gap-1">
+                              <div className="text-[13px] font-black text-slate-800 leading-tight">{conv?.empresaNombre}</div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono font-bold text-primary">Ref: {rel.numRelacion}</span>
+                                {statusBadge(rel.estado)}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={() => handleOpenForm(rel)}
+                                className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => setShowDeleteConfirm(rel.id!)}
+                                className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
                             </div>
                           </div>
 
+                          {/* LISTADO DE ALUMNOS: Ahora tiene vía libre para ocupar el 100% */}
                           <div className="space-y-2">
                             {rel.alumnosRelacion.map((ar, idx) => {
                               const a = alumnos.find(al => al.id === ar.alumnoId);
                               const studentStartDate = ar.fechaInicio || rel.fechaInicio || '';
                               const studentEndDate = calculateEndDateForHours(studentStartDate, ar.totalHoras, rel.horario);
                               return (
-                                <div key={idx} className="bg-white border border-slate-100 p-2.5 rounded-lg">
+                                <div key={idx} className="bg-white border border-slate-100 p-2.5 rounded-lg w-full">
                                   <div className="flex justify-between items-center mb-1">
                                     <span className="text-xs font-bold text-slate-700">{a?.nombre} {a?.apellidos}</span>
                                     <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded">
@@ -793,29 +915,13 @@ export default function RelacionesView({ cursoId }: Props) {
                                   </div>
                                   <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
                                     <Calendar className="h-3 w-3" />
-                                    <span>{studentStartDate ? new Date(studentStartDate).toLocaleDateString() : '—'}</span>
+                                    <span className="text-blue-600">{studentStartDate ? new Date(studentStartDate).toLocaleDateString() : '—'}</span>
                                     <span className="text-slate-300">-</span>
                                     <span className="text-emerald-600">{studentEndDate ? new Date(studentEndDate).toLocaleDateString() : '—'}</span>
                                   </div>
                                 </div>
                               );
                             })}
-                          </div>
-                        </td>
-                        <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              onClick={() => handleOpenForm(rel)}
-                              className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => setShowDeleteConfirm(rel.id!)}
-                              className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
                           </div>
                         </td>
                       </tr>
@@ -837,7 +943,7 @@ export default function RelacionesView({ cursoId }: Props) {
         </div>
 
         {/* COLUMNA DERECHA: Tarjeta de Detalles y Acciones */}
-        <div className="w-full lg:w-96 lg:shrink-0 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden min-h-[600px]">
+        <div className="w-full lg:w-96 lg:shrink-0 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden min-h-150">
           {selectedRelacion ? (
             <div className="flex flex-col h-full animate-in slide-in-from-right-4 duration-300">
               <div className="p-6 border-b border-slate-100 bg-slate-50/50">
@@ -899,8 +1005,32 @@ export default function RelacionesView({ cursoId }: Props) {
                     {statusBadge(selectedRelacion.estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE, true)}
                   </div>
                   <div className="flex gap-2">
-                    <BotonDescargaDOCX url={`/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`} name={`Plan_${selectedRelacion.numRelacion}.docx`} showText />
-                    <BotonDescargaPDF url={`/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo/pdf`} name={`Plan_${selectedRelacion.numRelacion}.pdf`} showText />
+                    <div className="flex gap-2">
+                      {(() => {
+                        const cantidadAlumnos = selectedRelacion.alumnosRelacion?.length || 0;
+                        const esMultiple = cantidadAlumnos > 1;
+
+                        return (
+                          <>
+                            <button
+                              onClick={() => descargarPlanesFormativos('docx')}
+                              className="flex-1 py-2 px-3 bg-white border border-slate-200 text-blue-600 rounded-xl text-[10px] font-bold uppercase hover:bg-blue-50 transition-colors flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap"
+                            >
+                              {esMultiple ? <FileArchive className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
+                              DOCX {esMultiple && `(${cantidadAlumnos})`}
+                            </button>
+
+                            <button
+                              onClick={() => descargarPlanesFormativos('pdf')}
+                              className="flex-1 py-2 px-3 bg-white border border-slate-200 text-red-600 rounded-xl text-[10px] font-bold uppercase hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap"
+                            >
+                              {esMultiple ? <FileArchive className="h-3.5 w-3.5" /> : <FilePdf className="h-3.5 w-3.5" />}
+                              PDF {esMultiple && `(${cantidadAlumnos})`}
+                            </button>
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
                   {getPlanStatusButton(selectedRelacion.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE') ? (
                     <button
@@ -936,8 +1066,8 @@ export default function RelacionesView({ cursoId }: Props) {
       </div>
 
       {showDeleteConfirm !== null && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4 text-center">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative p-8 transition-all">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-60 p-4 text-center">
+          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative p-8 transition-all">
             <button onClick={() => setShowDeleteConfirm(null)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors">
               <Plus className="rotate-45 h-5 w-5" />
             </button>
