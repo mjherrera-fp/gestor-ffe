@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, User, Phone, Mail, Calendar, Hash, FileUp, Downloa
 import { Alumno, DetalleAcademico, RelacionAlumno } from '../types/index.ts';
 import DetalleAcademicoModal from '../views/DetalleAcademicoModal.tsx';
 import * as XLSX from 'xlsx';
+import { CustomSelect } from '../components/CustomSelect.tsx';
 
 interface Props {
   cursoId: number;
@@ -29,12 +30,21 @@ export default function AlumnosView({ cursoId }: Props) {
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'assigned'>('all');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [pendingSubmitData, setPendingSubmitData] = useState<any | null>(null);
+
+  const filterAlumnosOptions: { id: string; label: string }[] = [
+    { id: 'all', label: 'Todos los Alumnos' },
+    { id: 'pending', label: 'Pendiente de Asignar' },
+    { id: 'assigned', label: 'Asignados' }
+  ];
+
+
   useEffect(() => {
     localStorage.setItem('alumnos_view_mode', viewMode);
   }, [viewMode]);
 
   const [formData, setFormData] = useState<Partial<Alumno>>({
-    nombre: '', apellidos: '', dni: '', numSS: '', tlfn: '', emailEduca: '', emailPersonal: '', fechaNacimiento: '', cursoId, detalleAcademicoId: undefined, horasPendientesFFE: 0
+    nombre: '', apellidos: '', dni: '', numSS: '', tlfn: '', emailEduca: '', emailPersonal: '', fechaNacimiento: '', cursoId, detalleAcademicoId: undefined, totalHorasFFE: 0
   });
 
   const fetchDetalles = async () => {
@@ -46,7 +56,7 @@ export default function AlumnosView({ cursoId }: Props) {
   const fetchAlumnos = async () => {
     const res = await fetch(`/api/alumnos?cursoId=${cursoId}`);
     setAlumnos(await res.json());
-    
+
     // Fetch relationships to determine assignment status
     const relRes = await fetch('/api/relaciones-alumnos');
     if (relRes.ok) {
@@ -65,38 +75,70 @@ export default function AlumnosView({ cursoId }: Props) {
       setFormData(alumno);
     } else {
       setEditing(null);
-      setFormData({ 
+      setFormData({
         nombre: '', apellidos: '', dni: '', numSS: '', tlfn: '', emailEduca: '', emailPersonal: '', fechaNacimiento: '', cursoId,
         detalleAcademicoId: detalles.length > 0 ? detalles[0].id : undefined,
-        horasPendientesFFE: 0
+        totalHorasFFE: 0
       });
     }
     setShowForm(true);
   };
 
-  const handleSubmit = async (e?: React.FormEvent, manualData?: any) => {
+  const handleSubmit = async (e?: React.FormEvent, manualData?: any, confirmClearDates = false) => {
     if (e) e.preventDefault();
-    const dataToSend = manualData || { ...formData, cursoId };
-    const method = editing && !manualData ? 'PUT' : 'POST';
-    const url = editing && !manualData ? `/api/alumnos/${editing.id}` : '/api/alumnos';
-    
+
+    // 1. Usamos los datos manuales (si venimos del modal) o los del formulario
+    const dataToSend = manualData ? { ...manualData } : { ...formData, cursoId };
+
+    // 2. Interceptación: Aviso de cambio de horas
+    if (editing && !manualData && !confirmClearDates) {
+      if (formData.totalHorasFFE !== editing.totalHorasFFE) {
+        const isAssigned = relaciones.some(rel =>
+          rel.alumnos?.some((ar: any) => ar.alumnoId === editing.id)
+        ) || (editing as any).relacionId;
+
+        if (isAssigned) {
+          setPendingSubmitData(dataToSend);
+          return false; // Detenemos la ejecución y mostramos el modal
+        }
+      }
+    }
+
+    // 3. Confirmación: Vaciamos las fechas
+    if (confirmClearDates) {
+      dataToSend.fechaInicio = null;
+      dataToSend.fechaFin = null;
+    }
+
+    // CORRECCIÓN CRÍTICA: Si 'editing' existe, SIEMPRE es un PUT y a la URL con ID
+    const method = editing ? 'PUT' : 'POST';
+    const url = editing ? `/api/alumnos/${editing.id}` : '/api/alumnos';
+
     try {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataToSend)
       });
+
       if (res.ok) {
-        if (!manualData) {
-          setShowForm(false);
-          setEditing(null);
-          setFormData({ nombre: '', apellidos: '', dni: '', numSS: '', tlfn: '', emailEduca: '', emailPersonal: '', fechaNacimiento: '', cursoId, horasPendientesFFE: 0 });
-        }
+        // CORRECCIÓN CRÍTICA 2: Cerramos todo siempre que haya éxito
+        setShowForm(false);
+        setEditing(null);
+        setPendingSubmitData(null); // Esto cierra el modal de advertencia
+        setFormData({
+          nombre: '', apellidos: '', dni: '', numSS: '', tlfn: '',
+          emailEduca: '', emailPersonal: '', fechaNacimiento: '',
+          cursoId, totalHorasFFE: 0
+        });
+
         fetchAlumnos();
         return true;
+      } else {
+        console.error("Error al guardar, el servidor devolvió:", await res.text());
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error en la petición de red:", error);
     }
     return false;
   };
@@ -129,16 +171,16 @@ export default function AlumnosView({ cursoId }: Props) {
 
   const downloadTemplate = () => {
     const headers = [[
-      'Primer Apellido', 
-      'Segundo Apellido', 
-      'Nombre', 
-      'DNI/Pasaporte', 
-      'Fecha Nacimiento', 
-      'Num SS', 
-      'Tlfn', 
-      'Email personal', 
-      'Código Grupo', 
-      'Email educamadrid', 
+      'Primer Apellido',
+      'Segundo Apellido',
+      'Nombre',
+      'DNI/Pasaporte',
+      'Fecha Nacimiento',
+      'Num SS',
+      'Tlfn',
+      'Email personal',
+      'Código Grupo',
+      'Email educamadrid',
       'Horas pendientes FFE'
     ]];
     const wb = XLSX.utils.book_new();
@@ -163,7 +205,7 @@ export default function AlumnosView({ cursoId }: Props) {
 
         let successCount = 0;
         let updateCount = 0;
-        
+
         for (const row of data) {
           const dni = (row['DNI/Pasaporte'] || '').toString().trim();
           const nombre = (row['Nombre'] || '').toString().trim();
@@ -173,7 +215,7 @@ export default function AlumnosView({ cursoId }: Props) {
           if (!dni || !nombre || !primerApellido) continue;
 
           let fechaNacimiento = row['Fecha Nacimiento'] || '2000-01-01';
-          
+
           // Handle dd/MM/yyyy format or Date objects
           if (fechaNacimiento instanceof Date) {
             fechaNacimiento = fechaNacimiento.toISOString().split('T')[0];
@@ -183,14 +225,14 @@ export default function AlumnosView({ cursoId }: Props) {
               const day = parts[0].padStart(2, '0');
               const month = parts[1].padStart(2, '0');
               const year = parts[2];
-              const fullYear = year.length === 2 ? (Number(year) > 40 ? '19'+year : '20'+year) : year;
+              const fullYear = year.length === 2 ? (Number(year) > 40 ? '19' + year : '20' + year) : year;
               fechaNacimiento = `${fullYear}-${month}-${day}`;
             }
           }
-          
+
           // Check if student exists by DNI
           const existingAlumno = alumnos.find(a => a.dni.trim().toLowerCase() === dni.toLowerCase());
-          
+
           const studentData = {
             nombre,
             apellidos: `${primerApellido} ${segundoApellido}`.trim(),
@@ -201,7 +243,7 @@ export default function AlumnosView({ cursoId }: Props) {
             emailPersonal: row['Email personal'] || '',
             fechaNacimiento: fechaNacimiento,
             cursoId,
-            horasPendientesFFE: Number(row['Horas pendientes FFE']) || 0,
+            totalHorasFFE: Number(row['Horas pendientes FFE']) || 0,
             detalleAcademicoId: detalles.find(d => d.codigoGrupo === row['Código Grupo'])?.id || (existingAlumno?.detalleAcademicoId || (detalles.length > 0 ? detalles[0].id : null))
           };
 
@@ -222,7 +264,7 @@ export default function AlumnosView({ cursoId }: Props) {
             console.error('Error processing student:', studentData.nombre, err);
           }
         }
-        
+
         fetchAlumnos();
         alert(`Importación finalizada:\n- Alumnos nuevos: ${successCount}\n- Alumnos actualizados: ${updateCount}`);
       } catch (error) {
@@ -248,19 +290,17 @@ export default function AlumnosView({ cursoId }: Props) {
   const filteredAndSortedAlumnos = alumnos
     .filter(alumno => {
       const searchTerms = searchTerm.toLowerCase();
-      const matchesSearch = 
+      const matchesSearch =
         alumno.nombre.toLowerCase().includes(searchTerms) ||
         alumno.apellidos.toLowerCase().includes(searchTerms) ||
         alumno.dni.toLowerCase().includes(searchTerms) ||
         alumno.emailEduca.toLowerCase().includes(searchTerms) ||
         alumno.emailPersonal.toLowerCase().includes(searchTerms);
 
-      const isAssigned = relaciones.some(rel => 
-        rel.alumnosRelacion.some(ar => ar.alumnoId === alumno.id)
-      );
+      const isAssigned = alumno.relacionId !== null;
 
-      const matchesStatus = 
-        filterStatus === 'all' || 
+      const matchesStatus =
+        filterStatus === 'all' ||
         (filterStatus === 'pending' && !isAssigned) ||
         (filterStatus === 'assigned' && isAssigned);
 
@@ -273,7 +313,7 @@ export default function AlumnosView({ cursoId }: Props) {
       } else if (sortBy === 'apellidos') {
         comparison = a.apellidos.localeCompare(b.apellidos);
       } else if (sortBy === 'horas') {
-        comparison = (a.horasPendientesFFE || 0) - (b.horasPendientesFFE || 0);
+        comparison = (a.totalHorasFFE || 0) - (b.totalHorasFFE || 0);
       }
       return sortOrder === 'asc' ? comparison : -comparison;
     });
@@ -303,12 +343,12 @@ export default function AlumnosView({ cursoId }: Props) {
             <FileSpreadsheet className="h-4 w-4" />
             {isImporting ? 'Importando...' : 'Importar Excel'}
           </button>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleImportExcel} 
-            accept=".xlsx, .xls, .csv" 
-            className="hidden" 
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImportExcel}
+            accept=".xlsx, .xls, .csv"
+            className="hidden"
           />
           <button
             onClick={() => handleOpenForm(null)}
@@ -331,7 +371,7 @@ export default function AlumnosView({ cursoId }: Props) {
               className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-sans"
             />
           </div>
-          
+
           <div className="flex gap-2">
             <div className="flex bg-slate-100 p-1 rounded-lg">
               <button
@@ -350,40 +390,37 @@ export default function AlumnosView({ cursoId }: Props) {
               </button>
             </div>
 
-            <select
+            <CustomSelect
+              options={filterAlumnosOptions}
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
-              className="bg-slate-100 border-none rounded-lg px-3 py-2 text-[10px] font-black uppercase tracking-wider outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700 cursor-pointer"
-            >
-              <option value="all">Todos los Alumnos</option>
-              <option value="pending">Pendiente de Asignar</option>
-              <option value="assigned">Asignados</option>
-            </select>
+              onChange={(val) => setFilterStatus(val as any)}
+              name="estadoFilter"
+            />
+  
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-           <span className="text-[10px] items-center flex uppercase tracking-wider text-slate-500 font-bold mr-2">Ordenar por:</span>
-           {[
-             { id: 'apellidos', label: 'Apellidos' },
-             { id: 'nombre', label: 'Nombre' },
-             { id: 'horas', label: 'Horas FFE' }
-           ].map(option => (
-             <button
-               key={option.id}
-               onClick={() => toggleSort(option.id as any)}
-               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
-                 sortBy === option.id 
-                   ? 'bg-blue-50 text-blue-600 border-blue-200 ring-4 ring-blue-500/5' 
-                   : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
-               }`}
-             >
-               {option.label}
-               {sortBy === option.id && (
-                 <ArrowUpDown className={`h-3 w-3 ${sortOrder === 'desc' ? 'rotate-180' : ''} transition-transform`} />
-               )}
-             </button>
-           ))}
+          <span className="text-[10px] items-center flex uppercase tracking-wider text-slate-500 font-bold mr-2">Ordenar por:</span>
+          {[
+            { id: 'apellidos', label: 'Apellidos' },
+            { id: 'nombre', label: 'Nombre' },
+            { id: 'horas', label: 'Horas FFE' }
+          ].map(option => (
+            <button
+              key={option.id}
+              onClick={() => toggleSort(option.id as any)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${sortBy === option.id
+                ? 'bg-blue-50 text-blue-600 border-blue-200 ring-4 ring-blue-500/5'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                }`}
+            >
+              {option.label}
+              {sortBy === option.id && (
+                <ArrowUpDown className={`h-3 w-3 ${sortOrder === 'desc' ? 'rotate-180' : ''} transition-transform`} />
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -399,15 +436,15 @@ export default function AlumnosView({ cursoId }: Props) {
               </div>
               <h3 className="text-xl font-black text-slate-900 mb-3">¿Eliminar alumno?</h3>
               <p className="text-sm text-slate-500 font-medium mb-8">Esta acción eliminará el expediente del alumno de forma permanente y no se puede deshacer.</p>
-              
+
               <div className="flex gap-3">
-                <button 
-                  onClick={() => setShowDeleteConfirm(null)} 
+                <button
+                  onClick={() => setShowDeleteConfirm(null)}
                   className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-all font-sans"
                 >
                   Cancelar
                 </button>
-                <button 
+                <button
                   onClick={() => handleDelete(showDeleteConfirm)}
                   className="flex-1 py-3 bg-red-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all font-sans"
                 >
@@ -428,58 +465,87 @@ export default function AlumnosView({ cursoId }: Props) {
                 <X className="h-5 w-5" />
               </button>
             </div>
+            {/* NUEVO: Modal de advertencia al cambiar horas de un alumno asignado */}
+            {pendingSubmitData && (
+              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[70] p-4 text-center">
+                <div className="bg-white rounded-4xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 relative p-8 transition-all">
+                  <button onClick={() => setPendingSubmitData(null)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors">
+                    <X className="h-5 w-5" />
+                  </button>
+                  <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Calendar className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-900 mb-3">Atención: Horas modificadas</h3>
+                  <p className="text-sm text-slate-500 font-medium mb-8">
+                    Has modificado el total de horas de un alumno que ya está asignado a una relación de prácticas. <br /><br />
+                    De continuar, <b>se eliminarán su Fecha de Inicio y Fecha de Fin</b> actuales, ya que sus prácticas deben ser recalculadas en el panel de Relaciones.
+                  </p>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setPendingSubmitData(null)}
+                      className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-all font-sans"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={() => handleSubmit(undefined, pendingSubmitData, true)}
+                      className="flex-1 py-3 bg-amber-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all font-sans"
+                    >
+                      Sí, borrar fechas
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Nombre</label>
-                <input required className={inputClass} value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} />
+                <input required className={inputClass} value={formData.nombre} onChange={e => setFormData({ ...formData, nombre: e.target.value })} />
               </div>
               <div>
                 <label className={labelClass}>Apellidos</label>
-                <input required className={inputClass} value={formData.apellidos} onChange={e => setFormData({...formData, apellidos: e.target.value})} />
+                <input required className={inputClass} value={formData.apellidos} onChange={e => setFormData({ ...formData, apellidos: e.target.value })} />
               </div>
               <div>
                 <label className={labelClass}>DNI / Pasaporte</label>
-                <input required className={inputClass} value={formData.dni} onChange={e => setFormData({...formData, dni: e.target.value})} />
+                <input required className={inputClass} value={formData.dni} onChange={e => setFormData({ ...formData, dni: e.target.value })} />
               </div>
               <div>
                 <label className={labelClass}>Número Seguridad Social</label>
-                <input required className={inputClass} value={formData.numSS} onChange={e => setFormData({...formData, numSS: e.target.value})} />
+                <input required className={inputClass} value={formData.numSS} onChange={e => setFormData({ ...formData, numSS: e.target.value })} />
               </div>
               <div>
                 <label className={labelClass}>Teléfono</label>
-                <input required className={inputClass} value={formData.tlfn} onChange={e => setFormData({...formData, tlfn: e.target.value})} />
+                <input required className={inputClass} value={formData.tlfn} onChange={e => setFormData({ ...formData, tlfn: e.target.value })} />
               </div>
               <div>
                 <label className={labelClass}>Fecha Nacimiento</label>
-                <input required type="date" className={inputClass} value={formData.fechaNacimiento} onChange={e => setFormData({...formData, fechaNacimiento: e.target.value})} />
+                <input required type="date" className={inputClass} value={formData.fechaNacimiento} onChange={e => setFormData({ ...formData, fechaNacimiento: e.target.value })} />
               </div>
               <div className="md:col-span-2">
                 <label className={labelClass}>Email EducaMadrid</label>
-                <input required type="email" className={inputClass} value={formData.emailEduca} onChange={e => setFormData({...formData, emailEduca: e.target.value})} />
+                <input required type="email" className={inputClass} value={formData.emailEduca} onChange={e => setFormData({ ...formData, emailEduca: e.target.value })} />
               </div>
               <div className="md:col-span-2">
                 <label className={labelClass}>Email Personal</label>
-                <input required type="email" className={inputClass} value={formData.emailPersonal} onChange={e => setFormData({...formData, emailPersonal: e.target.value})} />
+                <input required type="email" className={inputClass} value={formData.emailPersonal} onChange={e => setFormData({ ...formData, emailPersonal: e.target.value })} />
               </div>
               <div>
-                <label className={labelClass}>Horas Pendientes FFE</label>
-                <input required type="number" min="0" className={inputClass} value={formData.horasPendientesFFE} onChange={e => setFormData({...formData, horasPendientesFFE: Number(e.target.value)})} />
+                <label className={labelClass}>Horas Totales FFE</label>
+                <input required type="number" min="0" className={inputClass} value={formData.totalHorasFFE} onChange={e => setFormData({ ...formData, totalHorasFFE: Number(e.target.value) })} />
               </div>
               <div className="md:col-span-2">
                 <label className={labelClass}>Detalle Académico Asignado</label>
-                <select 
-                  required
-                  className={inputClass}
+                <CustomSelect
+                  options={detalles.map(d => ({
+                    id: d.id,
+                    label: `${d.ciclo} - ${(d as any).centroNombre} (${d.grado})`
+                  }))}
                   value={formData.detalleAcademicoId || ''}
-                  onChange={e => setFormData({...formData, detalleAcademicoId: Number(e.target.value)})}
-                >
-                  <option value="" disabled>Selecciona un detalle académico</option>
-                  {detalles.map(d => (
-                    <option key={d.id} value={d.id}>
-                      {d.ciclo} - {(d as any).centroNombre} ({d.grado})
-                    </option>
-                  ))}
-                </select>
+                  onChange={val => setFormData({ ...formData, detalleAcademicoId: Number(val) })}
+                  name="detalleAcademico"
+                />
                 {detalles.length === 0 && (
                   <p className="text-xs text-red-500 mt-1 font-medium italic">
                     * Debes crear al menos un detalle académico primero.
@@ -502,9 +568,7 @@ export default function AlumnosView({ cursoId }: Props) {
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAndSortedAlumnos.map(alumno => {
-            const isAssigned = relaciones.some(rel => 
-              rel.alumnosRelacion.some(ar => ar.alumnoId === alumno.id)
-            );
+            const isAssigned = alumno.relacionId !== null;
 
             return (
               <div key={alumno.id} className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group overflow-hidden flex flex-col h-full">
@@ -514,8 +578,8 @@ export default function AlumnosView({ cursoId }: Props) {
                       <User className="h-6 w-6 text-slate-400 group-hover:text-primary transition-colors" />
                     </div>
                     <div className="flex gap-1.5">
-                      <button 
-                        onClick={() => setAcademicDetailAlumno(alumno)} 
+                      <button
+                        onClick={() => setAcademicDetailAlumno(alumno)}
                         className={`p-1.5 transition-colors rounded-md ${alumno.detalleAcademicoId ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100' : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-50'}`}
                         title="Detalles Académicos"
                       >
@@ -555,23 +619,23 @@ export default function AlumnosView({ cursoId }: Props) {
                 </div>
 
                 <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between mt-auto">
-                   {alumno.cvPath ? (
-                     <a 
-                       href={`/${alumno.cvPath}`} 
-                       target="_blank" 
-                       rel="noreferrer"
-                       className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-wider hover:underline"
-                     >
-                       <CheckCircle className="h-4 w-4 text-emerald-500" /> CV Adjunto
-                     </a>
-                   ) : (
-                     <label className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-primary transition-colors">
-                       <FileUp className="h-4 w-4" />
-                       Subir CV (.pdf)
-                       <input type="file" className="hidden" accept=".pdf" onChange={e => e.target.files && handleFileUpload(alumno.id!, e.target.files[0])} />
-                     </label>
-                   )}
-                   <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest opacity-50">#{alumno.id}</div>
+                  {alumno.cvPath ? (
+                    <a
+                      href={`/${alumno.cvPath}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-wider hover:underline"
+                    >
+                      <CheckCircle className="h-4 w-4 text-emerald-500" /> CV Adjunto
+                    </a>
+                  ) : (
+                    <label className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-primary transition-colors">
+                      <FileUp className="h-4 w-4" />
+                      Subir CV (.pdf)
+                      <input type="file" className="hidden" accept=".pdf" onChange={e => e.target.files && handleFileUpload(alumno.id!, e.target.files[0])} />
+                    </label>
+                  )}
+                  <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest opacity-50">#{alumno.id}</div>
                 </div>
               </div>
             );
@@ -593,9 +657,7 @@ export default function AlumnosView({ cursoId }: Props) {
             </thead>
             <tbody className="divide-y divide-slate-50">
               {filteredAndSortedAlumnos.map((alumno) => {
-                const isAssigned = relaciones.some(rel => 
-                  rel.alumnosRelacion.some(ar => ar.alumnoId === alumno.id)
-                );
+                const isAssigned = alumno.relacionId !== null;
 
                 return (
                   <tr key={alumno.id} className="hover:bg-slate-50/50 transition-colors group font-sans">
@@ -635,9 +697,9 @@ export default function AlumnosView({ cursoId }: Props) {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      {(alumno.horasPendientesFFE || 0) > 0 ? (
+                      {(alumno.totalHorasFFE || 0) > 0 ? (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-100">
-                          <Clock className="h-3 w-3" /> {alumno.horasPendientesFFE} Horas
+                          <Clock className="h-3 w-3" /> {alumno.totalHorasFFE} Horas
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-wider border border-emerald-100">
@@ -647,7 +709,7 @@ export default function AlumnosView({ cursoId }: Props) {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                         <button onClick={() => setAcademicDetailAlumno(alumno)} className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all" title="Ver Expediente">
+                        <button onClick={() => setAcademicDetailAlumno(alumno)} className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all" title="Ver Expediente">
                           <GraduationCap className="h-4 w-4" />
                         </button>
                         <button onClick={() => handleOpenForm(alumno)} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all">
@@ -674,12 +736,12 @@ export default function AlumnosView({ cursoId }: Props) {
 
 
       {academicDetailAlumno && (
-        <DetalleAcademicoModal 
-          alumno={academicDetailAlumno} 
+        <DetalleAcademicoModal
+          alumno={academicDetailAlumno}
           onClose={() => {
             setAcademicDetailAlumno(null);
             fetchAlumnos();
-          }} 
+          }}
         />
       )}
     </div>

@@ -328,7 +328,7 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
               setCentroFormData({});
               setShowCentroForm(true);
             }}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-slate-800 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-blue-800 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <Plus className="h-4 w-4" /> Añadir Centro
           </button>
@@ -645,7 +645,7 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
               </div>
 
               <div className="pt-6">
-                <button type="submit" className="w-full bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10">
+                <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-800 transition-all shadow-xl shadow-slate-900/10">
                   Guardar Detalle Académico
                 </button>
               </div>

@@ -44,15 +44,20 @@ export default function RelacionesView({ cursoId }: Props) {
 
   const [selectedRelacion, setSelectedRelacion] = useState<RelacionAlumno | null>(null);
 
+  // NUEVO: Estado para los IDs de los alumnos seleccionados en el formulario
+  const [selectedAlumnosIds, setSelectedAlumnosIds] = useState<number[]>([]);
+
+  // ACTUALIZADO: formData ya no tiene 'alumnosRelacion'. Las fechas y horas son de la relación.
   const [formData, setFormData] = useState<Partial<RelacionAlumno>>({
-    alumnosRelacion: [],
+    alumnos: [],
     numRelacion: '',
-    fechaInicio: '',
-    fechaFin: '',
     horario: { ...DEFAULT_HORARIO },
     estado: RelacionEstado.PENDIENTE_ENVIAR_EMPRESA,
     estadoPlanFormativo: PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE
   });
+
+  const [targetEndDate, setTargetEndDate] = useState('');
+  const [targetStartDate, setTargetStartDate] = useState('');
 
   const fetchData = async () => {
     const [relRes, convRes, cursoRes, alumRes] = await Promise.all([
@@ -71,6 +76,12 @@ export default function RelacionesView({ cursoId }: Props) {
     setConvenios(allConvenios);
     setAlumnos(allAlumnos);
     setCurso(allCursos.find((c: Curso) => c.id === cursoId));
+
+    // Refrescar relación seleccionada si existe
+    if (selectedRelacion) {
+      const updatedRel = allRelaciones.find((r: RelacionAlumno) => r.id === selectedRelacion.id);
+      if (updatedRel) setSelectedRelacion(updatedRel);
+    }
   };
 
   const [bulkHorario, setBulkHorario] = useState({
@@ -149,10 +160,12 @@ export default function RelacionesView({ cursoId }: Props) {
   const calculateStartDateFromEnd = (targetEndDate: string, totalHours: number, horario: HorarioSemanal | undefined = formData.horario) => {
     if (!targetEndDate || !totalHours || !horario || !curso) return null;
 
-    const endParts = targetEndDate.split('-').map(Number);
+    const [year, month, day] = targetEndDate.split('-').map(Number);
     const festivos = curso.festivos || [];
     let remainingHoras = totalHours;
-    let current = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+
+    // Fecha objetivo desde la que retrocedemos
+    let current = new Date(year, month - 1, day);
 
     let iterations = 0;
     while (remainingHoras > 0 && iterations < 365) {
@@ -162,6 +175,7 @@ export default function RelacionesView({ cursoId }: Props) {
 
       if (!isFestivo) {
         let dailyHoras = 0;
+        // Mapeo de horas según el día de la semana
         switch (dayOfWeek) {
           case 1: dailyHoras = horario.lunes.horas; break;
           case 2: dailyHoras = horario.martes.horas; break;
@@ -171,9 +185,13 @@ export default function RelacionesView({ cursoId }: Props) {
           case 6: dailyHoras = horario.sabado.horas; break;
           case 0: dailyHoras = horario.domingo.horas; break;
         }
-        remainingHoras -= dailyHoras;
+
+        if (dailyHoras > 0) {
+          remainingHoras -= dailyHoras;
+        }
       }
 
+      // Si aún faltan horas, retrocedemos un día
       if (remainingHoras > 0) {
         current.setDate(current.getDate() - 1);
       }
@@ -184,22 +202,17 @@ export default function RelacionesView({ cursoId }: Props) {
 
   const applyBulkHorario = () => {
     setFormData((prev) => {
-      // Clonamos el horario actual para no mutar el estado directamente
       const newHorario = { ...prev.horario } as HorarioSemanal;
-
-      // Obtenemos las claves de los días (lunes, martes, etc.)
       const diasKeys = Object.keys(bulkHorario.dias) as Array<keyof typeof bulkHorario.dias>;
 
       diasKeys.forEach((day) => {
         if (bulkHorario.dias[day]) {
-          // Si el día está seleccionado, aplicamos los valores del panel
           newHorario[day] = {
             inicio: bulkHorario.inicio,
             fin: bulkHorario.fin,
             horas: bulkHorario.horas
           };
         } else {
-          // Si NO está seleccionado, reseteamos a cero
           newHorario[day] = {
             inicio: '00:00',
             fin: '00:00',
@@ -212,28 +225,14 @@ export default function RelacionesView({ cursoId }: Props) {
     });
   };
 
-
-  const [targetEndDate, setTargetEndDate] = useState('');
-
-  const applyTargetEndDate = () => {
-    if (!targetEndDate) return;
-    setFormData(prev => ({
-      ...prev,
-      alumnosRelacion: (prev.alumnosRelacion || []).map(a => {
-        const calculatedStart = calculateStartDateFromEnd(targetEndDate, a.totalHoras);
-        return { ...a, fechaInicio: calculatedStart || a.fechaInicio };
-      })
-    }));
-  };
-
   useEffect(() => {
-    if (formData.alumnosRelacion?.length && formData.horario) {
+    if (formData.alumnos?.length && formData.horario) {
       let maxEndDate: string | null = null;
       let minStartDate: string | null = null;
 
-      formData.alumnosRelacion.forEach(ar => {
-        const studentStartDate = ar.fechaInicio || formData.fechaInicio || '';
-        const endDate = calculateEndDateForHours(studentStartDate, ar.totalHoras);
+      formData.alumnos.forEach(ar => {
+        const studentStartDate = ar.fechaInicio || '';
+        const endDate = calculateEndDateForHours(studentStartDate, ar.totalHorasFFE);
 
         if (!minStartDate || (studentStartDate && studentStartDate < minStartDate)) {
           minStartDate = studentStartDate;
@@ -242,18 +241,21 @@ export default function RelacionesView({ cursoId }: Props) {
         if (!maxEndDate || (endDate && endDate > maxEndDate)) {
           maxEndDate = endDate;
         }
+
+        if (maxEndDate && maxEndDate !== ar.fechaFin) {
+          ar.fechaFin = maxEndDate || '';
+        }
       });
 
       const updates: Partial<RelacionAlumno> = {};
-      if (maxEndDate && maxEndDate !== formData.fechaFin) {
-        updates.fechaFin = maxEndDate || '';
-      }
+
 
       if (Object.keys(updates).length > 0) {
         setFormData(prev => ({ ...prev, ...updates }));
       }
     }
-  }, [formData.fechaInicio, formData.alumnosRelacion, formData.horario, curso]);
+  }, [formData.horario]);
+
 
   const advanceStatus = async (rel: RelacionAlumno) => {
     let nextEstado = rel.estado;
@@ -277,7 +279,6 @@ export default function RelacionesView({ cursoId }: Props) {
   };
 
   const moveBackStatus = async (rel: RelacionAlumno) => {
-    console.log("👉 [ANEXO] Intentando retroceder. Estado actual:", rel.estado);
     let prevEstado = rel.estado;
 
     switch (rel.estado) {
@@ -318,7 +319,6 @@ export default function RelacionesView({ cursoId }: Props) {
   };
 
   const moveBackPlanStatus = async (rel: RelacionAlumno) => {
-    console.log("👉 [PLAN FORMATIVO] Intentando retroceder. Estado actual:", rel.estadoPlanFormativo);
     const currentState = rel.estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
     let prevEstado = currentState;
 
@@ -367,10 +367,8 @@ export default function RelacionesView({ cursoId }: Props) {
     }
   };
 
-  // --- LÓGICA DE DESCARGA MÚLTIPLE (PLAN FORMATIVO) ---
-  // --- LÓGICA DE DESCARGA (PLAN FORMATIVO) ---
   const descargarPlanesFormativos = async (tipo: 'docx' | 'pdf') => {
-    if (!selectedRelacion || !selectedRelacion.alumnosRelacion || selectedRelacion.alumnosRelacion.length === 0) {
+    if (!selectedRelacion || !selectedRelacion.alumnos || selectedRelacion.alumnos.length === 0) {
       alert("No hay alumnos en esta relación.");
       return;
     }
@@ -380,17 +378,17 @@ export default function RelacionesView({ cursoId }: Props) {
     // ==========================================
     // CASO A: SOLO 1 ALUMNO (Descarga directa)
     // ==========================================
-    if (selectedRelacion.alumnosRelacion.length === 1) {
-      const ar = selectedRelacion.alumnosRelacion[0];
-      const alumno = alumnos.find(a => a.id === ar.alumnoId);
+    if (selectedRelacion.alumnos.length === 1) {
+      const ar = selectedRelacion.alumnos[0];
+      const alumno = alumnos.find(a => a.id === ar.id);
       const nombreAlumno = alumno
         ? `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_')
-        : `Alumno_${ar.alumnoId}`;
+        : `Alumno_${ar.id}`;
 
       const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`;
       const url = tipo === 'pdf'
-        ? `${baseUrl}/pdf?alumnoId=${ar.alumnoId}`
-        : `${baseUrl}?alumnoId=${ar.alumnoId}`;
+        ? `${baseUrl}/pdf?alumnoId=${ar.id}`
+        : `${baseUrl}?alumnoId=${ar.id}`;
 
       try {
         const response = await fetch(url);
@@ -410,7 +408,7 @@ export default function RelacionesView({ cursoId }: Props) {
         console.error(`Error descargando el plan de ${nombreAlumno}:`, error);
         alert(`Hubo un error al descargar el plan de ${nombreAlumno}`);
       }
-      return; // Cortamos la ejecución aquí
+      return;
     }
 
     // ==========================================
@@ -419,17 +417,17 @@ export default function RelacionesView({ cursoId }: Props) {
     const zip = new JSZip();
     let archivosAñadidos = 0;
 
-    for (let i = 0; i < selectedRelacion.alumnosRelacion.length; i++) {
-      const ar = selectedRelacion.alumnosRelacion[i];
-      const alumno = alumnos.find(a => a.id === ar.alumnoId);
+    for (let i = 0; i < selectedRelacion.alumnos.length; i++) {
+      const ar = selectedRelacion.alumnos[i];
+      const alumno = alumnos.find(a => a.id === ar.id);
       const nombreAlumno = alumno
         ? `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_')
-        : `Alumno_${ar.alumnoId}`;
+        : `Alumno_${ar.id}`;
 
       const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`;
       const url = tipo === 'pdf'
-        ? `${baseUrl}/pdf?alumnoId=${ar.alumnoId}`
-        : `${baseUrl}?alumnoId=${ar.alumnoId}`;
+        ? `${baseUrl}/pdf?alumnoId=${ar.id}`
+        : `${baseUrl}?alumnoId=${ar.id}`;
 
       try {
         const response = await fetch(url);
@@ -469,8 +467,6 @@ export default function RelacionesView({ cursoId }: Props) {
   const advancePlanStatus = async (rel: RelacionAlumno) => {
     // 1. Vemos qué estado tiene exactamente al pulsar
     const currentState = rel.estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
-    console.log("👉 Estado ACTUAL antes de pulsar:", currentState);
-
     let nextEstado = currentState;
 
     switch (currentState) {
@@ -544,7 +540,7 @@ export default function RelacionesView({ cursoId }: Props) {
     }
 
     return (
-      <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${color}`}>
+      <span className={`px-1.5 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider whitespace-nowrap truncate border ${color}`}>
         {displayText}
       </span>
     );
@@ -555,10 +551,10 @@ export default function RelacionesView({ cursoId }: Props) {
       const conv = convenios.find(c => c.id === rel.convenioId);
       if (!conv) return false;
 
-      const alumnoMatch = rel.alumnosRelacion.some(ar => {
-        const a = alumnos.find(al => al.id === ar.alumnoId);
-        return a && (a.nombre + ' ' + a.apellidos).toLowerCase().includes(listSearchTerm.toLowerCase());
-      });
+      // ACTUALIZADO: Buscamos dentro de rel.alumnos
+      const alumnoMatch = rel.alumnos?.some(a =>
+        (a.nombre + ' ' + a.apellidos).toLowerCase().includes(listSearchTerm.toLowerCase())
+      );
 
       const searchMatch = !listSearchTerm ||
         conv.empresaNombre.toLowerCase().includes(listSearchTerm.toLowerCase()) ||
@@ -622,8 +618,8 @@ export default function RelacionesView({ cursoId }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.alumnosRelacion || formData.alumnosRelacion.length === 0 || !formData.convenioId || !formData.tutorEmpresaId) {
-      alert('Por favor, selecciona al menos un alumno, un convenio y un tutor válidos.');
+    if (!formData.convenioId || !formData.tutorEmpresaId) {
+      alert('Por favor, selecciona al menos un convenio y un tutor válidos.');
       return;
     }
 
@@ -631,11 +627,17 @@ export default function RelacionesView({ cursoId }: Props) {
     const url = editing ? `/api/relaciones-alumnos/${editing.id}` : '/api/relaciones-alumnos';
 
     try {
+      const payload = {
+        ...formData,
+        alumnosIds: selectedAlumnosIds // Enviamos los alumnos seleccionados
+      };
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
+
       if (res.ok) {
         setShowForm(false);
         setEditing(null);
@@ -646,86 +648,215 @@ export default function RelacionesView({ cursoId }: Props) {
     }
   };
 
+  // --- NUEVAS FUNCIONES: PLAN FORMATIVO INDIVIDUAL ---
+
+  const descargarPlanFormativoIndividual = async (tipo: 'docx' | 'pdf', alumno: Alumno) => {
+    if (!selectedRelacion) return;
+    const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+    const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+
+    const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`;
+    const url = tipo === 'pdf' ? `${baseUrl}/pdf?alumnoId=${alumno.id}` : `${baseUrl}?alumnoId=${alumno.id}`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `Plan_${numRelacionLimpio}_${nombreAlumno}.${tipo}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error(`Error descargando el plan de ${nombreAlumno}:`, error);
+      alert(`Hubo un error al descargar el plan de ${nombreAlumno}`);
+    }
+  };
+
+  const advancePlanStatusIndividual = async (alumno: Alumno) => {
+    const currentState = (alumno as any).estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
+    let nextEstado = currentState;
+
+    switch (currentState) {
+      case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE:
+      case 'PENDIENTE_ENVIAR_ESTUDIANTE': nextEstado = PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE; break;
+      case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
+      case 'PENDIENTE_FIRMAR_ESTUDIANTE': nextEstado = PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA; break;
+      case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
+      case 'PENDIENTE_ENVIAR_EMPRESA': nextEstado = PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA; break;
+      case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
+      case 'PENDIENTE_FIRMA_EMPRESA': nextEstado = PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR; break;
+      case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
+      case 'PENDIENTE_FIRMA_TUTOR': nextEstado = PlanFormativoEstado.COMPLETADO; break;
+    }
+
+    if (nextEstado === currentState) return;
+
+    try {
+      await fetch(`/api/alumnos/${alumno.id}/plan-formativo`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estadoPlanFormativo: nextEstado })
+      });
+      fetchData(); // Recargamos para ver el cambio
+    } catch (error) {
+      console.error("Error al avanzar el plan:", error);
+    }
+  };
+
+  const moveBackPlanStatusIndividual = async (alumno: Alumno) => {
+    const currentState = (alumno as any).estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
+    let prevEstado = currentState;
+
+    switch (currentState) {
+      case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
+      case 'PENDIENTE_FIRMAR_ESTUDIANTE': prevEstado = PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE; break;
+      case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
+      case 'PENDIENTE_ENVIAR_EMPRESA': prevEstado = PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE; break;
+      case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
+      case 'PENDIENTE_FIRMA_EMPRESA': prevEstado = PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA; break;
+      case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
+      case 'PENDIENTE_FIRMA_TUTOR': prevEstado = PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA; break;
+      case PlanFormativoEstado.COMPLETADO:
+      case 'COMPLETADO': prevEstado = PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR; break;
+    }
+
+    if (prevEstado === currentState) return;
+
+    try {
+      await fetch(`/api/alumnos/${alumno.id}/plan-formativo`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estadoPlanFormativo: prevEstado })
+      });
+      fetchData();
+    } catch (error) {
+      console.error("Error al retroceder el plan:", error);
+    }
+  };
+
   const handleOpenForm = (rel: RelacionAlumno | null) => {
     if (rel) {
-      setEditing(rel);
-      setFormData(rel);
+      // ESTO ES LO QUE CARGA LOS DATOS EN EL FORMULARIO
+      setEditing(rel); // Guardamos que estamos editando (para saber que es un UPDATE y no un CREATE)
+
+      setFormData({
+        ...rel,
+        // Nos aseguramos de que alumnos sea un array para evitar errores de .map()
+        alumnos: rel.alumnos || []
+      });
+
+      // Opcional: Si usas buscadores de texto para convenios, actualiza el término de búsqueda
       const conv = convenios.find(c => c.id === rel.convenioId);
-      setSearchTermAlumno('');
       setSearchTermConvenio(conv ? `${conv.empresaNombre} (Ref: ${conv.numConvenio})` : '');
+
     } else {
+      // Si es una nueva relación, reseteamos al estado inicial que pusiste tú
       setEditing(null);
       setFormData({
-        alumnosRelacion: [],
+        alumnos: [],
         numRelacion: '',
-        fechaInicio: '',
-        fechaFin: '',
         horario: { ...DEFAULT_HORARIO },
-        estado: RelacionEstado.PENDIENTE_ENVIAR_EMPRESA
+        estado: RelacionEstado.PENDIENTE_ENVIAR_EMPRESA,
+        estadoPlanFormativo: PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE
       });
-      setSearchTermAlumno('');
       setSearchTermConvenio('');
     }
     setShowForm(true);
   };
 
   const addAlumnoToRelacion = (alumno: Alumno) => {
-    setFormData(prev => {
-      const current = prev.alumnosRelacion || [];
-      if (current.some(a => a.alumnoId === alumno.id)) return prev;
-      return {
-        ...prev,
-        alumnosRelacion: [...current, {
-          alumnoId: alumno.id!,
-          totalHoras: alumno.horasPendientesFFE || 0,
-          fechaInicio: prev.fechaInicio
-        }]
-      };
-    });
+    if (!selectedAlumnosIds.includes(alumno.id!)) {
+      setSelectedAlumnosIds([...selectedAlumnosIds, alumno.id!]);
+    }
     setSearchTermAlumno('');
   };
 
   const removeAlumnoFromRelacion = (id: number) => {
     setFormData(prev => ({
       ...prev,
-      alumnosRelacion: (prev.alumnosRelacion || []).filter(a => a.alumnoId !== id)
+      alumnosRelacion: (prev.alumnos || []).filter(a => a.id !== id)
     }));
   };
 
   const updateStudentHours = (id: number, hours: number) => {
     setFormData(prev => ({
       ...prev,
-      alumnosRelacion: (prev.alumnosRelacion || []).map(a =>
-        a.alumnoId === id ? { ...a, totalHoras: hours } : a
-      )
+      alumnos: (prev.alumnos || []).map(a => {
+        if (a.id === id) {
+          // Calculamos la nueva fecha fin al cambiar las horas
+          const newEndDate = calculateEndDateForHours(a.fechaInicio || '', hours, prev.horario);
+          return { ...a, horasPendientesFFE: hours, fechaFin: newEndDate || a.fechaFin };
+        }
+        return a;
+      })
     }));
   };
 
   const updateStudentStartDate = (id: number, date: string) => {
     setFormData(prev => ({
       ...prev,
-      alumnosRelacion: (prev.alumnosRelacion || []).map(a =>
-        a.alumnoId === id ? { ...a, fechaInicio: date } : a
-      )
+      alumnos: (prev.alumnos || []).map(a => {
+        if (a.id === id) {
+          // Calculamos la nueva fecha fin al cambiar la fecha de inicio
+          const newEndDate = calculateEndDateForHours(date, a.totalHorasFFE || 0, prev.horario);
+          return { ...a, fechaInicio: date, fechaFin: newEndDate || a.fechaFin };
+        }
+        return a;
+      })
     }));
   };
 
+  const applyTargetEndDate = () => {
+    if (!targetEndDate) return;
+
+    setFormData(prev => {
+      const nuevosAlumnos = (prev.alumnos || []).map(a => {
+        const calculatedStart = calculateStartDateFromEnd(
+          targetEndDate,
+          a.totalHorasFFE,
+          prev.horario
+        );
+
+        return {
+          ...a,
+          fechaInicio: calculatedStart || a.fechaInicio, // Si no se pudo calcular, mantenemos la fecha original
+          // Opcional: si quieres que cada alumno guarde su fin objetivo
+          fechaFin: targetEndDate
+        };
+      });
+
+      return {
+        ...prev,
+        alumnos: nuevosAlumnos
+      };
+    });
+  };
+
   const applyStartDateToAll = () => {
-    if (!formData.fechaInicio) return;
+    if (!targetStartDate) return; // Evitamos pisar con valores vacíos
+
     setFormData(prev => ({
       ...prev,
-      alumnosRelacion: (prev.alumnosRelacion || []).map(a => ({ ...a, fechaInicio: prev.fechaInicio }))
+      alumnos: (prev.alumnos || []).map(a => ({
+        ...a,
+        fechaInicio: targetStartDate
+      }))
     }));
   };
 
   const filteredAlumnos = searchTermAlumno.trim().length > 0
     ? alumnos.filter(a => {
       const matchesSearch = (a.nombre + ' ' + a.apellidos).toLowerCase().includes(searchTermAlumno.toLowerCase());
-      const isAlreadyInForm = (formData.alumnosRelacion || []).some(ar => ar.alumnoId === a.id);
-      const hasExistingRelacion = relaciones.some(rel =>
-        rel.alumnosRelacion.some(ar => ar.alumnoId === a.id)
-      );
-      return matchesSearch && !isAlreadyInForm && !hasExistingRelacion;
+      const isAlreadyInForm = selectedAlumnosIds.includes(a.id!);
+      // Mostrar solo alumnos sin relación asignada
+      const hasNoRelacion = !a.relacionId;
+      return matchesSearch && !isAlreadyInForm && hasNoRelacion;
     })
     : [];
 
@@ -768,7 +899,7 @@ export default function RelacionesView({ cursoId }: Props) {
     { id: 'all', label: 'Cualquier estado' },
     ...Object.values(RelacionEstado).map(e => ({
       id: e,
-      label: RelacionEstadoLabels[e as RelacionEstado] // <-- Usamos el diccionario aquí
+      label: RelacionEstadoLabels[e as RelacionEstado]
     }))
   ];
 
@@ -858,7 +989,6 @@ export default function RelacionesView({ cursoId }: Props) {
                   </th>
                 </tr>
               </thead>
-              {/* 1. Quitamos el divide-y débil de aquí */}
               <tbody className="bg-white">
                 {filteredAndSortedRelaciones.length > 0 ? (
                   filteredAndSortedRelaciones.map(rel => {
@@ -867,12 +997,10 @@ export default function RelacionesView({ cursoId }: Props) {
                       <tr
                         key={rel.id}
                         onClick={() => setSelectedRelacion(rel)}
-                        // 2. Añadimos un borde inferior muy grueso (border-b-8) y de un gris claro (border-slate-100) para hacer de separador físico
                         className={`cursor-pointer transition-colors group align-top border-b-12 border-slate-50 last:border-b-0 ${selectedRelacion?.id === rel.id ? 'bg-primary/5' : 'hover:bg-slate-50/80'}`}
                       >
-                        {/* 3. Aumentamos un poco el padding vertical (py-6 en vez de py-4) para que respire más */}
                         <td colSpan={2} className="px-5 py-6 w-full">
-                          
+
                           {/* CABECERA DE LA FILA: Empresa a la izq, Botones a la derecha */}
                           <div className="flex justify-between items-start mb-4">
                             <div className="flex flex-col gap-1">
@@ -899,29 +1027,27 @@ export default function RelacionesView({ cursoId }: Props) {
                             </div>
                           </div>
 
-                          {/* LISTADO DE ALUMNOS: Ahora tiene vía libre para ocupar el 100% */}
+                          {/* LISTADO DE ALUMNOS (Actualizado a rel.alumnos) */}
                           <div className="space-y-2">
-                            {rel.alumnosRelacion.map((ar, idx) => {
-                              const a = alumnos.find(al => al.id === ar.alumnoId);
-                              const studentStartDate = ar.fechaInicio || rel.fechaInicio || '';
-                              const studentEndDate = calculateEndDateForHours(studentStartDate, ar.totalHoras, rel.horario);
+                            {rel.alumnos?.map((alumno) => {
                               return (
-                                <div key={idx} className="bg-white border border-slate-100 p-2.5 rounded-lg w-full">
-                                  <div className="flex justify-between items-center mb-1">
-                                    <span className="text-xs font-bold text-slate-700">{a?.nombre} {a?.apellidos}</span>
-                                    <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded">
-                                      {ar.totalHoras}h
-                                    </span>
-                                  </div>
+                                <div key={alumno.id} className="bg-white border border-slate-100 p-2.5 rounded-lg w-full flex items-center justify-between">
+                                  <span className="text-xs font-bold text-slate-700">{alumno.nombre} {alumno.apellidos} <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded">
+                                    {alumno.totalHorasFFE}h
+                                  </span></span>
+
                                   <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
                                     <Calendar className="h-3 w-3" />
-                                    <span className="text-blue-600">{studentStartDate ? new Date(studentStartDate).toLocaleDateString() : '—'}</span>
+                                    <span className="text-blue-600">{alumno.fechaInicio ? new Date(alumno.fechaInicio).toLocaleDateString() : '—'}</span>
                                     <span className="text-slate-300">-</span>
-                                    <span className="text-emerald-600">{studentEndDate ? new Date(studentEndDate).toLocaleDateString() : '—'}</span>
+                                    <span className="text-emerald-600">{alumno.fechaFin ? new Date(alumno.fechaFin).toLocaleDateString() : '—'}</span>
                                   </div>
                                 </div>
                               );
                             })}
+                            {(!rel.alumnos || rel.alumnos.length === 0) && (
+                              <div className="text-xs text-slate-400 italic">Sin alumnos asignados</div>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -998,59 +1124,142 @@ export default function RelacionesView({ cursoId }: Props) {
                   )}
                 </section>
 
-                {/* BLOQUE 2: PLAN FORMATIVO (Dependiente de selectedRelacion pero con flujo propio) */}
+                {/* BLOQUE 2: PLANES FORMATIVOS (POR ALUMNO) */}
                 <section className="bg-blue-50/30 border border-blue-100 rounded-2xl p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5"><FileText className="h-3.5 w-3.5" /> 2. Plan Formativo</label>
-                    {statusBadge(selectedRelacion.estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE, true)}
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
+                      <FileText className="h-3.5 w-3.5" /> 2. Planes Formativos
+                    </label>
                   </div>
-                  <div className="flex gap-2">
-                    <div className="flex gap-2">
-                      {(() => {
-                        const cantidadAlumnos = selectedRelacion.alumnosRelacion?.length || 0;
-                        const esMultiple = cantidadAlumnos > 1;
 
-                        return (
-                          <>
-                            <button
-                              onClick={() => descargarPlanesFormativos('docx')}
-                              className="flex-1 py-2 px-3 bg-white border border-slate-200 text-blue-600 rounded-xl text-[10px] font-bold uppercase hover:bg-blue-50 transition-colors flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap"
-                            >
-                              {esMultiple ? <FileArchive className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
-                              DOCX {esMultiple && `(${cantidadAlumnos})`}
-                            </button>
+                  <div className="space-y-3">
+                    {selectedRelacion.alumnos?.map((alumno) => {
+                      // Obtenemos el estado individual (por defecto el inicial)
+                      const estadoPlan = (alumno as any).estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
 
-                            <button
-                              onClick={() => descargarPlanesFormativos('pdf')}
-                              className="flex-1 py-2 px-3 bg-white border border-slate-200 text-red-600 rounded-xl text-[10px] font-bold uppercase hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap"
-                            >
-                              {esMultiple ? <FileArchive className="h-3.5 w-3.5" /> : <FilePdf className="h-3.5 w-3.5" />}
-                              PDF {esMultiple && `(${cantidadAlumnos})`}
-                            </button>
-                          </>
-                        );
-                      })()}
-                    </div>
+                      return (
+                        <div key={alumno.id} className="bg-white border border-blue-100 rounded-xl p-3 shadow-sm flex flex-col gap-3">
+                          
+                          {/* Cabecera: Nombre y Badge */}
+                          <div className="flex items-center justify-between border-b border-slate-50 pb-2">
+                            <span className="text-xs font-bold text-slate-700 truncate pr-2">
+                              {alumno.nombre} {alumno.apellidos}
+                            </span>
+                            {statusBadge(estadoPlan, true)}
+                          </div>
+
+                          {/* Botones de acción */}
+                          <div className="flex flex-col gap-2">
+                            <div className="flex gap-2">
+                              {/* Botones de Descarga */}
+                              <div className="flex gap-1 shrink-0">
+                                <BotonDescargaDOCX
+                                  onClick={() => descargarPlanFormativoIndividual('docx', alumno)}
+                                  showText={true}
+                                  className="h-8 px-2 bg-white border border-slate-200 text-blue-600 rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-blue-50 transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
+                                />
+                                <BotonDescargaPDF
+                                  onClick={() => descargarPlanFormativoIndividual('pdf', alumno)}
+                                  showText={true}
+                                  className="h-8 px-2 bg-white border border-slate-200 text-red-600 rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-red-50 transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
+                                />
+                              </div>
+
+                              {/* Botón de Avanzar Estado */}
+                              {getPlanStatusButton(estadoPlan) ? (
+                                <button
+                                  onClick={() => advancePlanStatusIndividual(alumno)}
+                                  className={`flex-1 h-8 px-2 min-w-0 rounded-lg text-white font-bold text-[9px] uppercase whitespace-nowrap flex items-center justify-center gap-1.5 shadow-md transition-all hover:brightness-90 ${getPlanStatusButton(estadoPlan)!.color}`}
+                                >
+                                  {React.createElement(getPlanStatusButton(estadoPlan)!.icon, { className: 'h-3.5 w-3.5 shrink-0' })}
+                                  <span className="truncate">{getPlanStatusButton(estadoPlan)!.label}</span>
+                                </button>
+                              ) : (
+                                <div className="flex-1 h-8 bg-emerald-50 text-emerald-700 rounded-lg text-center font-bold text-[9px] border border-emerald-100 uppercase whitespace-nowrap flex items-center justify-center">
+                                  COMPLETADO
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Botón de Retroceder Estado */}
+                            {estadoPlan !== PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE && estadoPlan !== 'PENDIENTE_ENVIAR_ESTUDIANTE' && (
+                              <button
+                                onClick={() => moveBackPlanStatusIndividual(alumno)}
+                                className="w-full h-7 border border-slate-200 text-slate-500 rounded-lg font-bold text-[9px] uppercase whitespace-nowrap flex items-center justify-center gap-1.5 hover:bg-slate-50 transition-colors"
+                              >
+                                <ArrowLeft className="h-3 w-3 shrink-0" /> Deshacer estado
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  {getPlanStatusButton(selectedRelacion.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE') ? (
-                    <button
-                      onClick={() => advancePlanStatus(selectedRelacion)}
-                      className={`w-full py-2.5 rounded-xl text-white font-bold text-[10px] uppercase flex items-center justify-center gap-2 shadow-lg transition-all hover:brightness-90 ${getPlanStatusButton(selectedRelacion.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE')!.color}`}>
-                      {React.createElement(getPlanStatusButton(selectedRelacion.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE')!.icon, { className: 'h-4 w-4' })}
-                      {getPlanStatusButton(selectedRelacion.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE')!.label}
-                    </button>
-                  ) : <div className="bg-emerald-50 text-emerald-700 p-2.5 rounded-xl text-center font-bold text-[10px] border border-emerald-100">COMPLETADO</div>}
-                  {/* NUEVO BOTÓN PARA RETROCEDER ESTADO DEL PLAN FORMATIVO */}
-                  {(selectedRelacion.estadoPlanFormativo &&
-                    selectedRelacion.estadoPlanFormativo !== PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE) && (
-                      <button
-                        onClick={() => moveBackPlanStatus(selectedRelacion)}
-                        className="w-full py-2.5 border border-slate-200 text-slate-500 rounded-xl font-bold text-[10px] uppercase flex items-center justify-center gap-2 hover:bg-slate-50"
-                      >
-                        <ArrowLeft className="h-3.5 w-3.5" /> Regresar Estado Anterior
-                      </button>
-                    )}
                 </section>
+
+
+                {/* BLOQUE 3: FICHAS DE SEGUIMIENTO (POR ALUMNO) */}
+                {/*
+                <section className="bg-teal-50/30 border border-teal-100 rounded-2xl p-4 space-y-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[10px] font-black text-teal-600 uppercase tracking-widest flex items-center gap-1.5">
+                      <FileText className="h-3.5 w-3.5" /> 3. Fichas de Seguimiento
+                    </label>
+                  </div>
+
+                  <div className="space-y-3">
+                    {selectedRelacion.alumnos?.map((alumno) => {
+                      const estadoSeguimiento = (alumno as any).estadoSeguimiento || 'Pendiente';
+
+                      return (
+                        <div key={alumno.id} className="bg-white border border-teal-100 rounded-xl p-3 shadow-sm flex flex-col gap-3">
+                          
+                          <div className="flex items-center justify-between border-b border-slate-50 pb-2">
+                            <span className="text-xs font-bold text-slate-700 truncate pr-2">
+                              {alumno.nombre} {alumno.apellidos}
+                            </span>
+                            {statusBadge(estadoSeguimiento, false, true)}
+                          </div>
+
+                          <div className="flex flex-col gap-2">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => descargarFichaSeguimiento('docx', alumno)}
+                                className="w-1/3 py-2 px-2 bg-white border border-slate-200 text-teal-600 rounded-lg text-[10px] font-bold uppercase hover:bg-teal-50 transition-colors flex items-center justify-center gap-1.5"
+                              >
+                                <FileText className="h-3.5 w-3.5 shrink-0" /> DOCX
+                              </button>
+
+                              {getSeguimientoStatusButton(estadoSeguimiento) ? (
+                                <button
+                                  onClick={() => advanceSeguimientoStatus(alumno)}
+                                  className={`w-2/3 py-2 px-2 rounded-lg text-white font-bold text-[9px] uppercase flex items-center justify-center gap-1.5 shadow-md transition-all hover:brightness-90 ${getSeguimientoStatusButton(estadoSeguimiento)!.color}`}
+                                >
+                                  {React.createElement(getSeguimientoStatusButton(estadoSeguimiento)!.icon, { className: 'h-3.5 w-3.5 shrink-0' })}
+                                  <span className="truncate">{getSeguimientoStatusButton(estadoSeguimiento)!.label}</span>
+                                </button>
+                              ) : (
+                                <div className="w-2/3 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-center font-bold text-[10px] border border-emerald-100 uppercase flex items-center justify-center">
+                                  COMPLETADO
+                                </div>
+                              )}
+                            </div>
+
+                            {estadoSeguimiento !== 'Pendiente' && (
+                              <button
+                                onClick={() => moveBackSeguimientoStatus(alumno)}
+                                className="w-full py-1.5 border border-slate-200 text-slate-500 rounded-lg font-bold text-[9px] uppercase flex items-center justify-center gap-1.5 hover:bg-slate-50 transition-colors"
+                              >
+                                <ArrowLeft className="h-3 w-3 shrink-0" /> Deshacer estado
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+                */}
               </div>
             </div>
           ) : (
@@ -1059,7 +1268,7 @@ export default function RelacionesView({ cursoId }: Props) {
                 <FileText className="h-12 w-12 text-slate-200" />
               </div>
               <h3 className="text-base font-bold text-slate-700 mb-2">Selecciona una relación</h3>
-              <p className="text-xs text-slate-500">Para gestionar los Anexos y Planes Formativos asociados.</p>
+              <p className="text-xs text-slate-500">Para gestionar la documentación y los anexos asociados a la relación.</p>
             </div>
           )}
         </div>
@@ -1158,15 +1367,15 @@ export default function RelacionesView({ cursoId }: Props) {
 
                         {/* LISTA DE ALUMNOS CON SCROLL INDEPENDIENTE */}
                         <div className="space-y-3 max-h-[35vh] overflow-y-auto pr-2">
-                          {formData.alumnosRelacion?.map(ar => {
-                            const alum = alumnos.find(a => a.id === ar.alumnoId);
-                            const studentStartDate = ar.fechaInicio || formData.fechaInicio || '';
-                            const studentEndDate = calculateEndDateForHours(studentStartDate, ar.totalHoras);
+                          {formData.alumnos?.map(ar => {
+                            const alum = alumnos.find(a => a.id === ar.id);
+                            const studentStartDate = ar.fechaInicio || '';
+                            const studentEndDate = calculateEndDateForHours(studentStartDate, alum?.totalHorasFFE!);
                             return (
-                              <div key={ar.alumnoId} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                              <div key={ar.id} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                                 <div className="flex items-center justify-between">
                                   <span className="text-sm font-black text-slate-800">{alum?.nombre} {alum?.apellidos}</span>
-                                  <button type="button" onClick={() => removeAlumnoFromRelacion(ar.alumnoId)} className="text-red-400 hover:text-red-500 transition-colors">
+                                  <button type="button" onClick={() => removeAlumnoFromRelacion(ar.id!)} className="text-red-400 hover:text-red-500 transition-colors">
                                     <X className="h-4 w-4" />
                                   </button>
                                 </div>
@@ -1176,8 +1385,8 @@ export default function RelacionesView({ cursoId }: Props) {
                                     <input
                                       type="number"
                                       className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold text-primary focus:ring-2 focus:ring-primary/10 outline-none"
-                                      value={ar.totalHoras}
-                                      onChange={e => updateStudentHours(ar.alumnoId, Number(e.target.value))}
+                                      value={ar.totalHorasFFE}
+                                      onChange={e => updateStudentHours(ar.id!, Number(e.target.value))}
                                     />
                                   </div>
                                   <div>
@@ -1186,7 +1395,7 @@ export default function RelacionesView({ cursoId }: Props) {
                                       type="date"
                                       className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold text-slate-600 focus:ring-2 focus:ring-primary/10 outline-none"
                                       value={ar.fechaInicio || ''}
-                                      onChange={e => updateStudentStartDate(ar.alumnoId, e.target.value)}
+                                      onChange={e => updateStudentStartDate(ar.id!, e.target.value)}
                                     />
                                   </div>
                                 </div>
@@ -1199,7 +1408,7 @@ export default function RelacionesView({ cursoId }: Props) {
                               </div>
                             );
                           })}
-                          {(!formData.alumnosRelacion || formData.alumnosRelacion.length === 0) && (
+                          {(!formData.alumnos || formData.alumnos.length === 0) && (
                             <div className="py-8 text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest italic bg-white rounded-2xl border border-dashed border-slate-200">
                               No hay alumnos seleccionados
                             </div>
@@ -1219,7 +1428,7 @@ export default function RelacionesView({ cursoId }: Props) {
                             <button
                               type="button"
                               onClick={applyStartDateToAll}
-                              disabled={!formData.alumnosRelacion?.length}
+                              disabled={!formData.alumnos?.length}
                               className="text-[9px] font-bold text-primary hover:underline uppercase tracking-tight disabled:text-slate-300 disabled:no-underline disabled:cursor-not-allowed"
                             >
                               Aplicar a todos
@@ -1227,10 +1436,10 @@ export default function RelacionesView({ cursoId }: Props) {
                           </div>
                           <input
                             type="date"
-                            disabled={!formData.alumnosRelacion?.length}
+                            disabled={!formData.alumnos?.length}
                             className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
-                            value={formData.fechaInicio}
-                            onChange={e => setFormData({ ...formData, fechaInicio: e.target.value })}
+                            value={targetStartDate}
+                            onChange={e => setTargetStartDate(e.target.value)}
                           />
                         </div>
                         <div>
@@ -1239,7 +1448,7 @@ export default function RelacionesView({ cursoId }: Props) {
                             <button
                               type="button"
                               onClick={applyTargetEndDate}
-                              disabled={!formData.alumnosRelacion?.length}
+                              disabled={!formData.alumnos?.length}
                               className="text-[9px] font-bold text-emerald-600 hover:underline uppercase tracking-tight disabled:text-slate-300 disabled:no-underline disabled:cursor-not-allowed"
                             >
                               Cálculo retroactivo
@@ -1247,7 +1456,7 @@ export default function RelacionesView({ cursoId }: Props) {
                           </div>
                           <input
                             type="date"
-                            disabled={!formData.alumnosRelacion?.length}
+                            disabled={!formData.alumnos?.length}
                             className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                             value={targetEndDate}
                             onChange={e => setTargetEndDate(e.target.value)}

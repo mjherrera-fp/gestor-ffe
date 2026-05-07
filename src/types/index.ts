@@ -63,77 +63,6 @@ export interface HorarioSemanal {
   domingo: HorarioDia;
 }
 
-// 1. ENUMS (Lo que se guarda en Base de Datos y se usa en la lógica)
-export enum RelacionEstado {
-  PENDIENTE_ENVIAR_EMPRESA = 'PENDIENTE_ENVIAR_EMPRESA',
-  PENDIENTE_FIRMA_EMPRESA = 'PENDIENTE_FIRMA_EMPRESA',
-  PENDIENTE_ENVIAR_DIRECTOR = 'PENDIENTE_ENVIAR_DIRECTOR',
-  PENDIENTE_FIRMA_DIRECTOR = 'PENDIENTE_FIRMA_DIRECTOR',
-  COMPLETADO = 'COMPLETADO'
-}
-
-export enum PlanFormativoEstado {
-  PENDIENTE_ENVIAR_ESTUDIANTE = 'PENDIENTE_ENVIAR_ESTUDIANTE',
-  PENDIENTE_FIRMAR_ESTUDIANTE = 'PENDIENTE_FIRMAR_ESTUDIANTE',
-  PENDIENTE_ENVIAR_EMPRESA = 'PENDIENTE_ENVIAR_EMPRESA',
-  PENDIENTE_FIRMA_EMPRESA = 'PENDIENTE_FIRMA_EMPRESA',
-  PENDIENTE_FIRMA_TUTOR = 'PENDIENTE_FIRMA_TUTOR',
-  COMPLETADO = 'COMPLETADO'
-}
-
-export enum ConvenioEstado {
-  PENDIENTE_ENVIAR = 'PENDIENTE_ENVIAR',
-  PENDIENTE_FIRMA_EMPRESA = 'PENDIENTE_FIRMA_EMPRESA',
-  PENDIENTE_ENVIAR_DIRECTOR = 'PENDIENTE_ENVIAR_DIRECTOR',
-  PENDIENTE_FIRMA_DIRECTOR = 'PENDIENTE_FIRMA_DIRECTOR',
-  COMPLETADO = 'COMPLETADO'
-}
-
-// 2. DICCIONARIOS DE TEXTO (Lo que ve el usuario en la Interfaz)
-export const RelacionEstadoLabels: Record<RelacionEstado, string> = {
-  [RelacionEstado.PENDIENTE_ENVIAR_EMPRESA]: 'Pendiente enviar a empresa',
-  [RelacionEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente firma empresa',
-  [RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'Pendiente enviar a director',
-  [RelacionEstado.PENDIENTE_FIRMA_DIRECTOR]: 'Pendiente firma director',
-  [RelacionEstado.COMPLETADO]: 'Completado'
-};
-
-export const PlanFormativoEstadoLabels: Record<PlanFormativoEstado, string> = {
-  [PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE]: 'Pendiente enviar a estudiante',
-  [PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE]: 'Pendiente firma estudiante',
-  [PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA]: 'Pendiente enviar a empresa',
-  [PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente firma empresa',
-  [PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR]: 'Pendiente firma tutor',
-  [PlanFormativoEstado.COMPLETADO]: 'Completado'
-};
-
-export const ConvenioEstadoLabels: Record<ConvenioEstado, string> = {
-  [ConvenioEstado.PENDIENTE_ENVIAR]: 'Pendiente de enviar a empresa',
-  [ConvenioEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente de firmar por empresa',
-  [ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'Pendiente de enviar al director',
-  [ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR]: 'Pendiente de firmar por dirección',
-  [ConvenioEstado.COMPLETADO]: 'Completado'
-};
-
-export interface RelacionAlumno {
-  id?: number;
-  alumnosRelacion: {
-    alumnoId: number;
-    totalHoras: number;
-    fechaInicio?: string;
-    fechaFin?: string;
-  }[];
-  convenioId: number;
-  numRelacion: string;
-  tutorEmpresaId: number;
-  fechaInicio: string;
-  fechaFin: string;
-  horario: HorarioSemanal;
-  totalHoras: number;
-  estado: RelacionEstado;
-  estadoPlanFormativo: PlanFormativoEstado;
-}
-
 export interface Alumno {
   id?: number;
   nombre: string;
@@ -146,8 +75,23 @@ export interface Alumno {
   fechaNacimiento: string;
   cvPath?: string;
   cursoId: number;
-  detalleAcademicoId?: number;
-  horasPendientesFFE?: number;
+  relacionId?: number;
+  detalleAcademicoId: number;
+  totalHorasFFE: number;
+  fechaInicio: string;
+  fechaFin: string;
+}
+
+export interface RelacionAlumno {
+  id?: number;
+  alumnos: Alumno[];
+  convenioId: number;
+  numRelacion: string;
+  tutorEmpresaId: number;
+  horario: HorarioSemanal;
+  estado: RelacionEstado;
+  estadoPlanFormativo: PlanFormativoEstado;
+  estadoSeguimiento: SeguimientoEstado;
 }
 
 export interface Empresa {
@@ -185,3 +129,68 @@ export interface InteresAlumnoEmpresa {
   empresaId: number;
   interesado: 'alumno' | 'empresa';
 }
+
+// 1. ENUMS (Lo que se guarda en Base de Datos y se usa en la lógica)
+export enum RelacionEstado {
+  PENDIENTE_ENVIAR_EMPRESA = 'PENDIENTE_ENVIAR_EMPRESA',
+  PENDIENTE_FIRMA_EMPRESA = 'PENDIENTE_FIRMA_EMPRESA',
+  PENDIENTE_ENVIAR_DIRECTOR = 'PENDIENTE_ENVIAR_DIRECTOR',
+  PENDIENTE_FIRMA_DIRECTOR = 'PENDIENTE_FIRMA_DIRECTOR',
+  COMPLETADO = 'COMPLETADO'
+}
+
+export enum PlanFormativoEstado {
+  PENDIENTE_ENVIAR_ESTUDIANTE = 'PENDIENTE_ENVIAR_ESTUDIANTE',
+  PENDIENTE_FIRMAR_ESTUDIANTE = 'PENDIENTE_FIRMAR_ESTUDIANTE',
+  PENDIENTE_ENVIAR_EMPRESA = 'PENDIENTE_ENVIAR_EMPRESA',
+  PENDIENTE_FIRMA_EMPRESA = 'PENDIENTE_FIRMA_EMPRESA',
+  PENDIENTE_FIRMA_TUTOR = 'PENDIENTE_FIRMA_TUTOR',
+  COMPLETADO = 'COMPLETADO'
+}
+
+export enum ConvenioEstado {
+  PENDIENTE_ENVIAR = 'PENDIENTE_ENVIAR',
+  PENDIENTE_FIRMA_EMPRESA = 'PENDIENTE_FIRMA_EMPRESA',
+  PENDIENTE_ENVIAR_DIRECTOR = 'PENDIENTE_ENVIAR_DIRECTOR',
+  PENDIENTE_FIRMA_DIRECTOR = 'PENDIENTE_FIRMA_DIRECTOR',
+  COMPLETADO = 'COMPLETADO'
+}
+
+// Añadir el nuevo enum
+export enum SeguimientoEstado {
+  PENDIENTE = 'Pendiente',
+  ENVIADO = 'Enviado a empresa',
+  RECIBIDO = 'Recibido de empresa'
+}
+
+// 2. DICCIONARIOS DE TEXTO (Lo que ve el usuario en la Interfaz)
+export const RelacionEstadoLabels: Record<RelacionEstado, string> = {
+  [RelacionEstado.PENDIENTE_ENVIAR_EMPRESA]: 'Pendiente enviar a empresa',
+  [RelacionEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente firma empresa',
+  [RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'Pendiente enviar a director',
+  [RelacionEstado.PENDIENTE_FIRMA_DIRECTOR]: 'Pendiente firma director',
+  [RelacionEstado.COMPLETADO]: 'Completado'
+};
+
+export const PlanFormativoEstadoLabels: Record<PlanFormativoEstado, string> = {
+  [PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE]: 'Pendiente enviar a estudiante',
+  [PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE]: 'Pendiente firma estudiante',
+  [PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA]: 'Pendiente enviar a empresa',
+  [PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente firma empresa',
+  [PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR]: 'Pendiente firma tutor',
+  [PlanFormativoEstado.COMPLETADO]: 'Completado'
+};
+
+export const ConvenioEstadoLabels: Record<ConvenioEstado, string> = {
+  [ConvenioEstado.PENDIENTE_ENVIAR]: 'Pendiente de enviar a empresa',
+  [ConvenioEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente de firmar por empresa',
+  [ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'Pendiente de enviar al director',
+  [ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR]: 'Pendiente de firmar por dirección',
+  [ConvenioEstado.COMPLETADO]: 'Completado'
+};
+
+export const SEGUIMIENTO_ESTADO_DICT: Record<SeguimientoEstado, { label: string, color: string }> = {
+  [SeguimientoEstado.PENDIENTE]: { label: 'Pendiente', color: 'bg-slate-100 text-slate-600' },
+  [SeguimientoEstado.ENVIADO]: { label: 'Enviado a empresa', color: 'bg-amber-100 text-amber-700' },
+  [SeguimientoEstado.RECIBIDO]: { label: 'Recibido de empresa', color: 'bg-emerald-100 text-emerald-700' }
+};

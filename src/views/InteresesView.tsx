@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Trophy, User, Building2, ChevronRight, CheckCircle2, Circle, Briefcase, Search, X } from 'lucide-react';
+import { Heart, Trophy, User, Building2, ChevronRight, CheckCircle2, Circle, Briefcase, Search, X, Send } from 'lucide-react';
 import { Alumno, Empresa, InteresAlumnoEmpresa } from '../types/index.ts';
 
 interface Props {
@@ -133,7 +133,7 @@ export default function InteresesView({ cursoId }: Props) {
               <div className="flex flex-col sm:items-end gap-3">
                 <div className="flex gap-4">
                   <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
-                    <Heart className="h-3 w-3 text-primary" /> Alumno
+                    <Send className="h-3 w-3 text-primary" /> Envío de CV del alumno
                   </div>
                   <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
                     <Briefcase className="h-3 w-3 text-emerald-500" /> Empresa
@@ -176,7 +176,7 @@ export default function InteresesView({ cursoId }: Props) {
                             onClick={() => toggleInteres(selectedAlumno.id!, empresa.id!, 'alumno')}
                             className={`p-2 rounded-lg transition-all ${iA ? 'bg-primary text-white shadow-md' : 'text-text-muted bg-slate-50'}`}
                           >
-                            <Heart className={`h-4 w-4 ${iA ? 'fill-current' : ''}`} />
+                            <Send className={`h-4 w-4 ${iA ? 'fill-current' : ''}`} />
                           </button>
                           <button 
                             onClick={() => toggleInteres(selectedAlumno.id!, empresa.id!, 'empresa')}
@@ -205,7 +205,7 @@ export default function InteresesView({ cursoId }: Props) {
                    <thead>
                       <tr className="bg-slate-50 border-b border-border-base text-[10px] font-bold text-text-muted uppercase tracking-wider">
                         <th className="px-6 py-3">Empresa / Institución</th>
-                        <th className="px-6 py-3 text-center">Interés Alumno</th>
+                        <th className="px-6 py-3 text-center">Envío de CV</th>
                         <th className="px-6 py-3 text-center">Interés Empresa</th>
                         <th className="px-6 py-3 text-center">Match</th>
                       </tr>
@@ -224,7 +224,7 @@ export default function InteresesView({ cursoId }: Props) {
                                 onClick={() => toggleInteres(selectedAlumno.id!, empresa.id!, 'alumno')}
                                 className={`p-2 rounded-lg transition-all ${iA ? 'bg-primary text-white shadow-md shadow-primary/20 scale-110' : 'text-text-muted hover:bg-slate-100'}`}
                               >
-                                <Heart className={`h-5 w-5 ${iA ? 'fill-current' : ''}`} />
+                                <Send className={`h-5 w-5 ${iA ? 'fill-current' : ''}`} />
                               </button>
                            </td>
                            <td className="px-6 py-4 text-center">

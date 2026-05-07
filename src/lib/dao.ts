@@ -1,6 +1,15 @@
 import db from './db.ts';
 import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, Convenio, InteresAlumnoEmpresa, RelacionAlumno } from '../types/index.ts';
 
+const safeParse = (str: any, fallback: any) => {
+  if (!str || str === 'undefined' || str === 'null') return fallback;
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return fallback;
+  }
+};
+
 export const ProfesorDAO = {
   get: () => db.prepare('SELECT * FROM profesores LIMIT 1').get() as Profesor | undefined,
   create: (profesor: Profesor) => {
@@ -132,14 +141,15 @@ export const AlumnoDAO = {
     return db.prepare('SELECT * FROM alumnos').all() as Alumno[];
   },
   getById: (id: number) => db.prepare('SELECT * FROM alumnos WHERE id = ?').get(id) as Alumno,
+  getByRelacionId: (id: number) => db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').get(id) as Alumno[],
   create: (alumno: Alumno) => {
-    const stmt = db.prepare('INSERT INTO alumnos (nombre, apellidos, dni, numSS, tlfn, emailEduca, emailPersonal, fechaNacimiento, cursoId, detalleAcademicoId, horasPendientesFFE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.horasPendientesFFE || 0);
+    const stmt = db.prepare('INSERT INTO alumnos (nombre, apellidos, dni, numSS, tlfn, emailEduca, emailPersonal, fechaNacimiento, cursoId, detalleAcademicoId, totalHorasFFE, fechaInicio, fechaFin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin);
     return info.lastInsertRowid;
   },
   update: (id: number, alumno: Alumno) => {
-    const stmt = db.prepare('UPDATE alumnos SET nombre = ?, apellidos = ?, dni = ?, numSS = ?, tlfn = ?, emailEduca = ?, emailPersonal = ?, fechaNacimiento = ?, cursoId = ?, detalleAcademicoId = ?, horasPendientesFFE = ? WHERE id = ?');
-    stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.horasPendientesFFE || 0, id);
+    const stmt = db.prepare('UPDATE alumnos SET nombre = ?, apellidos = ?, dni = ?, numSS = ?, tlfn = ?, emailEduca = ?, emailPersonal = ?, fechaNacimiento = ?, cursoId = ?, detalleAcademicoId = ?, totalHorasFFE = ?, fechaInicio = ?, fechaFin = ? WHERE id = ?');
+    stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, id);
   },
   linkDetalle: (alumnoId: number, detalleId: number | null) => {
     db.prepare('UPDATE alumnos SET detalleAcademicoId = ? WHERE id = ?').run(detalleId, alumnoId);
@@ -180,7 +190,7 @@ export const TutorEmpresaDAO = {
 
 export const ConvenioDAO = {
   getAll: (cursoId?: number) => {
-    const query = cursoId 
+    const query = cursoId
       ? "SELECT c.*, e.nombre as empresaNombre, ce.nombre as centroNombre FROM convenios c JOIN empresas e ON c.empresaId = e.id LEFT JOIN centros_educativos ce ON c.centroId = ce.id WHERE c.cursoId = ?"
       : "SELECT c.*, e.nombre as empresaNombre, ce.nombre as centroNombre FROM convenios c JOIN empresas e ON c.empresaId = e.id LEFT JOIN centros_educativos ce ON c.centroId = ce.id";
     return db.prepare(query).all(cursoId ? [cursoId] : []) as (Convenio & { empresaNombre: string, centroNombre?: string })[];
@@ -209,35 +219,168 @@ export const InteresDAO = {
 };
 
 export const RelacionAlumnoDAO = {
-  getAll: () => (db.prepare('SELECT * FROM relaciones_alumnos').all() as any[]).map(r => ({
-    ...r,
-    alumnosRelacion: JSON.parse(r.alumnosRelacion),
-    horario: JSON.parse(r.horario)
-  })),
-  getById: (id: number) => {
-    const r = db.prepare('SELECT * FROM relaciones_alumnos WHERE id = ?').get(id) as any;
+  getAll: (): RelacionAlumno[] => {
+    const relaciones = db.prepare('SELECT * FROM relaciones').all() as any[];
+
+    return relaciones.map(r => {
+      // Obtenemos los alumnos asociados a esta relación específica
+      const alumnosRelacionados = db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').all(r.id) as Alumno[];
+
+      return {
+        ...r,
+        horario: safeParse(r.horario, {}),
+        alumnos: alumnosRelacionados
+      } as RelacionAlumno;
+    });
+  },
+  getById: (id: number): RelacionAlumno | null => {
+    const r = db.prepare('SELECT * FROM relaciones WHERE id = ?').get(id) as any;
     if (!r) return null;
-    return { 
-      ...r, 
-      alumnosRelacion: JSON.parse(r.alumnosRelacion),
-      horario: JSON.parse(r.horario) 
+
+    // Obtenemos los alumnos asociados a esta relación
+    const alumnosRelacionados = db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').all(id) as Alumno[];
+
+    return {
+      ...r,
+      horario: safeParse(r.horario, {}),
+      alumnos: alumnosRelacionados
     } as RelacionAlumno;
   },
-  getByConvenio: (convenioId: number) => (db.prepare('SELECT * FROM relaciones_alumnos WHERE convenioId = ?').all(convenioId) as any[]).map(r => ({
-    ...r,
-    alumnosRelacion: JSON.parse(r.alumnosRelacion),
-    horario: JSON.parse(r.horario)
-  })),
+
+  getByConvenio: (convenioId: number): RelacionAlumno[] => {
+    const relaciones = db.prepare('SELECT * FROM relaciones WHERE convenioId = ?').all(convenioId) as any[];
+
+    return relaciones.map(r => {
+      // Obtenemos los alumnos asociados a cada relación
+      const alumnosRelacionados = db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').all(r.id) as Alumno[];
+
+      return {
+        ...r,
+        horario: safeParse(r.horario, {}),
+        alumnos: alumnosRelacionados
+      } as RelacionAlumno;
+    });
+  },
+
   create: (rel: RelacionAlumno) => {
-    const stmt = db.prepare('INSERT INTO relaciones_alumnos (alumnosRelacion, convenioId, numRelacion, tutorEmpresaId, fechaInicio, fechaFin, horario, estado, estadoPlanFormativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(JSON.stringify(rel.alumnosRelacion), rel.convenioId, rel.numRelacion, rel.tutorEmpresaId, rel.fechaInicio, rel.fechaFin, JSON.stringify(rel.horario), rel.estado, rel.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE');
-    return info.lastInsertRowid;
+    // Usamos una transacción para asegurar la integridad de ambas tablas
+    return db.transaction(() => {
+      // 1. Insertar la relación en 'relaciones'
+      const stmtRel = db.prepare(`
+        INSERT INTO relaciones (
+          convenioId, tutorEmpresaId, numRelacion, horario, estado, 
+          estadoPlanFormativo, estadoSeguimiento
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmtRel.run(
+        rel.convenioId,
+        rel.tutorEmpresaId,
+        rel.numRelacion,
+        JSON.stringify(rel.horario),
+        rel.estado,
+        rel.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE',
+        rel.estadoSeguimiento || 'PENDIENTE'
+      );
+
+      const relacionId = info.lastInsertRowid as number;
+
+      // 2. Actualizar cada alumno vinculado
+      // Asumiendo que 'rel.alumnos' es el array de objetos Alumno que viene del frontal
+      const stmtAlumno = db.prepare(`
+        UPDATE alumnos SET 
+          relacionId = ?, 
+          fechaInicio = ?,
+          fechaFin = ? 
+        WHERE id = ?
+      `);
+
+      for (const alu of rel.alumnos) {
+        // Aquí puedes restar las horas si totalHoras es lo que consumen en esta relación
+        // O simplemente actualizar el campo si el frontal ya manda el valor final
+        stmtAlumno.run(relacionId, alu.fechaInicio, alu.fechaFin, alu.id);
+      }
+
+      return relacionId;
+    })();
   },
+
   update: (id: number, rel: RelacionAlumno) => {
-    const stmt = db.prepare('UPDATE relaciones_alumnos SET alumnosRelacion = ?, convenioId = ?, numRelacion = ?, tutorEmpresaId = ?, fechaInicio = ?, fechaFin = ?, horario = ?, estado = ?, estadoPlanFormativo = ? WHERE id = ?');
-    stmt.run(JSON.stringify(rel.alumnosRelacion), rel.convenioId, rel.numRelacion, rel.tutorEmpresaId, rel.fechaInicio, rel.fechaFin, JSON.stringify(rel.horario), rel.estado, rel.estadoPlanFormativo, id);
+    db.transaction(() => {
+      // 1. Actualizar la tabla de relaciones
+      const stmtRel = db.prepare(`
+        UPDATE relaciones SET 
+          convenioId = ?, tutorEmpresaId = ?, numRelacion = ?, 
+          horario = ?, estado = ?, estadoPlanFormativo = ?, 
+          estadoSeguimiento = ? 
+        WHERE id = ?
+      `);
+
+      stmtRel.run(
+        rel.convenioId, rel.tutorEmpresaId, rel.numRelacion,
+        JSON.stringify(rel.horario), rel.estado, rel.estadoPlanFormativo,
+        rel.estadoSeguimiento, id
+      );
+
+      // 2. Gestionar alumnos: Primero desvinculamos a los que ya no están
+      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL WHERE relacionId = ?').run(id);
+
+      // 3. Vinculamos a los nuevos/actuales
+      const stmtAlumno = db.prepare(`
+        UPDATE alumnos SET 
+          relacionId = ?, 
+          fechaInicio = ?,
+          fechaFin = ? 
+        WHERE id = ?
+      `);
+
+      for (const alu of rel.alumnos) {
+        // Aquí puedes restar las horas si totalHoras es lo que consumen en esta relación
+        // O simplemente actualizar el campo si el frontal ya manda el valor final
+        stmtAlumno.run(id, alu.fechaInicio, alu.fechaFin, alu.id);
+      }
+    })();
   },
+
   delete: (id: number) => {
-    db.prepare('DELETE FROM relaciones_alumnos WHERE id = ?').run(id);
+    db.transaction(() => {
+      // 1. Limpiamos la referencia en los alumnos antes de borrar la relación
+      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL WHERE relacionId = ?').run(id);
+      
+      // 2. Borramos la relación
+      db.prepare('DELETE FROM relaciones WHERE id = ?').run(id);
+    })();
+  },
+
+  getRelacionAlumnoParaSeguimiento: (relacionId: number, alumnoId: number) => {
+    // Como ya no hay tabla pivote, buscamos la info cruzando la relación y el alumno directamente
+    const stmt = db.prepare(`
+      SELECT 
+        r.id AS relacionId,
+        c.numConvenio,
+        a.id AS alumnoId,
+        a.nombre AS alumnoNombre,
+        a.apellidos AS alumnoApellidos,
+        a.emailEduca AS alumnoEmail,
+        e.nombre AS empresaNombre,
+        te.nombre AS tutorEmpresaNombre,
+        te.apellidos AS tutorEmpresaApellidos,
+        te.email AS tutorEmpresaEmail,
+        t.nombre AS tutorCentroNombre,
+        t.apellidos AS tutorCentroApellidos
+      FROM relaciones r
+      JOIN convenios c ON r.convenioId = c.id
+      JOIN alumnos a ON a.relacionId = r.id
+      JOIN empresas e ON c.empresaId = e.id
+      JOIN tutores_empresa te ON r.tutorEmpresaId = te.id
+      LEFT JOIN tutores t ON c.centroId = t.id -- Asegúrate de que esta relación tutor-centro es la correcta según tu esquema
+      WHERE r.id = ? AND a.id = ?
+  `);
+
+    return stmt.get(relacionId, alumnoId);
   }
 };
+
+
+
+

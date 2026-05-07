@@ -36,7 +36,7 @@ function createWindow() {
   const splash = new BrowserWindow({
     width: 400,
     height: 300,
-    icon: path.join(__dirname, 'assets/favicon.ico'),
+    icon: path.join(__dirname, 'assets/favicon.png'),
     transparent: true,
     frame: false, // Sin bordes ni botones de cerrar
     alwaysOnTop: true, // Siempre visible mientras carga

@@ -131,24 +131,26 @@ db.exec(`
     emailPersonal TEXT NOT NULL,
     fechaNacimiento TEXT NOT NULL,
     cvPath TEXT,
+    totalHorasFFE INTEGER NOT NULL,
+    fechaInicio TEXT,
+    fechaFin TEXT,
     cursoId INTEGER,
+    relacionId INTEGER,
     detalleAcademicoId INTEGER,
-    horasPendientesFFE INTEGER DEFAULT 0,
     FOREIGN KEY(cursoId) REFERENCES cursos(id) ON DELETE CASCADE,
+    FOREIGN KEY(relacionId) REFERENCES relaciones_alumnos(id) ON DELETE SET NULL,
     FOREIGN KEY(detalleAcademicoId) REFERENCES detalles_academicos(id) ON DELETE SET NULL
   );
 
-  CREATE TABLE IF NOT EXISTS relaciones_alumnos (
+  CREATE TABLE IF NOT EXISTS relaciones (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     convenioId INTEGER NOT NULL,
     tutorEmpresaId INTEGER NOT NULL,
-    alumnosRelacion TEXT NOT NULL,
     numRelacion TEXT NOT NULL,
-    fechaInicio TEXT NOT NULL,
-    fechaFin TEXT NOT NULL,
     horario TEXT NOT NULL,
     estado TEXT NOT NULL,
-    estadoPlanFormativo TEXT NOT NULL DEFAULT 'PENDIENTE_ENVIAR_ESTUDIANTE', -- <--- AÑADIR ESTO
+    estadoPlanFormativo TEXT NOT NULL DEFAULT 'PENDIENTE_ENVIAR_ESTUDIANTE',
+    estadoSeguimiento TEXT NOT NULL DEFAULT 'PENDIENTE',
     FOREIGN KEY (convenioId) REFERENCES convenios(id),
     FOREIGN KEY (tutorEmpresaId) REFERENCES tutores_empresa(id)
   );
