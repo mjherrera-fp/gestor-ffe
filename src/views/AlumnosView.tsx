@@ -467,7 +467,7 @@ export default function AlumnosView({ cursoId }: Props) {
             </div>
             {/* NUEVO: Modal de advertencia al cambiar horas de un alumno asignado */}
             {pendingSubmitData && (
-              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[70] p-4 text-center">
+              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-70 p-4 text-center">
                 <div className="bg-white rounded-4xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 relative p-8 transition-all">
                   <button onClick={() => setPendingSubmitData(null)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors">
                     <X className="h-5 w-5" />
