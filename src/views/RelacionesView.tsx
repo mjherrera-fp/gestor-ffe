@@ -655,7 +655,7 @@ export default function RelacionesView({ cursoId }: Props) {
     const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
     const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
 
-    const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`;
+    const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/estado-plan-formativo`;
     const url = tipo === 'pdf' ? `${baseUrl}/pdf?alumnoId=${alumno.id}` : `${baseUrl}?alumnoId=${alumno.id}`;
 
     try {
@@ -698,7 +698,7 @@ export default function RelacionesView({ cursoId }: Props) {
     if (nextEstado === currentState) return;
 
     try {
-      await fetch(`/api/alumnos/${alumno.id}/plan-formativo`, {
+      await fetch(`/api/alumnos/${alumno.id}/estado-plan-formativo`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ estadoPlanFormativo: nextEstado })
@@ -729,7 +729,7 @@ export default function RelacionesView({ cursoId }: Props) {
     if (prevEstado === currentState) return;
 
     try {
-      await fetch(`/api/alumnos/${alumno.id}/plan-formativo`, {
+      await fetch(`/api/alumnos/${alumno.id}/estado-plan-formativo`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ estadoPlanFormativo: prevEstado })

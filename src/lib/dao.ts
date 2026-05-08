@@ -1,5 +1,5 @@
 import db from './db.ts';
-import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, Convenio, InteresAlumnoEmpresa, RelacionAlumno } from '../types/index.ts';
+import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado } from '../types/index.ts';
 
 const safeParse = (str: any, fallback: any) => {
   if (!str || str === 'undefined' || str === 'null') return fallback;
@@ -143,13 +143,21 @@ export const AlumnoDAO = {
   getById: (id: number) => db.prepare('SELECT * FROM alumnos WHERE id = ?').get(id) as Alumno,
   getByRelacionId: (id: number) => db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').get(id) as Alumno[],
   create: (alumno: Alumno) => {
-    const stmt = db.prepare('INSERT INTO alumnos (nombre, apellidos, dni, numSS, tlfn, emailEduca, emailPersonal, fechaNacimiento, cursoId, detalleAcademicoId, totalHorasFFE, fechaInicio, fechaFin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const stmt = db.prepare('INSERT INTO alumnos (nombre, apellidos, dni, numSS, tlfn, emailEduca, emailPersonal, fechaNacimiento, cursoId, detalleAcademicoId, totalHorasFFE, fechaInicio, fechaFin, estadoPlanFormativo, estadoSeguimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin);
     return info.lastInsertRowid;
   },
   update: (id: number, alumno: Alumno) => {
-    const stmt = db.prepare('UPDATE alumnos SET nombre = ?, apellidos = ?, dni = ?, numSS = ?, tlfn = ?, emailEduca = ?, emailPersonal = ?, fechaNacimiento = ?, cursoId = ?, detalleAcademicoId = ?, totalHorasFFE = ?, fechaInicio = ?, fechaFin = ? WHERE id = ?');
-    stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, id);
+    const stmt = db.prepare('UPDATE alumnos SET nombre = ?, apellidos = ?, dni = ?, numSS = ?, tlfn = ?, emailEduca = ?, emailPersonal = ?, fechaNacimiento = ?, cursoId = ?, detalleAcademicoId = ?, totalHorasFFE = ?, fechaInicio = ?, fechaFin = ?, estadoPlanFormativo = ?, estadoSeguimiento = ? WHERE id = ?');
+    stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo, alumno.estadoSeguimiento, id);
+  },
+  updateEstadoPlanFormativo: (id: number, estadoPlanFormativo: PlanFormativoEstado) => {
+    const stmt = db.prepare('UPDATE alumnos SET estadoPlanFormativo = ? WHERE id = ?');
+    stmt.run(estadoPlanFormativo, id);
+  },
+  updateEstadoSeguimiento: (id: number, estadoSeguimiento: SeguimientoEstado) => {
+    const stmt = db.prepare('UPDATE alumnos SET estadoSeguimiento = ? WHERE id = ?');
+    stmt.run(estadoSeguimiento, id);
   },
   linkDetalle: (alumnoId: number, detalleId: number | null) => {
     db.prepare('UPDATE alumnos SET detalleAcademicoId = ? WHERE id = ?').run(detalleId, alumnoId);
@@ -268,9 +276,8 @@ export const RelacionAlumnoDAO = {
       // 1. Insertar la relación en 'relaciones'
       const stmtRel = db.prepare(`
         INSERT INTO relaciones (
-          convenioId, tutorEmpresaId, numRelacion, horario, estado, 
-          estadoPlanFormativo, estadoSeguimiento
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          convenioId, tutorEmpresaId, numRelacion, horario, estado
+        ) VALUES (?, ?, ?, ?, ?)
       `);
 
       const info = stmtRel.run(
@@ -278,9 +285,7 @@ export const RelacionAlumnoDAO = {
         rel.tutorEmpresaId,
         rel.numRelacion,
         JSON.stringify(rel.horario),
-        rel.estado,
-        rel.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE',
-        rel.estadoSeguimiento || 'PENDIENTE'
+        rel.estado
       );
 
       const relacionId = info.lastInsertRowid as number;
@@ -311,15 +316,13 @@ export const RelacionAlumnoDAO = {
       const stmtRel = db.prepare(`
         UPDATE relaciones SET 
           convenioId = ?, tutorEmpresaId = ?, numRelacion = ?, 
-          horario = ?, estado = ?, estadoPlanFormativo = ?, 
-          estadoSeguimiento = ? 
+          horario = ?, estado = ? 
         WHERE id = ?
       `);
 
       stmtRel.run(
         rel.convenioId, rel.tutorEmpresaId, rel.numRelacion,
-        JSON.stringify(rel.horario), rel.estado, rel.estadoPlanFormativo,
-        rel.estadoSeguimiento, id
+        JSON.stringify(rel.horario), rel.estado, id
       );
 
       // 2. Gestionar alumnos: Primero desvinculamos a los que ya no están
@@ -345,7 +348,7 @@ export const RelacionAlumnoDAO = {
   delete: (id: number) => {
     db.transaction(() => {
       // 1. Limpiamos la referencia en los alumnos antes de borrar la relación
-      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL WHERE relacionId = ?').run(id);
+      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = ?, estadoSeguimiento = ? WHERE relacionId = ?').run('PENDIENTE_ENVIAR_ESTUDIANTE', 'PENDIENTE', id);
       
       // 2. Borramos la relación
       db.prepare('DELETE FROM relaciones WHERE id = ?').run(id);

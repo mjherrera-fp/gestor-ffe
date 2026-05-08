@@ -29,6 +29,7 @@ async function startServer() {
       cb(null, uniqueSuffix + '-' + file.originalname);
     }
   });
+  
   const upload = multer({
     storage,
     fileFilter: (req, file, cb) => {
@@ -163,6 +164,14 @@ async function startServer() {
   app.post('/api/alumnos', (req, res) => res.json({ id: AlumnoDAO.create(req.body) }));
   app.put('/api/alumnos/:id', (req, res) => {
     AlumnoDAO.update(Number(req.params.id), req.body);
+    res.json({ success: true });
+  });
+  app.put('/api/alumnos/:id/estado-plan-formativo', (req, res) => {
+    AlumnoDAO.updateEstadoPlanFormativo(Number(req.params.id), req.body.estadoPlanFormativo);
+    res.json({ success: true });
+  });
+  app.put('/api/alumnos/:id/estado-seguimiento', (req, res) => {
+    AlumnoDAO.updateEstadoSeguimiento(Number(req.params.id), req.body.estadoSeguimiento);
     res.json({ success: true });
   });
   app.delete('/api/alumnos/:id', (req, res) => {

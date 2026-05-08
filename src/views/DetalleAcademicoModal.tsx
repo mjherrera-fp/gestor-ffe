@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, X, GraduationCap, Building2, MapPin, Phone, Mail, Hash, Layers, ListFilter } from 'lucide-react';
 import { DetalleAcademico, Alumno } from '../types/index.ts';
+import { CustomSelect } from '../components/CustomSelect.tsx';
 
 interface Props {
   alumno: Alumno;
@@ -68,20 +69,19 @@ export default function DetalleAcademicoModal({ alumno, onClose }: Props) {
         <form onSubmit={handleSubmit} className="p-8">
           <div className="mb-6">
             <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2">Seleccionar Centro / Ciclo / Grupo</label>
-            <select 
-              className="w-full bg-slate-50 border border-border-base rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
-              value={selectedId}
-              onChange={(e) => setSelectedId(e.target.value)}
-            >
-              <option value="">Sin vinculación académica...</option>
-              {detalles.map(d => (
-                <option key={d.id} value={d.id}>
-                  {d.ciclo} - {(d as any).centroNombre} ({d.codigoGrupo})
-                </option>
-              ))}
-            </select>
+            <div className="bg-white rounded-xl overflow-visible"> {/* Cambiar hidden por visible */}
+              <CustomSelect
+                value={selectedId}
+                onChange={setSelectedId}
+                options={detalles.map(d => ({
+                  id: d.id,
+                  label: `${d.ciclo} - ${(d as any).centroNombre} (${d.codigoGrupo})`
+                }))}
+                classListboxButton="py-3"
+              />
+            </div>
           </div>
-          
+
           <p className="text-xs text-text-muted leading-relaxed mb-8 bg-slate-50 p-4 rounded-xl border border-dashed border-border-base">
             Si no encuentras el detalle académico, créalo primero en la sección de <strong>Profesor</strong> del menú principal.
           </p>

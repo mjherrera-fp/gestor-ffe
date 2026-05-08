@@ -545,6 +545,7 @@ export default function AlumnosView({ cursoId }: Props) {
                   value={formData.detalleAcademicoId || ''}
                   onChange={val => setFormData({ ...formData, detalleAcademicoId: Number(val) })}
                   name="detalleAcademico"
+                  classListboxButton="py-4"
                 />
                 {detalles.length === 0 && (
                   <p className="text-xs text-red-500 mt-1 font-medium italic">

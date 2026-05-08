@@ -134,6 +134,8 @@ db.exec(`
     totalHorasFFE INTEGER NOT NULL,
     fechaInicio TEXT,
     fechaFin TEXT,
+    estadoPlanFormativo TEXT NOT NULL DEFAULT 'PENDIENTE_ENVIAR_ESTUDIANTE',
+    estadoSeguimiento TEXT NOT NULL DEFAULT 'PENDIENTE',
     cursoId INTEGER,
     relacionId INTEGER,
     detalleAcademicoId INTEGER,
@@ -149,8 +151,6 @@ db.exec(`
     numRelacion TEXT NOT NULL,
     horario TEXT NOT NULL,
     estado TEXT NOT NULL,
-    estadoPlanFormativo TEXT NOT NULL DEFAULT 'PENDIENTE_ENVIAR_ESTUDIANTE',
-    estadoSeguimiento TEXT NOT NULL DEFAULT 'PENDIENTE',
     FOREIGN KEY (convenioId) REFERENCES convenios(id),
     FOREIGN KEY (tutorEmpresaId) REFERENCES tutores_empresa(id)
   );

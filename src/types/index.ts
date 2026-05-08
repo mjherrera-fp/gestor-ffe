@@ -80,6 +80,8 @@ export interface Alumno {
   totalHorasFFE: number;
   fechaInicio: string;
   fechaFin: string;
+  estadoPlanFormativo: PlanFormativoEstado;
+  estadoSeguimiento: SeguimientoEstado;
 }
 
 export interface RelacionAlumno {
