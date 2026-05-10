@@ -9,3 +9,4 @@ coverage/
 *.log
 .env*
 !.env.example
+ffe_management-bck.db

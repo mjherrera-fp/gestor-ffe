@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { fork } from 'child_process'; 
+import { fork } from 'child_process';
 
 // 1. APAGAR ACELERACIÓN POR HARDWARE (Crucial para evitar cuelgues en Windows)
 app.disableHardwareAcceleration();
@@ -42,7 +42,7 @@ function createWindow() {
     alwaysOnTop: true, // Siempre visible mientras carga
     webPreferences: { nodeIntegration: false }
   });
-  
+
   splash.loadFile('splash.html'); // Cargamos tu nuevo diseño
 
   // 2. CREAMOS LA VENTANA PRINCIPAL (PERO INVISIBLE)
@@ -61,16 +61,7 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false);
 
   // 3. INTENTAMOS CARGAR LA RUTA (Y LE PASAMOS EL SPLASH PARA QUE LO CIERRE AL TERMINAR)
-  if (app.isPackaged) {
-    // En producción cargamos directamente porque el index.html ya existe
-    mainWindow.loadFile('dist/index.html').then(() => {
-      splash.close();
-      mainWindow.show();
-    });
-  } else {
-    // En desarrollo usamos nuestra función paciente
-    cargarURLConReintentos(mainWindow, splash, 'http://127.0.0.1:3000');
-  }
+  cargarURLConReintentos(mainWindow, splash, 'http://127.0.0.1:3000');
 
   mainWindow.on('closed', function () {
     mainWindow = null;
@@ -79,61 +70,71 @@ function createWindow() {
 
 function startServer() {
   const isDev = !app.isPackaged;
-  
-  if (isDev) return; 
+
+  if (isDev) return;
+
+  // --- AÑADIR ESTO: Calcular la ruta del ejecutable ---
+  const baseDir = app.isPackaged
+    ? (process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath))
+    : __dirname;
 
   const serverPath = path.join(__dirname, 'dist-server', 'server.js');
-  
+
   serverProcess = fork(serverPath, [], {
-    cwd: __dirname,
-    env: { ...process.env, NODE_ENV: 'production' },
-    stdio: 'pipe' 
+    cwd: baseDir,
+    // --- AÑADIR ESTO: Pasar la variable al env ---
+    env: {
+      ...process.env,
+      NODE_ENV: 'production',
+      PORTABLE_EXECUTABLE_DIR: baseDir
+    },
+    stdio: 'pipe'
   });
 
   if (serverProcess.stdout) {
-      serverProcess.stdout.on('data', (data) => {
-        console.log(`Server: ${data}`);
-      });
+    serverProcess.stdout.on('data', (data) => {
+      console.log(`Server: ${data}`);
+    });
   }
 
   if (serverProcess.stderr) {
-      serverProcess.stderr.on('data', (data) => {
-        console.error(`Server Error: ${data}`);
-      });
+    serverProcess.stderr.on('data', (data) => {
+      console.error(`Server Error: ${data}`);
+    });
   }
 }
 
 // Usamos el fetch nativo mágico de Node (ya no hace falta importarlo)
 async function waitForServer(url, timeout = 10000) {
-    const start = Date.now();
-    while (Date.now() - start < timeout) {
-        try {
-            await fetch(url); 
-            return true;
-        } catch (e) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    try {
+      await fetch(url);
+      return true;
+    } catch (e) {
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
-    return false;
+  }
+  return false;
 }
 
 // NUEVO CICLO DE VIDA (Más estable que app.on('ready'))
 app.whenReady().then(async () => {
   startServer();
-  
+
   if (app.isPackaged) {
-      // Producción: Esperamos a nuestro propio servidor forkeado
-      const serverReady = await waitForServer('http://127.0.0.1:3000');
-      if (serverReady) {
-          createWindow();
-      } else {
-          console.error("El servidor tardó demasiado en iniciar.");
-          app.quit();
-      }
+    // Producción: Esperamos a nuestro propio servidor forkeado
+    const serverReady = await waitForServer('http://127.0.0.1:3000');
+    if (serverReady) {
+      createWindow();
+    } else {
+      console.error("El servidor tardó demasiado en iniciar.");
+      app.quit();
+    }
   } else {
-      // Desarrollo: Creamos la ventana y dejamos que use sus propios reintentos
-      // mientras Vite termina de compilar
-      createWindow(); 
+    // Desarrollo: Creamos la ventana y dejamos que use sus propios reintentos
+    // mientras Vite termina de compilar
+    createWindow();
   }
 
   app.on('activate', function () {
@@ -151,7 +152,7 @@ app.on('window-all-closed', function () {
 });
 
 app.on('before-quit', () => {
-    if (serverProcess) {
-        serverProcess.kill();
-    }
+  if (serverProcess) {
+    serverProcess.kill();
+  }
 });

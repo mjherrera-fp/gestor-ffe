@@ -202,7 +202,7 @@ export default function CursosView({ cursos, onUpdate }: Props) {
               <div className="pt-4 border-t border-slate-100">
                 <label className="block text-sm font-medium text-slate-700 mb-3 items-center justify-between">
                   Días Festivos
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{formData.festivos?.length || 0} añadidos</span>
+                  <span className="text-[10px] font-bold text-slate-400 tracking-widest"> ({formData.festivos?.length || 0} añadidos)</span>
                 </label>
                 <div className="flex gap-2 mb-4">
                   <input 

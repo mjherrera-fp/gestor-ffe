@@ -22,3 +22,15 @@ View your app in AI Studio: https://ai.studio/apps/118188c6-b950-4a0e-8699-8bc8f
    `sudo npm run pack:win` 
 5. Una vez empaquetado hay que volver a hacer un rebuild de sqlite
    `npm rebuild better-sqlite3`
+
+
+   relaciones/
+├── RelacionesView.tsx          ~100 líneas  ← orquestador puro
+├── hooks/
+│   └── useRelaciones.ts        ~280 líneas  ← todo el estado y lógica
+├── utils/
+│   └── relacionesUtils.ts      ~200 líneas  ← funciones puras (fechas, estados, badges)
+└── components/
+    ├── RelacionesListado.tsx   ~180 líneas  ← columna izquierda (tabla + filtros)
+    ├── RelacionDetalle.tsx     ~150 líneas  ← columna derecha (documentación)
+    └── RelacionFormModal.tsx   ~300 líneas  ← modal crear/editar

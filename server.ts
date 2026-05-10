@@ -9,27 +9,43 @@ import path from 'path';
 import multer from 'multer';
 import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
+  const isProd = process.env.NODE_ENV === 'production';
+  const baseDir = process.env.PORTABLE_EXECUTABLE_DIR || process.cwd();
+
+  // 1. Validar permisos de escritura inmediatamente
+  try {
+    const testFile = path.join(baseDir, '.write_test');
+    fs.writeFileSync(testFile, 'ok');
+    fs.unlinkSync(testFile);
+  } catch (e) {
+    if (process.send) process.send('ERROR_PERMISOS');
+  }
 
   app.use(express.json());
 
-  // Setup multer for CV uploads
-  const uploadDir = 'uploads';
+  // 2. Configurar carpeta de subidas (UPLOADS) portable
+  const uploadDir = path.join(baseDir, 'uploads');
   if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
+    fs.mkdirSync(uploadDir, { recursive: true });
   }
 
+  // Actualiza tu configuración de multer:
   const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
+    destination: (req, file, cb) => cb(null, uploadDir), // Usa la nueva ruta
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
       cb(null, uniqueSuffix + '-' + file.originalname);
     }
   });
-  
+
   const upload = multer({
     storage,
     fileFilter: (req, file, cb) => {
@@ -39,46 +55,90 @@ async function startServer() {
   });
 
   function limpiarFilasActiveX(docxBuffer: Buffer): Buffer {
-    const zip = new PizZip(docxBuffer);
-    const docXmlStr = zip.file("word/document.xml")?.asText();
-    const relsXmlStr = zip.file("word/_rels/document.xml.rels")?.asText();
+    try {
+      const zip = new PizZip(docxBuffer);
+      const docXmlStr = zip.file("word/document.xml")?.asText();
+      const relsXmlStr = zip.file("word/_rels/document.xml.rels")?.asText();
 
-    if (!docXmlStr || !relsXmlStr) return docxBuffer;
+      if (!docXmlStr || !relsXmlStr) return docxBuffer;
 
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(docXmlStr, "text/xml");
-    const relsDoc = parser.parseFromString(relsXmlStr, "text/xml");
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(docXmlStr, "text/xml");
+      const relsDoc = parser.parseFromString(relsXmlStr, "text/xml");
 
-    const rows = doc.getElementsByTagName("w:tr");
-    const relIdsToDelete: string[] = [];
+      const rows = doc.getElementsByTagName("w:tr");
+      const relIdsToDelete: string[] = [];
 
-    for (let i = rows.length - 1; i >= 0; i--) {
-      const row = rows[i];
-      if (row.textContent && row.textContent.includes("@@ELIMINAR@@")) {
-        const oleObjects = row.getElementsByTagName("o:OLEObject");
-        for (let j = 0; j < oleObjects.length; j++) {
-          const rId = oleObjects[j].getAttribute("r:id");
-          if (rId) relIdsToDelete.push(rId);
+      for (let i = rows.length - 1; i >= 0; i--) {
+        const row = rows[i];
+        if (row.textContent && row.textContent.includes("@@ELIMINAR@@")) {
+          const oleObjects = row.getElementsByTagName("o:OLEObject");
+          for (let j = 0; j < oleObjects.length; j++) {
+            const rId = oleObjects[j].getAttribute("r:id");
+            if (rId) relIdsToDelete.push(rId);
+          }
+          row.parentNode?.removeChild(row);
         }
-        row.parentNode?.removeChild(row);
       }
-    }
 
-    const relationships = relsDoc.getElementsByTagName("Relationship");
-    for (let i = relationships.length - 1; i >= 0; i--) {
-      const rel = relationships[i];
-      const rId = rel.getAttribute("Id");
-      if (rId && relIdsToDelete.includes(rId)) {
-        rel.parentNode?.removeChild(rel);
+      const relationships = relsDoc.getElementsByTagName("Relationship");
+      for (let i = relationships.length - 1; i >= 0; i--) {
+        const rel = relationships[i];
+        const rId = rel.getAttribute("Id");
+        if (rId && relIdsToDelete.includes(rId)) {
+          rel.parentNode?.removeChild(rel);
+        }
       }
+
+      const serializer = new XMLSerializer();
+      zip.file("word/document.xml", serializer.serializeToString(doc));
+      zip.file("word/_rels/document.xml.rels", serializer.serializeToString(relsDoc));
+
+      return zip.generate({ type: "nodebuffer" });
+    } catch (e) {
+      console.error("Error en la cirugía XML:", e);
+      return docxBuffer; // Devolvemos el original si falla la limpieza
     }
-
-    const serializer = new XMLSerializer();
-    zip.file("word/document.xml", serializer.serializeToString(doc));
-    zip.file("word/_rels/document.xml.rels", serializer.serializeToString(relsDoc));
-
-    return zip.generate({ type: "nodebuffer" });
   }
+
+  const generarCheckboxXML = (marcado: boolean) => {
+    return marcado ? '☒' : '☐';
+  };
+
+  const generarCheckboxInteractivoXML = (marcado: boolean) => {
+    const isChecked = marcado ? '1' : '0';
+    // En la fuente MS Gothic: &#x2612; es ☒ y &#x2610; es ☐
+    const charCode = marcado ? '&#x2612;' : '&#x2610;';
+
+    // Generamos el párrafo (<w:p>) con el Structured Document Tag (<w:sdt>)
+    const xmlStr = `
+    <w:p xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml">
+      <w:pPr>
+        <w:jc w:val="center"/>
+      </w:pPr>
+      <w:sdt>
+        <w:sdtPr>
+          <w14:checkbox>
+            <w14:checked w14:val="${isChecked}"/>
+            <w14:checkedState w14:val="2612" w14:font="MS Gothic"/>
+            <w14:uncheckedState w14:val="2610" w14:font="MS Gothic"/>
+          </w14:checkbox>
+        </w:sdtPr>
+        <w:sdtContent>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="MS Gothic" w:eastAsia="MS Gothic" w:hAnsi="MS Gothic" w:cs="MS Gothic"/>
+            </w:rPr>
+            <w:t>${charCode}</w:t>
+          </w:r>
+        </w:sdtContent>
+      </w:sdt>
+    </w:p>
+  `;
+
+    // Limpiamos los saltos de línea para que docxtemplater no rompa el XML interno
+    return xmlStr.replace(/>\s+</g, '><').trim();
+  };
 
   // API Routes
   // Profesor
@@ -298,7 +358,7 @@ async function startServer() {
 
       // NUEVO: Buscamos TODOS los alumnos que tienen esta relacionId
       const alumnosAsignados: Alumno[] = relacionAlumno.alumnos || [];
-      
+
       const fechaFormateada = convenio.fechaConvenio
         ? new Date(convenio.fechaConvenio).toLocaleDateString('es-ES', {
           day: '2-digit',
@@ -418,7 +478,7 @@ async function startServer() {
       const profesor = ProfesorDAO.get();
 
       const alumnosAsignados: Alumno[] = relacionAlumno.alumnos || [];
-      
+
       const fechaFormateada = convenio.fechaConvenio
         ? new Date(convenio.fechaConvenio).toLocaleDateString('es-ES', {
           day: '2-digit',
@@ -485,7 +545,7 @@ async function startServer() {
       // 2. PROCESAMIENTO DE PLANTILLA HTML CON VERIFICACIÓN
       const isProd = process.env.NODE_ENV === 'production';
       // Intentamos localizar la carpeta templates de forma absoluta
-      const templatesDir = path.resolve(process.cwd(), 'templates');
+      const templatesDir = isProd ? path.join(__dirname, '..', 'templates') : path.resolve(process.cwd(), 'templates');
       const templatePath = path.join(templatesDir, 'plantilla_relacion.html');
 
       console.log(`Intentando leer plantilla en: ${templatePath}`);
@@ -574,11 +634,102 @@ async function startServer() {
     }
   });
 
-  // GENERAR DOCX PLAN FORMATIVO
+  // GENERAR DOCX PLAN FORMATIVO INDIVIDUAL
   app.get('/api/relaciones-alumnos/:id/plan-formativo', (req, res) => {
-    const relacionId = req.params.id;
-    // Aquí generas el Word usando los datos de 'relacionId'
-    // ...
+
+    try {
+      const relacionId = Number(req.params.id);
+      const alumnoId = Number(req.query.alumnoId);
+
+      const relacion = RelacionAlumnoDAO.getById(relacionId); //
+      const alumno = AlumnoDAO.getById(alumnoId); //
+
+      if (!relacion || !alumno) return res.status(404).json({ error: 'Datos no encontrados' });
+
+      const convenio = ConvenioDAO.getById(relacion.convenioId); //
+      const empresa = EmpresaDAO.getById(convenio.empresaId); //
+      const centro = CentroDAO.getById(convenio.centroId!); //
+      const tutorEmpresa = TutorEmpresaDAO.getById(relacion.tutorEmpresaId); //
+      const curso = CursoDAO.getById(convenio.cursoId); //
+      const profesor = ProfesorDAO.get(); //
+      const detalle = alumno.detalleAcademicoId ? DetalleAcademicoDAO.getById(alumno.detalleAcademicoId) : undefined; //
+
+      // Mapeo de Resultados de Aprendizaje
+      const RAsData = (detalle?.resultadosAprendizaje || []).map((ra: any) => ({
+        MODULO: ra.modulo,
+        MODULO_CODIGO: ra.codigo,
+        RA_NUMERO: ra.ra,
+        // IMPORTANTE: Como tu plantilla usa {@ etiqueta}, debemos enviar un objeto XML o texto simple sin conflictos
+        CHECK_INTEGRO: generarCheckboxInteractivoXML(ra.impartidoEmpresa === true),
+        CHECK_COMPARTIDO: generarCheckboxInteractivoXML(ra.impartidoEmpresa !== true)
+      }));
+
+      const templatePath = isProd
+        ? path.join(__dirname, '..', 'templates', 'plan_formacion.docx')
+        : path.join(process.cwd(), 'templates', 'plan_formacion.docx');
+      if (!fs.existsSync(templatePath)) throw new Error("Plantilla no encontrada");
+
+      const content = fs.readFileSync(templatePath, 'binary');
+      const zip = new PizZip(content);
+
+      const doc = new Docxtemplater(zip, {
+        paragraphLoop: true,
+        linebreaks: true,
+        nullGetter: () => ""
+      });
+
+      // Renderizamos con los nombres exactos de plan_formacion.docx
+      doc.render({
+        REGIMEN: detalle?.regimen,
+        FECHA_CURSO: curso?.descripcion,
+        CICLO: detalle?.ciclo,
+        CICLO_CODIGO: detalle?.codigo,
+        NIVEL: detalle?.nivel,
+        ALUMNADO_APELLIDOS_NOMBRE: `${alumno.apellidos}, ${alumno.nombre}`,
+        ALUMNADO_EMAIL: alumno.emailEduca || alumno.emailPersonal,
+        ALUMNADO_TELEFONO: alumno.tlfn,
+        CENTRO: centro?.nombre,
+        CENTRO_EMAIL: centro?.email,
+        CENTRO_TELEFONO: centro?.telefono,
+        TUTOR_NOMBRE_COMPLETO: `${profesor?.nombre} ${profesor?.apellidos}`,
+        TUTOR_EMAIL: profesor?.email,
+        TUTOR_TELEFONO: profesor?.telefono,
+        EMPRESA: empresa?.nombre,
+        EMPRESA_CIF: empresa?.cif,
+        EMPRESA_EMAIL: empresa?.email,
+        EMPRESA_TELEFONO: empresa?.tlfn,
+        EMPRESA_TUTOR_NOMBRE_COMPLETO: `${tutorEmpresa?.nombre} ${tutorEmpresa?.apellidos}`,
+        EMPRESA_TUTOR_EMAIL: tutorEmpresa?.email,
+        EMPRESA_TUTOR_TELEFONO: tutorEmpresa?.tlfn,
+        TOTAL_HORAS: alumno.totalHorasFFE || 0,
+        modulos: RAsData //
+      });
+
+      const buf = doc.getZip().generate({
+        type: 'nodebuffer',
+        compression: 'DEFLATE'
+      });
+
+      // Verificación de tamaño antes de enviar
+      if (buf.length < 2000) {
+        console.error("Advertencia: El buffer generado es demasiado pequeño:", buf.length);
+      }
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.setHeader('Content-Disposition', `attachment; filename="Plan_Formativo_${alumno.apellidos.replace(/\s+/g, '_')}.docx"`);
+      res.setHeader('Content-Length', buf.length);
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+      return res.status(200).send(buf);
+
+    } catch (error: any) {
+      console.error('Error detallado en Docxtemplater:', error);
+      if (error.properties && error.properties.errors) {
+        // Esto te dirá qué etiqueta exacta está rompiendo el documento
+        error.properties.errors.forEach((err: any) => console.log(err.message));
+      }
+      res.status(500).json({ error: 'Error al generar el documento' });
+    }
   });
 
   app.get('/api/relaciones-alumnos/:id/plan-formativo/pdf', async (req, res) => {
@@ -590,46 +741,79 @@ async function startServer() {
   });
 
   // --- ENDPOINT GENERACIÓN DE SEGUIMIENTO ---
-  app.post('/api/generate-seguimiento', async (req, res) => {
-    /*
+  app.get('/api/relaciones-alumnos/:id/seguimiento', async (req, res) => {
     try {
-      const { relacionAlumnoId, RAs, fechaSeguimiento, curso } = req.body;
+      const relacionId = Number(req.params.id);
+      const alumnoId = Number(req.query.alumnoId);
 
       // 1. Usar el DAO para obtener los datos
-      const dbData = RelacionAlumnoDAO.getRelacionAlumnoParaSeguimiento(relacionAlumnoId) as any;
+      const relacion = RelacionAlumnoDAO.getById(relacionId); //
+      const alumno = AlumnoDAO.getById(alumnoId); //
 
-      if (!dbData) {
-        return res.status(404).json({ error: 'Datos del alumno no encontrados' });
-      }
+      if (!relacion || !alumno) return res.status(404).json({ error: 'Datos no encontrados' });
+
+      const convenio = ConvenioDAO.getById(relacion.convenioId); //
+      const empresa = EmpresaDAO.getById(convenio.empresaId); //
+      const centro = CentroDAO.getById(convenio.centroId!); //
+      const tutorEmpresa = TutorEmpresaDAO.getById(relacion.tutorEmpresaId); //
+      const curso = CursoDAO.getById(convenio.cursoId); //
+      const profesor = ProfesorDAO.get(); //
+      const detalle = alumno.detalleAcademicoId ? DetalleAcademicoDAO.getById(alumno.detalleAcademicoId) : undefined; //
+      const fechaSeguimiento = alumno.fechaInicio !== null && alumno.fechaInicio !== null ? new Date(alumno.fechaInicio).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }) + ' - ' + (alumno.fechaFin ? new Date(alumno.fechaFin).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }) : '') : '';
+
+      // Mapeo de Resultados de Aprendizaje
+      const RAs = (detalle?.resultadosAprendizaje || []).map((ra: any) => ({
+        actividad: ra.actividadFormativa,
+        moduloCodigo: ra.codigo,
+        numero: ra.ra
+      }));
 
       // 2. Cargar plantilla
-      const templatePath = path.join(process.cwd(), 'templates', 'ficha_de_seguimiento_periodico.docx');
+      const templatePath = isProd
+        ? path.join(__dirname, '..', 'templates', 'ficha_de_seguimiento_periodico.docx')
+        : path.join(process.cwd(), 'templates', 'ficha_de_seguimiento_periodico.docx');
       const content = fs.readFileSync(templatePath, 'binary');
       const zip = new PizZip(content);
       const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
       // 3. Mapeo de variables
       const data: any = {
-        CURSO: curso || "2025-2026",
-        NUMERO_CONVENIO: dbData.numConvenio || "",
-        NUMERO_RELACION_ALUMNO: dbData.relacionId || "",
-        ALUMNADO_APELLIDOS: dbData.alumnoApellidos || "",
-        ALUMNADO_NOMBRE: dbData.alumnoNombre || "",
-        ALUMNADO_EMAIL: dbData.alumnoEmail || "",
-        EMPRESA: dbData.empresaNombre || "",
-        EMPRESA_TUTOR_APELLIDOS: dbData.tutorEmpresaApellidos || "",
-        EMPRESA_TUTOR_NOMBRE: dbData.tutorEmpresaNombre || "",
-        EMPRESA_TUTOR_EMAIL: dbData.tutorEmpresaEmail || "",
-        FECHA_SEGUIMIENTO: fechaSeguimiento || new Date().toLocaleDateString('es-ES'),
-        TUTOR_NOMBRE: `${dbData.tutorCentroNombre} ${dbData.tutorCentroApellidos}` || ""
+        CURSO: curso?.descripcion || "",
+        NUMERO_CONVENIO: convenio?.numConvenio || "",
+        NUMERO_RELACION_ALUMNO: relacion?.id || "",
+        ALUMNADO_APELLIDOS: alumno?.apellidos || "",
+        ALUMNADO_NOMBRE: alumno?.nombre || "",
+        ALUMNADO_EMAIL: alumno?.emailEduca || "",
+        EMPRESA: empresa?.nombre || "",
+        EMPRESA_TUTOR_APELLIDOS: tutorEmpresa?.apellidos || "",
+        EMPRESA_TUTOR_NOMBRE: tutorEmpresa?.nombre || "",
+        EMPRESA_TUTOR_EMAIL: tutorEmpresa?.email || "",
+        FECHA_SEGUIMIENTO: fechaSeguimiento || "",
+        TUTOR_NOMBRE: `${profesor?.nombre} ${profesor?.apellidos}` || ""
       };
 
       // 4. Mapeo RAs
       for (let i = 1; i <= 40; i++) {
         if (RAs && RAs[i - 1]) {
-          data[`RA${i}`] = RAs[i - 1];
+          // Si hay RA, rellenamos todas las columnas con sus datos
+          const ra = RAs[i - 1];
+          data[`ACT${i}`] = ra.actividad || "";
+          data[`COD${i}`] = ra.moduloCodigo || "";
+          data[`NUM${i}`] = ra.numero || "";
         } else {
-          data[`RA${i}`] = "@@ELIMINAR@@";
+          // Si la fila sobra, inyectamos la marca de borrado en la primera columna
+          // y dejamos las demás en blanco por limpieza.
+          data[`ACT${i}`] = "@@ELIMINAR@@";
+          data[`COD${i}`] = "";
+          data[`NUM${i}`] = "";
         }
       }
 
@@ -639,16 +823,20 @@ async function startServer() {
       // 5. Limpieza XML
       buf = limpiarFilasActiveX(buf);
 
-      res.setHeader('Content-Disposition', `attachment; filename=Seguimiento_${dbData.alumnoNombre.replace(/\s+/g, '_')}.docx`);
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-      res.send(buf);
+      // IMPORTANTE: Finalizar correctamente la respuesta
+      res.writeHead(200, {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'Content-Disposition': `attachment; filename=Seguimiento_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.apellidos.replace(/\s+/g, '_')}.docx`,
+        'Content-Length': buf.length
+      });
+      res.end(buf);
     } catch (error) {
       console.error('Error generando Ficha de Seguimiento:', error);
       res.status(500).json({ error: 'Error interno generando el documento' });
-    }*/
+    }
   });
 
-  // Vite setup
+  // Vite setup y Rutas Estáticas (UNIFICADO)
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
@@ -657,9 +845,27 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.resolve('dist');
+    // Producción: Usar rutas absolutas dentro del ASAR
+    const distPath = path.join(__dirname, '..', 'dist');
+    const indexPath = path.join(distPath, 'index.html');
+
+    console.log('--- MODO PRODUCCIÓN ---');
+    console.log('Ruta Dist:', distPath);
+
+    // 1. Servir archivos estáticos (js, css, imágenes)
     app.use(express.static(distPath));
-    app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
+
+    // 2. Servir el index.html para cualquier otra ruta (SPA)
+    app.get('*', (req, res) => {
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).send(`
+            <h2>Error Crítico: Frontend no encontrado</h2>
+            <p>El servidor esperaba encontrar el archivo en: <b>${indexPath}</b></p>
+        `);
+      }
+    });
   }
 
   // Global error handler

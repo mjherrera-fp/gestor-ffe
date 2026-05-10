@@ -1,6 +1,14 @@
 import Database from 'better-sqlite3';
+import path from 'path';
 
-const db = new Database('ffe_management.db');
+// Recuperamos la ruta que configuramos en el servidor
+const baseDir = process.env.PORTABLE_EXECUTABLE_DIR || process.cwd();
+const dbPath = path.join(baseDir, 'ffe_management.db');
+
+export const db = new Database(dbPath, { 
+  verbose: process.env.NODE_ENV !== 'production' ? console.log : undefined 
+});
+
 db.exec('PRAGMA foreign_keys = ON;');
 
 // Initialize schema

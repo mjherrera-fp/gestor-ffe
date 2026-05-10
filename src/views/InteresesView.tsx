@@ -103,7 +103,7 @@ export default function InteresesView({ cursoId }: Props) {
                   <div className="font-bold text-sm text-text-main leading-tight">{al.nombre} {al.apellidos}</div>
                   <div className="flex gap-1.5">
                     <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                      {alumnoMatches} Prefs
+                      {alumnoMatches} Envíos
                     </span>
                     <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
                       {companyInterests} Solics

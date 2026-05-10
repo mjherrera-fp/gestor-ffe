@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Profesor, Curso, Alumno, Empresa, Convenio, ConvenioEstado } from './types/index.ts';
+import packageJson from '../package.json';
 
 // Components
 import ProfesorView from './views/ProfesorView.tsx';
@@ -31,7 +32,7 @@ import AlumnosView from './views/AlumnosView.tsx';
 import EmpresasView from './views/EmpresasView.tsx';
 import ConveniosView from './views/ConveniosView.tsx';
 import InteresesView from './views/InteresesView.tsx';
-import RelacionesView from './views/RelacionesView.tsx';
+import RelacionesView from './views/relaciones/RelacionesView.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -170,7 +171,7 @@ export default function App() {
         </nav>
 
         <div className="p-6 mt-auto border-t border-slate-50">
-          <p className="text-[10px] text-text-muted font-medium uppercase tracking-widest">v1.1.5 Production</p>
+          <p className="text-[10px] text-text-muted font-medium uppercase tracking-widest">v{packageJson.version}</p>
         </div>
       </aside>
 

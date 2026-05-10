@@ -160,9 +160,9 @@ export enum ConvenioEstado {
 
 // Añadir el nuevo enum
 export enum SeguimientoEstado {
-  PENDIENTE = 'Pendiente',
-  ENVIADO = 'Enviado a empresa',
-  RECIBIDO = 'Recibido de empresa'
+  PENDIENTE = 'PENDIENTE',
+  ENVIADO_A_EMPRESA = 'ENVIADO_A_EMPRESA',
+  RECIBIDO = 'RECIBIDO'
 }
 
 // 2. DICCIONARIOS DE TEXTO (Lo que ve el usuario en la Interfaz)
@@ -191,8 +191,8 @@ export const ConvenioEstadoLabels: Record<ConvenioEstado, string> = {
   [ConvenioEstado.COMPLETADO]: 'Completado'
 };
 
-export const SEGUIMIENTO_ESTADO_DICT: Record<SeguimientoEstado, { label: string, color: string }> = {
-  [SeguimientoEstado.PENDIENTE]: { label: 'Pendiente', color: 'bg-slate-100 text-slate-600' },
-  [SeguimientoEstado.ENVIADO]: { label: 'Enviado a empresa', color: 'bg-amber-100 text-amber-700' },
-  [SeguimientoEstado.RECIBIDO]: { label: 'Recibido de empresa', color: 'bg-emerald-100 text-emerald-700' }
+export const SeguimientoEstadoLabels: Record<SeguimientoEstado, string> = {
+  [SeguimientoEstado.PENDIENTE]: 'Pendiente',
+  [SeguimientoEstado.ENVIADO_A_EMPRESA]: 'Enviado a empresa',
+  [SeguimientoEstado.RECIBIDO]: 'Recibido de empresa'
 };
