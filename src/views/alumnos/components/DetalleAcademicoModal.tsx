@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, X, GraduationCap, Building2, MapPin, Phone, Mail, Hash, Layers, ListFilter } from 'lucide-react';
-import { DetalleAcademico, Alumno } from '../types/index.ts';
-import { CustomSelect } from '../components/CustomSelect.tsx';
+import { DetalleAcademico, Alumno } from '../../../types/index.ts';
+import { CustomSelect } from '../../../components/CustomSelect.tsx';
 
 interface Props {
   alumno: Alumno;

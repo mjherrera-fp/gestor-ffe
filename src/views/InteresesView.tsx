@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Trophy, User, Building2, ChevronRight, CheckCircle2, Circle, Briefcase, Search, X, Send } from 'lucide-react';
+import { Heart, Trophy, User, Building2, ChevronRight, CheckCircle2, Circle, Briefcase, Search, X, Send, GraduationCap } from 'lucide-react';
 import { Alumno, Empresa, InteresAlumnoEmpresa } from '../types/index.ts';
 
 interface Props {
@@ -68,7 +68,12 @@ export default function InteresesView({ cursoId }: Props) {
       {/* Alumnos Sidebar Card */}
       <div className="w-full lg:w-75 lg:shrink-0 bg-white rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col h-full">
         <div className="px-6 py-4 border-b border-border-base bg-slate-50/50 flex flex-col gap-3">
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Alumnado</span>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <GraduationCap className="h-5 w-5" />
+            </div>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Estudiantes</span>
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
             <input 

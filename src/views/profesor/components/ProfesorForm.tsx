@@ -46,17 +46,6 @@ export function ProfesorForm({ formData, setFormData, saving, success, onSubmit 
             Configura tu información personal y los centros donde impartes clase.
           </p>
         </div>
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full sm:w-auto bg-primary text-white px-6 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-50"
-        >
-          {saving ? 'Procesando...' : (
-            <span className="flex items-center justify-center gap-2">
-              <Save className="h-4 w-4" /> Guardar Perfil
-            </span>
-          )}
-        </button>
       </div>
 
       {success && (
@@ -87,7 +76,22 @@ export function ProfesorForm({ formData, setFormData, saving, success, onSubmit 
           <label className={labelClass}>Teléfono</label>
           <input required className={inputClass} value={formData.telefono} onChange={update('telefono')} />
         </div>
+        <div className="col-span-1 md:col-span-2 lg:col-span-3 mt-2">
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full sm:w-auto bg-primary text-white px-8 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-50"
+          >
+            {saving ? 'Procesando...' : (
+              <span className="flex items-center justify-center gap-2">
+                <Save className="h-4 w-4" /> Guardar Perfil
+              </span>
+            )}
+          </button>
+        </div>
+        
       </FormSection>
+      
     </form>
   );
 }

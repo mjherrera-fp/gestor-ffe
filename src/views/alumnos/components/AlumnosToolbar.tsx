@@ -1,12 +1,14 @@
 import React from 'react';
 import {
   Download, FileSpreadsheet, Search, LayoutGrid, List, ArrowUpDown,
+  GraduationCap,
+  Plus,
 } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { SortField, SortOrder, FilterStatus, ViewMode } from '../hooks/useAlumnos.ts';
 
 const FILTER_OPTIONS = [
-  { id: 'all',      label: 'Todos los Alumnos' },
+  { id: 'all',      label: 'Todos los Estudiantes' },
   { id: 'pending',  label: 'Pendiente de Asignar' },
   { id: 'assigned', label: 'Asignados' },
 ];
@@ -67,15 +69,21 @@ export function AlumnosToolbar({
           </button>
           <button
             onClick={onNewAlumno}
-            className="w-full sm:w-auto bg-primary text-white px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md shadow-primary/20"
+            className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
           >
-            + Registrar Alumno
+            <Plus className="h-4 w-4" /> Registrar Alumno
           </button>
         </div>
       </div>
 
       {/* Fila inferior: búsqueda + controles */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 text-primary">
+            <GraduationCap className="h-5 w-5" />
+          </div>
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Estudiantes</span>
+        </div>
         <div className="flex flex-col md:flex-row gap-4">
 
           {/* Buscador */}

@@ -211,10 +211,15 @@ export default function ConveniosView({ cursoId }: Props) {
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-full items-start">
       {/* Convenios List Card */}
-      <div className="w-full lg:flex-1 bg-white rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col h-full">
-        <div className="px-6 py-4 border-b border-border-base space-y-4">
+      <div className="w-full lg:flex-1 bg-white rounded-xl border border-border-base shadow-sm flex flex-col h-full">
+        <div className="px-6 py-4 border-b border-border-base space-y-4 relative z-20">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Convenios</span>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                <FileText className="h-5 w-5" />
+              </div>
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Convenios</span>
+            </div>
             <button
               onClick={() => {
                 setIsEditing(false);
@@ -229,13 +234,16 @@ export default function ConveniosView({ cursoId }: Props) {
                 });
                 setShowForm(true);
               }}
-              className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans"
+              className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
             >
-              + Nuevo Convenio
+              <Plus className="h-4 w-4" /> Nuevo Convenio
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center w-full">
+
+            {/* 1. Buscador */}
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
               <input
                 type="text"
@@ -249,7 +257,10 @@ export default function ConveniosView({ cursoId }: Props) {
                   <X className="h-3 w-3" />
                 </button>
               )}
+            </div>
 
+            {/* 2. Filtro de estado */}
+            <div className="w-full">
               <CustomSelect
                 value={statusFilter}
                 onChange={setStatusFilter}
@@ -261,7 +272,9 @@ export default function ConveniosView({ cursoId }: Props) {
                   }))
                 ]}
               />
+            </div>
 
+            {/* 3. Botones de ordenación */}
             <div className="flex w-full bg-slate-50 border border-slate-200 rounded-lg p-1">
               <button
                 onClick={() => {
@@ -282,6 +295,7 @@ export default function ConveniosView({ cursoId }: Props) {
                 Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
               </button>
             </div>
+
           </div>
         </div>
 

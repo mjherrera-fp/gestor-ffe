@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, X, Edit2, Trash2, Calendar, FileText } from 'lucide-react';
+import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus } from 'lucide-react';
 import { RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { getStatusBadgeColor, getStatusLabel } from '../utils/relacionesUtils.ts';
@@ -14,7 +14,7 @@ interface StatusBadgeProps {
   type: 'relacion' | 'plan' | 'seguimiento';
 }
 
-export function StatusBadge({ estado, type}: StatusBadgeProps) {
+export function StatusBadge({ estado, type }: StatusBadgeProps) {
   const color = getStatusBadgeColor(estado, type);
   const text = getStatusLabel(estado, type);
   return (
@@ -34,6 +34,7 @@ export function StatusBadge({ estado, type}: StatusBadgeProps) {
 interface RelacionesListadoProps {
   relaciones: RelacionAlumno[];
   convenios: (Convenio & { empresaNombre: string })[];
+  createRelacion: (rel: RelacionAlumno | null) => void;
   selectedRelacion: RelacionAlumno | null;
   onSelectRelacion: (rel: RelacionAlumno) => void;
   onEdit: (rel: RelacionAlumno) => void;
@@ -53,7 +54,7 @@ interface RelacionesListadoProps {
 // ─────────────────────────────────────────
 
 export function RelacionesListado({
-  relaciones, convenios, selectedRelacion,
+  relaciones, convenios, createRelacion, selectedRelacion,
   onSelectRelacion, onEdit, onDeleteRequest,
   listSearchTerm, onListSearchChange,
   statusFilter, onStatusFilterChange,
@@ -70,11 +71,24 @@ export function RelacionesListado({
 
   return (
     <div className="w-full lg:flex-1 bg-white rounded-xl lg:rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
-
       {/* Barra de filtros */}
       <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <ArrowLeftRight className="h-5 w-5" />
+            </div>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Relaciones</span>
+          </div>
+          <button
+            onClick={() => createRelacion(null)}
+            className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+            
+          >
+            <Plus className="h-4 w-4" /> Nueva Relación
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-
           {/* Buscador */}
           <div className="md:col-span-5 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
@@ -230,6 +244,6 @@ export function RelacionesListado({
           </tbody>
         </table>
       </div>
-    </div>
+    </div >
   );
 }

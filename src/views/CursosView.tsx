@@ -37,7 +37,7 @@ export default function CursosView({ cursos, onUpdate }: Props) {
     e.preventDefault();
     const method = editing ? 'PUT' : 'POST';
     const url = editing ? `/api/cursos/${editing.id}` : '/api/cursos';
-    
+
     try {
       const res = await fetch(url, {
         method,
@@ -91,37 +91,35 @@ export default function CursosView({ cursos, onUpdate }: Props) {
       {confirmingAction && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 text-center">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${
-              confirmingAction.type === 'delete' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'
-            }`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${confirmingAction.type === 'delete' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'
+              }`}>
               {confirmingAction.type === 'delete' ? <Trash2 className="h-6 w-6" /> : (confirmingAction.type === 'restore' ? <RotateCcw className="h-6 w-6" /> : <Archive className="h-6 w-6" />)}
             </div>
             <h3 className="text-lg font-bold text-slate-800 mb-2">
               {confirmingAction.type === 'delete' ? '¿Eliminar curso?' : (confirmingAction.type === 'restore' ? '¿Restaurar curso?' : '¿Archivar curso?')}
             </h3>
             <p className="text-slate-500 text-sm mb-6">
-              {confirmingAction.type === 'delete' 
-                ? 'Se eliminará TODA la información asociada (alumnos, convenios, relaciones). Esta acción es irreversible.' 
-                : confirmingAction.type === 'restore' 
-                  ? 'El curso volverá a estar activo y disponible en todos los selectores.' 
+              {confirmingAction.type === 'delete'
+                ? 'Se eliminará TODA la información asociada (alumnos, convenios, relaciones). Esta acción es irreversible.'
+                : confirmingAction.type === 'restore'
+                  ? 'El curso volverá a estar activo y disponible en todos los selectores.'
                   : 'El curso dejará de aparecer en los selectores principales.'}
             </p>
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={() => setConfirmingAction(null)}
                 className="flex-1 py-2 border border-slate-200 rounded-lg text-slate-600 font-medium hover:bg-slate-50"
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 onClick={() => {
                   if (confirmingAction.type === 'delete') handleDelete(confirmingAction.id);
                   else if (confirmingAction.type === 'archive') handleArchive(confirmingAction.id, true);
                   else handleArchive(confirmingAction.id, false);
                 }}
-                className={`flex-1 py-2 rounded-lg text-white font-semibold ${
-                  confirmingAction.type === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'
-                }`}
+                className={`flex-1 py-2 rounded-lg text-white font-semibold ${confirmingAction.type === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'
+                  }`}
               >
                 Sí, {confirmingAction.type === 'delete' ? 'Eliminar' : (confirmingAction.type === 'restore' ? 'Restaurar' : 'Archivar')}
               </button>
@@ -135,23 +133,22 @@ export default function CursosView({ cursos, onUpdate }: Props) {
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className={`w-full sm:w-auto px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border ${
-              showArchived 
-                ? 'bg-amber-50 text-amber-600 border-amber-200' 
+            className={`w-full sm:w-auto px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border ${showArchived
+                ? 'bg-amber-50 text-amber-600 border-amber-200'
                 : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
-            }`}
+              }`}
           >
             {showArchived ? 'Ver Solo Activos' : 'Ver Todos (Inc. Archivados)'}
           </button>
           <button
-            onClick={() => { 
-              setShowForm(true); 
-              setEditing(null); 
+            onClick={() => {
+              setShowForm(true);
+              setEditing(null);
               setFormData({ descripcion: '', fechaInicio: '', fechaFin: '', festivos: [] });
             }}
-            className="w-full sm:w-auto bg-primary text-white px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md shadow-primary/20"
+            className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
           >
-            + Nuevo Curso
+            <Plus className="h-4 w-4" /> Nuevo Curso
           </button>
         </div>
       </div>
@@ -168,33 +165,33 @@ export default function CursosView({ cursos, onUpdate }: Props) {
             <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
-                <input 
-                  required 
+                <input
+                  required
                   className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  value={formData.descripcion} 
-                  onChange={e => setFormData({...formData, descripcion: e.target.value})}
+                  value={formData.descripcion}
+                  onChange={e => setFormData({ ...formData, descripcion: e.target.value })}
                   placeholder="Ej: Curso 2025-2026"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Fecha Inicio</label>
-                  <input 
-                    required 
+                  <input
+                    required
                     type="date"
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                    value={formData.fechaInicio} 
-                    onChange={e => setFormData({...formData, fechaInicio: e.target.value})}
+                    value={formData.fechaInicio}
+                    onChange={e => setFormData({ ...formData, fechaInicio: e.target.value })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Fecha Fin</label>
-                  <input 
-                    required 
+                  <input
+                    required
                     type="date"
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                    value={formData.fechaFin} 
-                    onChange={e => setFormData({...formData, fechaFin: e.target.value})}
+                    value={formData.fechaFin}
+                    onChange={e => setFormData({ ...formData, fechaFin: e.target.value })}
                   />
                 </div>
               </div>
@@ -205,27 +202,27 @@ export default function CursosView({ cursos, onUpdate }: Props) {
                   <span className="text-[10px] font-bold text-slate-400 tracking-widest"> ({formData.festivos?.length || 0} añadidos)</span>
                 </label>
                 <div className="flex gap-2 mb-4">
-                  <input 
+                  <input
                     type="date"
                     className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                     value={newFestivo}
                     onChange={e => setNewFestivo(e.target.value)}
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={addFestivo}
                     className="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all"
                   >
                     Añadir
                   </button>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2">
                   {formData.festivos?.map(date => (
                     <div key={date} className="flex items-center gap-2 bg-slate-50 border border-slate-200 pl-3 pr-1 py-1 rounded-full text-xs font-medium text-slate-600">
                       {new Date(date).toLocaleDateString()}
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => removeFestivo(date)}
                         className="p-1 hover:bg-slate-200 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
                       >
@@ -254,18 +251,23 @@ export default function CursosView({ cursos, onUpdate }: Props) {
 
       <div className="bg-white rounded-xl border border-border-base shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-border-base bg-slate-50/50 flex justify-between items-center">
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Historial de Cursos</span>
-          {showArchived && (
-            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 uppercase tracking-widest">Mostrando Histórico</span>
-          )}
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <History className="h-5 w-5" />
+            </div>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Historial de Cursos</span>
+            {showArchived && (
+              <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 uppercase tracking-widest">Mostrando Histórico</span>
+            )}
+          </div>
         </div>
-        
+
         {/* Mobile List (Hidden on tablet/desktop) */}
         <div className="block lg:hidden divide-y divide-border-base">
           {filteredCursos.length === 0 ? (
-             <div className="px-6 py-12 text-center text-text-muted text-sm italic">
-                No hay cursos registrados.
-             </div>
+            <div className="px-6 py-12 text-center text-text-muted text-sm italic">
+              No hay cursos registrados.
+            </div>
           ) : (
             filteredCursos.map(curso => (
               <div key={curso.id} className={`p-5 space-y-4 ${curso.archivado ? 'bg-slate-50/50 opacity-60' : ''}`}>
@@ -285,25 +287,25 @@ export default function CursosView({ cursos, onUpdate }: Props) {
                     <span className="px-2 py-0.5 rounded-full text-[8px] font-black bg-emerald-50 text-emerald-700 uppercase tracking-widest border border-emerald-100 shrink-0">Activo</span>
                   )}
                 </div>
-                
+
                 <div className="flex items-center justify-between pt-2">
                   <div className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2">
                     <Calendar className="h-3 w-3" /> {curso.festivos?.length || 0} festivos
                   </div>
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       onClick={() => setConfirmingAction({ id: curso.id!, type: curso.archivado ? 'restore' : 'archive' })}
                       className={`p-2 rounded-lg border shadow-sm ${curso.archivado ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-white text-slate-500 border-slate-200'}`}
                     >
                       {curso.archivado ? <RotateCcw className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
                     </button>
-                    <button 
+                    <button
                       onClick={() => { setEditing(curso); setFormData(curso); setShowForm(true); }}
                       className="p-2 bg-white text-slate-500 border border-slate-200 rounded-lg shadow-sm"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => setConfirmingAction({ id: curso.id!, type: 'delete' })}
                       className="p-2 bg-white text-red-500 border border-red-100 rounded-lg shadow-sm"
                     >
@@ -367,36 +369,35 @@ export default function CursosView({ cursos, onUpdate }: Props) {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button 
+                        <button
                           type="button"
                           onClick={() => {
-                            setConfirmingAction({ 
-                              id: curso.id!, 
-                              type: curso.archivado ? 'restore' : 'archive' 
+                            setConfirmingAction({
+                              id: curso.id!,
+                              type: curso.archivado ? 'restore' : 'archive'
                             });
                           }}
                           title={curso.archivado ? "Restaurar" : "Archivar"}
-                          className={`p-2 transition-all rounded-lg cursor-pointer flex items-center justify-center border shadow-sm active:scale-95 z-10 ${
-                            curso.archivado 
-                              ? 'text-amber-800 bg-amber-100 border-amber-300 hover:bg-amber-200' 
+                          className={`p-2 transition-all rounded-lg cursor-pointer flex items-center justify-center border shadow-sm active:scale-95 z-10 ${curso.archivado
+                              ? 'text-amber-800 bg-amber-100 border-amber-300 hover:bg-amber-200'
                               : 'text-slate-500 bg-white border-slate-200 hover:text-amber-600 hover:border-amber-300 hover:bg-amber-50'
-                          }`}
+                            }`}
                         >
                           {curso.archivado ? <RotateCcw className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
                         </button>
-                        <button 
+                        <button
                           type="button"
                           onClick={() => {
-                            setEditing(curso); 
-                            setFormData(curso); 
-                            setShowForm(true); 
+                            setEditing(curso);
+                            setFormData(curso);
+                            setShowForm(true);
                           }}
                           title="Editar"
                           className="p-2 text-slate-500 bg-white border border-slate-200 hover:text-primary hover:border-primary-light hover:bg-primary-light transition-all rounded-lg cursor-pointer flex items-center justify-center shadow-sm active:scale-95 z-10"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
-                        <button 
+                        <button
                           type="button"
                           onClick={() => {
                             setConfirmingAction({ id: curso.id!, type: 'delete' });
@@ -415,7 +416,7 @@ export default function CursosView({ cursos, onUpdate }: Props) {
           </table>
         </div>
       </div>
-      
+
       {cursos.length > 0 && !cursos.some(c => !c.archivado) && (
         <div className="bg-amber-50 rounded-xl p-4 flex gap-3 border border-amber-200">
           <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />

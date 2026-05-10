@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, Building2, MapPin, Mail, Phone, Users, UserPlus, Hash, ChevronRight, Briefcase, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, Building2, MapPin, Mail, Phone, Users, UserPlus, Hash, ChevronRight, Briefcase, X, Building } from 'lucide-react';
 import { Empresa, TutorEmpresa } from '../types/index.ts';
 import { CustomSelect } from '../components/CustomSelect.tsx';
 
@@ -161,12 +161,27 @@ export default function EmpresasView({ cursoId }: EmpresasViewProps) {
 
   return (
     <>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-xl lg:text-2xl font-bold font-sans text-text-main tracking-tight">
+            Empresas e Instituciones Colaboradoras
+          </h1>
+          <p className="text-xs lg:text-sm text-text-muted mt-1 leading-relaxed">
+            Configura la información de las empresas e instituciones colaboradoras.
+          </p>
+        </div>
+      </div>
       <div className="flex flex-col lg:flex-row gap-6 h-full items-start">
         {/* Companies List Card */}
         <div className="w-full lg:flex-1 bg-white rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col h-full">
           <div className="px-6 py-4 border-b border-border-base space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Empresas e Instituciones</span>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <Building className="h-5 w-5" />
+                </div>
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Empresas e Instituciones</span>
+              </div>
               <button
                 onClick={() => {
                   setShowEmpresaForm(true);
@@ -177,9 +192,9 @@ export default function EmpresasView({ cursoId }: EmpresasViewProps) {
                   setFechaConvenio('');
                   setCentroId(centros.length === 1 ? centros[0].id : '');
                 }}
-                className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans"
+                className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
               >
-                + Nueva Empresa
+                <Plus className="h-4 w-4" /> Nueva Empresa
               </button>
             </div>
 

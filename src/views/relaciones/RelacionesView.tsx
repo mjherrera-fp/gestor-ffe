@@ -31,12 +31,7 @@ export default function RelacionesView({ cursoId }: Props) {
             Gestión de periodos de prácticas y horarios grupales.
           </p>
         </div>
-        <button
-          onClick={() => ctx.handleOpenForm(null)}
-          className="w-full sm:w-auto bg-primary text-white px-5 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-        >
-          <Plus className="h-4 w-4" /> Nueva Relación
-        </button>
+        
       </div>
 
       {/* ── CONTENIDO PRINCIPAL (dos columnas) ── */}
@@ -46,6 +41,7 @@ export default function RelacionesView({ cursoId }: Props) {
         <RelacionesListado
           relaciones={ctx.filteredAndSortedRelaciones}
           convenios={ctx.convenios}
+          createRelacion={ctx.handleOpenForm}
           selectedRelacion={ctx.selectedRelacion}
           onSelectRelacion={ctx.setSelectedRelacion}
           onEdit={ctx.handleOpenForm}
