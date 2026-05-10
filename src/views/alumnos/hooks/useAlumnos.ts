@@ -1,0 +1,348 @@
+import { useState, useEffect, useRef } from 'react';
+import * as XLSX from 'xlsx';
+import { Alumno, DetalleAcademico, RelacionAlumno } from '../../../types/index.ts';
+
+// ─────────────────────────────────────────
+//  TIPOS
+// ─────────────────────────────────────────
+
+export type SortField   = 'nombre' | 'apellidos' | 'horas';
+export type SortOrder   = 'asc' | 'desc';
+export type FilterStatus = 'all' | 'pending' | 'assigned';
+export type ViewMode    = 'grid' | 'table';
+
+// ─────────────────────────────────────────
+//  HOOK PRINCIPAL
+// ─────────────────────────────────────────
+
+export function useAlumnos(cursoId: number) {
+
+  // ── Datos ──
+  const [alumnos,    setAlumnos]    = useState<Alumno[]>([]);
+  const [relaciones, setRelaciones] = useState<RelacionAlumno[]>([]);
+  const [detalles,   setDetalles]   = useState<DetalleAcademico[]>([]);
+
+  // ── UI listado ──
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('alumnos_view_mode');
+    return (saved === 'grid' || saved === 'table') ? saved : 'grid';
+  });
+  const [searchTerm,   setSearchTerm]   = useState('');
+  const [sortBy,       setSortBy]       = useState<SortField>('apellidos');
+  const [sortOrder,    setSortOrder]    = useState<SortOrder>('asc');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+
+  // ── Modal alumno ──
+  const [showForm,   setShowForm]   = useState(false);
+  const [editing,    setEditing]    = useState<Alumno | null>(null);
+  const [formData,   setFormData]   = useState<Partial<Alumno>>({
+    nombre: '', apellidos: '', dni: '', numSS: '', tlfn: '',
+    emailEduca: '', emailPersonal: '', fechaNacimiento: '',
+    cursoId, detalleAcademicoId: undefined, totalHorasFFE: 0,
+  });
+
+  // ── Modal advertencia horas ──
+  const [pendingSubmitData, setPendingSubmitData] = useState<any | null>(null);
+
+  // ── Modal eliminar ──
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
+
+  // ── Detalle académico modal ──
+  const [academicDetailAlumno, setAcademicDetailAlumno] = useState<Alumno | null>(null);
+
+  // ── Importación Excel ──
+  const [isImporting,  setIsImporting]  = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ─────────────────────────────────────────
+  //  EFECTOS
+  // ─────────────────────────────────────────
+
+  useEffect(() => { localStorage.setItem('alumnos_view_mode', viewMode); }, [viewMode]);
+
+  useEffect(() => {
+    fetchAlumnos();
+    fetchDetalles();
+  }, [cursoId]);
+
+  // ─────────────────────────────────────────
+  //  FETCH
+  // ─────────────────────────────────────────
+
+  const fetchAlumnos = async () => {
+    const res    = await fetch(`/api/alumnos?cursoId=${cursoId}`);
+    setAlumnos(await res.json());
+    const relRes = await fetch('/api/relaciones-alumnos');
+    if (relRes.ok) setRelaciones(await relRes.json());
+  };
+
+  const fetchDetalles = async () => {
+    const res = await fetch('/api/detalles-academicos');
+    setDetalles(await res.json());
+  };
+
+  // ─────────────────────────────────────────
+  //  HANDLERS: FORMULARIO
+  // ─────────────────────────────────────────
+
+  const handleOpenForm = (alumno: Alumno | null) => {
+    if (alumno) {
+      setEditing(alumno);
+      setFormData(alumno);
+    } else {
+      setEditing(null);
+      setFormData({
+        nombre: '', apellidos: '', dni: '', numSS: '', tlfn: '',
+        emailEduca: '', emailPersonal: '', fechaNacimiento: '', cursoId,
+        detalleAcademicoId: detalles.length > 0 ? detalles[0].id : undefined,
+        totalHorasFFE: 0,
+      });
+    }
+    setShowForm(true);
+  };
+
+  const handleSubmit = async (
+    e?: React.FormEvent,
+    manualData?: any,
+    confirmClearDates = false
+  ): Promise<boolean> => {
+    if (e) e.preventDefault();
+
+    const dataToSend = manualData ? { ...manualData } : { ...formData, cursoId };
+
+    // Intercepción: aviso de cambio de horas en alumno asignado
+    if (editing && !manualData && !confirmClearDates) {
+      if (formData.totalHorasFFE !== editing.totalHorasFFE) {
+        const isAssigned =
+          relaciones.some(rel => rel.alumnos?.some((ar: any) => ar.alumnoId === editing.id)) ||
+          !!(editing as any).relacionId;
+        if (isAssigned) {
+          setPendingSubmitData(dataToSend);
+          return false;
+        }
+      }
+    }
+
+    if (confirmClearDates) {
+      dataToSend.fechaInicio = null;
+      dataToSend.fechaFin    = null;
+    }
+
+    const method = editing ? 'PUT' : 'POST';
+    const url    = editing ? `/api/alumnos/${editing.id}` : '/api/alumnos';
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend),
+      });
+      if (res.ok) {
+        setShowForm(false);
+        setEditing(null);
+        setPendingSubmitData(null);
+        setFormData({
+          nombre: '', apellidos: '', dni: '', numSS: '', tlfn: '',
+          emailEduca: '', emailPersonal: '', fechaNacimiento: '',
+          cursoId, totalHorasFFE: 0,
+        });
+        fetchAlumnos();
+        return true;
+      } else {
+        console.error('Error al guardar:', await res.text());
+      }
+    } catch (error) {
+      console.error('Error en la petición de red:', error);
+    }
+    return false;
+  };
+
+  // ─────────────────────────────────────────
+  //  HANDLERS: ELIMINAR
+  // ─────────────────────────────────────────
+
+  const handleDelete = async (id: number) => {
+    try {
+      const res = await fetch(`/api/alumnos/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Error al eliminar');
+      setShowDeleteConfirm(null);
+      fetchAlumnos();
+    } catch {
+      alert('Error: No se pudo eliminar el alumno. Es posible que tenga dependencias activas.');
+    }
+  };
+
+  // ─────────────────────────────────────────
+  //  HANDLERS: CV
+  // ─────────────────────────────────────────
+
+  const handleFileUpload = async (alumnoId: number, file: File) => {
+    const fd = new FormData();
+    fd.append('cv', file);
+    try {
+      const res = await fetch(`/api/alumnos/${alumnoId}/cv`, { method: 'POST', body: fd });
+      if (res.ok) fetchAlumnos();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // ─────────────────────────────────────────
+  //  HANDLERS: EXCEL
+  // ─────────────────────────────────────────
+
+  const downloadTemplate = () => {
+    const headers = [[
+      'Primer Apellido', 'Segundo Apellido', 'Nombre', 'DNI/Pasaporte',
+      'Fecha Nacimiento', 'Num SS', 'Tlfn', 'Email personal',
+      'Código Grupo', 'Email educamadrid', 'Horas pendientes FFE',
+    ]];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(headers);
+    XLSX.utils.book_append_sheet(wb, ws, 'Plantilla Alumnos');
+    XLSX.writeFile(wb, 'plantilla_importacion_alumnos.xlsx');
+  };
+
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const wb   = XLSX.read(bstr, { type: 'binary', cellDates: true, dateNF: 'yyyy-mm-dd' });
+        const ws   = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false }) as any[];
+
+        let successCount = 0;
+        let updateCount  = 0;
+
+        for (const row of data) {
+          const dni            = (row['DNI/Pasaporte'] || '').toString().trim();
+          const nombre         = (row['Nombre'] || '').toString().trim();
+          const primerApellido = (row['Primer Apellido'] || '').toString().trim();
+          const segundoApellido = (row['Segundo Apellido'] || '').toString().trim();
+          if (!dni || !nombre || !primerApellido) continue;
+
+          let fechaNacimiento = row['Fecha Nacimiento'] || '2000-01-01';
+          if (fechaNacimiento instanceof Date) {
+            fechaNacimiento = fechaNacimiento.toISOString().split('T')[0];
+          } else if (typeof fechaNacimiento === 'string' && fechaNacimiento.includes('/')) {
+            const [d, m, y] = fechaNacimiento.split('/');
+            const fullYear  = y.length === 2 ? (Number(y) > 40 ? '19' + y : '20' + y) : y;
+            fechaNacimiento = `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+          }
+
+          const existingAlumno = alumnos.find(a => a.dni.trim().toLowerCase() === dni.toLowerCase());
+          const studentData = {
+            nombre,
+            apellidos:          `${primerApellido} ${segundoApellido}`.trim(),
+            dni,
+            numSS:              row['Num SS'] || '',
+            tlfn:               row['Tlfn'] || '',
+            emailEduca:         row['Email educamadrid'] || '',
+            emailPersonal:      row['Email personal'] || '',
+            fechaNacimiento,
+            cursoId,
+            totalHorasFFE:      Number(row['Horas pendientes FFE']) || 0,
+            detalleAcademicoId: detalles.find(d => d.codigoGrupo === row['Código Grupo'])?.id
+              || existingAlumno?.detalleAcademicoId
+              || (detalles.length > 0 ? detalles[0].id : null),
+          };
+
+          const method = existingAlumno ? 'PUT' : 'POST';
+          const url    = existingAlumno ? `/api/alumnos/${existingAlumno.id}` : '/api/alumnos';
+          try {
+            const res = await fetch(url, {
+              method,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(studentData),
+            });
+            if (res.ok) existingAlumno ? updateCount++ : successCount++;
+          } catch (err) {
+            console.error('Error al procesar alumno:', studentData.nombre, err);
+          }
+        }
+
+        fetchAlumnos();
+        alert(`Importación finalizada:\n- Alumnos nuevos: ${successCount}\n- Alumnos actualizados: ${updateCount}`);
+      } catch {
+        alert('Hubo un error al procesar el archivo Excel.');
+      } finally {
+        setIsImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
+
+  // ─────────────────────────────────────────
+  //  ORDENACIÓN Y FILTRADO
+  // ─────────────────────────────────────────
+
+  const toggleSort = (field: SortField) => {
+    if (sortBy === field) setSortOrder(o => o === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(field); setSortOrder('asc'); }
+  };
+
+  const filteredAndSortedAlumnos = alumnos
+    .filter(alumno => {
+      const q = searchTerm.toLowerCase();
+      const matchesSearch =
+        alumno.nombre.toLowerCase().includes(q) ||
+        alumno.apellidos.toLowerCase().includes(q) ||
+        alumno.dni.toLowerCase().includes(q) ||
+        alumno.emailEduca.toLowerCase().includes(q) ||
+        alumno.emailPersonal.toLowerCase().includes(q);
+      const isAssigned   = alumno.relacionId !== null;
+      const matchesStatus =
+        filterStatus === 'all' ||
+        (filterStatus === 'pending'  && !isAssigned) ||
+        (filterStatus === 'assigned' && isAssigned);
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      let cmp = 0;
+      if (sortBy === 'nombre')    cmp = a.nombre.localeCompare(b.nombre);
+      if (sortBy === 'apellidos') cmp = a.apellidos.localeCompare(b.apellidos);
+      if (sortBy === 'horas')     cmp = (a.totalHorasFFE || 0) - (b.totalHorasFFE || 0);
+      return sortOrder === 'asc' ? cmp : -cmp;
+    });
+
+  // ─────────────────────────────────────────
+  //  RETURN
+  // ─────────────────────────────────────────
+
+  return {
+    // Datos
+    alumnos, detalles,
+    // Listado UI
+    viewMode, setViewMode,
+    searchTerm, setSearchTerm,
+    sortBy, sortOrder, filterStatus, setFilterStatus,
+    toggleSort,
+    filteredAndSortedAlumnos,
+    // Formulario
+    showForm, setShowForm,
+    editing,
+    formData, setFormData,
+    handleOpenForm, handleSubmit,
+    // Advertencia horas
+    pendingSubmitData, setPendingSubmitData,
+    // Eliminar
+    showDeleteConfirm, setShowDeleteConfirm,
+    handleDelete,
+    // Detalle académico
+    academicDetailAlumno, setAcademicDetailAlumno,
+    fetchAlumnos,
+    // CV
+    handleFileUpload,
+    // Excel
+    isImporting,
+    fileInputRef,
+    downloadTemplate,
+    handleImportExcel,
+  };
+}

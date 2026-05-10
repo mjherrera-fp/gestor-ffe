@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Edit2, User, Phone, Mail, Calendar, Hash, FileUp, Download, CheckCircle, FileText, GraduationCap, X, Clock, FileSpreadsheet, LayoutGrid, List, Search, ArrowUpDown } from 'lucide-react';
-import { Alumno, DetalleAcademico, RelacionAlumno } from '../types/index.ts';
-import DetalleAcademicoModal from '../views/DetalleAcademicoModal.tsx';
+import { Alumno, DetalleAcademico, RelacionAlumno } from '../../types/index.ts';
+import DetalleAcademicoModal from '../DetalleAcademicoModal.tsx';
 import * as XLSX from 'xlsx';
-import { CustomSelect } from '../components/CustomSelect.tsx';
+import { CustomSelect } from '../../components/CustomSelect.tsx';
 
 interface Props {
   cursoId: number;

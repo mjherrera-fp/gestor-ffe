@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Archive, Calendar, Edit2, AlertTriangle, CheckCircle, X, RotateCcw } from 'lucide-react';
+import { Plus, History, Trash2, Archive, Calendar, Edit2, AlertTriangle, CheckCircle, X, RotateCcw } from 'lucide-react';
 import { Curso } from '../types/index.ts';
 
 interface Props {
