@@ -24,16 +24,16 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { Profesor, Curso, Alumno, Empresa, Convenio, ConvenioEstado } from './types/index.ts';
 import packageJson from '../package.json';
-import LockScreen from './components/LockScreen.tsx';
 
 // Components
-import ProfesorView from './views/ProfesorView.tsx';
+import ProfesorView from './views/profesor/ProfesorView.tsx';
 import CursosView from './views/CursosView.tsx';
 import AlumnosView from './views/AlumnosView.tsx';
 import EmpresasView from './views/EmpresasView.tsx';
 import ConveniosView from './views/ConveniosView.tsx';
 import InteresesView from './views/InteresesView.tsx';
 import RelacionesView from './views/relaciones/RelacionesView.tsx';
+import LockView from './views/LockView.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -135,7 +135,7 @@ export default function App() {
 
   // 4. Si isLocked es true, renderiza la pantalla de bloqueo en lugar de la app
   if (isLocked) {
-    return <LockScreen onUnlock={handleUnlock} error={authError} />;
+    return <LockView onUnlock={handleUnlock} error={authError} />;
   }
 
   if (loading) {

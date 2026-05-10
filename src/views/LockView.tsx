@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Lock, ShieldAlert, KeyRound, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 
-interface LockScreenProps {
+interface LockViewProps {
   onUnlock: (password: string) => Promise<void>;
   error: string;
 }
 
-export default function LockScreen({ onUnlock, error }: LockScreenProps) {
+export default function LockView({ onUnlock, error }: LockViewProps) {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
