@@ -10,3 +10,4 @@ coverage/
 .env*
 !.env.example
 *.db
+claves-dev.txt

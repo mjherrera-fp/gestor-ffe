@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Save, User, Mail, Phone, Building2, GraduationCap, Plus, Trash2, Edit2, MapPin, Hash, Briefcase, Layers, Info, CheckCircle, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Save, User, Mail, Phone, Building2, GraduationCap, Plus, Trash2, Edit2, Lock, RefreshCw, ShieldCheck, AlertTriangle, Key, MapPin, Hash, Briefcase, Layers, Info, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { Profesor, CentroEducativo, DetalleAcademico, ResultadoAprendizaje } from '../types/index.ts';
 
 interface Props {
@@ -46,6 +47,31 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
   const [currentCentroId, setCurrentCentroId] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{ id: number, type: 'centro' | 'detalle' } | null>(null);
 
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isEncrypting, setIsEncrypting] = useState(false);
+  const [isEncrypted, setIsEncrypted] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  // Comprobar si la base de datos ya está cifrada al entrar en la pestaña
+  const checkEncryptionStatus = async () => {
+    try {
+      const res = await fetch('/api/auth/status');
+      const data = await res.json();
+
+      // CAMBIO AQUÍ: Usamos data.encrypted en lugar de data.locked
+      setIsEncrypted(data.encrypted);
+
+    } catch (e) {
+      console.error("Error al comprobar estado de cifrado");
+    }
+  };
+
+  useEffect(() => {
+    checkEncryptionStatus();
+  }, []);
+
   const [newRA, setNewRA] = useState<Partial<ResultadoAprendizaje>>({
     modulo: '',
     codigo: '',
@@ -54,6 +80,45 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
     impartidoEmpresa: false,
     actividadFormativa: ''
   });
+
+  const handleEncryptDatabase = async () => {
+    if (newPassword !== confirmPassword) {
+      setMessage({ type: 'error', text: 'Las contraseñas no coinciden.' });
+      return;
+    }
+
+    if (newPassword.length < 4) {
+      setMessage({ type: 'error', text: 'La contraseña debe tener al menos 4 caracteres.' });
+      return;
+    }
+
+    // Si todo está bien, mostramos el modal en lugar del window.confirm
+    setShowConfirmModal(true);
+  };
+
+  // PASO 2: Ejecuta la llamada a la base de datos (se llama desde el modal)
+  const executeEncryption = async () => {
+    setIsEncrypting(true);
+    try {
+      const res = await fetch('/api/auth/encrypt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPassword })
+      });
+
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'Base de datos cifrada correctamente. Se requerirá en el próximo inicio.' });
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        throw new Error('Error al cifrar');
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'No se pudo cifrar la base de datos.' });
+    } finally {
+      setIsEncrypting(false);
+    }
+  };
 
   const addRA = () => {
     if (!newRA.modulo || !newRA.codigo || !newRA.ra || !newRA.nombre) {
@@ -99,13 +164,13 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
     try {
       const res = await fetch('/api/centros');
       const centrosData: CentroEducativo[] = await res.json();
-      
+
       const centrosWithDetalles = await Promise.all(centrosData.map(async (c) => {
         const dRes = await fetch(`/api/centros/${c.id}/detalles`);
         const detalles = await dRes.json();
         return { ...c, detalles };
       }));
-      
+
       setCentros(centrosWithDetalles);
     } catch (error) {
       console.error(error);
@@ -148,13 +213,13 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
       const method = editingCentro ? 'PUT' : 'POST';
       const url = editingCentro ? `/api/centros/${editingCentro.id}` : '/api/centros';
       const body = { ...centroFormData, profesorId: profesor.id };
-      
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      
+
       if (res.ok) {
         setShowCentroForm(false);
         setEditingCentro(null);
@@ -186,13 +251,13 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
       const method = editingDetalle ? 'PUT' : 'POST';
       const url = editingDetalle ? `/api/detalles-academicos/${editingDetalle.id}` : '/api/detalles-academicos';
       const body = { ...detalleFormData, centroId: currentCentroId };
-      
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      
+
       if (res.ok) {
         setShowDetalleForm(false);
         setEditingDetalle(null);
@@ -233,19 +298,19 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
             </div>
             <h3 className="text-xl font-black text-slate-900 mb-3">¿Estás seguro?</h3>
             <p className="text-sm text-slate-500 font-medium mb-8">
-              {showDeleteConfirm.type === 'centro' 
-                ? 'Esta acción eliminará el centro educativo y todos sus ciclos asociados de forma permanente.' 
+              {showDeleteConfirm.type === 'centro'
+                ? 'Esta acción eliminará el centro educativo y todos sus ciclos asociados de forma permanente.'
                 : 'Esta acción eliminará el ciclo formativo de forma permanente.'}
             </p>
-            
+
             <div className="flex gap-3">
-              <button 
-                onClick={() => setShowDeleteConfirm(null)} 
+              <button
+                onClick={() => setShowDeleteConfirm(null)}
                 className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-all font-sans"
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 onClick={() => {
                   if (showDeleteConfirm.type === 'centro') handleDeleteCentro(showDeleteConfirm.id);
                   else handleDeleteDetalle(showDeleteConfirm.id);
@@ -288,26 +353,115 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
         <FormSection title="Información Personal" icon={User}>
           <div className="col-span-1">
             <label className={labelClass}>Nombre</label>
-            <input required className={inputClass} value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} />
+            <input required className={inputClass} value={formData.nombre} onChange={e => setFormData({ ...formData, nombre: e.target.value })} />
           </div>
           <div className="col-span-1">
             <label className={labelClass}>Apellidos</label>
-            <input required className={inputClass} value={formData.apellidos} onChange={e => setFormData({...formData, apellidos: e.target.value})} />
+            <input required className={inputClass} value={formData.apellidos} onChange={e => setFormData({ ...formData, apellidos: e.target.value })} />
           </div>
           <div className="col-span-1">
             <label className={labelClass}>NIF</label>
-            <input required className={inputClass} value={formData.nif} onChange={e => setFormData({...formData, nif: e.target.value})} />
+            <input required className={inputClass} value={formData.nif} onChange={e => setFormData({ ...formData, nif: e.target.value })} />
           </div>
           <div className="col-span-1">
             <label className={labelClass}>Email</label>
-            <input required type="email" className={inputClass} value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+            <input required type="email" className={inputClass} value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
           </div>
           <div className="col-span-1">
             <label className={labelClass}>Teléfono</label>
-            <input required className={inputClass} value={formData.telefono} onChange={e => setFormData({...formData, telefono: e.target.value})} />
+            <input required className={inputClass} value={formData.telefono} onChange={e => setFormData({ ...formData, telefono: e.target.value })} />
           </div>
         </FormSection>
       </form>
+
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-8">
+        <div className="p-6 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${isEncrypted ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
+              {isEncrypted ? <ShieldCheck className="h-5 w-5" /> : <Lock className="h-5 w-5" />}
+            </div>
+            <div>
+              {/* TÍTULO DINÁMICO */}
+              <h3 className="text-lg font-bold text-slate-800">
+                {isEncrypted ? 'Gestión de Contraseña Maestra' : 'Seguridad de la Base de Datos'}
+              </h3>
+              <p className="text-sm text-slate-500">
+                {isEncrypted ? 'Tu base de datos está protegida con cifrado AES-256' : 'Cifra tus datos para mayor seguridad'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          {isEncrypting ? (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 flex gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+              <p className="text-sm text-amber-800">
+                <strong>Atención:</strong> Al cifrar la base de datos, el archivo de tu BBDD será ilegible para cualquier otra aplicación. Necesitarás esta clave cada vez que abras el Gestor FFE.
+                <br />
+                Si olvidas la contraseña, no podrás recuperar tus datos. La contraseña <strong>NO se puede recuperar</strong> de ninguna forma. Asegúrate de guardarla en un lugar seguro.
+              </p>
+            </div>
+          ): ('')}
+          {/* --- BLOQUE DE MENSAJES DE ERROR/ÉXITO --- */}
+          {message.text && (
+            <div className={`p-3 rounded-lg mb-4 text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1 ${message.type === 'success'
+              ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+              : 'bg-red-100 text-red-700 border border-red-200'
+              }`}>
+              {/* Icono dinámico según el tipo */}
+              {message.type === 'success' ? (
+                <ShieldCheck className="h-4 w-4" />
+              ) : (
+                <AlertTriangle className="h-4 w-4" />
+              )}
+              {message.text}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className={labelClass}>
+                {isEncrypted ? 'Nueva Contraseña' : 'Establecer Contraseña'}
+              </label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className={inputClass}
+                placeholder="Escribe la clave..."
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Confirmar Contraseña</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={inputClass}
+                placeholder="Repite la clave..."
+              />
+            </div>
+          </div>
+
+          {/* BOTÓN DINÁMICO */}
+          <button
+            onClick={handleEncryptDatabase}
+            disabled={isEncrypting || !newPassword}
+            className={`className="w-full sm:w-auto flex items-center justify-center gap-2 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed" ${isEncrypted ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-blue-600 hover:bg-blue-600 text-white'
+              }`}
+          >
+            {isEncrypting ? (
+              <RefreshCw className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                {isEncrypted ? <RefreshCw className="h-5 w-5" /> : <ShieldCheck className="h-5 w-5" />}
+                {isEncrypted ? 'Actualizar Contraseña' : 'Activar Cifrado de Datos'}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
 
       {/* Centros Educativos Section */}
       <div className="max-w-6xl">
@@ -411,23 +565,23 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
                       {centro.detalles.map(detalle => (
                         <div key={detalle.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100 group relative">
                           <div className="flex items-center justify-between mb-2">
-                             <div className="flex items-center gap-2">
-                               <div className="bg-primary/10 px-2 py-0.5 rounded text-[9px] font-black text-primary uppercase">
-                                 Grupo: {detalle.codigoGrupo}
-                               </div>
-                               <div className="bg-indigo-50 px-2 py-0.5 rounded text-[9px] font-black text-indigo-600 uppercase border border-indigo-100">
-                                 {detalle.resultadosAprendizaje?.length || 0} RA
-                               </div>
-                             </div>
-                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
-                                <button onClick={() => {
-                                  setCurrentCentroId(centro.id!);
-                                  setEditingDetalle(detalle);
-                                  setDetalleFormData(detalle);
-                                  setShowDetalleForm(true);
-                                }} className="p-1 text-slate-400 hover:text-blue-500"><Edit2 className="h-3 w-3" /></button>
-                                <button onClick={() => setShowDeleteConfirm({ id: detalle.id!, type: 'detalle' })} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-3 w-3" /></button>
-                             </div>
+                            <div className="flex items-center gap-2">
+                              <div className="bg-primary/10 px-2 py-0.5 rounded text-[9px] font-black text-primary uppercase">
+                                Grupo: {detalle.codigoGrupo}
+                              </div>
+                              <div className="bg-indigo-50 px-2 py-0.5 rounded text-[9px] font-black text-indigo-600 uppercase border border-indigo-100">
+                                {detalle.resultadosAprendizaje?.length || 0} RA
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                              <button onClick={() => {
+                                setCurrentCentroId(centro.id!);
+                                setEditingDetalle(detalle);
+                                setDetalleFormData(detalle);
+                                setShowDetalleForm(true);
+                              }} className="p-1 text-slate-400 hover:text-blue-500"><Edit2 className="h-3 w-3" /></button>
+                              <button onClick={() => setShowDeleteConfirm({ id: detalle.id!, type: 'detalle' })} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-3 w-3" /></button>
+                            </div>
                           </div>
                           <div className="font-bold text-slate-800 text-xs mb-1 line-clamp-1">{detalle.ciclo}</div>
                           <div className="space-y-1">
@@ -435,10 +589,10 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
                               <span className="font-bold">Nivel:</span> {detalle.nivel}
                             </div>
                             <div className="flex items-center gap-2 text-[9px] text-slate-500 font-medium">
-                               <span className="font-bold">Grado:</span> {detalle.grado}
+                              <span className="font-bold">Grado:</span> {detalle.grado}
                             </div>
                             <div className="flex items-center gap-2 text-[9px] text-slate-500 font-medium">
-                               <span className="font-bold">Régimen:</span> {detalle.regimen}
+                              <span className="font-bold">Régimen:</span> {detalle.regimen}
                             </div>
                           </div>
                         </div>
@@ -465,20 +619,20 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
             <form onSubmit={handleSaveCentro} className="p-8 space-y-4">
               <div>
                 <label className={labelClass}>Nombre del Centro</label>
-                <input required className={inputClass} value={centroFormData.nombre || ''} onChange={e => setCentroFormData({...centroFormData, nombre: e.target.value})} />
+                <input required className={inputClass} value={centroFormData.nombre || ''} onChange={e => setCentroFormData({ ...centroFormData, nombre: e.target.value })} />
               </div>
               <div>
                 <label className={labelClass}>Ciudad</label>
-                <input required className={inputClass} value={centroFormData.ciudad || ''} onChange={e => setCentroFormData({...centroFormData, ciudad: e.target.value})} />
+                <input required className={inputClass} value={centroFormData.ciudad || ''} onChange={e => setCentroFormData({ ...centroFormData, ciudad: e.target.value })} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Teléfono</label>
-                  <input required className={inputClass} value={centroFormData.telefono || ''} onChange={e => setCentroFormData({...centroFormData, telefono: e.target.value})} />
+                  <input required className={inputClass} value={centroFormData.telefono || ''} onChange={e => setCentroFormData({ ...centroFormData, telefono: e.target.value })} />
                 </div>
                 <div>
                   <label className={labelClass}>Email</label>
-                  <input required type="email" className={inputClass} value={centroFormData.email || ''} onChange={e => setCentroFormData({...centroFormData, email: e.target.value})} />
+                  <input required type="email" className={inputClass} value={centroFormData.email || ''} onChange={e => setCentroFormData({ ...centroFormData, email: e.target.value })} />
                 </div>
               </div>
               <button type="submit" className="w-full bg-primary text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all mt-6 shadow-xl shadow-primary/20">
@@ -495,7 +649,7 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
           <div className="bg-white rounded-4xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
             <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
               <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
-                 Configuración de Ciclo (Detalle Académico)
+                Configuración de Ciclo (Detalle Académico)
               </h3>
               <button onClick={() => setShowDetalleForm(false)} className="text-slate-400 hover:text-slate-600"><Plus className="rotate-45 h-6 w-6" /></button>
             </div>
@@ -503,32 +657,32 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1">Nombre del Ciclo</label>
-                  <input required className={inputClass} value={detalleFormData.ciclo || ''} onChange={e => setDetalleFormData({...detalleFormData, ciclo: e.target.value})} placeholder="Ej: Desarrollo de Aplicaciones Multiplataforma"/>
+                  <input required className={inputClass} value={detalleFormData.ciclo || ''} onChange={e => setDetalleFormData({ ...detalleFormData, ciclo: e.target.value })} placeholder="Ej: Desarrollo de Aplicaciones Multiplataforma" />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 md:col-span-2">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1">Código</label>
-                    <input required className={inputClass} value={detalleFormData.codigo || ''} onChange={e => setDetalleFormData({...detalleFormData, codigo: e.target.value})} placeholder="Ej: IFC303"/>
+                    <input required className={inputClass} value={detalleFormData.codigo || ''} onChange={e => setDetalleFormData({ ...detalleFormData, codigo: e.target.value })} placeholder="Ej: IFC303" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1">Grupo</label>
-                    <input required className={inputClass} value={detalleFormData.codigoGrupo || ''} onChange={e => setDetalleFormData({...detalleFormData, codigoGrupo: e.target.value})} placeholder="Ej: 2IFCS02DA"/>
+                    <input required className={inputClass} value={detalleFormData.codigoGrupo || ''} onChange={e => setDetalleFormData({ ...detalleFormData, codigoGrupo: e.target.value })} placeholder="Ej: 2IFCS02DA" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 md:col-span-2">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1">Nivel</label>
-                    <input required className={inputClass} value={detalleFormData.nivel || ''} onChange={e => setDetalleFormData({...detalleFormData, nivel: e.target.value})} placeholder="Ej: 2º"/>
+                    <input required className={inputClass} value={detalleFormData.nivel || ''} onChange={e => setDetalleFormData({ ...detalleFormData, nivel: e.target.value })} placeholder="Ej: 2º" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1">Grado</label>
-                    <input required className={inputClass} value={detalleFormData.grado || ''} onChange={e => setDetalleFormData({...detalleFormData, grado: e.target.value})} placeholder="Ej: Superior"/>
+                    <input required className={inputClass} value={detalleFormData.grado || ''} onChange={e => setDetalleFormData({ ...detalleFormData, grado: e.target.value })} placeholder="Ej: Superior" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1">Régimen</label>
-                    <input required className={inputClass} value={detalleFormData.regimen || ''} onChange={e => setDetalleFormData({...detalleFormData, regimen: e.target.value})} placeholder="Ej: General"/>
+                    <input required className={inputClass} value={detalleFormData.regimen || ''} onChange={e => setDetalleFormData({ ...detalleFormData, regimen: e.target.value })} placeholder="Ej: General" />
                   </div>
                 </div>
               </div>
@@ -548,58 +702,58 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
                 <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-200/60 space-y-3">
                   <div className="grid grid-cols-4 gap-2">
                     <div className="col-span-1">
-                      <input 
+                      <input
                         className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-indigo-400"
                         value={newRA.modulo}
-                        onChange={e => setNewRA({...newRA, modulo: e.target.value})}
+                        onChange={e => setNewRA({ ...newRA, modulo: e.target.value })}
                         placeholder="Módulo"
                       />
                     </div>
                     <div className="col-span-1">
-                      <input 
+                      <input
                         className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-indigo-400"
                         value={newRA.codigo}
-                        onChange={e => setNewRA({...newRA, codigo: e.target.value})}
+                        onChange={e => setNewRA({ ...newRA, codigo: e.target.value })}
                         placeholder="Cód."
                       />
                     </div>
                     <div className="col-span-2">
-                      <input 
+                      <input
                         className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-indigo-400"
                         value={newRA.ra}
-                        onChange={e => setNewRA({...newRA, ra: e.target.value})}
+                        onChange={e => setNewRA({ ...newRA, ra: e.target.value })}
                         placeholder="ID RA (Ej: RA1)"
                       />
                     </div>
                   </div>
-                  
-                  <input 
+
+                  <input
                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-indigo-400"
                     value={newRA.nombre}
-                    onChange={e => setNewRA({...newRA, nombre: e.target.value})}
+                    onChange={e => setNewRA({ ...newRA, nombre: e.target.value })}
                     placeholder="Nombre descriptivo del RA"
                   />
 
                   <div>
-                    <textarea 
+                    <textarea
                       className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-indigo-400 resize-none h-16"
                       value={newRA.actividadFormativa}
-                      onChange={e => setNewRA({...newRA, actividadFormativa: e.target.value})}
+                      onChange={e => setNewRA({ ...newRA, actividadFormativa: e.target.value })}
                       placeholder="Ejemplo de Actividad Formativa (Opcional)..."
                     />
                   </div>
 
                   <div className="flex items-center gap-2">
                     <label className="flex items-center gap-2 cursor-pointer bg-white border border-slate-200 rounded-lg px-2 py-1.5 flex-1">
-                      <input 
+                      <input
                         type="checkbox"
                         className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                         checked={newRA.impartidoEmpresa}
-                        onChange={e => setNewRA({...newRA, impartidoEmpresa: e.target.checked})}
+                        onChange={e => setNewRA({ ...newRA, impartidoEmpresa: e.target.checked })}
                       />
                       <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">Íntegro empresa</span>
                     </label>
-                    <button 
+                    <button
                       type="button"
                       onClick={addRA}
                       className="bg-indigo-600 text-white px-3 py-2 rounded-lg font-bold text-[9px] uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-1"
@@ -627,7 +781,7 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
                           <p className="text-[9px] text-slate-400 mt-1 italic line-clamp-2 leading-tight">{ra.actividadFormativa}</p>
                         )}
                       </div>
-                      <button 
+                      <button
                         type="button"
                         onClick={() => removeRA(ra.id)}
                         className="text-slate-300 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"
@@ -653,6 +807,65 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
           </div>
         </div>
       )}
+      {/* --- MODAL DE CONFIRMACIÓN MODERNO --- */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <>
+            {/* Fondo oscuro desenfocado */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50"
+              onClick={() => setShowConfirmModal(false)}
+            />
+
+            {/* Tarjeta del modal */}
+            <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none px-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto overflow-hidden"
+              >
+                <div className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0 h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center">
+                      <AlertTriangle className="h-6 w-6 text-amber-600" />
+                    </div>
+                    <div className="flex-1 pt-1">
+                      <h3 className="text-xl font-bold text-slate-800">
+                        {isEncrypted ? '¿Cambiar la contraseña?' : '¿Cifrar Base de Datos?'}
+                      </h3>
+                      <p className="mt-2 text-sm text-slate-500 leading-relaxed">
+                        {isEncrypted
+                          ? 'Estás a punto de cambiar la clave maestra. Asegúrate de recordarla bien.'
+                          : 'Toda la base de datos se encriptará. Si olvidas esta contraseña en el futuro, los datos serán totalmente irrecuperables.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botonera */}
+                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 bg-slate-100 rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={executeEncryption}
+                    className="px-4 py-2 text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors shadow-sm"
+                  >
+                    {isEncrypted ? 'Sí, actualizar clave' : 'Sí, cifrar datos'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

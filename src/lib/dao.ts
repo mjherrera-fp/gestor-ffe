@@ -1,4 +1,4 @@
-import db from './db.ts';
+import db, { initDB } from './db.ts';
 import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado } from '../types/index.ts';
 
 const safeParse = (str: any, fallback: any) => {
@@ -9,6 +9,56 @@ const safeParse = (str: any, fallback: any) => {
     return fallback;
   }
 };
+
+// --- LÓGICA DE CIFRADO ---
+
+let databaseHadKeyAtStartup = false;
+let sessionKeyApplied = false;
+
+// Función interna para comprobar el estado real del archivo
+const checkFileLocked = (): boolean => {
+    try {
+        db.prepare('SELECT count(*) FROM sqlite_master').get();
+        return false;
+    } catch (error) {
+        return true; 
+    }
+};
+
+// Guardamos si al arrancar el servidor el archivo estaba cifrado
+databaseHadKeyAtStartup = checkFileLocked();
+
+export const isDatabaseLocked = () => checkFileLocked();
+
+// NUEVA FUNCIÓN: Nos dice si el archivo TIENE cifrado (aunque esté desbloqueado ahora)
+export const isDatabaseEncrypted = () => {
+    return databaseHadKeyAtStartup || sessionKeyApplied;
+};
+
+// Función para desbloquear al arrancar
+export const unlockDatabase = (password: string): boolean => {
+    try {
+        db.pragma(`key='${password}'`);
+        // Probamos si la clave es correcta
+        db.prepare('SELECT count(*) FROM sqlite_master').get();
+        sessionKeyApplied = true;
+        initDB();
+        
+        return true;
+    } catch (error) {
+        return false; // Contraseña incorrecta
+    }
+};
+
+// Función para cifrar o cambiar la contraseña (se usa en el Perfil)
+export const encryptDatabase = (password: string) => {
+    db.pragma(`rekey='${password}'`);
+    sessionKeyApplied = true; // <--- Marcamos que ahora tiene clave
+};
+
+if (!isDatabaseLocked()) {
+    initDB();
+}
 
 export const ProfesorDAO = {
   get: () => db.prepare('SELECT * FROM profesores LIMIT 1').get() as Profesor | undefined,

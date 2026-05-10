@@ -7,7 +7,7 @@ import Handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
-import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO } from './src/lib/dao.ts';
+import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 
@@ -141,6 +141,36 @@ async function startServer() {
   };
 
   // API Routes
+  // --- RUTAS DE SEGURIDAD ---
+  app.get('/api/auth/status', (req, res) => {
+    // Hemos quitado el require que hacía explotar el servidor
+    res.json({ 
+      locked: isDatabaseLocked(),      
+      encrypted: isDatabaseEncrypted() 
+    });
+  });
+
+  app.post('/api/auth/unlock', (req, res) => {
+    const { password } = req.body;
+    
+    if (unlockDatabase(password)) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ error: 'Contraseña incorrecta' });
+    }
+  });
+
+  app.post('/api/auth/encrypt', (req, res) => {
+    const { password } = req.body;
+    
+    try {
+      encryptDatabase(password);
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // Profesor
   app.get('/api/profesor', (req, res) => res.json(ProfesorDAO.get() || null));
   app.post('/api/profesor', (req, res) => {

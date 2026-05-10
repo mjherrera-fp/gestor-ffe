@@ -5,11 +5,9 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "rebuild:node": "npm rebuild better-sqlite3",
-    "rebuild:electron": "npx @electron/rebuild -f -w better-sqlite3",
-    
+    "rebuild:node": "npm rebuild better-sqlite3-multiple-ciphers",
+    "rebuild:electron": "npx @electron/rebuild -f -w better-sqlite3-multiple-ciphers",
     "dev": "npm run rebuild:node && concurrently --raw --kill-others \"npm run dev:server\" \"npm run dev:electron:wait\"",
-    
     "dev:server": "tsx watch --ignore \"**/*.sqlite\" --ignore \"**/*.sqlite-*\" --ignore \"**/*.db\" --ignore \"**/*.db-*\" --ignore \"uploads/**\" server.ts",
     "dev:electron": "electron .",
     "dev:electron:wait": "wait-on tcp:127.0.0.1:3000 && npm run dev:electron",
@@ -18,9 +16,8 @@
     "preview": "vite preview",
     "clean": "npx rimraf dist dist-server release",
     "lint": "tsc --noEmit",
-    
     "pack:win": "npm run clean && npm run build && npm run build:server && npm run rebuild:electron && electron-builder --win --x64",
-    "pack:win:portable": "npm run clean && npm run build && npm run build:server && npx rimraf node_modules/better-sqlite3/build && npm run rebuild:electron && electron-builder --win --x64 -c.win.target=portable"
+    "pack:win:portable": "npm run clean && npm run build && npm run build:server && npx rimraf node_modules/better-sqlite3-multiple-ciphers/build && npm run rebuild:electron && electron-builder --win --x64 -c.win.target=portable"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
@@ -29,7 +26,7 @@
     "@tippyjs/react": "^4.2.6",
     "@vitejs/plugin-react": "^5.0.4",
     "@xmldom/xmldom": "^0.9.10",
-    "better-sqlite3": "^12.9.0",
+    "better-sqlite3-multiple-ciphers": "^12.9.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "docxtemplater": "^3.68.6",

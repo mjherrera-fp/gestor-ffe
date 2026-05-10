@@ -1,58 +1,61 @@
-import Database from 'better-sqlite3';
+import Database from 'better-sqlite3-multiple-ciphers';
 import path from 'path';
 
 // Recuperamos la ruta que configuramos en el servidor
 const baseDir = process.env.PORTABLE_EXECUTABLE_DIR || process.cwd();
 const dbPath = path.join(baseDir, 'ffe_management.db');
 
-export const db = new Database(dbPath, { 
-  verbose: process.env.NODE_ENV !== 'production' ? console.log : undefined 
+export const db = new Database(dbPath, {
+  verbose: process.env.NODE_ENV !== 'production' ? console.log : undefined
 });
 
-db.exec('PRAGMA foreign_keys = ON;');
+export const initDB = () => {
+  try {
 
-// Initialize schema
-db.exec('PRAGMA foreign_keys = OFF;');
+    db.exec('PRAGMA foreign_keys = ON;');
 
-const tablesToDrop = new Set<string>();
+    // Initialize schema
+    db.exec('PRAGMA foreign_keys = OFF;');
 
-const tableInfoConvenios = db.prepare("PRAGMA table_info(convenios)").all() as any[];
-if (tableInfoConvenios.length > 0) {
-  const hasEmpresaId = tableInfoConvenios.some(col => col.name === 'empresaId');
-  const hasCentroIdConvenio = tableInfoConvenios.some(col => col.name === 'centroId');
-  if (!hasEmpresaId || !hasCentroIdConvenio) {
-    tablesToDrop.add('relaciones_alumnos');
-    tablesToDrop.add('convenios');
-  }
-}
+    const tablesToDrop = new Set<string>();
 
-const tableInfoDetalles = db.prepare("PRAGMA table_info(detalles_academicos)").all() as any[];
-if (tableInfoDetalles.length > 0) {
-  const hasRADetalles = tableInfoDetalles.some(col => col.name === 'resultadosAprendizaje');
-  if (!hasRADetalles) {
-    tablesToDrop.add('alumnos');
-    tablesToDrop.add('detalles_academicos');
-  }
-}
+    const tableInfoConvenios = db.prepare("PRAGMA table_info(convenios)").all() as any[];
+    if (tableInfoConvenios.length > 0) {
+      const hasEmpresaId = tableInfoConvenios.some(col => col.name === 'empresaId');
+      const hasCentroIdConvenio = tableInfoConvenios.some(col => col.name === 'centroId');
+      if (!hasEmpresaId || !hasCentroIdConvenio) {
+        tablesToDrop.add('relaciones_alumnos');
+        tablesToDrop.add('convenios');
+      }
+    }
 
-const tableInfoCursos = db.prepare("PRAGMA table_info(cursos)").all() as any[];
-if (tableInfoCursos.length > 0) {
-  const hasRA = tableInfoCursos.some(col => col.name === 'resultadosAprendizaje');
-  if (hasRA) {
-    tablesToDrop.add('relaciones_alumnos');
-    tablesToDrop.add('convenios');
-    tablesToDrop.add('alumnos');
-    tablesToDrop.add('cursos');
-  }
-}
+    const tableInfoDetalles = db.prepare("PRAGMA table_info(detalles_academicos)").all() as any[];
+    if (tableInfoDetalles.length > 0) {
+      const hasRADetalles = tableInfoDetalles.some(col => col.name === 'resultadosAprendizaje');
+      if (!hasRADetalles) {
+        tablesToDrop.add('alumnos');
+        tablesToDrop.add('detalles_academicos');
+      }
+    }
 
-tablesToDrop.forEach(table => {
-  db.exec(`DROP TABLE IF EXISTS ${table}`);
-});
+    const tableInfoCursos = db.prepare("PRAGMA table_info(cursos)").all() as any[];
+    if (tableInfoCursos.length > 0) {
+      const hasRA = tableInfoCursos.some(col => col.name === 'resultadosAprendizaje');
+      if (hasRA) {
+        tablesToDrop.add('relaciones_alumnos');
+        tablesToDrop.add('convenios');
+        tablesToDrop.add('alumnos');
+        tablesToDrop.add('cursos');
+      }
+    }
 
-db.exec('PRAGMA foreign_keys = ON;');
+    tablesToDrop.forEach(table => {
+      db.exec(`DROP TABLE IF EXISTS ${table}`);
+    });
 
-db.exec(`
+    db.exec('PRAGMA foreign_keys = ON;');
+
+    db.exec(`
   CREATE TABLE IF NOT EXISTS profesores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre TEXT NOT NULL,
@@ -172,5 +175,10 @@ db.exec(`
     FOREIGN KEY(empresaId) REFERENCES empresas(id) ON DELETE CASCADE
   );
 `);
+
+  } catch (error) {
+    console.error("Error inicializando tablas:", error);
+  }
+};
 
 export default db;

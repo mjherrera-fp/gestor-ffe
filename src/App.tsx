@@ -24,6 +24,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { Profesor, Curso, Alumno, Empresa, Convenio, ConvenioEstado } from './types/index.ts';
 import packageJson from '../package.json';
+import LockScreen from './components/LockScreen.tsx';
 
 // Components
 import ProfesorView from './views/ProfesorView.tsx';
@@ -42,8 +43,23 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // 1. Nuevos estados
+  const [isLocked, setIsLocked] = useState(false);
+  const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+
   const fetchData = async () => {
     try {
+      const statusRes = await fetch('/api/auth/status');
+      const { locked } = await statusRes.json();
+
+      if (locked) {
+        setIsLocked(true);
+        setLoading(false);
+        return; // Cortamos la ejecución aquí
+      }
+
+      // Si no está bloqueada, sigue tu código normal:
       const [profesorRes, cursosRes] = await Promise.all([
         fetch('/api/profesor'),
         fetch('/api/cursos')
@@ -93,6 +109,34 @@ export default function App() {
     { id: 'convenios', label: 'Convenios', icon: FileText, disabled: activeCursos.length === 0 },
     { id: 'relaciones', label: 'Relaciones', icon: ArrowLeftRight, disabled: activeCursos.length === 0 },
   ];
+
+  // 3. Función para intentar desbloquear
+  // Función para desbloquear (recibe directamente el string del componente)
+  const handleUnlock = async (password: string) => {
+    try {
+      const res = await fetch('/api/auth/unlock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+
+      if (res.ok) {
+        setIsLocked(false);
+        setAuthError('');
+        setLoading(true);
+        await fetchData(); // Recargamos todo ahora que hay acceso
+      } else {
+        setAuthError('La contraseña es incorrecta o el archivo está dañado.');
+      }
+    } catch (err) {
+      setAuthError('Error de comunicación con el servidor.');
+    }
+  };
+
+  // 4. Si isLocked es true, renderiza la pantalla de bloqueo en lugar de la app
+  if (isLocked) {
+    return <LockScreen onUnlock={handleUnlock} error={authError} />;
+  }
 
   if (loading) {
     return (
@@ -158,10 +202,10 @@ export default function App() {
               }}
               disabled={item.disabled}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-semibold text-sm ${activeTab === item.id
-                  ? 'bg-primary-light text-primary'
-                  : item.disabled
-                    ? 'opacity-40 cursor-not-allowed text-text-muted'
-                    : 'text-text-muted hover:bg-slate-50 hover:text-text-main'
+                ? 'bg-primary-light text-primary'
+                : item.disabled
+                  ? 'opacity-40 cursor-not-allowed text-text-muted'
+                  : 'text-text-muted hover:bg-slate-50 hover:text-text-main'
                 }`}
             >
               <item.icon className="h-5 w-5" />
@@ -193,7 +237,7 @@ export default function App() {
               <h2 className="text-lg lg:text-xl font-bold text-text-main leading-none">
                 {navItems.find(i => i.id === activeTab)?.label}
               </h2>
-              
+
             </div>
             <div className="sm:hidden">
               <h2 className="text-base font-bold text-text-main">
