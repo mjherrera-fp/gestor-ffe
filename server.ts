@@ -224,44 +224,44 @@ async function startServer() {
 
   // Emails
   app.post('/api/send-email', async (req, res) => {
-  const { profesorId, tipo, destinatarios, plantillaId, asunto } = req.body;
+    const { profesorId, tipo, destinatarios, plantillaId, asunto } = req.body;
 
-  try {
-    // 1. Obtener la configuración del profesor desde la BD
-    const profesor = ProfesorDAO.get();
-    
-    if (!profesor || !profesor.smtp_user || !profesor.smtp_pass) {
-      return res.status(400).json({ error: "Configuración de email incompleta" });
+    try {
+      // 1. Obtener la configuración del profesor desde la BD
+      const profesor = ProfesorDAO.get();
+
+      if (!profesor || !profesor.smtp_user || !profesor.smtp_pass) {
+        return res.status(400).json({ error: "Configuración de email incompleta" });
+      }
+
+      // 2. Crear transporter dinámico
+      const transporter = nodemailer.createTransport({
+        host: profesor.smtp_host,
+        port: profesor.smtp_port,
+        secure: profesor.smtp_secure,
+        auth: {
+          user: profesor.smtp_user,
+          pass: profesor.smtp_pass,
+        },
+      });
+
+      // 3. Renderizar y enviar (usando React Email)
+      const emailHtml = await render(
+        tipo === 'estudiante' ? EstudianteTemplate(destinatarios) : EmpresaTemplate(destinatarios)
+      );
+
+      await transporter.sendMail({
+        from: `"${profesor.nombre} ${profesor.apellidos}" <${profesor.smtp_user}>`,
+        to: destinatarios,
+        subject: asunto,
+        html: emailHtml,
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Error al enviar el email", details: error });
     }
-
-    // 2. Crear transporter dinámico
-    const transporter = nodemailer.createTransport({
-      host: profesor.smtp_host,
-      port: profesor.smtp_port,
-      secure: profesor.smtp_secure, 
-      auth: {
-        user: profesor.smtp_user,
-        pass: profesor.smtp_pass,
-      },
-    });
-
-    // 3. Renderizar y enviar (usando React Email)
-    const emailHtml = await render(
-      tipo === 'estudiante' ? EstudianteTemplate(destinatarios) : EmpresaTemplate(destinatarios)
-    );
-
-    await transporter.sendMail({
-      from: `"${profesor.nombre} ${profesor.apellidos}" <${profesor.smtp_user}>`,
-      to: destinatarios,
-      subject: asunto,
-      html: emailHtml,
-    });
-
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: "Error al enviar el email", details: error });
-  }
-});
+  });
 
   // Cursos
   app.get('/api/cursos', (req, res) => res.json(CursoDAO.getAll()));
@@ -307,6 +307,10 @@ async function startServer() {
   });
   app.put('/api/alumnos/:id/estado-seguimiento', (req, res) => {
     AlumnoDAO.updateEstadoSeguimiento(Number(req.params.id), req.body.estadoSeguimiento);
+    res.json({ success: true });
+  });
+  app.put('/api/alumnos/:id/estado-valoracion', (req, res) => {
+    AlumnoDAO.updateEstadoValoracion(Number(req.params.id), req.body.estadoValoracion);
     res.json({ success: true });
   });
   app.delete('/api/alumnos/:id', (req, res) => {
@@ -852,7 +856,6 @@ async function startServer() {
 
       const convenio = ConvenioDAO.getById(relacion.convenioId); //
       const empresa = EmpresaDAO.getById(convenio.empresaId); //
-      const centro = CentroDAO.getById(convenio.centroId!); //
       const tutorEmpresa = TutorEmpresaDAO.getById(relacion.tutorEmpresaId); //
       const curso = CursoDAO.getById(convenio.cursoId); //
       const profesor = ProfesorDAO.get(); //
@@ -886,7 +889,7 @@ async function startServer() {
       const data: any = {
         CURSO: curso?.descripcion || "",
         NUMERO_CONVENIO: convenio?.numConvenio || "",
-        NUMERO_RELACION_ALUMNO: relacion?.id || "",
+        NUMERO_RELACION_ALUMNO: relacion?.numRelacion || "",
         ALUMNADO_APELLIDOS: alumno?.apellidos || "",
         ALUMNADO_NOMBRE: alumno?.nombre || "",
         ALUMNADO_EMAIL: alumno?.emailEduca || "",
@@ -933,6 +936,92 @@ async function startServer() {
       res.status(500).json({ error: 'Error interno generando el documento' });
     }
   });
+
+  // --- ENDPOINT GENERACIÓN DE VALORACIÓN ---
+  app.get('/api/relaciones-alumnos/:id/valoracion', async (req, res) => {
+    try {
+      const relacionId = Number(req.params.id);
+      const alumnoId = Number(req.query.alumnoId);
+
+      // 1. Usar el DAO para obtener los datos
+      const relacion = RelacionAlumnoDAO.getById(relacionId); //
+      const alumno = AlumnoDAO.getById(alumnoId); //
+
+      if (!relacion || !alumno) return res.status(404).json({ error: 'Datos no encontrados' });
+
+      const convenio = ConvenioDAO.getById(relacion.convenioId); //
+      const empresa = EmpresaDAO.getById(convenio.empresaId); //
+      const tutorEmpresa = TutorEmpresaDAO.getById(relacion.tutorEmpresaId); //
+      const curso = CursoDAO.getById(convenio.cursoId); //
+      const detalle = alumno.detalleAcademicoId ? DetalleAcademicoDAO.getById(alumno.detalleAcademicoId) : undefined; //
+      
+      // Mapeo de Resultados de Aprendizaje
+      const RAs = (detalle?.resultadosAprendizaje || []).map((ra: any) => ({
+        actividad: ra.actividadFormativa,
+        moduloCodigo: ra.codigo,
+        numero: ra.ra
+      }));
+
+      // 2. Cargar plantilla
+      const templatePath = isProd
+        ? path.join(__dirname, '..', 'templates', 'valoracion_final.docx')
+        : path.join(process.cwd(), 'templates', 'valoracion_final.docx');
+      const content = fs.readFileSync(templatePath, 'binary');
+      const zip = new PizZip(content);
+      const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+      // 3. Mapeo de variables
+      const data: any = {
+        CURSO: curso?.descripcion || "",
+        NUMERO_CONVENIO: convenio?.numConvenio || "",
+        NUMERO_RELACION_ALUMNO: relacion?.numRelacion || "",
+        ALUMNADO_APELLIDOS: alumno?.apellidos || "",
+        ALUMNADO_NOMBRE: alumno?.nombre || "",
+        ALUMNADO_EMAIL: alumno?.emailEduca || "",
+        EMPRESA: empresa?.nombre || "",
+        EMPRESA_TUTOR_APELLIDOS: tutorEmpresa?.apellidos || "",
+        EMPRESA_TUTOR_NOMBRE: tutorEmpresa?.nombre || "",
+        EMPRESA_TUTOR_EMAIL: tutorEmpresa?.email || "",
+        CICLO: detalle?.ciclo || "",
+        GRADO: detalle?.grado || "",
+        CICLO_CODIGO: detalle?.codigo || ""
+      };
+
+      // 4. Mapeo RAs
+      for (let i = 1; i <= 40; i++) {
+        if (RAs && RAs[i - 1]) {
+          // Si hay RA, rellenamos todas las columnas con sus datos
+          const ra = RAs[i - 1];
+          data[`COD${i}`] = ra.moduloCodigo || "";
+          data[`NUM${i}`] = ra.numero || "";
+        } else {
+          // Si la fila sobra, inyectamos la marca de borrado en la primera columna
+          // y dejamos las demás en blanco por limpieza.
+          data[`COD${i}`] = "@@ELIMINAR@@";
+          data[`NUM${i}`] = "";
+        }
+      }
+
+      doc.render(data);
+      let buf = doc.getZip().generate({ type: 'nodebuffer' });
+
+      // 5. Limpieza XML
+      buf = limpiarFilasActiveX(buf);
+
+      // IMPORTANTE: Finalizar correctamente la respuesta
+      res.writeHead(200, {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'Content-Disposition': `attachment; filename=Valoración_final_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.apellidos.replace(/\s+/g, '_')}.docx`,
+        'Content-Length': buf.length
+      });
+      res.end(buf);
+    } catch (error) {
+      console.error('Error generando Ficha de Valoración:', error);
+      res.status(500).json({ error: 'Error interno generando el documento' });
+    }
+  });
+
+
 
   // Vite setup y Rutas Estáticas (UNIFICADO)
   if (process.env.NODE_ENV !== 'production') {

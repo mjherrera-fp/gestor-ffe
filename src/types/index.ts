@@ -87,6 +87,7 @@ export interface Alumno {
   fechaFin: string;
   estadoPlanFormativo: PlanFormativoEstado;
   estadoSeguimiento: SeguimientoEstado;
+  estadoValoracion: ValoracionEstado;
 }
 
 export interface RelacionAlumno {
@@ -99,6 +100,7 @@ export interface RelacionAlumno {
   estado: RelacionEstado;
   estadoPlanFormativo: PlanFormativoEstado;
   estadoSeguimiento: SeguimientoEstado;
+  estadoValoracion: ValoracionEstado;
 }
 
 export interface Empresa {
@@ -163,8 +165,13 @@ export enum ConvenioEstado {
   COMPLETADO = 'COMPLETADO'
 }
 
-// Añadir el nuevo enum
 export enum SeguimientoEstado {
+  PENDIENTE = 'PENDIENTE',
+  ENVIADO_A_EMPRESA = 'ENVIADO_A_EMPRESA',
+  RECIBIDO = 'RECIBIDO'
+}
+
+export enum ValoracionEstado {
   PENDIENTE = 'PENDIENTE',
   ENVIADO_A_EMPRESA = 'ENVIADO_A_EMPRESA',
   RECIBIDO = 'RECIBIDO'
@@ -200,4 +207,10 @@ export const SeguimientoEstadoLabels: Record<SeguimientoEstado, string> = {
   [SeguimientoEstado.PENDIENTE]: 'Pendiente',
   [SeguimientoEstado.ENVIADO_A_EMPRESA]: 'Enviado a empresa',
   [SeguimientoEstado.RECIBIDO]: 'Recibido de empresa'
+};
+
+export const ValoracionEstadoLabels: Record<ValoracionEstado, string> = {
+  [ValoracionEstado.PENDIENTE]: 'Pendiente',
+  [ValoracionEstado.ENVIADO_A_EMPRESA]: 'Enviado a empresa',
+  [ValoracionEstado.RECIBIDO]: 'Recibido de empresa'
 };

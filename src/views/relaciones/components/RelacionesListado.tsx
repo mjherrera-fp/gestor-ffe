@@ -11,7 +11,7 @@ import { Title } from '@/src/components/Title.tsx';
 
 interface StatusBadgeProps {
   estado: string;
-  type: 'relacion' | 'plan' | 'seguimiento';
+  type: 'relacion' | 'plan' | 'seguimiento' | 'valoracion';
 }
 
 export function StatusBadge({ estado, type }: StatusBadgeProps) {

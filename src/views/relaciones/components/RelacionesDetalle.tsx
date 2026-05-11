@@ -1,10 +1,10 @@
 import React from 'react';
 import { FileText, ArrowLeft, Send, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import { RelacionAlumno, Alumno, RelacionEstado, PlanFormativoEstado, SeguimientoEstado } from '../../../types/index.ts';
+import { RelacionAlumno, Alumno, RelacionEstado, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado } from '../../../types/index.ts';
 import { BotonDescargaPDF } from '../../../components/BotonDescargaPDF.tsx';
 import { BotonDescargaDOCX } from '../../../components/BotonDescargaDOCX.tsx';
 import { StatusBadge } from './RelacionesListado.tsx';
-import { getAnexoStatusButton, getPlanStatusButton, getSeguimientoStatusButton } from '../utils/relacionesUtils.ts';
+import { getAnexoStatusButton, getPlanStatusButton, getSeguimientoStatusButton, getValoracionStatusButton } from '../utils/relacionesUtils.ts';
 import { Title } from '@/src/components/Title.tsx';
 
 interface RelacionDetalleProps {
@@ -21,6 +21,9 @@ interface RelacionDetalleProps {
   onDescargarSeguimientoIndividual: (alumno: Alumno) => Promise<void>;
   onAdvanceSeguimientoIndividual: (alumno: Alumno) => void;
   onMoveBackSeguimientoIndividual: (alumno: Alumno) => void;
+  onDescargarValoracionIndividual: (alumno: Alumno) => Promise<void>;
+  onAdvanceValoracionIndividual: (alumno: Alumno) => void;
+  onMoveBackValoracionIndividual: (alumno: Alumno) => void;
 }
 
 export function RelacionDetalle({
@@ -30,7 +33,8 @@ export function RelacionDetalle({
   onAdvancePlanIndividual, onMoveBackPlanIndividual,
   onDescargarPlan, onDescargarPlanIndividual,
   onDescargarSeguimientoIndividual, onAdvanceSeguimientoIndividual, 
-  onMoveBackSeguimientoIndividual
+  onMoveBackSeguimientoIndividual, onDescargarValoracionIndividual, 
+  onAdvanceValoracionIndividual, onMoveBackValoracionIndividual 
 }: RelacionDetalleProps) {
 
   if (!selectedRelacion) {
@@ -240,6 +244,76 @@ export function RelacionDetalle({
                     {!isInitial && (
                       <button
                         onClick={() => onMoveBackSeguimientoIndividual(alumno)}
+                        className="w-full h-7 border border-slate-200 text-slate-500 rounded-lg font-bold text-[9px] uppercase whitespace-nowrap flex items-center justify-center gap-1.5 hover:bg-slate-50 transition-colors"
+                      >
+                        <ArrowLeft className="h-3 w-3 shrink-0" /> Deshacer estado
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── BLOQUE 4: VALORACION (por alumno) ── */}
+        <section className="bg-blue-50/30 border border-blue-100 rounded-2xl p-4 space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
+              <FileText className="h-3.5 w-3.5" /> 4. Valoración
+            </label>
+          </div>
+
+          <div className="space-y-3">
+            {selectedRelacion.alumnos?.map(alumno => {
+              const estadoValoracion = (alumno as any).estadoValoracion || ValoracionEstado.PENDIENTE;
+              const planBtn = getValoracionStatusButton(estadoValoracion);
+              const isInitial = estadoValoracion === ValoracionEstado.PENDIENTE;
+
+              return (
+                <div
+                  key={alumno.id}
+                  className="bg-white border border-blue-100 rounded-xl p-3 shadow-sm flex flex-col gap-3"
+                >
+                  {/* Cabecera alumno */}
+                  <div className="flex items-center justify-between border-b border-slate-50 pb-2">
+                    <span className="text-xs font-bold text-slate-700 truncate pr-2">
+                      {alumno.nombre} {alumno.apellidos}
+                    </span>
+                    <StatusBadge estado={estadoValoracion} type="valoracion" />
+                  </div>
+
+                  {/* Botones de acción */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <div className="flex gap-1 shrink-0">
+                        <BotonDescargaDOCX
+                          onClick={async () => onDescargarValoracionIndividual(alumno)}
+                          showText={true}
+                          className="h-8 px-2 bg-white border border-slate-200 text-blue-600 rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-blue-50 transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
+                        />
+                      </div>
+
+                      {planBtn ? (
+                        <Title text={planBtn.label}>
+                          <button
+                            onClick={() => onAdvanceValoracionIndividual(alumno)}
+                            className={`flex-1 h-8 px-2 min-w-0 rounded-lg text-white font-bold text-[9px] uppercase whitespace-nowrap flex items-center justify-center gap-1.5 shadow-md transition-all hover:brightness-90 ${planBtn.color}`}
+                          >
+                            {React.createElement(planBtn.icon, { className: 'h-3.5 w-3.5 shrink-0' })}
+                            <span className="truncate">{planBtn.label}</span>
+                          </button>
+                        </Title>
+                      ) : (
+                        <div className="flex-1 h-8 bg-emerald-50 text-emerald-700 rounded-lg text-center font-bold text-[9px] border border-emerald-100 uppercase whitespace-nowrap flex items-center justify-center">
+                          COMPLETADO
+                        </div>
+                      )}
+                    </div>
+
+                    {!isInitial && (
+                      <button
+                        onClick={() => onMoveBackValoracionIndividual(alumno)}
                         className="w-full h-7 border border-slate-200 text-slate-500 rounded-lg font-bold text-[9px] uppercase whitespace-nowrap flex items-center justify-center gap-1.5 hover:bg-slate-50 transition-colors"
                       >
                         <ArrowLeft className="h-3 w-3 shrink-0" /> Deshacer estado

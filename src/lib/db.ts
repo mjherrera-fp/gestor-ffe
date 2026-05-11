@@ -159,6 +159,7 @@ export const initDB = () => {
     fechaFin TEXT,
     estadoPlanFormativo TEXT NOT NULL DEFAULT 'PENDIENTE_ENVIAR_ESTUDIANTE',
     estadoSeguimiento TEXT NOT NULL DEFAULT 'PENDIENTE',
+    estadoValoracion TEXT NOT NULL DEFAULT 'PENDIENTE',
     cursoId INTEGER,
     relacionId INTEGER,
     detalleAcademicoId INTEGER,

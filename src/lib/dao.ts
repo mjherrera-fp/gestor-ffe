@@ -1,5 +1,5 @@
 import db, { initDB } from './db.ts';
-import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado } from '../types/index.ts';
+import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado } from '../types/index.ts';
 
 const safeParse = (str: any, fallback: any) => {
   if (!str || str === 'undefined' || str === 'null') return fallback;
@@ -202,13 +202,13 @@ export const AlumnoDAO = {
   getById: (id: number) => db.prepare('SELECT * FROM alumnos WHERE id = ?').get(id) as Alumno,
   getByRelacionId: (id: number) => db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').get(id) as Alumno[],
   create: (alumno: Alumno) => {
-    const stmt = db.prepare('INSERT INTO alumnos (nombre, apellidos, dni, numSS, tlfn, emailEduca, emailPersonal, fechaNacimiento, cursoId, detalleAcademicoId, totalHorasFFE, fechaInicio, fechaFin, estadoPlanFormativo, estadoSeguimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin);
+    const stmt = db.prepare('INSERT INTO alumnos (nombre, apellidos, dni, numSS, tlfn, emailEduca, emailPersonal, fechaNacimiento, cursoId, detalleAcademicoId, totalHorasFFE, fechaInicio, fechaFin, estadoPlanFormativo, estadoSeguimiento, estadoValoracion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo, alumno.estadoSeguimiento, alumno.estadoValoracion);
     return info.lastInsertRowid;
   },
   update: (id: number, alumno: Alumno) => {
-    const stmt = db.prepare('UPDATE alumnos SET nombre = ?, apellidos = ?, dni = ?, numSS = ?, tlfn = ?, emailEduca = ?, emailPersonal = ?, fechaNacimiento = ?, cursoId = ?, detalleAcademicoId = ?, totalHorasFFE = ?, fechaInicio = ?, fechaFin = ?, estadoPlanFormativo = ?, estadoSeguimiento = ? WHERE id = ?');
-    stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo, alumno.estadoSeguimiento, id);
+    const stmt = db.prepare('UPDATE alumnos SET nombre = ?, apellidos = ?, dni = ?, numSS = ?, tlfn = ?, emailEduca = ?, emailPersonal = ?, fechaNacimiento = ?, cursoId = ?, detalleAcademicoId = ?, totalHorasFFE = ?, fechaInicio = ?, fechaFin = ?, estadoPlanFormativo = ?, estadoSeguimiento = ?, estadoValoracion = ? WHERE id = ?');
+    stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo, alumno.estadoSeguimiento, alumno.estadoValoracion, id);
   },
   updateEstadoPlanFormativo: (id: number, estadoPlanFormativo: PlanFormativoEstado) => {
     const stmt = db.prepare('UPDATE alumnos SET estadoPlanFormativo = ? WHERE id = ?');
@@ -217,6 +217,10 @@ export const AlumnoDAO = {
   updateEstadoSeguimiento: (id: number, estadoSeguimiento: SeguimientoEstado) => {
     const stmt = db.prepare('UPDATE alumnos SET estadoSeguimiento = ? WHERE id = ?');
     stmt.run(estadoSeguimiento, id);
+  },
+  updateEstadoValoracion: (id: number, estadoValoracion: ValoracionEstado) => {
+    const stmt = db.prepare('UPDATE alumnos SET estadoValoracion = ? WHERE id = ?');
+    stmt.run(estadoValoracion, id);
   },
   linkDetalle: (alumnoId: number, detalleId: number | null) => {
     db.prepare('UPDATE alumnos SET detalleAcademicoId = ? WHERE id = ?').run(detalleId, alumnoId);
@@ -407,39 +411,11 @@ export const RelacionAlumnoDAO = {
   delete: (id: number) => {
     db.transaction(() => {
       // 1. Limpiamos la referencia en los alumnos antes de borrar la relación
-      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = ?, estadoSeguimiento = ? WHERE relacionId = ?').run('PENDIENTE_ENVIAR_ESTUDIANTE', 'PENDIENTE', id);
+      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = ?, estadoSeguimiento = ?, estadoValoracion = ? WHERE relacionId = ?').run('PENDIENTE_ENVIAR_ESTUDIANTE', 'PENDIENTE', 'PENDIENTE', id);
       
       // 2. Borramos la relación
       db.prepare('DELETE FROM relaciones WHERE id = ?').run(id);
     })();
-  },
-
-  getRelacionAlumnoParaSeguimiento: (relacionId: number, alumnoId: number) => {
-    // Como ya no hay tabla pivote, buscamos la info cruzando la relación y el alumno directamente
-    const stmt = db.prepare(`
-      SELECT 
-        r.id AS relacionId,
-        c.numConvenio,
-        a.id AS alumnoId,
-        a.nombre AS alumnoNombre,
-        a.apellidos AS alumnoApellidos,
-        a.emailEduca AS alumnoEmail,
-        e.nombre AS empresaNombre,
-        te.nombre AS tutorEmpresaNombre,
-        te.apellidos AS tutorEmpresaApellidos,
-        te.email AS tutorEmpresaEmail,
-        t.nombre AS tutorCentroNombre,
-        t.apellidos AS tutorCentroApellidos
-      FROM relaciones r
-      JOIN convenios c ON r.convenioId = c.id
-      JOIN alumnos a ON a.relacionId = r.id
-      JOIN empresas e ON c.empresaId = e.id
-      JOIN tutores_empresa te ON r.tutorEmpresaId = te.id
-      LEFT JOIN tutores t ON c.centroId = t.id -- Asegúrate de que esta relación tutor-centro es la correcta según tu esquema
-      WHERE r.id = ? AND a.id = ?
-  `);
-
-    return stmt.get(relacionId, alumnoId);
   }
 };
 

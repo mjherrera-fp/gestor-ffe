@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import JSZip from 'jszip';
 import {
     RelacionAlumno, Convenio, TutorEmpresa, Alumno, Curso,
-    RelacionEstado, PlanFormativoEstado, HorarioSemanal, SeguimientoEstado
+    RelacionEstado, PlanFormativoEstado, HorarioSemanal, SeguimientoEstado,
+    ValoracionEstado
 } from '../../../types/index.ts';
 import {
     DEFAULT_HORARIO,
@@ -13,7 +14,9 @@ import {
     getNextPlanEstado,
     getPrevPlanEstado,
     getNextSeguimientoEstado,
-    getPrevSeguimientoEstado
+    getPrevSeguimientoEstado,
+    getNextValoracionEstado,
+    getPrevValoracionEstado
 } from '../utils/relacionesUtils.ts';
 
 //todo el estado y lógica de relaciones-alumnos, incluyendo gestión de alumnos en el formulario, cambios de estado y descargas de planes formativos
@@ -383,6 +386,34 @@ export function useRelaciones(cursoId: number) {
             fetchData();
         } catch (error) { console.error('Error al retroceder seguimiento individual:', error); }
     };
+
+    const advanceValoracionStatusIndividual = async (alumno: Alumno) => {
+        const currentState = (alumno as any).estadoValoracion || ValoracionEstado.PENDIENTE;
+        const nextEstado = getNextValoracionEstado(currentState);
+        if (nextEstado === currentState) return;
+        try {
+            await fetch(`/api/alumnos/${alumno.id}/estado-valoracion`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estadoValoracion: nextEstado }),
+            });
+            fetchData();
+        } catch (error) { console.error('Error al avanzar valoración individual:', error); }
+    };
+
+    const moveBackValoracionStatusIndividual = async (alumno: Alumno) => {
+        const currentState = (alumno as any).estadoValoracion || ValoracionEstado.PENDIENTE;
+        const prevEstado = getPrevValoracionEstado(currentState);
+        if (prevEstado === currentState) return;
+        try {
+            await fetch(`/api/alumnos/${alumno.id}/estado-valoracion`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estadoValoracion: prevEstado }),
+            });
+            fetchData();
+        } catch (error) { console.error('Error al retroceder valoración individual:', error); }
+    };
     // ─────────────────────────────────────────
     //  DESCARGAS
     // ─────────────────────────────────────────
@@ -487,6 +518,27 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar el seguimiento de ${nombreAlumno}`); }
     };
 
+    const descargarValoracionIndividual = async (alumno: Alumno) => {
+        if (!selectedRelacion) return;
+        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/valoracion`;
+        const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `Valoracion_${numRelacionLimpio}_${nombreAlumno}.docx`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) { alert(`Error al descargar la valoración de ${nombreAlumno}`); }
+    };
+
     // ─────────────────────────────────────────
     //  DATOS DERIVADOS
     // ─────────────────────────────────────────
@@ -565,8 +617,9 @@ export function useRelaciones(cursoId: number) {
         advancePlanStatus, moveBackPlanStatus,
         advancePlanStatusIndividual, moveBackPlanStatusIndividual,
         advanceSeguimientoStatusIndividual, moveBackSeguimientoStatusIndividual,
+        advanceValoracionStatusIndividual, moveBackValoracionStatusIndividual,
         // Descargas
         descargarPlanesFormativos, descargarPlanFormativoIndividual, 
-        descargarSeguimientoIndividual,
+        descargarSeguimientoIndividual, descargarValoracionIndividual,
     };
 }

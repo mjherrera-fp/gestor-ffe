@@ -8,6 +8,8 @@ import {
   SeguimientoEstado,
   SeguimientoEstadoLabels,
   Curso,
+  ValoracionEstado,
+  ValoracionEstadoLabels,
 } from '../../../types/index.ts';
 import { Send, Clock, ShieldCheck, Check } from 'lucide-react';
 
@@ -154,6 +156,10 @@ export const getStatusBadgeColor = (estado: string, type: string): string => {
     if (estado === SeguimientoEstado.PENDIENTE) return 'bg-slate-50 text-slate-500 border-slate-200';
     if (estado === SeguimientoEstado.ENVIADO_A_EMPRESA)   return 'bg-amber-50 text-amber-700 border-amber-100';
     if (estado === SeguimientoEstado.RECIBIDO)  return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+  } else if (type === 'valoracion') {
+    if (estado === ValoracionEstado.PENDIENTE) return 'bg-slate-50 text-slate-500 border-slate-200';
+    if (estado === ValoracionEstado.ENVIADO_A_EMPRESA)   return 'bg-amber-50 text-amber-700 border-amber-100';
+    if (estado === ValoracionEstado.RECIBIDO)  return 'bg-emerald-50 text-emerald-700 border-emerald-100';
   }
   return 'bg-slate-50 text-slate-500 border-slate-200';
 };
@@ -165,6 +171,8 @@ export const getStatusLabel = (estado: string, type: string): string => {
     return PlanFormativoEstadoLabels[estado as PlanFormativoEstado] || estado;
   } else if (type === 'seguimiento') {
     return SeguimientoEstadoLabels[estado as SeguimientoEstado] || estado;
+  } else if (type === 'valoracion') {
+    return ValoracionEstadoLabels[estado as ValoracionEstado] || estado;
   }
   return estado;
 };
@@ -199,6 +207,14 @@ export const getSeguimientoStatusButton = (estado: string) => {
   switch (estado) {
     case SeguimientoEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: 'bg-blue-600' };
     case SeguimientoEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: 'bg-emerald-600' };
+    default: return null;
+  }
+};
+
+export const getValoracionStatusButton = (estado: string) => {
+  switch (estado) {
+    case ValoracionEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: 'bg-blue-600' };
+    case ValoracionEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: 'bg-emerald-600' };
     default: return null;
   }
 };
@@ -275,6 +291,22 @@ export const getPrevSeguimientoEstado = (estado: SeguimientoEstado | string): Se
   switch (estado) {
     case SeguimientoEstado.ENVIADO_A_EMPRESA:   return SeguimientoEstado.PENDIENTE;
     case SeguimientoEstado.RECIBIDO:  return SeguimientoEstado.ENVIADO_A_EMPRESA;
+    default: return estado;
+  }
+};
+
+export const getNextValoracionEstado = (estado: ValoracionEstado | string): ValoracionEstado | string => {
+  switch (estado) {
+    case ValoracionEstado.PENDIENTE: return ValoracionEstado.ENVIADO_A_EMPRESA;
+    case ValoracionEstado.ENVIADO_A_EMPRESA:   return ValoracionEstado.RECIBIDO;
+    default: return estado;
+  }
+};
+
+export const getPrevValoracionEstado = (estado: ValoracionEstado | string): ValoracionEstado | string => {
+  switch (estado) {
+    case ValoracionEstado.ENVIADO_A_EMPRESA:   return ValoracionEstado.PENDIENTE;
+    case ValoracionEstado.RECIBIDO:  return ValoracionEstado.ENVIADO_A_EMPRESA;
     default: return estado;
   }
 };
