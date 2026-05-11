@@ -187,6 +187,18 @@ export function useAlumnos(cursoId: number) {
     }
   };
 
+  const handleFileDelete = async (id: number) => {
+    try {
+      const res = await fetch(`/api/alumnos/${id}/cv`, { method: 'DELETE' });
+      if (res.ok) {
+        // Actualizar el estado local para quitar el CV sin recargar todo
+        setAlumnos(alumnos.map(a => a.id === id ? { ...a, cvPath: undefined } : a));
+      }
+    } catch (error) {
+      console.error('Error al eliminar CV:', error);
+    }
+  };
+
   // ─────────────────────────────────────────
   //  HANDLERS: EXCEL
   // ─────────────────────────────────────────
@@ -339,6 +351,7 @@ export function useAlumnos(cursoId: number) {
     fetchAlumnos,
     // CV
     handleFileUpload,
+    handleFileDelete,
     // Excel
     isImporting,
     fileInputRef,

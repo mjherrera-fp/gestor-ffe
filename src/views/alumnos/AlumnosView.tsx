@@ -107,6 +107,7 @@ export default function AlumnosView({ cursoId }: Props) {
               onDelete={ctx.setShowDeleteConfirm}
               onAcademicDetail={ctx.setAcademicDetailAlumno}
               onFileUpload={ctx.handleFileUpload}
+              onFileDelete={ctx.handleFileDelete}
             />
           ))}
         </div>

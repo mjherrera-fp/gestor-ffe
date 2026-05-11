@@ -9,6 +9,13 @@ export const db = new Database(dbPath, {
   verbose: process.env.NODE_ENV !== 'production' ? console.log : undefined
 });
 
+// 1. Obligamos a usar el idioma de DB Browser
+db.pragma(`cipher='sqlcipher'`);
+db.pragma(`legacy=4`)
+// 2. OBLIGAMOS a que el tamaño de página sea exactamente el que espera DB Browser
+db.pragma("page_size=4096");
+
+
 export const initDB = () => {
   try {
 
@@ -62,7 +69,12 @@ export const initDB = () => {
     apellidos TEXT NOT NULL,
     nif TEXT NOT NULL,
     email TEXT NOT NULL,
-    telefono TEXT NOT NULL
+    telefono TEXT NOT NULL,
+    smtp_host TEXT DEFAULT 'smtp.educamadrid.org',
+    smtp_port INTEGER DEFAULT 587,
+    smtp_user TEXT,
+    smtp_pass TEXT, -- En un entorno real, esto debería estar cifrado
+    smtp_secure BOOLEAN DEFAULT 0
   );
 
   CREATE TABLE IF NOT EXISTS centros_educativos (

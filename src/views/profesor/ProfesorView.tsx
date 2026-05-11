@@ -8,11 +8,16 @@ import { SeguridadPanel }       from './components/SeguridadPanel.tsx';
 import { CentrosEducativos }    from './components/CentrosEducativos.tsx';
 import { CentroFormModal }      from './components/CentroFormModal.tsx';
 import { DetalleFormModal }     from './components/DetalleFormModal.tsx';
+import { EmailConfigPanel } from './components/EmailConfigPanel.tsx';
 
 interface Props {
   profesor: Profesor | null;
   onUpdate: (profesor: Profesor) => void;
 }
+
+export const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
+export const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+
 
 export default function ProfesorView({ profesor, onUpdate }: Props) {
   const ctx = useProfesor(profesor, onUpdate);
@@ -79,6 +84,16 @@ export default function ProfesorView({ profesor, onUpdate }: Props) {
         onEncrypt={ctx.handleEncryptDatabase}
         onExecuteEncryption={ctx.executeEncryption}
         onCloseConfirmModal={() => ctx.setShowConfirmModal(false)}
+      />
+
+      {/* ── PANEL CONFIGURACIÓN EMAIL (NUEVO) ── */}
+      <EmailConfigPanel
+        formData={ctx.formData}
+        setFormData={ctx.setFormData}
+        saving={ctx.savingEmail}
+        success={ctx.successEmail}
+        error={ctx.errorEmail}
+        onSubmit={ctx.handleSaveEmailConfig}
       />
 
       {/* ── CENTROS EDUCATIVOS ── */}

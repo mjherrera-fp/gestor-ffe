@@ -20,27 +20,33 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   // ── Datos del perfil ──
   const [formData, setFormData] = useState<Profesor>({
     nombre: '', apellidos: '', nif: '', email: '', telefono: '',
+    smtp_host: 'smtp.educamadrid.org', smtp_port: 587, smtp_user: '', smtp_pass: '', smtp_secure: false
   });
-  const [saving,  setSaving]  = useState(false);
+  const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Estados independientes para el formulario de email
+  const [savingEmail, setSavingEmail] = useState(false);
+  const [successEmail, setSuccessEmail] = useState(false);
+  const [errorEmail, setErrorEmail] = useState('');
+
   // ── Centros ──
-  const [centros,       setCentros]       = useState<CentroWithDetalles[]>([]);
+  const [centros, setCentros] = useState<CentroWithDetalles[]>([]);
   const [loadingCentros, setLoadingCentros] = useState(false);
 
   // ── Modal eliminar ──
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<DeleteTarget | null>(null);
 
   // ── Modal centro ──
-  const [showCentroForm,  setShowCentroForm]  = useState(false);
-  const [editingCentro,   setEditingCentro]   = useState<CentroEducativo | null>(null);
-  const [centroFormData,  setCentroFormData]  = useState<Partial<CentroEducativo>>({});
+  const [showCentroForm, setShowCentroForm] = useState(false);
+  const [editingCentro, setEditingCentro] = useState<CentroEducativo | null>(null);
+  const [centroFormData, setCentroFormData] = useState<Partial<CentroEducativo>>({});
 
   // ── Modal detalle ──
-  const [showDetalleForm,  setShowDetalleForm]  = useState(false);
-  const [editingDetalle,   setEditingDetalle]   = useState<DetalleAcademico | null>(null);
-  const [detalleFormData,  setDetalleFormData]  = useState<Partial<DetalleAcademico>>({});
-  const [currentCentroId,  setCurrentCentroId]  = useState<number | null>(null);
+  const [showDetalleForm, setShowDetalleForm] = useState(false);
+  const [editingDetalle, setEditingDetalle] = useState<DetalleAcademico | null>(null);
+  const [detalleFormData, setDetalleFormData] = useState<Partial<DetalleAcademico>>({});
+  const [currentCentroId, setCurrentCentroId] = useState<number | null>(null);
 
   // ── RA en curso ──
   const [newRA, setNewRA] = useState<Partial<ResultadoAprendizaje>>({
@@ -48,12 +54,12 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   });
 
   // ── Seguridad / cifrado ──
-  const [newPassword,      setNewPassword]      = useState('');
-  const [confirmPassword,  setConfirmPassword]  = useState('');
-  const [isEncrypting,     setIsEncrypting]     = useState(false);
-  const [isEncrypted,      setIsEncrypted]      = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isEncrypting, setIsEncrypting] = useState(false);
+  const [isEncrypted, setIsEncrypted] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [message,          setMessage]          = useState<Message>({ type: '', text: '' });
+  const [message, setMessage] = useState<Message>({ type: '', text: '' });
 
   // ─────────────────────────────────────────
   //  EFECTOS
@@ -63,7 +69,15 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
 
   useEffect(() => {
     if (profesor) {
-      setFormData(profesor);
+      setFormData({
+        ...profesor,
+        // Al cargar de BD, si no hay datos SMTP ponemos los de defecto
+        smtp_host: profesor.smtp_host || 'smtp.educamadrid.org',
+        smtp_port: profesor.smtp_port || 587,
+        smtp_user: profesor.smtp_user || '',
+        smtp_pass: profesor.smtp_pass || '',
+        smtp_secure: !!profesor.smtp_secure // Aseguramos que sea boolean
+      });
       fetchCentros();
     }
   }, [profesor]);
@@ -80,7 +94,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
       const centrosData: CentroEducativo[] = await res.json();
       const centrosWithDetalles = await Promise.all(
         centrosData.map(async c => {
-          const dRes     = await fetch(`/api/centros/${c.id}/detalles`);
+          const dRes = await fetch(`/api/centros/${c.id}/detalles`);
           const detalles = await dRes.json();
           return { ...c, detalles };
         })
@@ -95,7 +109,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
 
   const checkEncryptionStatus = async () => {
     try {
-      const res  = await fetch('/api/auth/status');
+      const res = await fetch('/api/auth/status');
       const data = await res.json();
       setIsEncrypted(data.encrypted);
     } catch {
@@ -112,10 +126,10 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     setSaving(true);
     setSuccess(false);
     try {
-      const res  = await fetch('/api/profesor', {
-        method:  'POST',
+      const res = await fetch('/api/profesor', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(formData),
+        body: JSON.stringify(formData),
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -127,6 +141,41 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
       console.error(error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveEmailConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingEmail(true);
+    setSuccessEmail(false);
+    setErrorEmail('');
+
+    if (!formData.smtp_user?.includes('@')) {
+      setErrorEmail('El usuario debe ser un correo válido');
+      setSavingEmail(false);
+      return;
+    }
+
+    try {
+      // Reutilizamos el endpoint existente que actualiza el Profesor entero
+      const res = await fetch('/api/profesor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        onUpdate({ ...formData, id: data.id });
+        setSuccessEmail(true);
+        setTimeout(() => setSuccessEmail(false), 3000);
+      } else {
+        setErrorEmail('Error al guardar en el servidor');
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorEmail('Error de conexión al servidor');
+    } finally {
+      setSavingEmail(false);
     }
   };
 
@@ -149,11 +198,11 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     setSaving(true);
     try {
       const method = editingCentro ? 'PUT' : 'POST';
-      const url    = editingCentro ? `/api/centros/${editingCentro.id}` : '/api/centros';
-      const res    = await fetch(url, {
+      const url = editingCentro ? `/api/centros/${editingCentro.id}` : '/api/centros';
+      const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ ...centroFormData, profesorId: profesor.id }),
+        body: JSON.stringify({ ...centroFormData, profesorId: profesor.id }),
       });
       if (res.ok) {
         setShowCentroForm(false);
@@ -194,13 +243,13 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     setSaving(true);
     try {
       const method = editingDetalle ? 'PUT' : 'POST';
-      const url    = editingDetalle
+      const url = editingDetalle
         ? `/api/detalles-academicos/${editingDetalle.id}`
         : '/api/detalles-academicos';
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ ...detalleFormData, centroId: currentCentroId }),
+        body: JSON.stringify({ ...detalleFormData, centroId: currentCentroId }),
       });
       if (res.ok) {
         setShowDetalleForm(false);
@@ -240,12 +289,12 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
       return;
     }
     const ra: ResultadoAprendizaje = {
-      id:                 crypto.randomUUID(),
-      modulo:             newRA.modulo!,
-      codigo:             newRA.codigo!,
-      ra:                 newRA.ra!,
-      nombre:             newRA.nombre!,
-      impartidoEmpresa:   newRA.impartidoEmpresa || false,
+      id: crypto.randomUUID(),
+      modulo: newRA.modulo!,
+      codigo: newRA.codigo!,
+      ra: newRA.ra!,
+      nombre: newRA.nombre!,
+      impartidoEmpresa: newRA.impartidoEmpresa || false,
       actividadFormativa: newRA.actividadFormativa,
     };
     setDetalleFormData(prev => ({
@@ -282,9 +331,9 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     setIsEncrypting(true);
     try {
       const res = await fetch('/api/auth/encrypt', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ password: newPassword }),
+        body: JSON.stringify({ password: newPassword }),
       });
       if (res.ok) {
         setMessage({ type: 'success', text: 'Base de datos cifrada correctamente. Se requerirá en el próximo inicio.' });
@@ -310,6 +359,9 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     formData, setFormData,
     saving, success,
     handleSubmitProfesor,
+    // Email Config
+    savingEmail, successEmail, errorEmail,
+    handleSaveEmailConfig,
     // Centros
     centros, loadingCentros,
     showCentroForm, setShowCentroForm,

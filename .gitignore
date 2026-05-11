@@ -11,3 +11,4 @@ coverage/
 !.env.example
 *.db
 claves-dev.txt
+uploads/

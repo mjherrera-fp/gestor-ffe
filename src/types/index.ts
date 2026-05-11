@@ -5,6 +5,11 @@ export interface Profesor {
   nif: string;
   email: string;
   telefono: string;
+  smtp_host?: string;
+  smtp_port?: number;
+  smtp_user?: string;
+  smtp_pass?: string;
+  smtp_secure?: boolean;
 }
 
 export interface CentroEducativo {

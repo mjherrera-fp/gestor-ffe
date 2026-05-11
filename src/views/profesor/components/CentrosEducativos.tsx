@@ -21,7 +21,7 @@ export function CentrosEducativos({
   onAddDetalle, onEditDetalle, onDeleteDetalle,
 }: CentrosEducativosProps) {
   return (
-    <div className="max-w-6xl">
+    <div>
       {/* Cabecera sección */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">

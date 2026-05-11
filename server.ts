@@ -4,12 +4,16 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 import puppeteer from 'puppeteer';
 import Handlebars from 'handlebars';
+import nodemailer from 'nodemailer';
+import { render } from '@react-email/render';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
+import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
+import { EmpresaTemplate } from './src/emails/EmpresasTemplate.tsx';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -144,15 +148,15 @@ async function startServer() {
   // --- RUTAS DE SEGURIDAD ---
   app.get('/api/auth/status', (req, res) => {
     // Hemos quitado el require que hacía explotar el servidor
-    res.json({ 
-      locked: isDatabaseLocked(),      
-      encrypted: isDatabaseEncrypted() 
+    res.json({
+      locked: isDatabaseLocked(),
+      encrypted: isDatabaseEncrypted()
     });
   });
 
   app.post('/api/auth/unlock', (req, res) => {
     const { password } = req.body;
-    
+
     if (unlockDatabase(password)) {
       res.json({ success: true });
     } else {
@@ -162,7 +166,7 @@ async function startServer() {
 
   app.post('/api/auth/encrypt', (req, res) => {
     const { password } = req.body;
-    
+
     try {
       encryptDatabase(password);
       res.json({ success: true });
@@ -218,6 +222,47 @@ async function startServer() {
     res.json({ success: true });
   });
 
+  // Emails
+  app.post('/api/send-email', async (req, res) => {
+  const { profesorId, tipo, destinatarios, plantillaId, asunto } = req.body;
+
+  try {
+    // 1. Obtener la configuración del profesor desde la BD
+    const profesor = ProfesorDAO.get();
+    
+    if (!profesor || !profesor.smtp_user || !profesor.smtp_pass) {
+      return res.status(400).json({ error: "Configuración de email incompleta" });
+    }
+
+    // 2. Crear transporter dinámico
+    const transporter = nodemailer.createTransport({
+      host: profesor.smtp_host,
+      port: profesor.smtp_port,
+      secure: profesor.smtp_secure, 
+      auth: {
+        user: profesor.smtp_user,
+        pass: profesor.smtp_pass,
+      },
+    });
+
+    // 3. Renderizar y enviar (usando React Email)
+    const emailHtml = await render(
+      tipo === 'estudiante' ? EstudianteTemplate(destinatarios) : EmpresaTemplate(destinatarios)
+    );
+
+    await transporter.sendMail({
+      from: `"${profesor.nombre} ${profesor.apellidos}" <${profesor.smtp_user}>`,
+      to: destinatarios,
+      subject: asunto,
+      html: emailHtml,
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Error al enviar el email", details: error });
+  }
+});
+
   // Cursos
   app.get('/api/cursos', (req, res) => res.json(CursoDAO.getAll()));
   app.get('/api/cursos/active', (req, res) => res.json(CursoDAO.getActive()));
@@ -270,11 +315,34 @@ async function startServer() {
   });
 
   // CV Upload
+  // RUTA PARA SUBIR CV (Guardando en BD)
   app.post('/api/alumnos/:id/cv', upload.single('cv'), (req, res) => {
-    const file = (req as any).file;
-    if (!file) return res.status(400).json({ error: 'No file' });
-    AlumnoDAO.updateCV(Number(req.params.id), file.path);
-    res.json({ success: true, path: file.path });
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    // Convertimos el buffer a base64
+    const base64Data = req.file.buffer.toString('base64');
+    const mimeType = req.file.mimetype; // Debería ser application/pdf
+    const dataURI = `data:${mimeType};base64,${base64Data}`;
+
+    const { AlumnoDAO } = require('./src/lib/dao.ts');
+    try {
+      // En lugar de una ruta de archivo, guardamos el DataURI inmenso
+      AlumnoDAO.updateCV(Number(req.params.id), dataURI);
+      res.json({ message: 'CV subido y cifrado correctamente', path: dataURI });
+    } catch (error) {
+      res.status(500).json({ error: 'Error al procesar el archivo' });
+    }
+  });
+
+  // NUEVA RUTA PARA ELIMINAR CV
+  app.delete('/api/alumnos/:id/cv', (req, res) => {
+    const { AlumnoDAO } = require('./src/lib/dao.ts');
+    try {
+      AlumnoDAO.updateCV(Number(req.params.id), null);
+      res.json({ message: 'CV eliminado' });
+    } catch (error) {
+      res.status(500).json({ error: 'Error al eliminar el CV' });
+    }
   });
   app.get('/uploads/:filename', (req, res) => {
     res.sendFile(path.resolve('uploads', req.params.filename));

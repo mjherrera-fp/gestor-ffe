@@ -46,6 +46,7 @@ export const unlockDatabase = (password: string): boolean => {
         
         return true;
     } catch (error) {
+        console.error("🔴 Error REAL al intentar desbloquear:", error);
         return false; // Contraseña incorrecta
     }
 };
@@ -77,7 +78,15 @@ export const ProfesorDAO = {
       WHERE id = ?
     `);
     stmt.run(profesor.nombre, profesor.apellidos, profesor.nif, profesor.email, profesor.telefono, id);
-  }
+  },
+  updateConfigEmail: (id: number, config: Partial<Profesor>) => {
+    const stmt = db.prepare(`
+      UPDATE profesores SET 
+        smtp_host = ?, smtp_port = ?, smtp_user = ?, smtp_pass = ?, smtp_secure = ?
+      WHERE id = ?
+    `);
+    stmt.run(config.smtp_host, config.smtp_port, config.smtp_user, config.smtp_pass, config.smtp_secure, id);
+  },
 };
 
 export const CentroDAO = {

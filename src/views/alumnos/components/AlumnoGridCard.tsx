@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   User, Mail, Phone, GraduationCap, Edit2, Trash2,
-  FileUp, CheckCircle, Clock,
+  FileUp, CheckCircle, Clock, X, Eye
 } from 'lucide-react';
 import { Alumno } from '../../../types/index.ts';
 
@@ -11,12 +11,42 @@ interface AlumnoGridCardProps {
   onDelete: (id: number) => void;
   onAcademicDetail: (a: Alumno) => void;
   onFileUpload: (id: number, file: File) => void;
+  onFileDelete: (id: number) => void;
 }
 
 export function AlumnoGridCard({
-  alumno, onEdit, onDelete, onAcademicDetail, onFileUpload,
+  alumno, onEdit, onDelete, onAcademicDetail, onFileUpload, onFileDelete
 }: AlumnoGridCardProps) {
   const isAssigned = alumno.relacionId !== null;
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Función para abrir el Base64 como un archivo PDF real
+  const handleOpenPDF = () => {
+    if (!alumno.cvPath) return;
+
+    // Extraemos los datos base64 del string (data:application/pdf;base64,JVBERi...)
+    const base64Parts = alumno.cvPath.split(',');
+    if (base64Parts.length !== 2) return;
+    
+    const byteCharacters = atob(base64Parts[1]);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/pdf' });
+    
+    // Creamos una URL temporal y la abrimos
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, '_blank');
+  };
+
+  const handleDeleteCV = async () => {
+    if (!window.confirm('¿Eliminar el CV de este alumno?')) return;
+    setIsDeleting(true);
+    await onFileDelete(alumno.id!);
+    setIsDeleting(false);
+  };
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group overflow-hidden flex flex-col h-full">
@@ -86,14 +116,22 @@ export function AlumnoGridCard({
       {/* Footer: CV */}
       <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between mt-auto">
         {alumno.cvPath ? (
-          <a
-            href={`/${alumno.cvPath}`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-wider hover:underline"
-          >
-            <CheckCircle className="h-4 w-4 text-emerald-500" /> CV Adjunto
-          </a>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleOpenPDF}
+              className="flex items-center gap-1.5 text-emerald-600 font-bold text-[10px] uppercase tracking-wider hover:text-emerald-700 transition-colors bg-emerald-50 px-2 py-1 rounded-md"
+            >
+              <Eye className="h-4 w-4" /> Ver CV
+            </button>
+            <button
+              onClick={handleDeleteCV}
+              disabled={isDeleting}
+              title="Eliminar CV"
+              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         ) : (
           <label className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-primary transition-colors">
             <FileUp className="h-4 w-4" />

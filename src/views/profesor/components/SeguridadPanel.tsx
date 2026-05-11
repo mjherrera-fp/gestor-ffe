@@ -2,9 +2,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Lock, ShieldCheck, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Message } from '../hooks/useProfesor.ts';
-
-const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
-const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+import { createPortal } from 'react-dom';
+import { labelClass, inputClass } from '../ProfesorView.tsx';
 
 interface SeguridadPanelProps {
   isEncrypted: boolean;
@@ -42,7 +41,7 @@ export function SeguridadPanel({
                 {isEncrypted ? 'Gestión de Contraseña Maestra' : 'Seguridad de la Base de Datos'}
               </h3>
               <p className="text-sm text-slate-500">
-                {isEncrypted ? 'Tu base de datos está protegida con cifrado AES-256' : 'Cifra tus datos para mayor seguridad'}
+                {isEncrypted ? 'Tu base de datos está cifrada' : 'Cifra tus datos para mayor seguridad'}
               </p>
             </div>
           </div>
@@ -65,11 +64,10 @@ export function SeguridadPanel({
 
           {/* Mensaje éxito / error */}
           {message.text && (
-            <div className={`p-3 rounded-lg mb-4 text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1 ${
-              message.type === 'success'
-                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                : 'bg-red-100 text-red-700 border border-red-200'
-            }`}>
+            <div className={`p-3 rounded-lg mb-4 text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1 ${message.type === 'success'
+              ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+              : 'bg-red-100 text-red-700 border border-red-200'
+              }`}>
               {message.type === 'success'
                 ? <ShieldCheck className="h-4 w-4" />
                 : <AlertTriangle className="h-4 w-4" />}
@@ -103,79 +101,84 @@ export function SeguridadPanel({
             </div>
           </div>
 
-          <button
-            onClick={onEncrypt}
-            disabled={isEncrypting || !newPassword}
-            className={`flex items-center justify-center gap-2 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
-              isEncrypted ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'
-            }`}
-          >
-            {isEncrypting ? (
-              <RefreshCw className="h-5 w-5 animate-spin" />
-            ) : (
-              <>
-                {isEncrypted ? <RefreshCw className="h-5 w-5" /> : <ShieldCheck className="h-5 w-5" />}
-                {isEncrypted ? 'Actualizar Contraseña' : 'Activar Cifrado de Datos'}
-              </>
-            )}
-          </button>
+          <div className="flex justify-start pt-4 border-t border-slate-100">
+
+            <button
+              onClick={onEncrypt}
+              disabled={isEncrypting || !newPassword}
+              className={`flex items-center justify-center gap-2 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed ${isEncrypted ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+            >
+              {isEncrypting ? (
+                <RefreshCw className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  {isEncrypted ? <RefreshCw className="h-5 w-5" /> : <ShieldCheck className="h-5 w-5" />}
+                  {isEncrypted ? 'Actualizar Contraseña' : 'Activar Cifrado de Datos'}
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Modal de confirmación */}
-      <AnimatePresence>
-        {showConfirmModal && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50"
-              onClick={onCloseConfirmModal}
-            />
-            <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none px-4">
+      {createPortal(
+        <AnimatePresence>
+          {showConfirmModal && (
+            <>
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto overflow-hidden"
-              >
-                <div className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="shrink-0 h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center">
-                      <AlertTriangle className="h-6 w-6 text-amber-600" />
-                    </div>
-                    <div className="flex-1 pt-1">
-                      <h3 className="text-xl font-bold text-slate-800">
-                        {isEncrypted ? '¿Cambiar la contraseña?' : '¿Cifrar Base de Datos?'}
-                      </h3>
-                      <p className="mt-2 text-sm text-slate-500 leading-relaxed">
-                        {isEncrypted
-                          ? 'Estás a punto de cambiar la clave maestra. Asegúrate de recordarla bien.'
-                          : 'Toda la base de datos se encriptará. Si olvidas esta contraseña en el futuro, los datos serán totalmente irrecuperables.'}
-                      </p>
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-9999"
+                onClick={onCloseConfirmModal}
+              />
+              <div className="fixed inset-0 flex items-center justify-center z-9999 pointer-events-none px-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  className="bg-white rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto overflow-hidden"
+                >
+                  <div className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center">
+                        <AlertTriangle className="h-6 w-6 text-amber-600" />
+                      </div>
+                      <div className="flex-1 pt-1">
+                        <h3 className="text-xl font-bold text-slate-800">
+                          {isEncrypted ? '¿Cambiar la contraseña?' : '¿Cifrar Base de Datos?'}
+                        </h3>
+                        <p className="mt-2 text-sm text-slate-500 leading-relaxed">
+                          {isEncrypted
+                            ? 'Estás a punto de cambiar la clave maestra. Asegúrate de recordarla bien.'
+                            : 'Toda la base de datos se encriptará. Si olvidas esta contraseña en el futuro, los datos serán totalmente irrecuperables.'}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
-                  <button
-                    onClick={onCloseConfirmModal}
-                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 bg-slate-100 rounded-lg transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={onExecuteEncryption}
-                    className="px-4 py-2 text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors shadow-sm"
-                  >
-                    {isEncrypted ? 'Sí, actualizar clave' : 'Sí, cifrar datos'}
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          </>
-        )}
-      </AnimatePresence>
+                  <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                    <button
+                      onClick={onCloseConfirmModal}
+                      className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 bg-slate-100 rounded-lg transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={onExecuteEncryption}
+                      className="px-4 py-2 text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors shadow-sm"
+                    >
+                      {isEncrypted ? 'Sí, actualizar clave' : 'Sí, cifrar datos'}
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body // <--- ESTO TELETRANSPORTA EL MODAL AL BODY DIRECTAMENTE
+      )}
     </>
   );
 }

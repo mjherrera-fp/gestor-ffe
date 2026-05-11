@@ -11,12 +11,23 @@ const FormSection = ({ title, icon: Icon, children }: {
   children: React.ReactNode;
 }) => (
   <div className="bg-white rounded-xl border border-border-base shadow-sm overflow-hidden mb-6">
-    <div className="px-6 py-4 border-b border-border-base bg-slate-50/50 flex items-center gap-3">
-      <div className="p-2 rounded-lg bg-primary/10 text-primary">
-        <Icon className="h-5 w-5" />
+
+    <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
+          <Icon className="h-5 w-5" />
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-slate-800">
+            Información Personal
+          </h3>
+          <p className="text-sm text-slate-500">
+            Configura tus datos personales.
+          </p>
+        </div>
       </div>
-      <h3 className="font-bold text-sm text-text-main uppercase tracking-widest">{title}</h3>
     </div>
+
     <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
       {children}
     </div>
@@ -36,7 +47,7 @@ export function ProfesorForm({ formData, setFormData, saving, success, onSubmit 
     setFormData({ ...formData, [field]: e.target.value });
 
   return (
-    <form onSubmit={onSubmit} className="max-w-6xl">
+    <form onSubmit={onSubmit} >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-xl lg:text-2xl font-bold font-sans text-text-main tracking-tight">
@@ -76,7 +87,7 @@ export function ProfesorForm({ formData, setFormData, saving, success, onSubmit 
           <label className={labelClass}>Teléfono</label>
           <input required className={inputClass} value={formData.telefono} onChange={update('telefono')} />
         </div>
-        <div className="col-span-1 md:col-span-2 lg:col-span-3 mt-2">
+        <div className="col-span-1 md:col-span-2 lg:col-span-3 mt-2 pt-4 border-t border-slate-100">
           <button
             type="submit"
             disabled={saving}
@@ -89,9 +100,9 @@ export function ProfesorForm({ formData, setFormData, saving, success, onSubmit 
             )}
           </button>
         </div>
-        
+
       </FormSection>
-      
+
     </form>
   );
 }
