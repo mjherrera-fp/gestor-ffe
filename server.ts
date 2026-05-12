@@ -835,11 +835,131 @@ async function startServer() {
   });
 
   app.get('/api/relaciones-alumnos/:id/plan-formativo/pdf', async (req, res) => {
-    const relacionId = req.params.id;
-    const alumnoId = req.query.alumnoId; // <--- Debes capturar esto
+    let browser;
+    try {
+      // 1. OBTENCIÓN DE DATOS (Misma lógica que tienes, omitida por brevedad)
+      const relacionAlumno = RelacionAlumnoDAO.getById(Number(req.params.id));
+      const alumnoId = req.query.alumnoId;
+      if (!relacionAlumno) return res.status(404).json({ error: 'Relación no encontrada' });
 
-    // Aquí generas el Word/PDF usando los datos de 'relacionId' y filtrando por 'alumnoId'
-    // ...
+      const convenio = ConvenioDAO.getById(relacionAlumno.convenioId);
+      const empresa = EmpresaDAO.getById(convenio.empresaId);
+      const centro = CentroDAO.getById(convenio.centroId!);
+      const tutorEmpresa = TutorEmpresaDAO.getById(relacionAlumno.tutorEmpresaId);
+      const curso = CursoDAO.getById(convenio.cursoId);
+      const profesor = ProfesorDAO.get();
+      const alumno = AlumnoDAO.getById(Number(alumnoId));
+
+      const alumnosAsignados: Alumno[] = relacionAlumno.alumnos || [];
+
+      // Buscamos el detalle académico (asumiendo que todos los alumnos de la relación comparten ciclo)
+      // 1. Tipamos la variable permitiendo que sea 'undefined'
+      let detalleAcademicoGlobal: DetalleAcademico | undefined = undefined;
+
+      // 3. Si encontramos a ese alumno, buscamos su detalle en la base de datos
+      if (alumno && alumno.detalleAcademicoId) {
+        detalleAcademicoGlobal = DetalleAcademicoDAO.getById(alumno.detalleAcademicoId);
+      }
+
+      // NUEVO: Mapeamos los alumnos directamente desde el array de la BD
+      // 2. PROCESAMIENTO DE PLANTILLA HTML CON VERIFICACIÓN
+      const isProd = process.env.NODE_ENV === 'production';
+      // Intentamos localizar la carpeta templates de forma absoluta
+      const templatesDir = isProd ? path.join(__dirname, '..', 'templates') : path.resolve(process.cwd(), 'templates');
+      const templatePath = path.join(templatesDir, 'plan_formacion.html');
+
+      console.log(`Intentando leer plantilla en: ${templatePath}`);
+
+      if (!fs.existsSync(templatePath)) {
+        console.error("ERROR: No existe el archivo de plantilla HTML.");
+        return res.status(500).json({ error: `Plantilla no encontrada en ${templatePath}` });
+      }
+
+      const source = fs.readFileSync(templatePath, 'utf8');
+      const template = Handlebars.compile(source);
+
+      const htmlFinal = template({
+        REGIMEN: detalleAcademicoGlobal?.regimen || '',
+        FECHA_CURSO: curso?.descripcion || '',
+        CICLO: detalleAcademicoGlobal?.ciclo || '',
+        CICLO_CODIGO: detalleAcademicoGlobal?.codigo || '',
+        NIVEL: detalleAcademicoGlobal?.nivel || '',
+        ALUMNADO_APELLIDOS_NOMBRE: `${alumno.apellidos}, ${alumno.nombre}`,
+        ALUMNADO_EMAIL: alumno.emailEduca || alumno.emailPersonal,
+        ALUMNADO_TELEFONO: alumno.tlfn,
+        CENTRO: centro?.nombre || '',
+        CENTRO_EMAIL: centro?.email || '',
+        CENTRO_TELEFONO: centro?.telefono || '',
+        TUTOR_NOMBRE_COMPLETO: `${profesor?.nombre} ${profesor?.apellidos}`,
+        TUTOR_EMAIL: profesor?.email,
+        TUTOR_TELEFONO: profesor?.telefono,
+        EMPRESA: empresa?.nombre || '',
+        EMPRESA_CIF: empresa?.cif || '',
+        EMPRESA_EMAIL: empresa?.email || '',
+        EMPRESA_TELEFONO: empresa?.tlfn || '',
+        EMPRESA_TUTOR_NOMBRE_COMPLETO: `${tutorEmpresa?.nombre} ${tutorEmpresa?.apellidos}`,
+        EMPRESA_TUTOR_EMAIL: tutorEmpresa?.email,
+        EMPRESA_TUTOR_TELEFONO: tutorEmpresa?.tlfn,
+        TOTAL_HORAS: alumno.totalHorasFFE || 0,
+        modulos: (detalleAcademicoGlobal?.resultadosAprendizaje || []).map((ra: any) => ({
+          MODULO: ra.modulo,
+          MODULO_CODIGO: ra.codigo,
+          RA_NUMERO: ra.ra,
+          CHECK_INTEGRO:  ra.impartidoEmpresa === true ? '☒' : '☐',
+          CHECK_COMPARTIDO: ra.impartidoEmpresa === true ? '☐' : '☒'
+        }))
+      });
+
+      // 3. GENERACIÓN DE PDF CON PUPPETEER
+      browser = await puppeteer.launch({
+        headless: true, // Cambiado a true (formato moderno)
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--font-render-hinting=none' // Mejora legibilidad en PDF
+        ]
+      });
+
+      const page = await browser.newPage();
+
+      // ESTO ES CRÍTICO: 
+      // Si el HTML tiene imágenes locales, Puppeteer necesita conocer el "basePath"
+      await page.setContent(htmlFinal, {
+        waitUntil: 'networkidle0', // Espera a que carguen imágenes/estilos
+        timeout: 30000
+      });
+
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
+      });
+
+      await browser.close();
+
+      // 4. ENVÍO SEGURO DEL BUFFER
+      // Limpiamos cualquier cabecera previa que pudiera estar interfiriendo
+      res.removeHeader('Transfer-Encoding');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Length', pdfBuffer.length);
+      res.setHeader('Content-Disposition', `attachment; filename=Plan_Formativo_${alumno.apellidos.replace(/\s+/g, '_')}.pdf`);
+
+      return res.end(pdfBuffer); // Usamos .end() para enviar el buffer binario puro
+
+    } catch (error: any) {
+      console.error('💥 ERROR CRÍTICO GENERANDO EL DOCX:');
+
+      if (error.properties && error.properties.errors) {
+        console.error('El motor de plantillas ha encontrado estos errores en tu archivo Word:');
+        error.properties.errors.forEach((err: any) => {
+          console.error(`- Etiqueta problemática: {${err.properties.id}} | Motivo: ${err.message}`);
+        });
+      } else {
+        console.error(error);
+      }
+
+      res.status(500).json({ error: 'No se pudo generar el plan formativo' });
+    }
   });
 
   // --- ENDPOINT GENERACIÓN DE SEGUIMIENTO ---
@@ -954,7 +1074,7 @@ async function startServer() {
       const tutorEmpresa = TutorEmpresaDAO.getById(relacion.tutorEmpresaId); //
       const curso = CursoDAO.getById(convenio.cursoId); //
       const detalle = alumno.detalleAcademicoId ? DetalleAcademicoDAO.getById(alumno.detalleAcademicoId) : undefined; //
-      
+
       // Mapeo de Resultados de Aprendizaje
       const RAs = (detalle?.resultadosAprendizaje || []).map((ra: any) => ({
         actividad: ra.actividadFormativa,
