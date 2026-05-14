@@ -28,7 +28,7 @@ import packageJson from '../package.json';
 
 // Components
 import ProfesorView from './views/profesor/ProfesorView.tsx';
-import CursosView from './views/CursosView.tsx';
+import CursosView from './views/cursos/CursosView.tsx';
 import AlumnosView from './views/alumnos/AlumnosView.tsx';
 import EmpresasView from './views/EmpresasView.tsx';
 import ConveniosView from './views/convenios/ConveniosView.tsx';
