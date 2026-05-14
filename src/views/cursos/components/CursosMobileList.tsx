@@ -29,7 +29,7 @@ export function CursosMobileList({ cursos, showArchived, onEdit, onConfirmAction
           {/* Info */}
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div className="font-bold text-sm text-text-main break-words">{curso.descripcion}</div>
+              <div className="font-bold text-sm text-text-main wrap-break-word">{curso.descripcion}</div>
               <div className="flex items-center gap-2 mt-1 text-[10px] text-text-muted font-medium">
                 <Calendar className="h-3 w-3" />
                 {new Date(curso.fechaInicio).toLocaleDateString()} — {new Date(curso.fechaFin).toLocaleDateString()}
