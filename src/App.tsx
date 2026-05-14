@@ -31,7 +31,7 @@ import ProfesorView from './views/profesor/ProfesorView.tsx';
 import CursosView from './views/CursosView.tsx';
 import AlumnosView from './views/alumnos/AlumnosView.tsx';
 import EmpresasView from './views/EmpresasView.tsx';
-import ConveniosView from './views/ConveniosView.tsx';
+import ConveniosView from './views/convenios/ConveniosView.tsx';
 import InteresesView from './views/InteresesView.tsx';
 import RelacionesView from './views/relaciones/RelacionesView.tsx';
 import LockView from './views/LockView.tsx';
