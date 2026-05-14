@@ -164,7 +164,7 @@ async function startServer() {
     }
   });
 
-  
+
   app.post('/api/auth/lock', (req, res) => {
     lockDatabase();
     res.status(200).json({ success: true });
@@ -985,21 +985,22 @@ async function startServer() {
       // Buscar datos específicos del alumno dentro de la relación
       if (!alumno.fechaInicio || !alumno.fechaFin) return res.status(404).json({ error: 'Alumno no vinculado a esta relación' });
 
-      // Determinar fechas de inicio y fin (específicas del alumno o generales de la relación)
-      const fechaInicioFFE = new Date(alumno.fechaInicio);
-      const fechaFinFFE = new Date(alumno.fechaFin);
-
       // Parsear festivos del curso
       const festivos = curso.festivos || [];
+      const tutorias = curso.tutorias || [];
 
       // --- LÓGICA DE GENERACIÓN DE MESES PARA EL CALENDARIO ---
       const mesesData = [];
       const nombresMeses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
 
-      // Ajuste crítico: El calendario empieza en el mes de inicio de prácticas
-      const start = new Date(fechaInicioFFE.getFullYear(), fechaInicioFFE.getMonth(), 1);
+      // SOLUCIÓN: Extraemos el año y mes directamente del string para evitar desfases UTC
+      const [anioInicio, mesInicio] = alumno.fechaInicio.split('-');
+      const [anioFin, mesFin] = alumno.fechaFin.split('-');
+
+      // Ajuste crítico: El calendario empieza en el mes de inicio de prácticas (hora local)
+      const start = new Date(Number(anioInicio), Number(mesInicio) - 1, 1);
       // Y termina en el mes de fin de prácticas
-      const end = new Date(fechaFinFFE.getFullYear(), fechaFinFFE.getMonth(), 1);
+      const end = new Date(Number(anioFin), Number(mesFin) - 1, 1);
 
       while (start <= end) {
         const mesIndex = start.getMonth();
@@ -1014,22 +1015,34 @@ async function startServer() {
           }
 
           const fechaActual = new Date(año, mesIndex, d);
-          const isoFecha = fechaActual.toISOString().split('T')[0];
-          let clase = 'empty-cell';
 
+          // SOLUCIÓN: Construimos el isoFecha manualmente en formato YYYY-MM-DD 
+          // basándonos en la hora local, evitando .toISOString()
+          const mesFormateado = String(mesIndex + 1).padStart(2, '0');
+          const diaFormateado = String(d).padStart(2, '0');
+          const isoFecha = `${año}-${mesFormateado}-${diaFormateado}`;
+
+          let clase = 'empty-cell';
           const dayOfWeek = fechaActual.getDay();
+
+          // SOLUCIÓN: Comparamos directamente los strings YYYY-MM-DD. 
+          // Esto es totalmente seguro y evita fallos de milisegundos u horas.
+          const isPeriodFFE = isoFecha >= alumno.fechaInicio && isoFecha <= alumno.fechaFin;
 
           // Lógica de visualización en la plantilla HTML
           if (dayOfWeek === 0 || dayOfWeek === 6) {
             clase = 'fin-semana-cell';
           }
-          else if (festivos.includes(isoFecha)) {
+          else if (isPeriodFFE && festivos.includes(isoFecha)) {
             clase = 'festivo-cell';
+          }
+          else if (isPeriodFFE && tutorias.includes(isoFecha)) {
+            clase = 'tutoria-cell';
           }
           else if (isoFecha === alumno.fechaInicio || isoFecha === alumno.fechaFin) {
             clase = 'inicio-fin-cell';
           }
-          else if (fechaActual >= fechaInicioFFE && fechaActual <= fechaFinFFE) {
+          else if (isPeriodFFE) {
             clase = 'laboral-cell';
           }
 

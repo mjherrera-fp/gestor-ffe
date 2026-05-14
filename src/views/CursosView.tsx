@@ -15,9 +15,11 @@ export default function CursosView({ cursos, onUpdate }: Props) {
     descripcion: '',
     fechaInicio: '',
     fechaFin: '',
-    festivos: []
+    festivos: [],
+    tutorias: [],
   });
   const [newFestivo, setNewFestivo] = useState('');
+  const [newTutoria, setNewTutoria] = useState('');
 
   const [confirmingAction, setConfirmingAction] = useState<{ id: number; type: 'delete' | 'archive' | 'restore' } | null>(null);
 
@@ -31,6 +33,18 @@ export default function CursosView({ cursos, onUpdate }: Props) {
   const removeFestivo = (date: string) => {
     const festivos = (formData.festivos || []).filter(f => f !== date);
     setFormData({ ...formData, festivos });
+  };
+
+  const addTutoria = () => {
+    if (!newTutoria) return;
+    const tutorias = [...(formData.tutorias || []), newTutoria];
+    setFormData({ ...formData, tutorias });
+    setNewTutoria('');
+  };
+
+  const removeTutoria = (date: string) => {
+    const tutorias = (formData.tutorias || []).filter(f => f !== date);
+    setFormData({ ...formData, tutorias });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,7 +61,7 @@ export default function CursosView({ cursos, onUpdate }: Props) {
       if (res.ok) {
         setShowForm(false);
         setEditing(null);
-        setFormData({ descripcion: '', fechaInicio: '', fechaFin: '', festivos: [] });
+        setFormData({ descripcion: '', fechaInicio: '', fechaFin: '', festivos: [], tutorias:[] });
         onUpdate();
       }
     } catch (error) {
@@ -134,8 +148,8 @@ export default function CursosView({ cursos, onUpdate }: Props) {
           <button
             onClick={() => setShowArchived(!showArchived)}
             className={`w-full sm:w-auto px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border ${showArchived
-                ? 'bg-amber-50 text-amber-600 border-amber-200'
-                : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+              ? 'bg-amber-50 text-amber-600 border-amber-200'
+              : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
               }`}
           >
             {showArchived ? 'Ver Solo Activos' : 'Ver Todos (Inc. Archivados)'}
@@ -144,7 +158,7 @@ export default function CursosView({ cursos, onUpdate }: Props) {
             onClick={() => {
               setShowForm(true);
               setEditing(null);
-              setFormData({ descripcion: '', fechaInicio: '', fechaFin: '', festivos: [] });
+              setFormData({ descripcion: '', fechaInicio: '', fechaFin: '', festivos: [], tutorias:[] });
             }}
             className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
           >
@@ -232,6 +246,46 @@ export default function CursosView({ cursos, onUpdate }: Props) {
                   ))}
                   {(!formData.festivos || formData.festivos.length === 0) && (
                     <p className="text-xs text-slate-400 italic py-2">No se han añadido días festivos todavía.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100">
+                <label className="block text-sm font-medium text-slate-700 mb-3 items-center justify-between">
+                  Días de tutorías
+                  <span className="text-[10px] font-bold text-slate-400 tracking-widest"> ({formData.tutorias?.length || 0} añadidos)</span>
+                </label>
+                <div className="flex gap-2 mb-4">
+                  <input
+                    type="date"
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    value={newTutoria}
+                    onChange={e => setNewTutoria(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={addTutoria}
+                    className="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all"
+                  >
+                    Añadir
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {formData.tutorias?.map(date => (
+                    <div key={date} className="flex items-center gap-2 bg-slate-50 border border-slate-200 pl-3 pr-1 py-1 rounded-full text-xs font-medium text-slate-600">
+                      {new Date(date).toLocaleDateString()}
+                      <button
+                        type="button"
+                        onClick={() => removeTutoria(date)}
+                        className="p-1 hover:bg-slate-200 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {(!formData.tutorias || formData.tutorias.length === 0) && (
+                    <p className="text-xs text-slate-400 italic py-2">No se han añadido días de tutoría todavía.</p>
                   )}
                 </div>
               </div>
@@ -379,8 +433,8 @@ export default function CursosView({ cursos, onUpdate }: Props) {
                           }}
                           title={curso.archivado ? "Restaurar" : "Archivar"}
                           className={`p-2 transition-all rounded-lg cursor-pointer flex items-center justify-center border shadow-sm active:scale-95 z-10 ${curso.archivado
-                              ? 'text-amber-800 bg-amber-100 border-amber-300 hover:bg-amber-200'
-                              : 'text-slate-500 bg-white border-slate-200 hover:text-amber-600 hover:border-amber-300 hover:bg-amber-50'
+                            ? 'text-amber-800 bg-amber-100 border-amber-300 hover:bg-amber-200'
+                            : 'text-slate-500 bg-white border-slate-200 hover:text-amber-600 hover:border-amber-300 hover:bg-amber-50'
                             }`}
                         >
                           {curso.archivado ? <RotateCcw className="h-4 w-4" /> : <Archive className="h-4 w-4" />}

@@ -118,7 +118,8 @@ function setupTables() {
     fechaInicio TEXT NOT NULL,
     fechaFin TEXT NOT NULL,
     archivado INTEGER DEFAULT 0,
-    festivos TEXT
+    festivos TEXT,
+    tutorias TEXT
   );
 
   CREATE TABLE IF NOT EXISTS empresas (

@@ -50,6 +50,7 @@ export interface Curso {
   fechaFin: string;
   archivado: number; // 0 or 1
   festivos?: string[];
+  tutorias?: string[];
 }
 
 export interface HorarioDia {

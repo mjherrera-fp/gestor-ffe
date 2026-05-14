@@ -156,17 +156,20 @@ export const CursoDAO = {
   getAll: () => (db.prepare('SELECT * FROM cursos').all() as any[]).map(c => ({
     ...c,
     archivado: !!c.archivado,
-    festivos: c.festivos ? JSON.parse(c.festivos) : []
+    festivos: c.festivos ? JSON.parse(c.festivos) : [],
+    tutorias: c.tutorias ? JSON.parse(c.tutorias) : []
   })),
   getActive: () => (db.prepare('SELECT * FROM cursos WHERE archivado = 0').all() as any[]).map(c => ({
     ...c,
     archivado: !!c.archivado,
-    festivos: c.festivos ? JSON.parse(c.festivos) : []
+    festivos: c.festivos ? JSON.parse(c.festivos) : [],
+    tutorias: c.tutorias ? JSON.parse(c.tutorias) : []
   })),
   getArchived: () => (db.prepare('SELECT * FROM cursos WHERE archivado = 1').all() as any[]).map(c => ({
     ...c,
     archivado: !!c.archivado,
-    festivos: c.festivos ? JSON.parse(c.festivos) : []
+    festivos: c.festivos ? JSON.parse(c.festivos) : [],
+    tutorias: c.tutorias ? JSON.parse(c.tutorias) : []
   })),
   getById: (id: number) => {
     const c = db.prepare('SELECT * FROM cursos WHERE id = ?').get(id) as any;
@@ -174,17 +177,18 @@ export const CursoDAO = {
     return {
       ...c,
       archivado: !!c.archivado,
-      festivos: c.festivos ? JSON.parse(c.festivos) : []
+      festivos: c.festivos ? JSON.parse(c.festivos) : [],
+      tutorias: c.tutorias ? JSON.parse(c.tutorias) : []
     } as Curso;
   },
   create: (curso: Curso) => {
-    const stmt = db.prepare('INSERT INTO cursos (descripcion, fechaInicio, fechaFin, festivos) VALUES (?, ?, ?, ?)');
-    const info = stmt.run(curso.descripcion, curso.fechaInicio, curso.fechaFin, JSON.stringify(curso.festivos || []));
+    const stmt = db.prepare('INSERT INTO cursos (descripcion, fechaInicio, fechaFin, festivos, tutorias) VALUES (?, ?, ?, ?)');
+    const info = stmt.run(curso.descripcion, curso.fechaInicio, curso.fechaFin, JSON.stringify(curso.festivos || []), JSON.stringify(curso.tutorias || []));
     return info.lastInsertRowid;
   },
   update: (id: number, curso: Curso) => {
-    const stmt = db.prepare('UPDATE cursos SET descripcion = ?, fechaInicio = ?, fechaFin = ?, festivos = ? WHERE id = ?');
-    stmt.run(curso.descripcion, curso.fechaInicio, curso.fechaFin, JSON.stringify(curso.festivos || []), id);
+    const stmt = db.prepare('UPDATE cursos SET descripcion = ?, fechaInicio = ?, fechaFin = ?, festivos = ?, tutorias = ? WHERE id = ?');
+    stmt.run(curso.descripcion, curso.fechaInicio, curso.fechaFin, JSON.stringify(curso.festivos || []), JSON.stringify(curso.tutorias || []), id);
   },
   delete: (id: number) => {
     // Cascade delete is handled by DB schema (foreign keys)
