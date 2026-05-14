@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { File as FilePdf, Loader2 } from 'lucide-react';
+import { File as FilePdf, Loader2, LucideIcon } from 'lucide-react';
 
 interface Props {
   url?: string;
   name?: string;
   showText?: boolean;
+  text?: string;
   onClick?: () => Promise<void>;
   className?: string;
+  icon?: LucideIcon
 }
 
-export function BotonDescargaPDF({ url, name, showText = true, onClick, className }: Props) {
+export function BotonDescargaPDF({ url, name, showText = true, text, onClick, className, icon: Icon = FilePdf }: Props) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const descargarPDF = async () => {
@@ -54,9 +56,9 @@ export function BotonDescargaPDF({ url, name, showText = true, onClick, classNam
       {isDownloading ? (
         <Loader2 className="h-4 w-4 animate-spin shrink-0" />
       ) : (
-        <FilePdf className="h-4 w-4 shrink-0" />
+        <Icon className="h-4 w-4 shrink-0" />
       )}
-      {showText && <span className="text-[9px] font-bold truncate">PDF</span>}
+      {showText && <span className="text-[9px] font-bold truncate">{text || 'PDF'}</span>}
     </button>
   );
 }

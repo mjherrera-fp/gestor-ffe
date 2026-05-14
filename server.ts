@@ -9,7 +9,7 @@ import { render } from '@react-email/render';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
-import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase } from './src/lib/dao.ts';
+import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
@@ -158,10 +158,16 @@ async function startServer() {
     const { password } = req.body;
 
     if (unlockDatabase(password)) {
-      res.json({ success: true });
+      res.status(200).json({ success: true });
     } else {
       res.status(401).json({ error: 'Contraseña incorrecta' });
     }
+  });
+
+  
+  app.post('/api/auth/lock', (req, res) => {
+    lockDatabase();
+    res.status(200).json({ success: true });
   });
 
   app.post('/api/auth/encrypt', (req, res) => {
@@ -905,7 +911,7 @@ async function startServer() {
           MODULO: ra.modulo,
           MODULO_CODIGO: ra.codigo,
           RA_NUMERO: ra.ra,
-          CHECK_INTEGRO:  ra.impartidoEmpresa === true ? '☒' : '☐',
+          CHECK_INTEGRO: ra.impartidoEmpresa === true ? '☒' : '☐',
           CHECK_COMPARTIDO: ra.impartidoEmpresa === true ? '☐' : '☒'
         }))
       });
@@ -947,10 +953,227 @@ async function startServer() {
       return res.end(pdfBuffer); // Usamos .end() para enviar el buffer binario puro
 
     } catch (error: any) {
-      console.error('💥 ERROR CRÍTICO GENERANDO EL DOCX:');
+      console.error('💥 ERROR CRÍTICO GENERANDO EL PDF:');
 
       if (error.properties && error.properties.errors) {
-        console.error('El motor de plantillas ha encontrado estos errores en tu archivo Word:');
+        console.error('El motor de plantillas ha encontrado estos errores en tu archivo PDF:');
+        error.properties.errors.forEach((err: any) => {
+          console.error(`- Etiqueta problemática: {${err.properties.id}} | Motivo: ${err.message}`);
+        });
+      } else {
+        console.error(error);
+      }
+
+      res.status(500).json({ error: 'No se pudo generar el plan formativo' });
+    }
+  });
+
+  app.get('/api/relaciones-alumnos/:id/calendario', async (req, res) => {
+    let browser;
+    try {
+      const relacionId = Number(req.params.id);
+      const alumnoId = Number(req.query.alumnoId);
+      const alumno = AlumnoDAO.getById(alumnoId);
+
+      const relacion = RelacionAlumnoDAO.getById(relacionId);
+      if (!relacion) return res.status(404).json({ error: 'Relación no encontrada' });
+
+      const convenio = ConvenioDAO.getById(relacion.convenioId);
+      const curso = CursoDAO.getById(convenio.cursoId);
+      if (!curso) return res.status(404).json({ error: 'Curso no encontrado' });
+
+      // Buscar datos específicos del alumno dentro de la relación
+      if (!alumno.fechaInicio || !alumno.fechaFin) return res.status(404).json({ error: 'Alumno no vinculado a esta relación' });
+
+      // Determinar fechas de inicio y fin (específicas del alumno o generales de la relación)
+      const fechaInicioFFE = new Date(alumno.fechaInicio);
+      const fechaFinFFE = new Date(alumno.fechaFin);
+
+      // Parsear festivos del curso
+      const festivos = curso.festivos || [];
+
+      // --- LÓGICA DE GENERACIÓN DE MESES PARA EL CALENDARIO ---
+      const mesesData = [];
+      const nombresMeses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+
+      // Ajuste crítico: El calendario empieza en el mes de inicio de prácticas
+      const start = new Date(fechaInicioFFE.getFullYear(), fechaInicioFFE.getMonth(), 1);
+      // Y termina en el mes de fin de prácticas
+      const end = new Date(fechaFinFFE.getFullYear(), fechaFinFFE.getMonth(), 1);
+
+      while (start <= end) {
+        const mesIndex = start.getMonth();
+        const año = start.getFullYear();
+        const diasEnMes = new Date(año, mesIndex + 1, 0).getDate();
+
+        const diasArray = [];
+        for (let d = 1; d <= 31; d++) {
+          if (d > diasEnMes) {
+            diasArray.push({ DIA: '', CLASE: 'empty-cell' });
+            continue;
+          }
+
+          const fechaActual = new Date(año, mesIndex, d);
+          const isoFecha = fechaActual.toISOString().split('T')[0];
+          let clase = 'empty-cell';
+
+          const dayOfWeek = fechaActual.getDay();
+
+          // Lógica de visualización en la plantilla HTML
+          if (dayOfWeek === 0 || dayOfWeek === 6) {
+            clase = 'fin-semana-cell';
+          }
+          else if (festivos.includes(isoFecha)) {
+            clase = 'festivo-cell';
+          }
+          else if (isoFecha === alumno.fechaInicio || isoFecha === alumno.fechaFin) {
+            clase = 'inicio-fin-cell';
+          }
+          else if (fechaActual >= fechaInicioFFE && fechaActual <= fechaFinFFE) {
+            clase = 'laboral-cell';
+          }
+
+          diasArray.push({ DIA: d, CLASE: clase });
+        }
+
+        mesesData.push({
+          MES: `${nombresMeses[mesIndex]} ${año}`,
+          dias: diasArray
+        });
+
+        start.setMonth(start.getMonth() + 1);
+      }
+
+      // --- RENDERIZADO ---
+      const templatesDir = isProd ? path.join(__dirname, '..', 'templates') : path.resolve(process.cwd(), 'templates');
+      const templatePath = path.join(templatesDir, 'calendar.html');
+
+      if (!fs.existsSync(templatePath)) {
+        console.error("ERROR: No existe el archivo de plantilla HTML.");
+        return res.status(500).json({ error: `Plantilla no encontrada en ${templatePath}` });
+      }
+
+      const source = fs.readFileSync(templatePath, 'utf8');
+      const template = Handlebars.compile(source);
+      const htmlFinal = template({
+        CURSO: curso.descripcion,
+        meses: mesesData
+      });
+
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+
+      const page = await browser.newPage();
+      await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
+
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        landscape: true, // El calendario suele verse mejor en horizontal
+        printBackground: true,
+        margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
+      });
+
+      await browser.close();
+
+      res.removeHeader('Transfer-Encoding');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Length', pdfBuffer.length);
+      res.setHeader('Content-Disposition', `attachment; filename=Plan_Formativo_${alumno.apellidos.replace(/\s+/g, '_')}.pdf`);
+
+      return res.end(pdfBuffer); // Usamos .end() para enviar el buffer binario puro
+
+    } catch (error: any) {
+      if (browser) await browser.close();
+      console.error('Error generando calendario:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/relaciones-alumnos/:id/carta/pdf', async (req, res) => {
+    let browser;
+    try {
+      // 1. OBTENCIÓN DE DATOS (Misma lógica que tienes, omitida por brevedad)
+      const relacionAlumno = RelacionAlumnoDAO.getById(Number(req.params.id));
+      if (!relacionAlumno) return res.status(404).json({ error: 'Relación no encontrada' });
+
+      const convenio = ConvenioDAO.getById(relacionAlumno.convenioId);
+      const empresa = EmpresaDAO.getById(convenio.empresaId);
+      const centro = CentroDAO.getById(convenio.centroId!);
+      const curso = CursoDAO.getById(convenio.cursoId);
+      const profesor = ProfesorDAO.get();
+
+      // NUEVO: Mapeamos los alumnos directamente desde el array de la BD
+      // 2. PROCESAMIENTO DE PLANTILLA HTML CON VERIFICACIÓN
+      const isProd = process.env.NODE_ENV === 'production';
+      // Intentamos localizar la carpeta templates de forma absoluta
+      const templatesDir = isProd ? path.join(__dirname, '..', 'templates') : path.resolve(process.cwd(), 'templates');
+      const templatePath = path.join(templatesDir, 'carta_inicio.html');
+
+      console.log(`Intentando leer plantilla en: ${templatePath}`);
+
+      if (!fs.existsSync(templatePath)) {
+        console.error("ERROR: No existe el archivo de plantilla HTML.");
+        return res.status(500).json({ error: `Plantilla no encontrada en ${templatePath}` });
+      }
+
+      const source = fs.readFileSync(templatePath, 'utf8');
+      const template = Handlebars.compile(source);
+
+      const htmlFinal = template({
+        CENTRO_CIUDAD: centro?.ciudad || '',
+        FECHA_ACTUAL: new Date().toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        }) || '',
+        TUTOR_NOMBRE_COMPLETO: `${profesor?.nombre} ${profesor?.apellidos}`,
+        TUTOR_EMAIL: profesor?.email,
+        CURSO_ACADEMICO: curso?.descripcion || ''
+      });
+
+      // 3. GENERACIÓN DE PDF CON PUPPETEER
+      browser = await puppeteer.launch({
+        headless: true, // Cambiado a true (formato moderno)
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--font-render-hinting=none' // Mejora legibilidad en PDF
+        ]
+      });
+
+      const page = await browser.newPage();
+
+      // ESTO ES CRÍTICO: 
+      // Si el HTML tiene imágenes locales, Puppeteer necesita conocer el "basePath"
+      await page.setContent(htmlFinal, {
+        waitUntil: 'networkidle0', // Espera a que carguen imágenes/estilos
+        timeout: 30000
+      });
+
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
+      });
+
+      await browser.close();
+
+      // 4. ENVÍO SEGURO DEL BUFFER
+      // Limpiamos cualquier cabecera previa que pudiera estar interfiriendo
+      res.removeHeader('Transfer-Encoding');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Length', pdfBuffer.length);
+      res.setHeader('Content-Disposition', `attachment; filename=Carta_Informativa_${empresa?.nombre.replace(/\s+/g, '_')}.pdf`);
+
+      return res.end(pdfBuffer); // Usamos .end() para enviar el buffer binario puro
+
+    } catch (error: any) {
+      console.error('💥 ERROR CRÍTICO GENERANDO EL PDF:');
+
+      if (error.properties && error.properties.errors) {
+        console.error('El motor de plantillas ha encontrado estos errores en tu archivo PDF:');
         error.properties.errors.forEach((err: any) => {
           console.error(`- Etiqueta problemática: {${err.properties.id}} | Motivo: ${err.message}`);
         });

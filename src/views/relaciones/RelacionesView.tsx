@@ -81,6 +81,8 @@ export default function RelacionesView({ cursoId }: Props) {
             onDescargarValoracionIndividual={ctx.descargarValoracionIndividual}
             onAdvanceValoracionIndividual={ctx.advanceValoracionStatusIndividual}
             onMoveBackValoracionIndividual={ctx.moveBackValoracionStatusIndividual}
+            onDescargarCarta={ctx.descargarCarta}
+            onDescargarCalendario={ctx.descargarCalendario}
           />
         </div>
       </div>

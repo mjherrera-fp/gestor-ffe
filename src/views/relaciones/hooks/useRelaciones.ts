@@ -518,6 +518,50 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar el seguimiento de ${nombreAlumno}`); }
     };
 
+    const descargarCarta = async () => {
+        if (!selectedRelacion) return;
+        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/carta/pdf`;
+        let nombreEmpresa = 'Empresa';
+        const convenio = convenios.find(c => c.id === selectedRelacion.convenioId);
+        if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
+        const url = `${baseUrl}?t=${Date.now()}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `Carta_${numRelacionLimpio}_${nombreEmpresa}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) { alert(`Error al descargar la carta de ${nombreEmpresa}`); }
+    };
+
+    const descargarCalendario = async (alumno: Alumno) => {
+        if (!selectedRelacion) return;
+        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/calendario`;
+        const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `Calendario_${numRelacionLimpio}_${nombreAlumno}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) { alert(`Error al descargar el calendario de ${nombreAlumno}`); }
+    };
+
     const descargarValoracionIndividual = async (alumno: Alumno) => {
         if (!selectedRelacion) return;
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
@@ -621,5 +665,6 @@ export function useRelaciones(cursoId: number) {
         // Descargas
         descargarPlanesFormativos, descargarPlanFormativoIndividual, 
         descargarSeguimientoIndividual, descargarValoracionIndividual,
+        descargarCarta, descargarCalendario
     };
 }

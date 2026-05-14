@@ -5,64 +5,76 @@ import path from 'path';
 const baseDir = process.env.PORTABLE_EXECUTABLE_DIR || process.cwd();
 const dbPath = path.join(baseDir, 'ffe_management.db');
 
-export const db = new Database(dbPath, {
-  verbose: process.env.NODE_ENV !== 'production' ? console.log : undefined
-});
+// Exportamos la instancia y un estado de bloqueo
+export let db: any = null;
+export let isDbEncrypted = false;
 
-// 1. Obligamos a usar el idioma de DB Browser
-db.pragma(`cipher='sqlcipher'`);
-db.pragma(`legacy=4`)
-// 2. OBLIGAMOS a que el tamaño de página sea exactamente el que espera DB Browser
-db.pragma("page_size=4096");
-
-
+/**
+ * Intento de conexión inicial (sin contraseña)
+ */
 export const initDB = () => {
   try {
+    // Intentamos abrir la base de datos de forma normal
+    const tempDb = new Database(dbPath);
 
-    db.exec('PRAGMA foreign_keys = ON;');
+    // Prueba de lectura: Si está cifrada, esto lanzará un error inmediatamente
+    tempDb.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
 
-    // Initialize schema
-    db.exec('PRAGMA foreign_keys = OFF;');
+    // Si llegamos aquí, NO está cifrada o ya estaba abierta
+    db = tempDb;
+    isDbEncrypted = false;
+    setupTables(); // Tu lógica de creación de tablas
+    console.log("Base de datos abierta (Sin cifrado)");
+  } catch (error: any) {
+    // El código de error 26 o mensajes sobre "file is not a database" 
+    // suelen indicar que está cifrada y falta la clave
+    isDbEncrypted = true;
+    db = null;
+    console.log("Base de datos detectada como cifrada. Esperando clave...");
+  }
+};
 
-    const tablesToDrop = new Set<string>();
+/**
+ * Desbloqueo manual con contraseña (llamado desde /api/auth/unlock)
+ */
+export const unlockDB = (password: string) => {
+  const newDb = new Database(dbPath);
 
-    const tableInfoConvenios = db.prepare("PRAGMA table_info(convenios)").all() as any[];
-    if (tableInfoConvenios.length > 0) {
-      const hasEmpresaId = tableInfoConvenios.some(col => col.name === 'empresaId');
-      const hasCentroIdConvenio = tableInfoConvenios.some(col => col.name === 'centroId');
-      if (!hasEmpresaId || !hasCentroIdConvenio) {
-        tablesToDrop.add('relaciones_alumnos');
-        tablesToDrop.add('convenios');
-      }
-    }
+  // Aplicamos los PRAGMAS que ya tenías en tu código original
+  newDb.pragma(`cipher='sqlcipher'`);
+  newDb.pragma(`legacy=4`);
+  newDb.pragma(`page_size=4096`);
+  newDb.pragma(`key='${password}'`);
 
-    const tableInfoDetalles = db.prepare("PRAGMA table_info(detalles_academicos)").all() as any[];
-    if (tableInfoDetalles.length > 0) {
-      const hasRADetalles = tableInfoDetalles.some(col => col.name === 'resultadosAprendizaje');
-      if (!hasRADetalles) {
-        tablesToDrop.add('alumnos');
-        tablesToDrop.add('detalles_academicos');
-      }
-    }
+  try {
+    // Validamos la clave
+    newDb.prepare("SELECT count(*) FROM sqlite_master").run();
+    db = newDb;
+    isDbEncrypted = true; // Ahora sabemos que está cifrada
+    setupTables();
+  } catch (error) {
+    newDb.close();
+    throw new Error("Contraseña incorrecta");
+  }
+};
 
-    const tableInfoCursos = db.prepare("PRAGMA table_info(cursos)").all() as any[];
-    if (tableInfoCursos.length > 0) {
-      const hasRA = tableInfoCursos.some(col => col.name === 'resultadosAprendizaje');
-      if (hasRA) {
-        tablesToDrop.add('relaciones_alumnos');
-        tablesToDrop.add('convenios');
-        tablesToDrop.add('alumnos');
-        tablesToDrop.add('cursos');
-      }
-    }
+/**
+ * Cierre físico para el botón de la cabecera
+ */
+export const lockDB = () => {
+  if (db) {
+    db.close();
+    db = null;
+    // Forzamos a que tras el cierre, el sistema sepa que debe pedir pass
+    isDbEncrypted = true;
+  }
+};
 
-    tablesToDrop.forEach(table => {
-      db.exec(`DROP TABLE IF EXISTS ${table}`);
-    });
 
-    db.exec('PRAGMA foreign_keys = ON;');
-
-    db.exec(`
+function setupTables() {
+  if (!db) return;
+  db.exec('PRAGMA foreign_keys = ON;');
+  db.exec(`
   CREATE TABLE IF NOT EXISTS profesores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre TEXT NOT NULL,
@@ -188,10 +200,8 @@ export const initDB = () => {
     FOREIGN KEY(empresaId) REFERENCES empresas(id) ON DELETE CASCADE
   );
 `);
+}
 
-  } catch (error) {
-    console.error("Error inicializando tablas:", error);
-  }
-};
-
+// Ejecutamos el intento inicial al importar el módulo
+initDB();
 export default db;

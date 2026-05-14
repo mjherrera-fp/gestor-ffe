@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, ShieldAlert, KeyRound, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
+import packageJson from '../../package.json';
 
 interface LockViewProps {
   onUnlock: (password: string) => Promise<void>;
@@ -14,7 +15,7 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) return;
-    
+
     setIsSubmitting(true);
     await onUnlock(password);
     setIsSubmitting(false);
@@ -26,7 +27,7 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-900/10 rounded-full blur-[120px]" />
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md p-8 relative z-10"
@@ -58,7 +59,7 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
             </div>
 
             {error && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="flex items-center gap-2 text-red-400 text-sm bg-red-400/10 p-3 rounded-lg border border-red-400/20"
@@ -84,10 +85,11 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
             </button>
           </form>
         </div>
-        
+
         <p className="text-center mt-6 text-slate-500 text-xs uppercase tracking-widest font-medium">
           Sistema de Gestión de las FFE
         </p>
+        <p className="text-center mt-2 text-[10px] text-text-muted font-medium uppercase tracking-widest">v{packageJson.version}</p>
       </motion.div>
     </div>
   );

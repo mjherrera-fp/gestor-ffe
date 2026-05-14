@@ -19,7 +19,8 @@ import {
   AlertCircle,
   Menu,
   X,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Profesor, Curso, Alumno, Empresa, Convenio, ConvenioEstado } from './types/index.ts';
@@ -45,18 +46,23 @@ export default function App() {
 
   // 1. Nuevos estados
   const [isLocked, setIsLocked] = useState(false);
+  const [isEncrypted, setIsEncrypted] = useState(false);
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
 
   const fetchData = async () => {
     try {
       const statusRes = await fetch('/api/auth/status');
-      const { locked } = await statusRes.json();
+      const { locked, encrypted } = await statusRes.json();
 
       if (locked) {
         setIsLocked(true);
         setLoading(false);
         return; // Cortamos la ejecución aquí
+      }
+
+      if (encrypted) {
+        setIsEncrypted(true);
       }
 
       // Si no está bloqueada, sigue tu código normal:
@@ -130,6 +136,22 @@ export default function App() {
       }
     } catch (err) {
       setAuthError('Error de comunicación con el servidor.');
+    }
+  };
+
+  const handleLock = async () => {
+    try {
+      // Llamada al backend para cerrar la sesión/cifrar la DB
+      await fetch('/api/auth/lock', { method: 'POST' });
+
+      // Reset de estados locales para limpiar la UI
+      setIsLocked(true);
+      setProfesor(null);
+      setCursos([]);
+      setActiveCurso(null);
+      setActiveTab('dashboard');
+    } catch (err) {
+      console.error("Error al bloquear la aplicación", err);
     }
   };
 
@@ -263,7 +285,16 @@ export default function App() {
                 </select>
               </div>
             )}
-
+            {/* Solo mostramos el botón si la base de datos es de tipo cifrada */}
+            {isEncrypted && (
+              <button
+                onClick={handleLock}
+                title="Bloquear Aplicación"
+                className="p-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all flex items-center justify-center"
+              >
+                <Lock className="h-5 w-5" />
+              </button>
+            )}
             <div
               onClick={() => setActiveTab('dashboard')}
               className="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-primary-light flex items-center justify-center text-primary cursor-pointer hover:bg-primary/10 transition-colors"

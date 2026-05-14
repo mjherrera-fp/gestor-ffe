@@ -1,4 +1,4 @@
-import db, { initDB } from './db.ts';
+import { db, isDbEncrypted, unlockDB, lockDB } from './db.ts';
 import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado } from '../types/index.ts';
 
 const safeParse = (str: any, fallback: any) => {
@@ -17,12 +17,12 @@ let sessionKeyApplied = false;
 
 // Función interna para comprobar el estado real del archivo
 const checkFileLocked = (): boolean => {
-    try {
-        db.prepare('SELECT count(*) FROM sqlite_master').get();
-        return false;
-    } catch (error) {
-        return true; 
-    }
+  try {
+    db.prepare('SELECT count(*) FROM sqlite_master').get();
+    return false;
+  } catch (error) {
+    return true;
+  }
 };
 
 // Guardamos si al arrancar el servidor el archivo estaba cifrado
@@ -32,34 +32,35 @@ export const isDatabaseLocked = () => checkFileLocked();
 
 // NUEVA FUNCIÓN: Nos dice si el archivo TIENE cifrado (aunque esté desbloqueado ahora)
 export const isDatabaseEncrypted = () => {
-    return databaseHadKeyAtStartup || sessionKeyApplied;
+  return databaseHadKeyAtStartup || sessionKeyApplied;
 };
 
 // Función para desbloquear al arrancar
 export const unlockDatabase = (password: string): boolean => {
-    try {
-        db.pragma(`key='${password}'`);
-        // Probamos si la clave es correcta
-        db.prepare('SELECT count(*) FROM sqlite_master').get();
-        sessionKeyApplied = true;
-        initDB();
-        
-        return true;
-    } catch (error) {
-        console.error("🔴 Error REAL al intentar desbloquear:", error);
-        return false; // Contraseña incorrecta
-    }
+  try {
+    unlockDB(password);
+    return true
+  } catch (error) {
+    console.error("🔴 Error REAL al intentar desbloquear:", error);
+    return false; // Contraseña incorrecta
+  }
+};
+
+export const lockDatabase = (): boolean => {
+  try {
+    lockDB();
+    return true
+  } catch (error) {
+    console.error("🔴 Error REAL al intentar bloquear:", error);
+    return false; // Contraseña incorrecta
+  }
 };
 
 // Función para cifrar o cambiar la contraseña (se usa en el Perfil)
 export const encryptDatabase = (password: string) => {
-    db.pragma(`rekey='${password}'`);
-    sessionKeyApplied = true; // <--- Marcamos que ahora tiene clave
+  db.pragma(`rekey='${password}'`);
+  sessionKeyApplied = true; // <--- Marcamos que ahora tiene clave
 };
-
-if (!isDatabaseLocked()) {
-    initDB();
-}
 
 export const ProfesorDAO = {
   get: () => db.prepare('SELECT * FROM profesores LIMIT 1').get() as Profesor | undefined,
@@ -412,7 +413,7 @@ export const RelacionAlumnoDAO = {
     db.transaction(() => {
       // 1. Limpiamos la referencia en los alumnos antes de borrar la relación
       db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = ?, estadoSeguimiento = ?, estadoValoracion = ? WHERE relacionId = ?').run('PENDIENTE_ENVIAR_ESTUDIANTE', 'PENDIENTE', 'PENDIENTE', id);
-      
+
       // 2. Borramos la relación
       db.prepare('DELETE FROM relaciones WHERE id = ?').run(id);
     })();

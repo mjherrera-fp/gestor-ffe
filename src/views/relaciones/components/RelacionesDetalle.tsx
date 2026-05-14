@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, ArrowLeft, Send, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { FileText, ArrowLeft, Send, Clock, ShieldCheck, CheckCircle2, Calendar, FileDown, Users, CalendarDays } from 'lucide-react';
 import { RelacionAlumno, Alumno, RelacionEstado, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado } from '../../../types/index.ts';
 import { BotonDescargaPDF } from '../../../components/BotonDescargaPDF.tsx';
 import { BotonDescargaDOCX } from '../../../components/BotonDescargaDOCX.tsx';
@@ -24,6 +24,8 @@ interface RelacionDetalleProps {
   onDescargarValoracionIndividual: (alumno: Alumno) => Promise<void>;
   onAdvanceValoracionIndividual: (alumno: Alumno) => void;
   onMoveBackValoracionIndividual: (alumno: Alumno) => void;
+  onDescargarCarta: () => Promise<void>;
+  onDescargarCalendario: (alumno: Alumno) => Promise<void>;
 }
 
 export function RelacionDetalle({
@@ -32,9 +34,10 @@ export function RelacionDetalle({
   onAdvancePlanStatus, onMoveBackPlanStatus,
   onAdvancePlanIndividual, onMoveBackPlanIndividual,
   onDescargarPlan, onDescargarPlanIndividual,
-  onDescargarSeguimientoIndividual, onAdvanceSeguimientoIndividual, 
-  onMoveBackSeguimientoIndividual, onDescargarValoracionIndividual, 
-  onAdvanceValoracionIndividual, onMoveBackValoracionIndividual 
+  onDescargarSeguimientoIndividual, onAdvanceSeguimientoIndividual,
+  onMoveBackSeguimientoIndividual, onDescargarValoracionIndividual,
+  onAdvanceValoracionIndividual, onMoveBackValoracionIndividual,
+  onDescargarCarta, onDescargarCalendario
 }: RelacionDetalleProps) {
 
   if (!selectedRelacion) {
@@ -323,6 +326,57 @@ export function RelacionDetalle({
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        {/* ── BLOQUE 5: OTROS DOCUMENTOS (por alumno) ── */}
+        <section className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+            <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
+              <FileText className="h-3.5 w-3.5" /> 5. Otros documentos
+            </label>
+          </div>
+
+          <div title="Descargar Carta de Presentación">
+            <BotonDescargaPDF
+              onClick={async () => onDescargarCarta()}
+              showText={true}
+              text="Carta de inicio de las FFE"
+              className="w-full py-2.5 font-bold text-[10px] uppercase flex items-center justify-center gap-2 bg-white border border-slate-200 text-red-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 rounded-lg transition-all shadow-sm active:scale-90 disabled:opacity-50"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
+            {selectedRelacion.alumnos?.map((alumno) => (
+              <div
+                key={alumno.id}
+                className="group bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-200 flex items-left justify-between gap-2"
+              >
+
+                {/* Información del Alumno */}
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-xs font-bold text-slate-700 truncate pr-2">
+                      {alumno.nombre} {alumno.apellidos}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Acciones de Descarga */}
+                <div className="flex gap-1.5 flex-1">
+                  {/* Añadimos w-full al div del tooltip para que no colapse al contenido */}
+                  <div title="Descargar Calendario" className="w-full">
+                    <BotonDescargaPDF
+                      onClick={async () => onDescargarCalendario(alumno)}
+                      showText={true}
+                      text="CALENDARIO"
+                      icon={CalendarDays}
+                      className="h-8 w-full gap-1.5 flex items-center justify-center bg-white border border-slate-200 text-red-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 rounded-lg transition-all shadow-sm active:scale-90 disabled:opacity-50"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
