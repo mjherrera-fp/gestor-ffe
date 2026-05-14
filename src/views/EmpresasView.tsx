@@ -264,7 +264,7 @@ export default function EmpresasView({ cursoId }: EmpresasViewProps) {
                 <tr className="bg-slate-50 border-b border-border-base">
                   <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Entidad</th>
                   <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Contacto</th>
-                  <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Acciones</th>
+                  <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-base font-sans">
@@ -282,8 +282,8 @@ export default function EmpresasView({ cursoId }: EmpresasViewProps) {
                       <p>{emp.email}</p>
                       <p className="text-[10px] text-text-muted">{emp.tlfn}</p>
                     </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center gap-2 justify-end">
                         <button onClick={(e) => { e.stopPropagation(); setEditingEmpresa(emp); setEmpresaFormData(emp); setShowEmpresaForm(true); }} className="p-1.5 text-text-muted hover:text-primary transition-colors">
                           <Edit2 className="h-4 w-4" />
                         </button>
