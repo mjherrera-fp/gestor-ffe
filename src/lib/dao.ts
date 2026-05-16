@@ -301,10 +301,13 @@ export const RelacionAlumnoDAO = {
     return relaciones.map(r => {
       // Obtenemos los alumnos asociados a esta relación específica
       const alumnosRelacionados = db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').all(r.id) as Alumno[];
+      // Obtenemos la empresa asociada a esta relación específica
+      const empresa = db.prepare('SELECT e.* FROM empresas e INNER JOIN convenios c ON e.id = c.empresaId INNER JOIN relaciones r ON c.id = r.convenioId WHERE r.id = ?').get(r.id) as Empresa;
 
       return {
         ...r,
         horario: safeParse(r.horario, {}),
+        empresa: empresa,
         alumnos: alumnosRelacionados
       } as RelacionAlumno;
     });
@@ -315,10 +318,12 @@ export const RelacionAlumnoDAO = {
 
     // Obtenemos los alumnos asociados a esta relación
     const alumnosRelacionados = db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').all(id) as Alumno[];
+    const empresa = db.prepare('SELECT e.* FROM empresas e INNER JOIN convenios c ON e.id = c.empresaId INNER JOIN relaciones r ON c.id = r.convenioId WHERE r.id = ?').get(r.id) as Empresa;
 
     return {
       ...r,
       horario: safeParse(r.horario, {}),
+      empresa: empresa,
       alumnos: alumnosRelacionados
     } as RelacionAlumno;
   },
@@ -329,10 +334,12 @@ export const RelacionAlumnoDAO = {
     return relaciones.map(r => {
       // Obtenemos los alumnos asociados a cada relación
       const alumnosRelacionados = db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').all(r.id) as Alumno[];
+      const empresa = db.prepare('SELECT e.* FROM empresas e INNER JOIN convenios c ON e.id = c.empresaId WHERE c.id = ?').get(convenioId) as Empresa;
 
       return {
         ...r,
         horario: safeParse(r.horario, {}),
+        empresa: empresa,
         alumnos: alumnosRelacionados
       } as RelacionAlumno;
     });

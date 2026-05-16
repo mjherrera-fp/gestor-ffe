@@ -73,16 +73,24 @@ export default function RelacionesView({ cursoId }: Props) {
             onMoveBackPlanStatus={ctx.moveBackPlanStatus}
             onAdvancePlanIndividual={ctx.advancePlanStatusIndividual}
             onMoveBackPlanIndividual={ctx.moveBackPlanStatusIndividual}
-            onDescargarPlan={ctx.descargarPlanesFormativos}
-            onDescargarPlanIndividual={ctx.descargarPlanFormativoIndividual}
-            onDescargarSeguimientoIndividual={ctx.descargarSeguimientoIndividual}
+            onDescargarPlanFormativo={ctx.descargarPlanFormativo}
+            onDescargarSeguimiento={ctx.descargarSeguimiento}
             onAdvanceSeguimientoIndividual={ctx.advanceSeguimientoStatusIndividual}
             onMoveBackSeguimientoIndividual={ctx.moveBackSeguimientoStatusIndividual}
-            onDescargarValoracionIndividual={ctx.descargarValoracionIndividual}
+            onDescargarValoracion={ctx.descargarValoracion}
             onAdvanceValoracionIndividual={ctx.advanceValoracionStatusIndividual}
             onMoveBackValoracionIndividual={ctx.moveBackValoracionStatusIndividual}
+            onDescargarRelacion={ctx.descargarRelacion}
             onDescargarCarta={ctx.descargarCarta}
             onDescargarCalendario={ctx.descargarCalendario}
+            onHandleDescargarTodo={ctx.handleDescargarTodo}
+            isDownloadingMasivo={ctx.isDownloadingMasivo}
+            downloadProgress={ctx.downloadProgress}
+            downloadStatus={ctx.downloadStatus}
+            setShowSelectionModal={ctx.setShowSelectionModal}
+            showSelectionModal={ctx.showSelectionModal}
+            setSelectedDocs={ctx.setSelectedDocs}
+            selectedDocs={ctx.selectedDocs}
           />
         </div>
       </div>

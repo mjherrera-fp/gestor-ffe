@@ -96,6 +96,7 @@ export interface RelacionAlumno {
   alumnos: Alumno[];
   convenioId: number;
   numRelacion: string;
+  empresa: Empresa;
   tutorEmpresaId: number;
   horario: HorarioSemanal;
   estado: RelacionEstado;
@@ -215,3 +216,12 @@ export const ValoracionEstadoLabels: Record<ValoracionEstado, string> = {
   [ValoracionEstado.ENVIADO_A_EMPRESA]: 'Enviado a empresa',
   [ValoracionEstado.RECIBIDO]: 'Recibido de empresa'
 };
+
+export interface SelectedDocs {
+  relacion: boolean,
+  plan: boolean,
+  seguimiento: boolean,
+  valoracion: boolean,
+  calendario: boolean,
+  carta: boolean
+}

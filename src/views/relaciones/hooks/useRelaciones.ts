@@ -18,6 +18,7 @@ import {
     getNextValoracionEstado,
     getPrevValoracionEstado
 } from '../utils/relacionesUtils.ts';
+import { blob } from 'stream/consumers';
 
 //todo el estado y lógica de relaciones-alumnos, incluyendo gestión de alumnos en el formulario, cambios de estado y descargas de planes formativos
 
@@ -62,6 +63,22 @@ export function useRelaciones(cursoId: number) {
     const [targetEndDate, setTargetEndDate] = useState('');
     const [targetStartDate, setTargetStartDate] = useState('');
     const [isConvenioDropdownOpen, setIsConvenioDropdownOpen] = useState(false);
+
+    // Control del modal de selección previa
+    const [showSelectionModal, setShowSelectionModal] = useState(false);
+    const [selectedDocs, setSelectedDocs] = useState({
+        relacion: true,
+        plan: true,
+        seguimiento: true,
+        valoracion: true,
+        calendario: true,
+        carta: true
+    });
+
+    // Estados para controlar el modal de descarga masiva
+    const [isDownloadingMasivo, setIsDownloadingMasivo] = useState(false);
+    const [downloadProgress, setDownloadProgress] = useState(0);
+    const [downloadStatus, setDownloadStatus] = useState('');
 
     const [formData, setFormData] = useState<Partial<RelacionAlumno>>({
         alumnos: [],
@@ -418,65 +435,48 @@ export function useRelaciones(cursoId: number) {
     //  DESCARGAS
     // ─────────────────────────────────────────
 
-    const descargarPlanesFormativos = async (tipo: 'docx' | 'pdf') => {
+    const crearDocumentoRelacion = async (tipo: 'docx' | 'pdf') => {
         if (!selectedRelacion?.alumnos?.length) { alert('No hay alumnos en esta relación.'); return; }
 
-        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/documento`;
+        const url = tipo === 'pdf' ? `${baseUrl}/pdf?t=${Date.now()}` : `${baseUrl}?t=${Date.now()}`;
 
-        if (selectedRelacion.alumnos.length === 1) {
-            const ar = selectedRelacion.alumnos[0];
-            const alumno = alumnos.find(a => a.id === ar.id);
-            const nombreAlumno = alumno ? `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_') : `Alumno_${ar.id}`;
-            const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`;
-            const url = tipo === 'pdf' ? `${baseUrl}/pdf?alumnoId=${ar.id}&t=${Date.now()}` : `${baseUrl}?alumnoId=${ar.id}`;
-            
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-                const blob = await response.blob();
-                const downloadUrl = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.download = `Plan_${numRelacionLimpio}_${nombreAlumno}.${tipo}`;
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                window.URL.revokeObjectURL(downloadUrl);
-            } catch (error) { alert(`Error al descargar el plan.`); }
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            const blob = await response.blob();
+            return blob;
+        } catch (error) { alert(`Error al descargar el plan.`); }
+
+    };
+
+    const descargarRelacion = async (tipo: 'docx' | 'pdf') => {
+        if (!selectedRelacion?.alumnos?.length) {
+            alert('No hay alumnos en esta relación.');
             return;
         }
 
-        // Múltiples alumnos → ZIP
-        const zip = new JSZip();
-        let archivosAñadidos = 0;
-        for (const ar of selectedRelacion.alumnos) {
-            const alumno = alumnos.find(a => a.id === ar.id);
-            const nombreAlumno = alumno ? `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_') : `Alumno_${ar.id}`;
-            const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`;
-            const url = tipo === 'pdf' ? `${baseUrl}/pdf?alumnoId=${ar.id}&t=${Date.now()}` : `${baseUrl}?alumnoId=${ar.id}&t=${Date.now()}`;
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-                zip.file(`Plan_${numRelacionLimpio}_${nombreAlumno}.${tipo}`, await response.blob());
-                archivosAñadidos++;
-            } catch (error) { console.error(`Error procesando plan de ${nombreAlumno}`); }
+        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+
+        const blob = await crearDocumentoRelacion(tipo);
+
+        if (!blob) {
+            return;
         }
-        if (archivosAñadidos > 0) {
-            const zipBlob = await zip.generateAsync({ type: 'blob' });
-            const downloadUrl = window.URL.createObjectURL(zipBlob);
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = `Planes_Formativos_${numRelacionLimpio}.zip`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(downloadUrl);
-        } else {
-            alert('No se pudo descargar ningún archivo del servidor.');
-        }
+
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `Relacion_${numRelacionLimpio}.${tipo}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+
+        return;
     };
 
-    const descargarPlanFormativoIndividual = async (tipo: 'docx' | 'pdf', alumno: Alumno) => {
+    const crearPlanFormativo = async (tipo: 'docx' | 'pdf', alumno: Alumno) => {
         if (!selectedRelacion) return;
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
@@ -486,6 +486,19 @@ export function useRelaciones(cursoId: number) {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             const blob = await response.blob();
+            return blob;
+        } catch (error) { alert(`Error al descargar el plan de ${nombreAlumno}`); }
+    };
+
+    const descargarPlanFormativo = async (tipo: 'docx' | 'pdf', alumno: Alumno) => {
+        if (!selectedRelacion) return;
+        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        try {
+            const blob = await crearPlanFormativo(tipo, alumno);
+            if (!blob) {
+                return;
+            }
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = downloadUrl;
@@ -497,7 +510,7 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar el plan de ${nombreAlumno}`); }
     };
 
-    const descargarSeguimientoIndividual = async (alumno: Alumno) => {
+    const crearSeguimiento = async (alumno: Alumno) => {
         if (!selectedRelacion) return;
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
@@ -507,6 +520,19 @@ export function useRelaciones(cursoId: number) {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             const blob = await response.blob();
+            return blob;
+        } catch (error) { alert(`Error al descargar el seguimiento de ${nombreAlumno}`); }
+    };
+
+    const descargarSeguimiento = async (alumno: Alumno) => {
+        if (!selectedRelacion) return;
+        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        try {
+            const blob = await crearSeguimiento(alumno);
+            if (!blob) {
+                return;
+            }
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = downloadUrl;
@@ -518,7 +544,7 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar el seguimiento de ${nombreAlumno}`); }
     };
 
-    const descargarCarta = async () => {
+    const crearCarta = async () => {
         if (!selectedRelacion) return;
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
         const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/carta/pdf`;
@@ -530,6 +556,21 @@ export function useRelaciones(cursoId: number) {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             const blob = await response.blob();
+            return blob;
+        } catch (error) { alert(`Error al descargar la carta de ${nombreEmpresa}`); }
+    };
+
+    const descargarCarta = async () => {
+        if (!selectedRelacion) return;
+        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+        let nombreEmpresa = 'Empresa';
+        const convenio = convenios.find(c => c.id === selectedRelacion.convenioId);
+        if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
+        try {
+            const blob = await crearCarta();
+            if (!blob) {
+                return;
+            }
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = downloadUrl;
@@ -541,7 +582,7 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar la carta de ${nombreEmpresa}`); }
     };
 
-    const descargarCalendario = async (alumno: Alumno) => {
+    const crearCalendario = async (alumno: Alumno) => {
         if (!selectedRelacion) return;
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
@@ -551,6 +592,19 @@ export function useRelaciones(cursoId: number) {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             const blob = await response.blob();
+            return blob;
+        } catch (error) { alert(`Error al descargar el calendario de ${nombreAlumno}`); }
+    };
+
+    const descargarCalendario = async (alumno: Alumno) => {
+        if (!selectedRelacion) return;
+        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        try {
+            const blob = await crearCalendario(alumno);
+            if (!blob) {
+                return;
+            }
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = downloadUrl;
@@ -562,7 +616,7 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar el calendario de ${nombreAlumno}`); }
     };
 
-    const descargarValoracionIndividual = async (alumno: Alumno) => {
+    const crearValoracion = async (alumno: Alumno) => {
         if (!selectedRelacion) return;
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
@@ -572,6 +626,19 @@ export function useRelaciones(cursoId: number) {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             const blob = await response.blob();
+            return blob;
+        } catch (error) { alert(`Error al descargar la valoración de ${nombreAlumno}`); }
+    };
+
+    const descargarValoracion = async (alumno: Alumno) => {
+        if (!selectedRelacion) return;
+        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        try {
+            const blob = await crearValoracion(alumno);
+            if (!blob) {
+                return;
+            }
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = downloadUrl;
@@ -583,6 +650,166 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar la valoración de ${nombreAlumno}`); }
     };
 
+    const handleDescargarTodo = async () => {
+        try {
+            if (!selectedRelacion) return;
+
+            const docsAlumno = ['plan', 'seguimiento', 'valoracion', 'calendario'];
+            const docsRelacion = ['relacion', 'carta'];
+
+            const numDocsAlumno = docsAlumno.filter(k => selectedDocs[k as keyof typeof selectedDocs]).length;
+            const numDocsGeneral = docsRelacion.filter(k => selectedDocs[k as keyof typeof selectedDocs]).length;
+
+            if (numDocsAlumno === 0 && numDocsGeneral === 0) {
+                alert('Debes seleccionar al menos un tipo de documento para descargar.');
+                return;
+            }
+
+            // 1. Ocultamos el selector y mostramos el modal de progreso real
+            setShowSelectionModal(false);
+            setIsDownloadingMasivo(true);
+            setDownloadProgress(0);
+            setDownloadStatus('Iniciando preparación de archivos...');
+            // 1. Inicializar JSZip
+            const zip = new JSZip();
+
+            const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+
+            // Calculamos el total de operaciones (4 documentos por cada alumno)
+            const totalOperaciones = (selectedRelacion.alumnos.length * numDocsAlumno) + numDocsGeneral;
+            let operacionesCompletadas = 0;
+
+            // Función auxiliar para actualizar la barra (reservamos el último 10% para comprimir)
+            const reportarProgreso = (mensaje: string) => {
+                operacionesCompletadas++;
+                const porcentaje = totalOperaciones > 0 ? (operacionesCompletadas / totalOperaciones) * 90 : 90;
+                setDownloadProgress(porcentaje);
+                setDownloadStatus(mensaje);
+            };
+
+            // (Opcional) Crear una carpeta dentro del ZIP
+            const mainFolder = zip.folder(selectedRelacion.empresa.nombre);
+
+            // 2. Iterar sobre todos los alumnos
+            for (const alumno of selectedRelacion.alumnos) {
+                if (!alumno.relacionId && numDocsAlumno > 0) continue; // Si no tiene relación, saltamos
+
+                // Creamos una subcarpeta por cada alumno para tenerlo organizado
+                const alumnoFolder = mainFolder?.folder(`${alumno.apellidos}_${alumno.nombre}`);
+
+                // --- 1. PLAN FORMATIVO PDF ---
+                if (selectedDocs.plan) {
+                    reportarProgreso(`Plan Formativo: ${alumno.nombre} ${alumno.apellidos}`);
+                    const blobPlanPDF = await crearPlanFormativo('pdf', alumno);
+                    if (!blobPlanPDF) {
+                        return;
+                    }
+                    // Asignamos la extensión correcta (pdf o docx según lo que devuelva tu API)
+                    alumnoFolder?.file(`Plan_Formativo_${alumno.apellidos}.pdf`, blobPlanPDF);
+
+                    // --- 2. PLAN FORMATIVO DOCX ---
+                    const blobPlanDoc = await crearPlanFormativo('docx', alumno);
+                    if (!blobPlanDoc) {
+                        return;
+                    }
+                    // Asignamos la extensión correcta (pdf o docx según lo que devuelva tu API)
+                    alumnoFolder?.file(`Plan_Formativo_${alumno.apellidos}.docx`, blobPlanDoc);
+                }
+
+
+                // --- 3. FICHA DE SEGUIMIENTO ---
+                if (selectedDocs.seguimiento) {
+                    reportarProgreso(`Ficha de Seguimiento: ${alumno.nombre} ${alumno.apellidos}`);
+                    const blobSeguimiento = await crearSeguimiento(alumno);
+                    if (!blobSeguimiento) {
+                        return;
+                    }
+                    alumnoFolder?.file(`Ficha_Seguimiento_${alumno.apellidos}.docx`, blobSeguimiento);
+                }
+
+                // ---4. VALORACIÓN FINAL ---
+                if (selectedDocs.valoracion) {
+                    reportarProgreso(`Valoración final: ${alumno.nombre} ${alumno.apellidos}`);
+                    const blobValoracion = await crearValoracion(alumno);
+                    if (!blobValoracion) {
+                        return;
+                    }
+
+                    alumnoFolder?.file(`Valoracion_Final_${alumno.apellidos}.docx`, blobValoracion);
+                }
+
+                // ---5. CALENDARIO ---
+                if (selectedDocs.calendario) {
+                    reportarProgreso(`Calendario: ${alumno.nombre} ${alumno.apellidos}`);
+                    const blobCalendario = await crearCalendario(alumno);
+                    if (!blobCalendario) {
+                        return;
+                    }
+                    alumnoFolder?.file(`Calendario_${alumno.apellidos}.pdf`, blobCalendario);
+                }
+
+            }
+
+            if (numDocsGeneral > 0 && selectedRelacion) {
+
+                if (selectedDocs.relacion) {
+                    // ---6. RELACION PDF---
+                    reportarProgreso(`Relacion: ${numRelacionLimpio}`);
+                    const blobRelPDF = await crearDocumentoRelacion('pdf');
+                    if (!blobRelPDF) {
+                        return;
+                    }
+                    mainFolder?.file(`Relacion_${numRelacionLimpio}.pdf`, blobRelPDF);
+
+                    // ---7. RELACION DOCX---
+                    const blobRelDOC = await crearDocumentoRelacion('docx');
+                    if (!blobRelDOC) {
+                        return;
+                    }
+                    mainFolder?.file(`Relacion_${numRelacionLimpio}.docx`, blobRelDOC);
+                }
+                if (selectedDocs.carta) {
+                    // ---8. CARTA ---
+                    reportarProgreso(`Carta: ${numRelacionLimpio}`);
+                    const cartaPDF = await crearCarta();
+                    if (!cartaPDF) {
+                        return;
+                    }
+                    mainFolder?.file(`Carta.pdf`, cartaPDF);
+                }
+            }
+
+            // 3. Generar el archivo ZIP asíncronamente
+            setDownloadStatus('Comprimiendo todos los archivos en un ZIP...');
+            setDownloadProgress(95);
+            const zipContent = await zip.generateAsync({ type: 'blob' });
+
+            setDownloadStatus('¡Tarea completada!');
+            setDownloadProgress(100);
+
+            // 4. Forzar la descarga del ZIP en el navegador
+            const url = window.URL.createObjectURL(zipContent);
+            const link = document.createElement('a');
+            link.href = url;
+
+            // Nombre del archivo que se descargará
+            const fecha = new Date().toISOString().split('T')[0];
+            link.download = `Documentacion_Relacion_${numRelacionLimpio}_${fecha}.zip`;
+
+            document.body.appendChild(link);
+            link.click();
+
+            // 5. Limpieza de memoria
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error("Error al generar el ZIP con la documentación:", error);
+            // Aquí puedes añadir una notificación/toast informando al usuario del error
+        } finally {
+            setIsDownloadingMasivo(false);
+        }
+    };
     // ─────────────────────────────────────────
     //  DATOS DERIVADOS
     // ─────────────────────────────────────────
@@ -663,8 +890,12 @@ export function useRelaciones(cursoId: number) {
         advanceSeguimientoStatusIndividual, moveBackSeguimientoStatusIndividual,
         advanceValoracionStatusIndividual, moveBackValoracionStatusIndividual,
         // Descargas
-        descargarPlanesFormativos, descargarPlanFormativoIndividual, 
-        descargarSeguimientoIndividual, descargarValoracionIndividual,
-        descargarCarta, descargarCalendario
+        descargarRelacion, descargarPlanFormativo,
+        descargarSeguimiento, descargarValoracion,
+        descargarCarta, descargarCalendario, handleDescargarTodo,
+        isDownloadingMasivo, downloadProgress, downloadStatus,
+        setShowSelectionModal, showSelectionModal, setSelectedDocs, selectedDocs
     };
+
+
 }
