@@ -65,7 +65,7 @@ export function useRelaciones(cursoId: number) {
     const [isConvenioDropdownOpen, setIsConvenioDropdownOpen] = useState(false);
 
     // Control del modal de selección previa
-    const [showSelectionModal, setShowSelectionModal] = useState(false);
+    const [targetDownloadRelaciones, setTargetDownloadRelaciones] = useState<RelacionAlumno[]>([]);
     const [selectedDocs, setSelectedDocs] = useState({
         relacion: true,
         plan: true,
@@ -435,10 +435,10 @@ export function useRelaciones(cursoId: number) {
     //  DESCARGAS
     // ─────────────────────────────────────────
 
-    const crearDocumentoRelacion = async (tipo: 'docx' | 'pdf') => {
-        if (!selectedRelacion?.alumnos?.length) { alert('No hay alumnos en esta relación.'); return; }
+    const crearDocumentoRelacion = async (tipo: 'docx' | 'pdf', relacion: RelacionAlumno) => {
+        if (!relacion?.alumnos?.length) { alert('No hay alumnos en esta relación.'); return; }
 
-        const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/documento`;
+        const baseUrl = `/api/relaciones-alumnos/${relacion.id}/documento`;
         const url = tipo === 'pdf' ? `${baseUrl}/pdf?t=${Date.now()}` : `${baseUrl}?t=${Date.now()}`;
 
         try {
@@ -458,7 +458,7 @@ export function useRelaciones(cursoId: number) {
 
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
 
-        const blob = await crearDocumentoRelacion(tipo);
+        const blob = await crearDocumentoRelacion(tipo, selectedRelacion);
 
         if (!blob) {
             return;
@@ -476,11 +476,11 @@ export function useRelaciones(cursoId: number) {
         return;
     };
 
-    const crearPlanFormativo = async (tipo: 'docx' | 'pdf', alumno: Alumno) => {
-        if (!selectedRelacion) return;
-        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+    const crearPlanFormativo = async (tipo: 'docx' | 'pdf', alumno: Alumno, relacion: RelacionAlumno) => {
+        if (!relacion) return;
+        const numRelacionLimpio = relacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-        const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/plan-formativo`;
+        const baseUrl = `/api/relaciones-alumnos/${relacion.id}/plan-formativo`;
         const url = tipo === 'pdf' ? `${baseUrl}/pdf?alumnoId=${alumno.id}&t=${Date.now()}` : `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}`;
         try {
             const response = await fetch(url);
@@ -495,7 +495,7 @@ export function useRelaciones(cursoId: number) {
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         try {
-            const blob = await crearPlanFormativo(tipo, alumno);
+            const blob = await crearPlanFormativo(tipo, alumno, selectedRelacion);
             if (!blob) {
                 return;
             }
@@ -510,11 +510,11 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar el plan de ${nombreAlumno}`); }
     };
 
-    const crearSeguimiento = async (alumno: Alumno) => {
-        if (!selectedRelacion) return;
-        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+    const crearSeguimiento = async (alumno: Alumno, relacion: RelacionAlumno) => {
+        if (!relacion) return;
+        const numRelacionLimpio = relacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-        const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/seguimiento`;
+        const baseUrl = `/api/relaciones-alumnos/${relacion.id}/seguimiento`;
         const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}`;
         try {
             const response = await fetch(url);
@@ -529,7 +529,7 @@ export function useRelaciones(cursoId: number) {
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         try {
-            const blob = await crearSeguimiento(alumno);
+            const blob = await crearSeguimiento(alumno, selectedRelacion);
             if (!blob) {
                 return;
             }
@@ -544,12 +544,12 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar el seguimiento de ${nombreAlumno}`); }
     };
 
-    const crearCarta = async () => {
-        if (!selectedRelacion) return;
-        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
-        const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/carta/pdf`;
+    const crearCarta = async (relacion: RelacionAlumno) => {
+        if (!relacion) return;
+        const numRelacionLimpio = relacion.numRelacion.replace(/\//g, '_');
+        const baseUrl = `/api/relaciones-alumnos/${relacion.id}/carta/pdf`;
         let nombreEmpresa = 'Empresa';
-        const convenio = convenios.find(c => c.id === selectedRelacion.convenioId);
+        const convenio = convenios.find(c => c.id === relacion.convenioId);
         if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
         const url = `${baseUrl}?t=${Date.now()}`;
         try {
@@ -567,7 +567,7 @@ export function useRelaciones(cursoId: number) {
         const convenio = convenios.find(c => c.id === selectedRelacion.convenioId);
         if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
         try {
-            const blob = await crearCarta();
+            const blob = await crearCarta(selectedRelacion);
             if (!blob) {
                 return;
             }
@@ -582,11 +582,11 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar la carta de ${nombreEmpresa}`); }
     };
 
-    const crearCalendario = async (alumno: Alumno) => {
-        if (!selectedRelacion) return;
-        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+    const crearCalendario = async (alumno: Alumno, relacion: RelacionAlumno) => {
+        if (!relacion) return;
+        const numRelacionLimpio = relacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-        const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/calendario`;
+        const baseUrl = `/api/relaciones-alumnos/${relacion.id}/calendario`;
         const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}`;
         try {
             const response = await fetch(url);
@@ -601,7 +601,7 @@ export function useRelaciones(cursoId: number) {
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         try {
-            const blob = await crearCalendario(alumno);
+            const blob = await crearCalendario(alumno, selectedRelacion);
             if (!blob) {
                 return;
             }
@@ -616,11 +616,11 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar el calendario de ${nombreAlumno}`); }
     };
 
-    const crearValoracion = async (alumno: Alumno) => {
-        if (!selectedRelacion) return;
-        const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+    const crearValoracion = async (alumno: Alumno, relacion: RelacionAlumno) => {
+        if (!relacion) return undefined;
+        const numRelacionLimpio = relacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-        const baseUrl = `/api/relaciones-alumnos/${selectedRelacion.id}/valoracion`;
+        const baseUrl = `/api/relaciones-alumnos/${relacion.id}/valoracion`;
         const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}`;
         try {
             const response = await fetch(url);
@@ -635,7 +635,7 @@ export function useRelaciones(cursoId: number) {
         const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         try {
-            const blob = await crearValoracion(alumno);
+            const blob = await crearValoracion(alumno, selectedRelacion);
             if (!blob) {
                 return;
             }
@@ -650,9 +650,8 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar la valoración de ${nombreAlumno}`); }
     };
 
-    const handleDescargarTodo = async () => {
+    const handleDescargarTodo = async (relaciones: RelacionAlumno[]) => {
         try {
-            if (!selectedRelacion) return;
 
             const docsAlumno = ['plan', 'seguimiento', 'valoracion', 'calendario'];
             const docsRelacion = ['relacion', 'carta'];
@@ -665,21 +664,22 @@ export function useRelaciones(cursoId: number) {
                 return;
             }
 
-            // 1. Ocultamos el selector y mostramos el modal de progreso real
-            setShowSelectionModal(false);
+            // 0. Ocultamos el selector y mostramos el modal de progreso real
+            setTargetDownloadRelaciones([]);
             setIsDownloadingMasivo(true);
             setDownloadProgress(0);
             setDownloadStatus('Iniciando preparación de archivos...');
             // 1. Inicializar JSZip
             const zip = new JSZip();
 
-            const numRelacionLimpio = selectedRelacion.numRelacion.replace(/\//g, '_');
+            // 1. CÁLCULO DINÁMICO EXACTO DEL TOTAL DE OPERACIONES
+            let totalOperaciones = 0;
+            relaciones.forEach(rel => {
+                const alumnosValidos = rel.alumnos?.filter(a => a.relacionId) || [];
+                totalOperaciones += (alumnosValidos.length * numDocsAlumno) + numDocsGeneral;
+            });
 
-            // Calculamos el total de operaciones (4 documentos por cada alumno)
-            const totalOperaciones = (selectedRelacion.alumnos.length * numDocsAlumno) + numDocsGeneral;
             let operacionesCompletadas = 0;
-
-            // Función auxiliar para actualizar la barra (reservamos el último 10% para comprimir)
             const reportarProgreso = (mensaje: string) => {
                 operacionesCompletadas++;
                 const porcentaje = totalOperaciones > 0 ? (operacionesCompletadas / totalOperaciones) * 90 : 90;
@@ -687,99 +687,128 @@ export function useRelaciones(cursoId: number) {
                 setDownloadStatus(mensaje);
             };
 
-            // (Opcional) Crear una carpeta dentro del ZIP
-            const mainFolder = zip.folder(selectedRelacion.empresa.nombre);
+            // Array maestro donde amontonaremos TODAS las promesas en paralelo de todas las relaciones
+            const tareas: (() => Promise<void>)[] = [];
+            // 2. ITERAR POR CADA RELACIÓN
+            for (const relacion of relaciones) {
+                const numRelacionLimpio = relacion.numRelacion.replace(/\//g, '_');
 
-            // 2. Iterar sobre todos los alumnos
-            for (const alumno of selectedRelacion.alumnos) {
-                if (!alumno.relacionId && numDocsAlumno > 0) continue; // Si no tiene relación, saltamos
+                // (Opcional) Crear una carpeta dentro del ZIP
+                const mainFolder = zip.folder(relacion.empresa.nombre);
 
-                // Creamos una subcarpeta por cada alumno para tenerlo organizado
-                const alumnoFolder = mainFolder?.folder(`${alumno.apellidos}_${alumno.nombre}`);
+                // 2. Iterar sobre todos los alumnos
+                for (const alumno of relacion.alumnos) {
+                    if (!alumno.relacionId) continue; // Si no tiene relación, saltamos
 
-                // --- 1. PLAN FORMATIVO PDF ---
-                if (selectedDocs.plan) {
-                    reportarProgreso(`Plan Formativo: ${alumno.nombre} ${alumno.apellidos}`);
-                    const blobPlanPDF = await crearPlanFormativo('pdf', alumno);
-                    if (!blobPlanPDF) {
-                        return;
+                    // Creamos una subcarpeta por cada alumno para tenerlo organizado
+                    const alumnoFolder = mainFolder?.folder(`${alumno.apellidos}_${alumno.nombre}`);
+
+                    // --- 1. PLAN FORMATIVO PDF ---
+                    if (selectedDocs.plan) {
+                        const tarea = crearPlanFormativo('pdf', alumno, relacion).then((blob) => {
+                            if (blob) { // Si no falló y tenemos el archivo
+                                alumnoFolder?.file(`Plan_Formativo_${alumno.apellidos}.pdf`, blob);
+                            }
+                        });
+                        tareas.push(async () => tarea);
+
+
+                        // --- 2. PLAN FORMATIVO DOCX ---
+                        const tareaDoc = crearPlanFormativo('docx', alumno, relacion).then((blob) => {
+                            if (blob) { // Si no falló y tenemos el archivo
+                                alumnoFolder?.file(`Plan_Formativo_${alumno.apellidos}.docx`, blob);
+                                reportarProgreso(`Plan Formativo: ${alumno.apellidos}`);
+                            }
+                        });
+                        tareas.push(async () => tareaDoc);
+
                     }
-                    // Asignamos la extensión correcta (pdf o docx según lo que devuelva tu API)
-                    alumnoFolder?.file(`Plan_Formativo_${alumno.apellidos}.pdf`, blobPlanPDF);
 
-                    // --- 2. PLAN FORMATIVO DOCX ---
-                    const blobPlanDoc = await crearPlanFormativo('docx', alumno);
-                    if (!blobPlanDoc) {
-                        return;
+
+                    // --- 3. FICHA DE SEGUIMIENTO ---
+                    if (selectedDocs.seguimiento) {
+                        const tarea = crearSeguimiento(alumno, relacion).then((blob) => {
+                            if (blob) {
+                                alumnoFolder?.file(`Ficha_Seguimiento_${alumno.apellidos}.docx`, blob);
+                                reportarProgreso(`Ficha Seguimiento: ${alumno.apellidos}`);
+                            }
+                        });
+                        tareas.push(async () => tarea);
                     }
-                    // Asignamos la extensión correcta (pdf o docx según lo que devuelva tu API)
-                    alumnoFolder?.file(`Plan_Formativo_${alumno.apellidos}.docx`, blobPlanDoc);
+
+                    // ---4. VALORACIÓN FINAL ---
+                    if (selectedDocs.valoracion) {
+                        const tarea = crearValoracion(alumno, relacion).then((blob) => {
+                            if (blob) {
+                                alumnoFolder?.file(`Valoracion_Final_${alumno.apellidos}.docx`, blob);
+                                reportarProgreso(`Valoración Final: ${alumno.apellidos}`);
+                            }
+                        });
+                        tareas.push(async () => tarea);
+                    }
+
+                    // ---5. CALENDARIO ---
+                    if (selectedDocs.calendario) {
+                        const tarea = crearCalendario(alumno, relacion).then((blob) => {
+                            if (blob) {
+                                alumnoFolder?.file(`Calendario_${alumno.apellidos}.pdf`, blob);
+                                reportarProgreso(`Calendario: ${alumno.apellidos}`);
+                            }
+                        });
+                        tareas.push(async () => tarea);
+                    }
+
                 }
 
+                if (numDocsGeneral > 0 && relacion) {
 
-                // --- 3. FICHA DE SEGUIMIENTO ---
-                if (selectedDocs.seguimiento) {
-                    reportarProgreso(`Ficha de Seguimiento: ${alumno.nombre} ${alumno.apellidos}`);
-                    const blobSeguimiento = await crearSeguimiento(alumno);
-                    if (!blobSeguimiento) {
-                        return;
+                    if (selectedDocs.relacion) {
+                        // ---6. RELACION PDF---
+                        // Usamos tu función crearDocumentoRelacion
+                        const tarea = crearDocumentoRelacion('pdf', relacion).then((blob) => {
+                            if (blob) {
+                                mainFolder?.file(`Relacion_${numRelacionLimpio}.pdf`, blob);
+                            }
+                        });
+                        tareas.push(async () => tarea);
+
+                        // ---7. RELACION DOCX---
+                        const tareaDocx = crearDocumentoRelacion('docx', relacion).then((blob) => {
+                            if (blob) {
+                                mainFolder?.file(`Relacion_${numRelacionLimpio}.docx`, blob);
+                                reportarProgreso(`Relacion_${numRelacionLimpio}`);
+                            }
+                        });
+                        tareas.push(async () => tareaDocx);
                     }
-                    alumnoFolder?.file(`Ficha_Seguimiento_${alumno.apellidos}.docx`, blobSeguimiento);
-                }
 
-                // ---4. VALORACIÓN FINAL ---
-                if (selectedDocs.valoracion) {
-                    reportarProgreso(`Valoración final: ${alumno.nombre} ${alumno.apellidos}`);
-                    const blobValoracion = await crearValoracion(alumno);
-                    if (!blobValoracion) {
-                        return;
+                    if (selectedDocs.carta) {
+                        // ---8. CARTA ---
+                        const tarea = crearCarta(relacion).then((blob) => {
+                            if (blob) {
+                                mainFolder?.file(`Carta.pdf`, blob);
+                                reportarProgreso(`Carta: ${numRelacionLimpio}`);
+                            }
+                        });
+                        tareas.push(async () => tarea);
                     }
-
-                    alumnoFolder?.file(`Valoracion_Final_${alumno.apellidos}.docx`, blobValoracion);
                 }
-
-                // ---5. CALENDARIO ---
-                if (selectedDocs.calendario) {
-                    reportarProgreso(`Calendario: ${alumno.nombre} ${alumno.apellidos}`);
-                    const blobCalendario = await crearCalendario(alumno);
-                    if (!blobCalendario) {
-                        return;
-                    }
-                    alumnoFolder?.file(`Calendario_${alumno.apellidos}.pdf`, blobCalendario);
-                }
-
             }
+            // ---------------------------------------------------------
+            // NUEVO MOTOR DE EJECUCIÓN POR LOTES (CHUNK PROCESSING)
+            // ---------------------------------------------------------
+            // En lugar de await Promise.all(todasLasTareas); que lanza todo a la vez:
 
-            if (numDocsGeneral > 0 && selectedRelacion) {
+            const TAMAÑO_LOTE = 3; // Lanza de 3 en 3 navegadores (ajusta según tu CPU)
 
-                if (selectedDocs.relacion) {
-                    // ---6. RELACION PDF---
-                    reportarProgreso(`Relacion: ${numRelacionLimpio}`);
-                    const blobRelPDF = await crearDocumentoRelacion('pdf');
-                    if (!blobRelPDF) {
-                        return;
-                    }
-                    mainFolder?.file(`Relacion_${numRelacionLimpio}.pdf`, blobRelPDF);
-
-                    // ---7. RELACION DOCX---
-                    const blobRelDOC = await crearDocumentoRelacion('docx');
-                    if (!blobRelDOC) {
-                        return;
-                    }
-                    mainFolder?.file(`Relacion_${numRelacionLimpio}.docx`, blobRelDOC);
-                }
-                if (selectedDocs.carta) {
-                    // ---8. CARTA ---
-                    reportarProgreso(`Carta: ${numRelacionLimpio}`);
-                    const cartaPDF = await crearCarta();
-                    if (!cartaPDF) {
-                        return;
-                    }
-                    mainFolder?.file(`Carta.pdf`, cartaPDF);
-                }
+            for (let i = 0; i < tareas.length; i += TAMAÑO_LOTE) {
+                const loteActual = tareas.slice(i, i + TAMAÑO_LOTE);
+                // Ejecutamos solo estas 3 en paralelo y ESPERAMOS a que terminen
+                await Promise.all(loteActual.map(tarea => tarea()));
             }
+            // Cuando el bucle termine, todas se habrán ejecutado sin saturar el backend
 
-            // 3. Generar el archivo ZIP asíncronamente
+            // 5. Fase final: Compresión (solo ocurre cuando todo lo anterior ha descargado)
             setDownloadStatus('Comprimiendo todos los archivos en un ZIP...');
             setDownloadProgress(95);
             const zipContent = await zip.generateAsync({ type: 'blob' });
@@ -794,17 +823,18 @@ export function useRelaciones(cursoId: number) {
 
             // Nombre del archivo que se descargará
             const fecha = new Date().toISOString().split('T')[0];
-            link.download = `Documentacion_Relacion_${numRelacionLimpio}_${fecha}.zip`;
+            link.download = `Documentacion_Relacion_${fecha}.zip`;
 
             document.body.appendChild(link);
             link.click();
 
-            // 5. Limpieza de memoria
+            // 6. Limpieza de memoria
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
 
         } catch (error) {
             console.error("Error al generar el ZIP con la documentación:", error);
+            setDownloadStatus('Ocurrió un error al procesar el lote masivo.');
             // Aquí puedes añadir una notificación/toast informando al usuario del error
         } finally {
             setIsDownloadingMasivo(false);
@@ -894,7 +924,7 @@ export function useRelaciones(cursoId: number) {
         descargarSeguimiento, descargarValoracion,
         descargarCarta, descargarCalendario, handleDescargarTodo,
         isDownloadingMasivo, downloadProgress, downloadStatus,
-        setShowSelectionModal, showSelectionModal, setSelectedDocs, selectedDocs
+        targetDownloadRelaciones, setTargetDownloadRelaciones, setSelectedDocs, selectedDocs
     };
 
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download } from 'lucide-react';
 import { RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { getStatusBadgeColor, getStatusLabel } from '../utils/relacionesUtils.ts';
@@ -47,6 +47,8 @@ interface RelacionesListadoProps {
   sortOrder: 'asc' | 'desc';
   onSortByEmpresa: () => void;
   onSortByEstado: () => void;
+  onHandleDescargarTodo: (relaciones: RelacionAlumno[]) => Promise<void>;
+  setTargetDownloadRelaciones: React.Dispatch<React.SetStateAction<RelacionAlumno[]>>;
 }
 
 // ─────────────────────────────────────────
@@ -58,8 +60,11 @@ export function RelacionesListado({
   onSelectRelacion, onEdit, onDeleteRequest,
   listSearchTerm, onListSearchChange,
   statusFilter, onStatusFilterChange,
-  sortBy, sortOrder, onSortByEmpresa, onSortByEstado,
+  sortBy, sortOrder, onSortByEmpresa, onSortByEstado, 
+  onHandleDescargarTodo, setTargetDownloadRelaciones
 }: RelacionesListadoProps) {
+
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const estadosOptions = [
     { id: 'all', label: 'Cualquier estado' },
@@ -80,13 +85,34 @@ export function RelacionesListado({
             </div>
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Relaciones</span>
           </div>
-          <button
-            onClick={() => createRelacion(null)}
-            className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-            
-          >
-            <Plus className="h-4 w-4" /> Nueva Relación
-          </button>
+          <div className="flex items-center gap-2">
+            {/* NUEVO BOTÓN MASIVO FILTRADO */}
+            <button
+              onClick={() => {
+                if (relaciones) {
+                  setTargetDownloadRelaciones(relaciones);
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
+              title="Descargar todos los documentos"
+            >
+              {isDownloading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+              ) : (
+                <Download className="h-3.5 w-3.5" />
+
+              )}
+            </button>
+
+            {/* Tu botón original de Crear Relación */}
+            <button
+              onClick={() => createRelacion(null)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold shadow-md shadow-blue-600/10 transition-all"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Crear Relación</span>
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
           {/* Buscador */}

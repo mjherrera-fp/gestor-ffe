@@ -26,12 +26,12 @@ interface RelacionDetalleProps {
   onDescargarCarta: () => Promise<void>;
   onDescargarRelacion: (tipo: 'docx' | 'pdf') => Promise<void>;
   onDescargarCalendario: (alumno: Alumno) => Promise<void>;
-  onHandleDescargarTodo: () => Promise<void>;
+  onHandleDescargarTodo: (relaciones: RelacionAlumno[]) => Promise<void>;
   isDownloadingMasivo: boolean;
   downloadProgress: number;
   downloadStatus: string;
-  setShowSelectionModal: React.Dispatch<React.SetStateAction<boolean>>;
-  showSelectionModal: boolean;
+  setTargetDownloadRelaciones: React.Dispatch<React.SetStateAction<RelacionAlumno[]>>;
+  targetDownloadRelaciones: RelacionAlumno[];
   selectedDocs: SelectedDocs;
   setSelectedDocs: React.Dispatch<React.SetStateAction<SelectedDocs>>;
 }
@@ -46,7 +46,7 @@ export function RelacionDetalle({
   onDescargarValoracion, onAdvanceValoracionIndividual, onMoveBackValoracionIndividual,
   onDescargarCarta, onDescargarCalendario, onHandleDescargarTodo,
   isDownloadingMasivo, downloadProgress, downloadStatus,
-  setShowSelectionModal, showSelectionModal, setSelectedDocs, selectedDocs
+  setTargetDownloadRelaciones, targetDownloadRelaciones, setSelectedDocs, selectedDocs
 }: RelacionDetalleProps) {
 
   const [isDownloading, setIsDownloading] = useState(false);
@@ -69,202 +69,7 @@ export function RelacionDetalle({
 
   return (
     <div className="flex flex-col h-full animate-in slide-in-from-right-4 duration-300">
-      {/* MODAL 1: SELECCIÓN DE DOCUMENTOS A DESCARGAR */}
-      {showSelectionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-100">
-
-            <div className="mb-4">
-              <h3 className="text-lg font-bold text-slate-800">Seleccionar Documentación</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Elige qué archivos deseas incluir en el paquete comprimido (.ZIP) de la relación actual.
-              </p>
-            </div>
-
-            {/* NUEVO: Botones de Selección Rápida */}
-            <div className="flex justify-end gap-3 mb-2">
-              <button
-                type="button"
-                onClick={() => setSelectedDocs({
-                  plan: true,
-                  seguimiento: true,
-                  valoracion: true,
-                  calendario: true,
-                  relacion: true,
-                  carta: true
-                })}
-                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-wider"
-              >
-                Seleccionar Todos
-              </button>
-              <span className="text-slate-300 text-[11px]">|</span>
-              <button
-                type="button"
-                onClick={() => setSelectedDocs({
-                  plan: false,
-                  seguimiento: false,
-                  valoracion: false,
-                  calendario: false,
-                  relacion: false,
-                  carta: false
-                })}
-                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors uppercase tracking-wider"
-              >
-                Deseleccionar Todos
-              </button>
-            </div>
-
-            {/* Checkboxes de opciones */}
-            <div className="space-y-3 my-6">
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={selectedDocs.relacion}
-                  onChange={(e) => setSelectedDocs({ ...selectedDocs, relacion: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Relación de alumnos</p>
-                  <p className="text-[11px] text-slate-400">Documento en formato Word (.docx) y PDF con la relación de alumnos</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={selectedDocs.plan}
-                  onChange={(e) => setSelectedDocs({ ...selectedDocs, plan: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Plan Formativo</p>
-                  <p className="text-[11px] text-slate-400">Documento por alumno en formato Word (.docx) y PDF</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={selectedDocs.seguimiento}
-                  onChange={(e) => setSelectedDocs({ ...selectedDocs, seguimiento: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Ficha de Seguimiento Periódico</p>
-                  <p className="text-[11px] text-slate-400">Plantilla editable por alumno en formato Word (.docx)</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={selectedDocs.valoracion}
-                  onChange={(e) => setSelectedDocs({ ...selectedDocs, valoracion: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Valoración Final</p>
-                  <p className="text-[11px] text-slate-400">Plantilla editable por alumno en formato Word (.docx)</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={selectedDocs.calendario}
-                  onChange={(e) => setSelectedDocs({ ...selectedDocs, calendario: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Calendario de Prácticas</p>
-                  <p className="text-[11px] text-slate-400">Documento de asistencia por alumno en formato PDF</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={selectedDocs.carta}
-                  onChange={(e) => setSelectedDocs({ ...selectedDocs, carta: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Carta a la empresa</p>
-                  <p className="text-[11px] text-slate-400">Documento explicativo sobre las FFE</p>
-                </div>
-              </label>
-            </div>
-
-            {/* Botones de acción del Modal */}
-            <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setShowSelectionModal(false)}
-                className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => onHandleDescargarTodo()}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md shadow-blue-600/10 transition-all transform active:scale-98"
-              >
-                Aceptar y Generar
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DE PROGRESO DE DESCARGA */}
-      {isDownloadingMasivo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative overflow-hidden">
-
-            {/* Decoración superior */}
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-100">
-              <div
-                className="h-full bg-blue-500 transition-all duration-300 ease-out"
-                style={{ width: `${downloadProgress}%` }}
-              />
-            </div>
-
-            <div className="flex flex-col items-center text-center mt-2">
-              <div className="h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                {downloadProgress === 100 ? (
-                  <FileArchive className="h-6 w-6 text-blue-600" />
-                ) : (
-                  <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
-                )}
-              </div>
-
-              <h3 className="text-lg font-bold text-slate-800">
-                Descargando Documentación
-              </h3>
-
-              <p className="text-sm text-slate-500 mt-2 min-h-10">
-                {downloadStatus}
-              </p>
-
-              {/* Barra de progreso */}
-              <div className="w-full mt-6">
-                <div className="flex justify-between text-xs font-semibold text-slate-600 mb-2">
-                  <span>Progreso</span>
-                  <span>{Math.round(downloadProgress)}%</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                  <div
-                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
-                    style={{ width: `${downloadProgress}%` }}
-                  ></div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      )}
+      
 
       <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-start justify-between mb-4">
 
@@ -281,7 +86,9 @@ export function RelacionDetalle({
 
         {/* Botón de Descargar Todo (intacto) */}
         <button
-          onClick={() => setShowSelectionModal(true)}
+          onClick={() => {
+            if (selectedRelacion) setTargetDownloadRelaciones([selectedRelacion]);
+          }}
           className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
           title="Descargar todos los documentos"
         >

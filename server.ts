@@ -705,14 +705,14 @@ async function startServer() {
       // ESTO ES CRÍTICO: 
       // Si el HTML tiene imágenes locales, Puppeteer necesita conocer el "basePath"
       await page.setContent(htmlFinal, {
-        waitUntil: 'networkidle0', // Espera a que carguen imágenes/estilos
+        waitUntil: 'load', // Espera a que carguen imágenes/estilos
         timeout: 30000
       });
 
       const pdfBuffer = await page.pdf({
         format: 'A4',
         printBackground: true,
-        margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
+        margin: { top: '15mm', right: '15mm', bottom: '15mm', left: '15mm' }
       });
 
       await browser.close();
@@ -931,7 +931,7 @@ async function startServer() {
       // ESTO ES CRÍTICO: 
       // Si el HTML tiene imágenes locales, Puppeteer necesita conocer el "basePath"
       await page.setContent(htmlFinal, {
-        waitUntil: 'networkidle0', // Espera a que carguen imágenes/estilos
+        waitUntil: 'load', // Espera a que carguen imágenes/estilos
         timeout: 30000
       });
 
@@ -1079,7 +1079,7 @@ async function startServer() {
       });
 
       const page = await browser.newPage();
-      await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
+      await page.setContent(htmlFinal, { waitUntil: 'load' });
 
       const pdfBuffer = await page.pdf({
         format: 'A4',
@@ -1161,7 +1161,7 @@ async function startServer() {
       // ESTO ES CRÍTICO: 
       // Si el HTML tiene imágenes locales, Puppeteer necesita conocer el "basePath"
       await page.setContent(htmlFinal, {
-        waitUntil: 'networkidle0', // Espera a que carguen imágenes/estilos
+        waitUntil: 'load', // Espera a que carguen imágenes/estilos
         timeout: 30000
       });
 

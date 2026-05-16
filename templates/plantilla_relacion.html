@@ -8,8 +8,28 @@
         /* CONFIGURACIÓN DE PÁGINA PARA PDF */
         @page {
             size: A4;
-            margin: 15mm;
+        }
 
+        @media print {
+
+            /* 2. Eliminar márgenes residuales del navegador */
+            body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            /* 3. Evitar que la tabla desborde el ancho de la página */
+            table {
+                width: 100%;
+                max-width: 100%;
+                table-layout: fixed;
+                /* Fuerza a la tabla a respetar el ancho máximo */
+                border-collapse: collapse;
+                word-wrap: break-word;
+                /* Si un texto es muy largo, lo parte en lugar de ensanchar la celda */
+            }
         }
 
         html,
