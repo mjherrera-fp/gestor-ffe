@@ -34,7 +34,8 @@ import EmpresasView from './views/empresas/EmpresasView.tsx';
 import ConveniosView from './views/convenios/ConveniosView.tsx';
 import InteresesView from './views/intereses/InteresesView.tsx';
 import RelacionesView from './views/relaciones/RelacionesView.tsx';
-import LockView from './views/LockView.tsx';
+import PanelView from './views/panel/PanelView.tsx';
+import LockView from './views/lock/LockView.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -109,6 +110,7 @@ export default function App() {
   const navItems = [
     { id: 'dashboard', label: 'Profesor', icon: UserCircle },
     { id: 'cursos', label: 'Cursos', icon: BookOpen },
+    { id: 'panel', label: 'Panel', icon: LayoutDashboard, disabled: activeCursos.length === 0 },
     { id: 'alumnos', label: 'Alumnos', icon: Users, disabled: activeCursos.length === 0 },
     { id: 'empresas', label: 'Empresas', icon: Building2, disabled: activeCursos.length === 0 },
     { id: 'intereses', label: 'Intereses', icon: Trophy, disabled: activeCursos.length === 0 },
@@ -326,6 +328,9 @@ export default function App() {
             )}
             {activeTab === 'empresas' && activeCurso && (
               <EmpresasView cursoId={activeCurso.id!} />
+            )}
+            {activeTab === 'panel' && activeCurso && (
+              <PanelView cursoId={activeCurso.id!} />
             )}
             {activeTab === 'intereses' && activeCurso && (
               <InteresesView cursoId={activeCurso.id!} />

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, ShieldAlert, KeyRound, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
-import packageJson from '../../package.json';
+import packageJson from '../../../package.json';
 
 interface LockViewProps {
   onUnlock: (password: string) => Promise<void>;

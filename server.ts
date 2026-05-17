@@ -9,7 +9,7 @@ import { render } from '@react-email/render';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
-import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
+import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
@@ -1378,6 +1378,17 @@ async function startServer() {
   });
 
 
+
+  // Panel
+  app.get('/api/panel/resumen', (req, res) => {
+    res.json(PanelDAO.resumen(req.query.cursoId ? Number(req.query.cursoId) : undefined));
+  });
+
+  app.get('/api/panel/seguridad-social', (req, res) => {
+    const cursoId = Number(req.query.cursoId);
+    if (!cursoId) return res.status(400).json({ error: 'cursoId es obligatorio' });
+    res.json(PanelDAO.seguridadSocial(cursoId));
+  });
 
   // Vite setup y Rutas Estáticas (UNIFICADO)
   if (process.env.NODE_ENV !== 'production') {

@@ -1,5 +1,5 @@
 import { db, isDbEncrypted, unlockDB, lockDB } from './db.ts';
-import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado } from '../types/index.ts';
+import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData } from '../types/index.ts';
 
 const safeParse = (str: any, fallback: any) => {
   if (!str || str === 'undefined' || str === 'null') return fallback;
@@ -431,6 +431,123 @@ export const RelacionAlumnoDAO = {
   }
 };
 
+export const PanelDAO = {
+  resumen: (cursoId?: number): PanelResumenRow[] => {
+    const query = cursoId
+      ? `SELECT 
+          a.id as alumnoId, a.nombre, a.apellidos,
+          a.fechaInicio, a.fechaFin, a.totalHorasFFE, a.relacionId,
+          a.estadoPlanFormativo, a.estadoSeguimiento, a.estadoValoracion,
+          e.nombre as empresaNombre,
+          c.numConvenio, c.estado as estadoConvenio,
+          r.numRelacion, r.estado as estadoRelacion
+        FROM alumnos a
+        LEFT JOIN relaciones r ON a.relacionId = r.id
+        LEFT JOIN convenios c ON r.convenioId = c.id
+        LEFT JOIN empresas e ON c.empresaId = e.id
+        WHERE a.cursoId = ?`
+      : `SELECT 
+          a.id as alumnoId, a.nombre, a.apellidos,
+          a.fechaInicio, a.fechaFin, a.totalHorasFFE, a.relacionId,
+          a.estadoPlanFormativo, a.estadoSeguimiento, a.estadoValoracion,
+          e.nombre as empresaNombre,
+          c.numConvenio, c.estado as estadoConvenio,
+          r.numRelacion, r.estado as estadoRelacion
+        FROM alumnos a
+        LEFT JOIN relaciones r ON a.relacionId = r.id
+        LEFT JOIN convenios c ON r.convenioId = c.id
+        LEFT JOIN empresas e ON c.empresaId = e.id`;
+    return db.prepare(query).all(cursoId ? [cursoId] : []) as PanelResumenRow[];
+  },
 
+  seguridadSocial: (cursoId: number): SeguridadSocialData => {
+    const alumnos = db.prepare(
+      'SELECT id, nombre, apellidos, fechaInicio, fechaFin FROM alumnos WHERE cursoId = ?'
+    ).all(cursoId) as { id: number; nombre: string; apellidos: string; fechaInicio: string | null; fechaFin: string | null }[];
 
+    const curso = db.prepare('SELECT * FROM cursos WHERE id = ?').get(cursoId) as any;
+    if (!curso) return { meses: [], alumnos: [], datos: {} };
+
+    const festivos: string[] = curso.festivos ? JSON.parse(curso.festivos) : [];
+    const festivosSet = new Set(festivos);
+
+    const toLocalDate = (iso: string | null): Date | null => {
+      if (!iso) return null;
+      const [y, m, d] = iso.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    };
+
+    const toLocalDateStr = (d: Date): string => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    const relaciones = db.prepare(`
+      SELECT r.id, r.horario, a.id as alumnoId, a.fechaInicio as aluInicio, a.fechaFin as aluFin
+      FROM relaciones r
+      JOIN alumnos a ON a.relacionId = r.id
+      WHERE a.cursoId = ?
+    `).all(cursoId) as any[];
+
+    let minDate: Date | null = null;
+    let maxDate: Date | null = null;
+    for (const rel of relaciones) {
+      const di = toLocalDate(rel.aluInicio);
+      const df = toLocalDate(rel.aluFin);
+      if (di && (!minDate || di < minDate)) minDate = di;
+      if (df && (!maxDate || df > maxDate)) maxDate = df;
+    }
+
+    if (!minDate || !maxDate) return { meses: [], alumnos: [], datos: {} };
+
+    const meses: string[] = [];
+    const iter = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+    while (iter <= maxDate) {
+      meses.push(toLocalDateStr(iter));
+      iter.setMonth(iter.getMonth() + 1);
+    }
+
+    const datos: Record<string, number> = {};
+
+    for (const rel of relaciones) {
+      const horario = safeParse(rel.horario, {});
+      const diasSemana: string[] = [];
+      for (const dia of ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']) {
+        if (horario[dia]?.horas > 0) diasSemana.push(dia);
+      }
+      if (diasSemana.length === 0) continue;
+
+      const diaMap: Record<string, number> = {
+        lunes: 1, martes: 2, miercoles: 3, jueves: 4, viernes: 5, sabado: 6, domingo: 0
+      };
+      const diasSet = new Set(diasSemana.map(d => diaMap[d]));
+
+      const aluInicio = toLocalDate(rel.aluInicio) || minDate;
+      const aluFin = toLocalDate(rel.aluFin) || maxDate;
+
+      for (const mesKey of meses) {
+        const [year, month] = mesKey.split('-').map(Number);
+        const startM = new Date(year, month - 1, 1);
+        const endM = new Date(year, month, 0);
+
+        const start = startM < aluInicio ? aluInicio : startM;
+        const end = endM > aluFin ? aluFin : endM;
+
+        let dias = 0;
+        const d = new Date(start);
+        while (d <= end) {
+          if (diasSet.has(d.getDay()) && !festivosSet.has(toLocalDateStr(d))) dias++;
+          d.setDate(d.getDate() + 1);
+        }
+
+        const key = `${rel.alumnoId}_${mesKey}`;
+        datos[key] = (datos[key] || 0) + dias;
+      }
+    }
+
+    return { meses, alumnos, datos };
+  }
+};
 
