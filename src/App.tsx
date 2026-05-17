@@ -30,9 +30,9 @@ import packageJson from '../package.json';
 import ProfesorView from './views/profesor/ProfesorView.tsx';
 import CursosView from './views/cursos/CursosView.tsx';
 import AlumnosView from './views/alumnos/AlumnosView.tsx';
-import EmpresasView from './views/EmpresasView.tsx';
+import EmpresasView from './views/empresas/EmpresasView.tsx';
 import ConveniosView from './views/convenios/ConveniosView.tsx';
-import InteresesView from './views/InteresesView.tsx';
+import InteresesView from './views/intereses/InteresesView.tsx';
 import RelacionesView from './views/relaciones/RelacionesView.tsx';
 import LockView from './views/LockView.tsx';
 
