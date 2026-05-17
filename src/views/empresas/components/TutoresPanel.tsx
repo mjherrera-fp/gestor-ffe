@@ -36,7 +36,7 @@ export function TutoresPanel({
       <div className="p-6 border-b border-border-base">
         <h3 className="text-lg font-bold text-text-main leading-tight">Tutores Laborales</h3>
         <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
-          Ref: {selectedEmpresa.nombre}
+          <span className='font-black'>{selectedEmpresa.nombre}</span>
         </p>
       </div>
 
