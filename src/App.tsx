@@ -20,7 +20,10 @@ import {
   Menu,
   X,
   ArrowLeftRight,
-  Lock
+  Lock,
+  Code,
+  Copy,
+  Copyright
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Profesor, Curso, Alumno, Empresa, Convenio, ConvenioEstado } from './types/index.ts';
@@ -113,6 +116,7 @@ export default function App() {
     { id: 'panel', label: 'Panel', icon: LayoutDashboard, disabled: activeCursos.length === 0 },
     { id: 'alumnos', label: 'Alumnos', icon: Users, disabled: activeCursos.length === 0 },
     { id: 'empresas', label: 'Empresas', icon: Building2, disabled: activeCursos.length === 0 },
+
     { id: 'intereses', label: 'Intereses', icon: Trophy, disabled: activeCursos.length === 0 },
     { id: 'convenios', label: 'Convenios', icon: FileText, disabled: activeCursos.length === 0 },
     { id: 'relaciones', label: 'Relaciones', icon: ArrowLeftRight, disabled: activeCursos.length === 0 },
@@ -240,6 +244,9 @@ export default function App() {
 
         <div className="p-6 mt-auto border-t border-slate-50">
           <p className="text-[10px] text-text-muted font-medium uppercase tracking-widest">v{packageJson.version}</p>
+          <p className="text-[9px] text-slate-400 mt-1">
+            <Copyright size={12} className="inline"/> <a href="https://github.com/mjherrera-fp" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-colors">mjherrera-fp</a>
+          </p>
         </div>
       </aside>
 

@@ -72,19 +72,19 @@ export function SeguridadSocialTable({ data }: Props) {
         <table className="w-full text-sm border-collapse">
           <thead className="sticky top-0 z-10">
             <tr className="bg-slate-50">
-              <th className="px-4 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-left sticky left-0 bg-slate-50 z-20 min-w-[160px]">
+              <th className="px-4 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-left sticky left-0 bg-slate-50 z-20 min-w-40">
                 Alumno
               </th>
-              <th className="px-3 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center min-w-[90px]">
+              <th className="px-3 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center min-w-22.5">
                 F. Inicio
               </th>
-              <th className="px-3 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center min-w-[90px]">
+              <th className="px-3 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center min-w-22.5">
                 F. Fin
               </th>
               {data.meses.map(mes => (
                 <th
                   key={mes}
-                  className={`px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-center min-w-[60px] transition-colors ${
+                  className={`px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-center min-w-15 transition-colors ${
                     selectedMes === mes
                       ? 'text-blue-700 bg-blue-100'
                       : 'text-slate-500 bg-slate-50'
@@ -93,7 +93,7 @@ export function SeguridadSocialTable({ data }: Props) {
                   {formatMesLabel(mes)}
                 </th>
               ))}
-              <th className="px-3 py-3 text-[11px] font-bold text-slate-600 uppercase tracking-wider text-center min-w-[60px] bg-slate-100">
+              <th className="px-3 py-3 text-[11px] font-bold text-slate-600 uppercase tracking-wider text-center min-w-15 bg-slate-100">
                 Total
               </th>
             </tr>

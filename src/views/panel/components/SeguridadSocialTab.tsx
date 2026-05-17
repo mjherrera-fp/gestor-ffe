@@ -34,7 +34,7 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
   }
 
   const filteredAlumnos = useMemo(() => {
-    let result = ctx.ssData.alumnos;
+    let result = ctx.ssData!.alumnos;
 
     if (filterType === 'conFFE') {
       result = result.filter(a => alumnoTieneFFE(a.id, ctx.ssData!.datos));

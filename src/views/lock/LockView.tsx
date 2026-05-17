@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, ShieldAlert, KeyRound, ArrowRight } from 'lucide-react';
+import { Lock, ShieldAlert, KeyRound, ArrowRight, Copyright } from 'lucide-react';
 import { motion } from 'motion/react';
 import packageJson from '../../../package.json';
 
@@ -90,6 +90,9 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
           Sistema de Gestión de las FFE
         </p>
         <p className="text-center mt-2 text-[10px] text-text-muted font-medium uppercase tracking-widest">v{packageJson.version}</p>
+        <p className="text-center mt-2 text-[9px] text-text-muted font-medium tracking-widest">
+            <Copyright size={12} className="inline"/> <a href="https://github.com/mjherrera-fp" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-colors">mjherrera-fp</a>
+          </p>
       </motion.div>
     </div>
   );
