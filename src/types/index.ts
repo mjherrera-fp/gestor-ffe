@@ -225,3 +225,27 @@ export interface SelectedDocs {
   calendario: boolean,
   carta: boolean
 }
+
+export interface PanelResumenRow {
+  alumnoId: number;
+  nombre: string;
+  apellidos: string;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  totalHorasFFE: number;
+  relacionId: number | null;
+  empresaNombre: string | null;
+  numConvenio: string | null;
+  numRelacion: string | null;
+  estadoConvenio: ConvenioEstado | null;
+  estadoRelacion: RelacionEstado | null;
+  estadoPlanFormativo: PlanFormativoEstado;
+  estadoSeguimiento: SeguimientoEstado;
+  estadoValoracion: ValoracionEstado;
+}
+
+export interface SeguridadSocialData {
+  meses: string[];
+  alumnos: { id: number; nombre: string; apellidos: string; fechaInicio: string | null; fechaFin: string | null }[];
+  datos: Record<string, number>;
+}
