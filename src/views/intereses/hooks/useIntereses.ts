@@ -17,7 +17,7 @@ export interface MatchResult {
 //  HOOK PRINCIPAL
 // ─────────────────────────────────────────
 
-export function useIntereses(cursoId: number) {
+export function useIntereses(cursoId: number, detalleAcademicoId?: number) {
 
   // ── Datos ──
   const [alumnos,   setAlumnos]   = useState<Alumno[]>([]);
@@ -34,17 +34,21 @@ export function useIntereses(cursoId: number) {
   // ─────────────────────────────────────────
 
   const fetchData = async () => {
+    const params = new URLSearchParams({ cursoId: String(cursoId) });
+    if (detalleAcademicoId) params.set('detalleAcademicoId', String(detalleAcademicoId));
+    const intParams = new URLSearchParams();
+    if (detalleAcademicoId) intParams.set('detalleAcademicoId', String(detalleAcademicoId));
     const [alRes, emRes, intRes] = await Promise.all([
-      fetch(`/api/alumnos?cursoId=${cursoId}`),
+      fetch(`/api/alumnos?${params}`),
       fetch('/api/empresas'),
-      fetch('/api/intereses'),
+      fetch(`/api/intereses?${intParams}`),
     ]);
     setAlumnos(await alRes.json());
     setEmpresas(await emRes.json());
     setIntereses(await intRes.json());
   };
 
-  useEffect(() => { fetchData(); }, [cursoId]);
+  useEffect(() => { fetchData(); }, [cursoId, detalleAcademicoId]);
 
   // ─────────────────────────────────────────
   //  HANDLERS

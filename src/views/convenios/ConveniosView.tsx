@@ -8,10 +8,11 @@ import { ConvenioFormModal }   from './components/ConvenioFormModal.tsx';
 
 interface Props {
   cursoId: number;
+  centroId?: number;
 }
 
-export default function ConveniosView({ cursoId }: Props) {
-  const ctx = useConvenios(cursoId);
+export default function ConveniosView({ cursoId, centroId }: Props) {
+  const ctx = useConvenios(cursoId, centroId);
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-full items-start">

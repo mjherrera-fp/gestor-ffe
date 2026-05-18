@@ -4,6 +4,7 @@ import { RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels } from '
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { getStatusBadgeColor, getStatusLabel } from '../utils/relacionesUtils.ts';
 import { Title } from '@/src/components/Title.tsx';
+import { formatDate } from '../../../lib/dateUtils.ts';
 
 // ─────────────────────────────────────────
 //  SUBCOMPONENTE: Badge de estado
@@ -246,11 +247,11 @@ export function RelacionesListado({
                             <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
                               <Calendar className="h-3 w-3" />
                               <span className="text-blue-600">
-                                {alumno.fechaInicio ? new Date(alumno.fechaInicio).toLocaleDateString() : '—'}
+                                {alumno.fechaInicio ? formatDate(alumno.fechaInicio) : '—'}
                               </span>
                               <span className="text-slate-300">-</span>
                               <span className="text-emerald-600">
-                                {alumno.fechaFin ? new Date(alumno.fechaFin).toLocaleDateString() : '—'}
+                                {alumno.fechaFin ? formatDate(alumno.fechaFin) : '—'}
                               </span>
                             </div>
                           </div>

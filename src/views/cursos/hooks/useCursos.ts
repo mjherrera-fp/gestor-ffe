@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { Curso } from '../../../types/index.ts';
 
-// ─────────────────────────────────────────
-//  TIPOS
-// ─────────────────────────────────────────
-
-export type ConfirmAction = { id: number; type: 'delete' | 'archive' | 'restore' };
-
 const EMPTY_FORM: Partial<Curso> = {
   descripcion: '',
   fechaInicio: '',
@@ -15,33 +9,42 @@ const EMPTY_FORM: Partial<Curso> = {
   tutorias: [],
 };
 
-// ─────────────────────────────────────────
-//  HOOK PRINCIPAL
-// ─────────────────────────────────────────
-
 export function useCursos(cursos: Curso[], onUpdate: () => void) {
 
-  // ── UI listado ──
-  const [showArchived,     setShowArchived]     = useState(false);
-  const [confirmingAction, setConfirmingAction] = useState<ConfirmAction | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState<number | null>(null);
+  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
 
-  // ── UI formulario ──
   const [showForm, setShowForm] = useState(false);
   const [editing,  setEditing]  = useState<Curso | null>(null);
   const [formData, setFormData] = useState<Partial<Curso>>(EMPTY_FORM);
 
-  // ── Festivos y tutorías ──
   const [newFestivo, setNewFestivo] = useState('');
   const [newTutoria, setNewTutoria] = useState('');
 
-  // ─────────────────────────────────────────
-  //  HANDLERS: FORMULARIO
-  // ─────────────────────────────────────────
-
   const handleOpenNew = () => {
+    if (cursos.length > 0) {
+      setShowReplaceConfirm(true);
+    } else {
+      setEditing(null);
+      setFormData(EMPTY_FORM);
+      setShowForm(true);
+    }
+  };
+
+  const handleReplaceConfirm = async () => {
+    try {
+      for (const c of cursos) {
+        if (c.id) await fetch(`/api/cursos/${c.id}`, { method: 'DELETE' });
+      }
+    } catch {
+      alert('Error al eliminar el curso anterior');
+      return;
+    }
+    setShowReplaceConfirm(false);
     setEditing(null);
     setFormData(EMPTY_FORM);
     setShowForm(true);
+    onUpdate();
   };
 
   const handleOpenEdit = (curso: Curso) => {
@@ -71,10 +74,6 @@ export function useCursos(cursos: Curso[], onUpdate: () => void) {
     }
   };
 
-  // ─────────────────────────────────────────
-  //  HANDLERS: FESTIVOS Y TUTORÍAS
-  // ─────────────────────────────────────────
-
   const addFestivo = () => {
     if (!newFestivo) return;
     setFormData(prev => ({ ...prev, festivos: [...(prev.festivos || []), newFestivo] }));
@@ -95,68 +94,28 @@ export function useCursos(cursos: Curso[], onUpdate: () => void) {
     setFormData(prev => ({ ...prev, tutorias: (prev.tutorias || []).filter(f => f !== date) }));
   };
 
-  // ─────────────────────────────────────────
-  //  HANDLERS: DELETE / ARCHIVE
-  // ─────────────────────────────────────────
-
   const handleDelete = async (id: number) => {
     try {
       const res = await fetch(`/api/cursos/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Error al eliminar');
-      setConfirmingAction(null);
+      setConfirmingDelete(null);
       onUpdate();
     } catch {
       alert('Error al intentar eliminar el curso.');
     }
   };
 
-  const handleArchive = async (id: number, shouldArchive: boolean) => {
-    try {
-      const res = await fetch(`/api/cursos/${id}/archive`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ archive: shouldArchive }),
-      });
-      if (!res.ok) throw new Error('Error al cambiar estado');
-      setConfirmingAction(null);
-      onUpdate();
-    } catch {
-      alert('Error al intentar cambiar el estado del curso.');
-    }
-  };
-
-  const handleConfirmAction = () => {
-    if (!confirmingAction) return;
-    if (confirmingAction.type === 'delete')   handleDelete(confirmingAction.id);
-    else if (confirmingAction.type === 'archive') handleArchive(confirmingAction.id, true);
-    else handleArchive(confirmingAction.id, false);
-  };
-
-  // ─────────────────────────────────────────
-  //  DATOS DERIVADOS
-  // ─────────────────────────────────────────
-
-  const filteredCursos = showArchived ? cursos : cursos.filter(c => !c.archivado);
-  const hasNoActiveCursos = cursos.length > 0 && !cursos.some(c => !c.archivado);
-
-  // ─────────────────────────────────────────
-  //  RETURN
-  // ─────────────────────────────────────────
-
   return {
-    // Listado UI
-    showArchived, setShowArchived,
-    filteredCursos, hasNoActiveCursos,
-    confirmingAction, setConfirmingAction,
-    // Formulario UI
+    filteredCursos: cursos,
+    confirmingDelete, setConfirmingDelete,
+    showReplaceConfirm, setShowReplaceConfirm,
+    handleOpenNew, handleOpenEdit, handleReplaceConfirm,
     showForm, setShowForm,
     editing,
     formData, setFormData,
-    handleOpenNew, handleOpenEdit, handleSubmit,
-    // Festivos y tutorías
+    handleSubmit,
     newFestivo, setNewFestivo, addFestivo, removeFestivo,
     newTutoria, setNewTutoria, addTutoria, removeTutoria,
-    // Acciones
-    handleConfirmAction,
+    handleDelete,
   };
 }

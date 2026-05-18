@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Plus } from 'lucide-react';
 import { Curso } from '../../../types/index.ts';
+import { formatDate } from '../../../lib/dateUtils.ts';
 
 const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 const labelCls = 'block text-sm font-medium text-slate-700 mb-1';
@@ -48,7 +49,7 @@ function DateList({ label, count, dates, newDate, onNewDateChange, onAdd, onRemo
             key={date}
             className="flex items-center gap-2 bg-slate-50 border border-slate-200 pl-3 pr-1 py-1 rounded-full text-xs font-medium text-slate-600"
           >
-            {new Date(date).toLocaleDateString()}
+            {formatDate(date)}
             <button
               type="button"
               onClick={() => onRemove(date)}

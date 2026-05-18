@@ -6,10 +6,11 @@ import { InteresesGrid }       from './components/InteresesGrid.tsx';
 
 interface Props {
   cursoId: number;
+  detalleAcademicoId?: number;
 }
 
-export default function InteresesView({ cursoId }: Props) {
-  const ctx = useIntereses(cursoId);
+export default function InteresesView({ cursoId, detalleAcademicoId }: Props) {
+  const ctx = useIntereses(cursoId, detalleAcademicoId);
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-full items-start">

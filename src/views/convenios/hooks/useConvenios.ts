@@ -21,7 +21,7 @@ export interface ConvenioFormState {
 //  HOOK PRINCIPAL
 // ─────────────────────────────────────────
 
-export function useConvenios(cursoId: number) {
+export function useConvenios(cursoId: number, centroId?: number) {
 
   // ── Datos ──
   const [convenios, setConvenios] = useState<ConvenioExtendido[]>([]);
@@ -53,15 +53,17 @@ export function useConvenios(cursoId: number) {
   //  EFECTOS
   // ─────────────────────────────────────────
 
-  useEffect(() => { fetchData(); }, [cursoId]);
+  useEffect(() => { fetchData(); }, [cursoId, centroId]);
 
   // ─────────────────────────────────────────
   //  FETCH
   // ─────────────────────────────────────────
 
   const fetchData = async () => {
+    const convParams = new URLSearchParams({ cursoId: String(cursoId) });
+    if (centroId) convParams.set('centroId', String(centroId));
     const [convRes, emRes, ceRes] = await Promise.all([
-      fetch(`/api/convenios?cursoId=${cursoId}`),
+      fetch(`/api/convenios?${convParams}`),
       fetch('/api/empresas'),
       fetch('/api/centros'),
     ]);

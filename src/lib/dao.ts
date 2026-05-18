@@ -155,19 +155,6 @@ export const DetalleAcademicoDAO = {
 export const CursoDAO = {
   getAll: () => (db.prepare('SELECT * FROM cursos').all() as any[]).map(c => ({
     ...c,
-    archivado: !!c.archivado,
-    festivos: c.festivos ? JSON.parse(c.festivos) : [],
-    tutorias: c.tutorias ? JSON.parse(c.tutorias) : []
-  })),
-  getActive: () => (db.prepare('SELECT * FROM cursos WHERE archivado = 0').all() as any[]).map(c => ({
-    ...c,
-    archivado: !!c.archivado,
-    festivos: c.festivos ? JSON.parse(c.festivos) : [],
-    tutorias: c.tutorias ? JSON.parse(c.tutorias) : []
-  })),
-  getArchived: () => (db.prepare('SELECT * FROM cursos WHERE archivado = 1').all() as any[]).map(c => ({
-    ...c,
-    archivado: !!c.archivado,
     festivos: c.festivos ? JSON.parse(c.festivos) : [],
     tutorias: c.tutorias ? JSON.parse(c.tutorias) : []
   })),
@@ -176,13 +163,12 @@ export const CursoDAO = {
     if (!c) return undefined;
     return {
       ...c,
-      archivado: !!c.archivado,
       festivos: c.festivos ? JSON.parse(c.festivos) : [],
       tutorias: c.tutorias ? JSON.parse(c.tutorias) : []
     } as Curso;
   },
   create: (curso: Curso) => {
-    const stmt = db.prepare('INSERT INTO cursos (descripcion, fechaInicio, fechaFin, festivos, tutorias) VALUES (?, ?, ?, ?)');
+    const stmt = db.prepare('INSERT INTO cursos (descripcion, fechaInicio, fechaFin, festivos, tutorias) VALUES (?, ?, ?, ?, ?)');
     const info = stmt.run(curso.descripcion, curso.fechaInicio, curso.fechaFin, JSON.stringify(curso.festivos || []), JSON.stringify(curso.tutorias || []));
     return info.lastInsertRowid;
   },
@@ -191,17 +177,22 @@ export const CursoDAO = {
     stmt.run(curso.descripcion, curso.fechaInicio, curso.fechaFin, JSON.stringify(curso.festivos || []), JSON.stringify(curso.tutorias || []), id);
   },
   delete: (id: number) => {
-    // Cascade delete is handled by DB schema (foreign keys)
-    db.prepare('DELETE FROM cursos WHERE id = ?').run(id);
+    const delRelaciones = db.prepare('DELETE FROM relaciones WHERE convenioId IN (SELECT id FROM convenios WHERE cursoId = ?)');
+    const delAlumnos = db.prepare('DELETE FROM alumnos WHERE cursoId = ?');
+    const delCurso = db.prepare('DELETE FROM cursos WHERE id = ?');
+    db.transaction(() => {
+      delRelaciones.run(id);
+      delAlumnos.run(id);
+      delCurso.run(id);
+    })();
   },
-  archive: (id: number, archive: boolean) => {
-    db.prepare('UPDATE cursos SET archivado = ? WHERE id = ?').run(archive ? 1 : 0, id);
-  }
 };
 
 export const AlumnoDAO = {
-  getAll: (cursoId?: number) => {
+  getAll: (cursoId?: number, detalleAcademicoId?: number) => {
+    if (cursoId && detalleAcademicoId) return db.prepare('SELECT * FROM alumnos WHERE cursoId = ? AND detalleAcademicoId = ?').all(cursoId, detalleAcademicoId) as Alumno[];
     if (cursoId) return db.prepare('SELECT * FROM alumnos WHERE cursoId = ?').all(cursoId) as Alumno[];
+    if (detalleAcademicoId) return db.prepare('SELECT * FROM alumnos WHERE detalleAcademicoId = ?').all(detalleAcademicoId) as Alumno[];
     return db.prepare('SELECT * FROM alumnos').all() as Alumno[];
   },
   getById: (id: number) => db.prepare('SELECT * FROM alumnos WHERE id = ?').get(id) as Alumno,
@@ -302,11 +293,14 @@ export const EmpresaEstadisticaDAO = {
 };
 
 export const ConvenioDAO = {
-  getAll: (cursoId?: number) => {
-    const query = cursoId
-      ? "SELECT c.*, e.nombre as empresaNombre, ce.nombre as centroNombre FROM convenios c JOIN empresas e ON c.empresaId = e.id LEFT JOIN centros_educativos ce ON c.centroId = ce.id WHERE c.cursoId = ?"
-      : "SELECT c.*, e.nombre as empresaNombre, ce.nombre as centroNombre FROM convenios c JOIN empresas e ON c.empresaId = e.id LEFT JOIN centros_educativos ce ON c.centroId = ce.id";
-    return db.prepare(query).all(cursoId ? [cursoId] : []) as (Convenio & { empresaNombre: string, centroNombre?: string })[];
+  getAll: (cursoId?: number, centroId?: number) => {
+    let query = "SELECT c.*, e.nombre as empresaNombre, ce.nombre as centroNombre FROM convenios c JOIN empresas e ON c.empresaId = e.id LEFT JOIN centros_educativos ce ON c.centroId = ce.id";
+    const params: any[] = [];
+    const conditions: string[] = [];
+    if (cursoId) { conditions.push('c.cursoId = ?'); params.push(cursoId); }
+    if (centroId) { conditions.push('c.centroId = ?'); params.push(centroId); }
+    if (conditions.length > 0) query += ' WHERE ' + conditions.join(' AND ');
+    return db.prepare(query).all(...params) as (Convenio & { empresaNombre: string, centroNombre?: string })[];
   },
   getById: (id: number) => db.prepare('SELECT * FROM convenios WHERE id = ?').get(id) as Convenio,
   create: (convenio: Convenio) => {
@@ -322,7 +316,16 @@ export const ConvenioDAO = {
 };
 
 export const InteresDAO = {
-  getIntereses: () => db.prepare('SELECT * FROM intereses').all() as InteresAlumnoEmpresa[],
+  getIntereses: (detalleAcademicoId?: number) => {
+    if (detalleAcademicoId) {
+      return db.prepare(`
+        SELECT i.* FROM intereses i
+        JOIN alumnos a ON i.alumnoId = a.id
+        WHERE a.detalleAcademicoId = ?
+      `).all(detalleAcademicoId) as InteresAlumnoEmpresa[];
+    }
+    return db.prepare('SELECT * FROM intereses').all() as InteresAlumnoEmpresa[];
+  },
   add: (interes: InteresAlumnoEmpresa) => {
     db.prepare('INSERT INTO intereses (alumnoId, empresaId, interesado) VALUES (?, ?, ?)').run(interes.alumnoId, interes.empresaId, interes.interesado);
   },
@@ -359,13 +362,17 @@ function syncEmpresaEstadistica(convenioId: number) {
 }
 
 export const RelacionAlumnoDAO = {
-  getAll: (): RelacionAlumno[] => {
-    const relaciones = db.prepare('SELECT * FROM relaciones').all() as any[];
+  getAll: (detalleAcademicoId?: number): RelacionAlumno[] => {
+    const relaciones = detalleAcademicoId
+      ? db.prepare(`
+          SELECT DISTINCT r.* FROM relaciones r
+          JOIN alumnos a ON a.relacionId = r.id
+          WHERE a.detalleAcademicoId = ?
+        `).all(detalleAcademicoId) as any[]
+      : db.prepare('SELECT * FROM relaciones').all() as any[];
 
     return relaciones.map(r => {
-      // Obtenemos los alumnos asociados a esta relación específica
       const alumnosRelacionados = db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').all(r.id) as Alumno[];
-      // Obtenemos la empresa asociada a esta relación específica
       const empresa = db.prepare('SELECT e.* FROM empresas e INNER JOIN convenios c ON e.id = c.empresaId INNER JOIN relaciones r ON c.id = r.convenioId WHERE r.id = ?').get(r.id) as Empresa;
 
       return {
@@ -503,38 +510,33 @@ export const RelacionAlumnoDAO = {
 };
 
 export const PanelDAO = {
-  resumen: (cursoId?: number): PanelResumenRow[] => {
-    const query = cursoId
-      ? `SELECT 
-          a.id as alumnoId, a.nombre, a.apellidos,
-          a.fechaInicio, a.fechaFin, a.totalHorasFFE, a.relacionId,
-          a.estadoPlanFormativo, a.estadoSeguimiento, a.estadoValoracion,
-          e.nombre as empresaNombre,
-          c.numConvenio, c.estado as estadoConvenio,
-          r.numRelacion, r.estado as estadoRelacion
-        FROM alumnos a
-        LEFT JOIN relaciones r ON a.relacionId = r.id
-        LEFT JOIN convenios c ON r.convenioId = c.id
-        LEFT JOIN empresas e ON c.empresaId = e.id
-        WHERE a.cursoId = ?`
-      : `SELECT 
-          a.id as alumnoId, a.nombre, a.apellidos,
-          a.fechaInicio, a.fechaFin, a.totalHorasFFE, a.relacionId,
-          a.estadoPlanFormativo, a.estadoSeguimiento, a.estadoValoracion,
-          e.nombre as empresaNombre,
-          c.numConvenio, c.estado as estadoConvenio,
-          r.numRelacion, r.estado as estadoRelacion
-        FROM alumnos a
-        LEFT JOIN relaciones r ON a.relacionId = r.id
-        LEFT JOIN convenios c ON r.convenioId = c.id
-        LEFT JOIN empresas e ON c.empresaId = e.id`;
-    return db.prepare(query).all(cursoId ? [cursoId] : []) as PanelResumenRow[];
+  resumen: (cursoId?: number, detalleAcademicoId?: number): PanelResumenRow[] => {
+    const baseQuery = `SELECT 
+        a.id as alumnoId, a.nombre, a.apellidos,
+        a.fechaInicio, a.fechaFin, a.totalHorasFFE, a.relacionId,
+        a.estadoPlanFormativo, a.estadoSeguimiento, a.estadoValoracion,
+        e.nombre as empresaNombre,
+        c.numConvenio, c.estado as estadoConvenio,
+        r.numRelacion, r.estado as estadoRelacion
+      FROM alumnos a
+      LEFT JOIN relaciones r ON a.relacionId = r.id
+      LEFT JOIN convenios c ON r.convenioId = c.id
+      LEFT JOIN empresas e ON c.empresaId = e.id`;
+    const conditions: string[] = [];
+    const params: any[] = [];
+    if (cursoId) { conditions.push('a.cursoId = ?'); params.push(cursoId); }
+    if (detalleAcademicoId) { conditions.push('a.detalleAcademicoId = ?'); params.push(detalleAcademicoId); }
+    const query = conditions.length > 0 ? baseQuery + ' WHERE ' + conditions.join(' AND ') : baseQuery;
+    return db.prepare(query).all(...params) as PanelResumenRow[];
   },
 
-  seguridadSocial: (cursoId: number): SeguridadSocialData => {
+  seguridadSocial: (cursoId: number, detalleAcademicoId?: number): SeguridadSocialData => {
+    const filtroAlumno = detalleAcademicoId ? 'AND a.detalleAcademicoId = ?' : '';
+    const paramsAlumno: any[] = detalleAcademicoId ? [cursoId, detalleAcademicoId] : [cursoId];
+
     const alumnos = db.prepare(
-      'SELECT id, nombre, apellidos, fechaInicio, fechaFin FROM alumnos WHERE cursoId = ?'
-    ).all(cursoId) as { id: number; nombre: string; apellidos: string; fechaInicio: string | null; fechaFin: string | null }[];
+      `SELECT id, nombre, apellidos, fechaInicio, fechaFin FROM alumnos WHERE cursoId = ? ${filtroAlumno}`
+    ).all(...paramsAlumno) as { id: number; nombre: string; apellidos: string; fechaInicio: string | null; fechaFin: string | null }[];
 
     const curso = db.prepare('SELECT * FROM cursos WHERE id = ?').get(cursoId) as any;
     if (!curso) return { meses: [], alumnos: [], datos: {} };
@@ -559,8 +561,8 @@ export const PanelDAO = {
       SELECT r.id, r.horario, a.id as alumnoId, a.fechaInicio as aluInicio, a.fechaFin as aluFin
       FROM relaciones r
       JOIN alumnos a ON a.relacionId = r.id
-      WHERE a.cursoId = ?
-    `).all(cursoId) as any[];
+      WHERE a.cursoId = ? ${filtroAlumno}
+    `).all(...paramsAlumno) as any[];
 
     let minDate: Date | null = null;
     let maxDate: Date | null = null;
