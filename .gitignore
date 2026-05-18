@@ -12,3 +12,4 @@ coverage/
 *.db
 claves-dev.txt
 uploads/
+prompt.ia
