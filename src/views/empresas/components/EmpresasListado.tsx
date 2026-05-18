@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, Hash, Plus, Edit2, Trash2, Mail, Phone, X } from 'lucide-react';
+import { Building, Hash, Plus, Edit2, Trash2, Mail, Phone, X, Star, Filter } from 'lucide-react';
 import { Empresa } from '../../../types/index.ts';
 
 interface EmpresasListadoProps {
@@ -11,17 +11,31 @@ interface EmpresasListadoProps {
   onNew: () => void;
   onEdit: (emp: Empresa) => void;
   onDeleteRequest: (id: number) => void;
+  // Filters
+  filterValoracion: number;
+  onFilterValoracionChange: (v: number) => void;
+  filterUltimosCursos: number;
+  onFilterUltimosCursosChange: (v: number) => void;
+  filterColaboracion: 'todas' | 'con' | 'sin';
+  onFilterColaboracionChange: (v: 'todas' | 'con' | 'sin') => void;
+  cursosUnicos: string[];
 }
 
 export function EmpresasListado({
   empresas, selectedEmpresa,
   searchTerm, onSearchChange,
   onSelectEmpresa, onNew, onEdit, onDeleteRequest,
+  filterValoracion, onFilterValoracionChange,
+  filterUltimosCursos, onFilterUltimosCursosChange,
+  filterColaboracion, onFilterColaboracionChange,
+  cursosUnicos,
 }: EmpresasListadoProps) {
 
   const emptyMsg = searchTerm
     ? 'No se encontraron empresas para esta búsqueda.'
     : 'No hay empresas registradas todavía.';
+
+  const cleanFilters = filterValoracion > 0 || filterUltimosCursos > 0 || filterColaboracion !== 'todas';
 
   return (
     <div className="w-full lg:flex-1 bg-white rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col h-full">
@@ -61,6 +75,65 @@ export function EmpresasListado({
               className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main"
             >
               <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+
+        {/* Filtros */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1 text-[10px] font-bold text-text-muted uppercase tracking-wider">
+            <Filter className="h-3 w-3" />
+            Filtros
+          </div>
+
+          <select
+            className="text-[10px] bg-white border border-border-base rounded-lg px-2 py-1.5 font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+            value={filterColaboracion}
+            onChange={e => onFilterColaboracionChange(e.target.value as 'todas' | 'con' | 'sin')}
+          >
+            <option value="todas">Todas las empresas</option>
+            <option value="con">Con colaboración</option>
+            <option value="sin">Sin colaboración</option>
+          </select>
+
+          {cursosUnicos.length > 0 && (
+            <select
+              className="text-[10px] bg-white border border-border-base rounded-lg px-2 py-1.5 font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+              value={filterUltimosCursos}
+              onChange={e => onFilterUltimosCursosChange(Number(e.target.value))}
+            >
+              <option value={0}>Cualquier curso</option>
+              {cursosUnicos.slice(0, 5).map((_, i) => (
+                <option key={i} value={i + 1}>
+                  {cursosUnicos.slice(0, i + 1).join(', ')}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <div className="flex items-center gap-1">
+            <Star className="h-3 w-3 text-amber-400" />
+            {[0, 1, 2, 3, 4, 5].map(v => (
+              <button
+                key={v}
+                onClick={() => onFilterValoracionChange(filterValoracion === v ? 0 : v)}
+                className={`text-[10px] font-bold px-2 py-1 rounded-md transition-all ${
+                  filterValoracion === v
+                    ? 'bg-amber-100 text-amber-700 border border-amber-300'
+                    : 'text-text-muted hover:bg-slate-100 border border-transparent'
+                }`}
+              >
+                {v === 0 ? '★' : v}
+              </button>
+            ))}
+          </div>
+
+          {cleanFilters && (
+            <button
+              onClick={() => { onFilterValoracionChange(0); onFilterUltimosCursosChange(0); onFilterColaboracionChange('todas'); }}
+              className="text-[10px] font-bold text-text-muted hover:text-primary underline"
+            >
+              Limpiar
             </button>
           )}
         </div>

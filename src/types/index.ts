@@ -113,6 +113,7 @@ export interface Empresa {
   cif: string;
   email: string;
   tlfn: string;
+  comentarios?: string;
 }
 
 export interface TutorEmpresa {
@@ -123,6 +124,15 @@ export interface TutorEmpresa {
   nif: string;
   email: string;
   tlfn: string;
+}
+
+export interface EmpresaEstadistica {
+  id?: number;
+  empresaId: number;
+  curso: string;
+  numAlumnos: number;
+  contratados: number;
+  valoracion?: number;
 }
 
 export interface Convenio {

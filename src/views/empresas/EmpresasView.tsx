@@ -1,11 +1,12 @@
 import React from 'react';
-import { Trash2, X } from 'lucide-react';
+import { Trash2, X, BarChart3, Users, Building2 } from 'lucide-react';
 
-import { useEmpresas }        from './hooks/useEmpresas.ts';
-import { EmpresasListado }    from './components/EmpresasListado.tsx';
-import { TutoresPanel }       from './components/TutoresPanel.tsx';
-import { EmpresaFormModal }   from './components/EmpresaFormModal.tsx';
-import { TutorFormModal }     from './components/TutorFormModal.tsx';
+import { useEmpresas }                from './hooks/useEmpresas.ts';
+import { EmpresasListado }            from './components/EmpresasListado.tsx';
+import { TutoresPanel }               from './components/TutoresPanel.tsx';
+import { EmpresaFormModal }           from './components/EmpresaFormModal.tsx';
+import { TutorFormModal }             from './components/TutorFormModal.tsx';
+import { EmpresaEstadisticasPanel }   from './components/EmpresaEstadisticasPanel.tsx';
 
 interface Props {
   cursoId: number;
@@ -41,17 +42,71 @@ export default function EmpresasView({ cursoId }: Props) {
           onNew={ctx.handleOpenNewEmpresa}
           onEdit={ctx.handleOpenEditEmpresa}
           onDeleteRequest={id => ctx.setShowDeleteConfirm({ id, type: 'empresa' })}
+          filterValoracion={ctx.filterValoracion}
+          onFilterValoracionChange={ctx.setFilterValoracion}
+          filterUltimosCursos={ctx.filterUltimosCursos}
+          onFilterUltimosCursosChange={ctx.setFilterUltimosCursos}
+          filterColaboracion={ctx.filterColaboracion}
+          onFilterColaboracionChange={ctx.setFilterColaboracion}
+          cursosUnicos={ctx.cursosUnicos}
         />
 
-        {/* Columna derecha: tutores */}
+        {/* Columna derecha: detalle con tabs */}
         <div className="w-full lg:w-85 lg:shrink-0 bg-white rounded-xl border border-border-base shadow-sm flex flex-col h-full overflow-hidden min-h-75">
-          <TutoresPanel
-            selectedEmpresa={ctx.selectedEmpresa}
-            tutores={ctx.tutores}
-            onAddTutor={ctx.handleOpenNewTutor}
-            onEditTutor={ctx.handleOpenEditTutor}
-            onDeleteTutor={id => ctx.setShowDeleteConfirm({ id, type: 'tutor' })}
-          />
+
+          {!ctx.selectedEmpresa ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+              <div className="bg-slate-50 p-6 rounded-full mb-4">
+                <Building2 className="h-12 w-12 text-slate-200" />
+              </div>
+              <h3 className="text-base font-bold text-text-main mb-2">Selecciona una empresa</h3>
+              <p className="text-xs text-text-muted leading-relaxed">
+                Haz clic en una empresa para gestionar sus tutores y estadísticas.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="flex border-b border-border-base shrink-0">
+                <button
+                  onClick={() => ctx.setActiveTab('estadisticas')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    ctx.activeTab === 'estadisticas'
+                      ? 'text-primary border-b-2 border-primary bg-primary-light/30'
+                      : 'text-text-muted hover:text-text-main hover:bg-slate-50'
+                  }`}
+                >
+                  <BarChart3 className="h-3.5 w-3.5" />
+                  Estadísticas
+                </button>
+                <button
+                  onClick={() => ctx.setActiveTab('tutores')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    ctx.activeTab === 'tutores'
+                      ? 'text-primary border-b-2 border-primary bg-primary-light/30'
+                      : 'text-text-muted hover:text-text-main hover:bg-slate-50'
+                  }`}
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  Tutores
+                </button>
+              </div>
+
+              {ctx.activeTab === 'estadisticas' ? (
+                <EmpresaEstadisticasPanel
+                  selectedEmpresa={ctx.selectedEmpresa}
+                  estadisticas={ctx.estadisticas}
+                />
+              ) : (
+                <TutoresPanel
+                  selectedEmpresa={ctx.selectedEmpresa}
+                  tutores={ctx.tutores}
+                  onAddTutor={ctx.handleOpenNewTutor}
+                  onEditTutor={ctx.handleOpenEditTutor}
+                  onDeleteTutor={id => ctx.setShowDeleteConfirm({ id, type: 'tutor' })}
+                />
+              )}
+            </>
+          )}
         </div>
       </div>
 
@@ -116,6 +171,7 @@ export default function EmpresasView({ cursoId }: Props) {
           onClose={() => ctx.setShowTutorForm(false)}
         />
       )}
+
     </>
   );
 }

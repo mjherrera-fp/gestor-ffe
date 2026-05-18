@@ -1,5 +1,5 @@
 import { db, isDbEncrypted, unlockDB, lockDB } from './db.ts';
-import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData } from '../types/index.ts';
+import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, EmpresaEstadistica, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData } from '../types/index.ts';
 
 const safeParse = (str: any, fallback: any) => {
   if (!str || str === 'undefined' || str === 'null') return fallback;
@@ -238,13 +238,13 @@ export const EmpresaDAO = {
   getAll: () => db.prepare('SELECT * FROM empresas').all() as Empresa[],
   getById: (id: number) => db.prepare('SELECT * FROM empresas WHERE id = ?').get(id) as Empresa,
   create: (empresa: Empresa) => {
-    const stmt = db.prepare('INSERT INTO empresas (nombre, direccion, ciudad, cif, email, tlfn) VALUES (?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn);
+    const stmt = db.prepare('INSERT INTO empresas (nombre, direccion, ciudad, cif, email, tlfn, comentarios) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, empresa.comentarios ?? null);
     return info.lastInsertRowid;
   },
   update: (id: number, empresa: Empresa) => {
-    const stmt = db.prepare('UPDATE empresas SET nombre = ?, direccion = ?, ciudad = ?, cif = ?, email = ?, tlfn = ? WHERE id = ?');
-    stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, id);
+    const stmt = db.prepare('UPDATE empresas SET nombre = ?, direccion = ?, ciudad = ?, cif = ?, email = ?, tlfn = ?, comentarios = ? WHERE id = ?');
+    stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, empresa.comentarios ?? null, id);
   },
   delete: (id: number) => db.prepare('DELETE FROM empresas WHERE id = ?').run(id)
 };
@@ -262,6 +262,43 @@ export const TutorEmpresaDAO = {
     stmt.run(tutor.nombre, tutor.apellidos, tutor.nif, tutor.email, tutor.tlfn, id);
   },
   delete: (id: number) => db.prepare('DELETE FROM tutores_empresa WHERE id = ?').run(id)
+};
+
+export const EmpresaEstadisticaDAO = {
+  getAll: () => db.prepare('SELECT * FROM empresa_estadisticas ORDER BY empresaId, curso DESC').all() as EmpresaEstadistica[],
+  getAllByEmpresa: (empresaId: number) => db.prepare('SELECT * FROM empresa_estadisticas WHERE empresaId = ? ORDER BY curso DESC').all(empresaId) as EmpresaEstadistica[],
+  getById: (id: number) => db.prepare('SELECT * FROM empresa_estadisticas WHERE id = ?').get(id) as EmpresaEstadistica,
+  getByEmpresaAndCurso: (empresaId: number, curso: string) => db.prepare('SELECT * FROM empresa_estadisticas WHERE empresaId = ? AND curso = ?').get(empresaId, curso) as EmpresaEstadistica | undefined,
+  create: (est: EmpresaEstadistica) => {
+    const stmt = db.prepare('INSERT INTO empresa_estadisticas (empresaId, curso, numAlumnos, contratados, valoracion) VALUES (?, ?, ?, ?, ?)');
+    const info = stmt.run(est.empresaId, est.curso, est.numAlumnos, est.contratados ?? 0, est.valoracion ?? null);
+    return info.lastInsertRowid;
+  },
+  update: (id: number, est: EmpresaEstadistica) => {
+    const stmt = db.prepare('UPDATE empresa_estadisticas SET curso = ?, numAlumnos = ?, contratados = ?, valoracion = ? WHERE id = ?');
+    stmt.run(est.curso, est.numAlumnos, est.contratados ?? 0, est.valoracion ?? null, id);
+  },
+  delete: (id: number) => db.prepare('DELETE FROM empresa_estadisticas WHERE id = ?').run(id),
+  upsert: (empresaId: number, curso: string, data: { numAlumnos?: number; contratados?: number; valoracion?: number }) => {
+    const existing = db.prepare('SELECT id FROM empresa_estadisticas WHERE empresaId = ? AND curso = ?').get(empresaId, curso) as any;
+    if (existing) {
+      const sets: string[] = [];
+      const vals: any[] = [];
+      if (data.numAlumnos !== undefined) { sets.push('numAlumnos = ?'); vals.push(data.numAlumnos); }
+      if (data.contratados !== undefined) { sets.push('contratados = ?'); vals.push(data.contratados); }
+      if (data.valoracion !== undefined) { sets.push('valoracion = ?'); vals.push(data.valoracion); }
+      if (sets.length > 0) {
+        vals.push(existing.id);
+        db.prepare(`UPDATE empresa_estadisticas SET ${sets.join(', ')} WHERE id = ?`).run(...vals);
+      }
+      return existing.id;
+    } else {
+      const info = db.prepare('INSERT INTO empresa_estadisticas (empresaId, curso, numAlumnos, contratados, valoracion) VALUES (?, ?, ?, ?, ?)').run(
+        empresaId, curso, data.numAlumnos ?? 0, data.contratados ?? 0, data.valoracion ?? null
+      );
+      return info.lastInsertRowid;
+    }
+  }
 };
 
 export const ConvenioDAO = {
@@ -293,6 +330,33 @@ export const InteresDAO = {
     db.prepare('DELETE FROM intereses WHERE alumnoId = ? AND empresaId = ? AND interesado = ?').run(alumnoId, empresaId, interesado);
   }
 };
+
+function syncEmpresaEstadistica(convenioId: number) {
+  const convenio = db.prepare('SELECT * FROM convenios WHERE id = ?').get(convenioId) as Convenio | undefined;
+  if (!convenio) return;
+
+  const total = db.prepare(`
+    SELECT COUNT(*) as total FROM alumnos a
+    JOIN relaciones r ON a.relacionId = r.id
+    WHERE r.convenioId = ?
+  `).get(convenioId) as any;
+
+  const curso = db.prepare('SELECT * FROM cursos WHERE id = ?').get(convenio.cursoId) as any;
+  if (!curso) return;
+
+  const cursoStr = `${new Date(curso.fechaInicio).getFullYear()}/${new Date(curso.fechaFin).getFullYear()}`;
+
+  const existing = db.prepare('SELECT id FROM empresa_estadisticas WHERE empresaId = ? AND curso = ?').get(convenio.empresaId, cursoStr) as any;
+  if (existing) {
+    if (total.total === 0) {
+      db.prepare('DELETE FROM empresa_estadisticas WHERE id = ?').run(existing.id);
+    } else {
+      db.prepare('UPDATE empresa_estadisticas SET numAlumnos = ? WHERE id = ?').run(total.total, existing.id);
+    }
+  } else if (total.total > 0) {
+    db.prepare('INSERT INTO empresa_estadisticas (empresaId, curso, numAlumnos, contratados) VALUES (?, ?, ?, 0)').run(convenio.empresaId, cursoStr, total.total);
+  }
+}
 
 export const RelacionAlumnoDAO = {
   getAll: (): RelacionAlumno[] => {
@@ -366,7 +430,6 @@ export const RelacionAlumnoDAO = {
       const relacionId = info.lastInsertRowid as number;
 
       // 2. Actualizar cada alumno vinculado
-      // Asumiendo que 'rel.alumnos' es el array de objetos Alumno que viene del frontal
       const stmtAlumno = db.prepare(`
         UPDATE alumnos SET 
           relacionId = ?, 
@@ -376,10 +439,11 @@ export const RelacionAlumnoDAO = {
       `);
 
       for (const alu of rel.alumnos) {
-        // Aquí puedes restar las horas si totalHoras es lo que consumen en esta relación
-        // O simplemente actualizar el campo si el frontal ya manda el valor final
         stmtAlumno.run(relacionId, alu.fechaInicio, alu.fechaFin, alu.id);
       }
+
+      // 3. Sincronizar empresa_estadisticas
+      syncEmpresaEstadistica(rel.convenioId);
 
       return relacionId;
     })();
@@ -413,20 +477,27 @@ export const RelacionAlumnoDAO = {
       `);
 
       for (const alu of rel.alumnos) {
-        // Aquí puedes restar las horas si totalHoras es lo que consumen en esta relación
-        // O simplemente actualizar el campo si el frontal ya manda el valor final
         stmtAlumno.run(id, alu.fechaInicio, alu.fechaFin, alu.id);
       }
+
+      // 4. Sincronizar empresa_estadisticas
+      syncEmpresaEstadistica(rel.convenioId);
     })();
   },
 
   delete: (id: number) => {
+    // Obtenemos datos antes de borrar
+    const rel = db.prepare('SELECT * FROM relaciones WHERE id = ?').get(id) as any;
+
     db.transaction(() => {
       // 1. Limpiamos la referencia en los alumnos antes de borrar la relación
       db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = ?, estadoSeguimiento = ?, estadoValoracion = ? WHERE relacionId = ?').run('PENDIENTE_ENVIAR_ESTUDIANTE', 'PENDIENTE', 'PENDIENTE', id);
 
       // 2. Borramos la relación
       db.prepare('DELETE FROM relaciones WHERE id = ?').run(id);
+
+      // 3. Sincronizar empresa_estadisticas
+      if (rel) syncEmpresaEstadistica(rel.convenioId);
     })();
   }
 };

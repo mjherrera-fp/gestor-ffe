@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download } from 'lucide-react';
+import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3 } from 'lucide-react';
 import { RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { getStatusBadgeColor, getStatusLabel } from '../utils/relacionesUtils.ts';
@@ -39,6 +39,7 @@ interface RelacionesListadoProps {
   onSelectRelacion: (rel: RelacionAlumno) => void;
   onEdit: (rel: RelacionAlumno) => void;
   onDeleteRequest: (id: number) => void;
+  onOpenStats: (rel: RelacionAlumno) => void;
   listSearchTerm: string;
   onListSearchChange: (val: string) => void;
   statusFilter: string;
@@ -57,7 +58,7 @@ interface RelacionesListadoProps {
 
 export function RelacionesListado({
   relaciones, convenios, createRelacion, selectedRelacion,
-  onSelectRelacion, onEdit, onDeleteRequest,
+  onSelectRelacion, onEdit, onDeleteRequest, onOpenStats,
   listSearchTerm, onListSearchChange,
   statusFilter, onStatusFilterChange,
   sortBy, sortOrder, onSortByEmpresa, onSortByEstado, 
@@ -212,6 +213,13 @@ export function RelacionesListado({
                             className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
                           >
                             <Edit2 className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => onOpenStats(rel)}
+                            className="p-2 text-slate-400 hover:text-amber-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                            title="Estadísticas de la empresa"
+                          >
+                            <BarChart3 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => onDeleteRequest(rel.id!)}

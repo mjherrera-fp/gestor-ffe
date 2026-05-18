@@ -1,11 +1,12 @@
 import React from 'react';
 import { FileArchive, Loader2, Plus, Trash2 } from 'lucide-react';
 
-import { useRelaciones }       from './hooks/useRelaciones.ts';
-import { RelacionesListado }   from './components/RelacionesListado.tsx';
-import { RelacionDetalle }     from './components/RelacionesDetalle.tsx';
-import { RelacionFormModal }   from './components/RelacionesFormModal.tsx';
-import { calculateEndDateForHours } from './utils/relacionesUtils.ts';
+import { useRelaciones }                from './hooks/useRelaciones.ts';
+import { RelacionesListado }            from './components/RelacionesListado.tsx';
+import { RelacionDetalle }              from './components/RelacionesDetalle.tsx';
+import { RelacionFormModal }            from './components/RelacionesFormModal.tsx';
+import { RelacionEstadisticaFormModal } from './components/RelacionEstadisticaFormModal.tsx';
+import { calculateEndDateForHours }     from './utils/relacionesUtils.ts';
 
 interface Props {
   cursoId: number;
@@ -243,6 +244,7 @@ export default function RelacionesView({ cursoId }: Props) {
           onSelectRelacion={ctx.setSelectedRelacion}
           onEdit={ctx.handleOpenForm}
           onDeleteRequest={ctx.setShowDeleteConfirm}
+          onOpenStats={ctx.handleOpenEstadistica}
           listSearchTerm={ctx.listSearchTerm}
           onListSearchChange={ctx.setListSearchTerm}
           statusFilter={ctx.statusFilter}
@@ -362,6 +364,20 @@ export default function RelacionesView({ cursoId }: Props) {
           onApplyBulkHorario={ctx.applyBulkHorario}
           onSubmit={ctx.handleSubmit}
           onClose={() => ctx.setShowForm(false)}
+        />
+      )}
+
+      {ctx.showEstadisticaModal && (
+        <RelacionEstadisticaFormModal
+          empresaNombre={ctx.estadisticaEmpresaNombre}
+          curso={ctx.estadisticaCurso}
+          numAlumnos={ctx.estadisticaNumAlumnos}
+          contratados={ctx.estadisticaContratados}
+          valoracion={ctx.estadisticaValoracion}
+          onContratadosChange={ctx.setEstadisticaContratados}
+          onValoracionChange={ctx.setEstadisticaValoracion}
+          onSubmit={ctx.handleEstadisticaSubmit}
+          onClose={() => ctx.setShowEstadisticaModal(false)}
         />
       )}
     </div>

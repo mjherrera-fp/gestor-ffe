@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Empresa, TutorEmpresa } from '../../../types/index.ts';
+import { Empresa, TutorEmpresa, EmpresaEstadistica, Curso } from '../../../types/index.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -40,9 +40,10 @@ const EMPTY_CONVENIO: ConvenioRapidoState = {
 export function useEmpresas(cursoId: number) {
 
   // ── Datos ──
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
-  const [tutores,  setTutores]  = useState<TutorEmpresa[]>([]);
-  const [centros,  setCentros]  = useState<any[]>([]);
+  const [empresas,   setEmpresas]   = useState<Empresa[]>([]);
+  const [tutores,    setTutores]    = useState<TutorEmpresa[]>([]);
+  const [centros,    setCentros]    = useState<any[]>([]);
+  const [cursoInfo,  setCursoInfo]  = useState<Curso | null>(null);
 
   // ── UI listado ──
   const [selectedEmpresa,  setSelectedEmpresa]  = useState<Empresa | null>(null);
@@ -60,6 +61,16 @@ export function useEmpresas(cursoId: number) {
   const [editingTutor,   setEditingTutor]   = useState<TutorEmpresa | null>(null);
   const [tutorFormData,  setTutorFormData]  = useState<Partial<TutorEmpresa>>(EMPTY_TUTOR);
 
+  // ── Estadísticas ──
+  const [estadisticas,      setEstadisticas]      = useState<EmpresaEstadistica[]>([]);
+  const [allEstadisticas,   setAllEstadisticas]   = useState<EmpresaEstadistica[]>([]);
+  const [activeTab,         setActiveTab]         = useState<'tutores' | 'estadisticas'>('estadisticas');
+
+  // ── Filtros ──
+  const [filterValoracion,    setFilterValoracion]    = useState(0);
+  const [filterUltimosCursos, setFilterUltimosCursos] = useState(0);
+  const [filterColaboracion,  setFilterColaboracion]  = useState<'todas' | 'con' | 'sin'>('todas');
+
   // ─────────────────────────────────────────
   //  EFECTOS
   // ─────────────────────────────────────────
@@ -67,6 +78,8 @@ export function useEmpresas(cursoId: number) {
   useEffect(() => {
     fetchEmpresas();
     fetchCentros();
+    fetchCurso();
+    fetchAllEstadisticas();
   }, []);
 
   // ─────────────────────────────────────────
@@ -93,6 +106,29 @@ export function useEmpresas(cursoId: number) {
       }
     } catch (error) {
       console.error('Error al cargar centros:', error);
+    }
+  };
+
+  const fetchEstadisticas = async (empresaId: number) => {
+    const res = await fetch(`/api/empresas/${empresaId}/estadisticas`);
+    setEstadisticas(await res.json());
+  };
+
+  const fetchCurso = async () => {
+    try {
+      const res = await fetch(`/api/cursos/${cursoId}`);
+      if (res.ok) setCursoInfo(await res.json());
+    } catch {
+      console.error('Error al cargar el curso');
+    }
+  };
+
+  const fetchAllEstadisticas = async () => {
+    try {
+      const res = await fetch('/api/empresas-estadisticas');
+      if (res.ok) setAllEstadisticas(await res.json());
+    } catch {
+      console.error('Error al cargar estadísticas');
     }
   };
 
@@ -217,16 +253,56 @@ export function useEmpresas(cursoId: number) {
   const handleSelectEmpresa = (emp: Empresa) => {
     setSelectedEmpresa(emp);
     fetchTutores(emp.id!);
+    fetchEstadisticas(emp.id!);
+    setActiveTab('estadisticas');
   };
 
   // ─────────────────────────────────────────
   //  DATOS DERIVADOS
   // ─────────────────────────────────────────
 
-  const filteredEmpresas = empresas.filter(emp =>
-    emp.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.cif.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const cursosUnicos = [...new Set(allEstadisticas.map(e => e.curso))]
+    .sort((a, b) => {
+      const yearA = parseInt(a.split('/')[0]);
+      const yearB = parseInt(b.split('/')[0]);
+      return yearB - yearA;
+    });
+
+  const empresaValoracionMedia: Record<number, number> = {};
+  const empresaCursos: Record<number, string[]> = {};
+  allEstadisticas.forEach(e => {
+    if (!empresaCursos[e.empresaId]) empresaCursos[e.empresaId] = [];
+    empresaCursos[e.empresaId].push(e.curso);
+  });
+  allEstadisticas.forEach(e => {
+    if (e.valoracion != null && e.valoracion > 0) {
+      empresaValoracionMedia[e.empresaId] = Math.max(empresaValoracionMedia[e.empresaId] || 0, e.valoracion);
+    }
+  });
+
+  const filteredEmpresas = empresas.filter(emp => {
+    if (!emp.id) return false;
+
+    const matchesSearch = emp.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp.cif.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!matchesSearch) return false;
+
+    if (filterValoracion > 0) {
+      const maxVal = empresaValoracionMedia[emp.id] ?? 0;
+      if (maxVal < filterValoracion) return false;
+    }
+
+    if (filterUltimosCursos > 0 && cursosUnicos.length > 0) {
+      const lastN = cursosUnicos.slice(0, filterUltimosCursos);
+      const empCursosSet = new Set(empresaCursos[emp.id] || []);
+      if (!lastN.every(c => empCursosSet.has(c))) return false;
+    }
+
+    if (filterColaboracion === 'con' && !empresaCursos[emp.id]) return false;
+    if (filterColaboracion === 'sin' && empresaCursos[emp.id]) return false;
+
+    return true;
+  });
 
   // ─────────────────────────────────────────
   //  RETURN
@@ -234,13 +310,20 @@ export function useEmpresas(cursoId: number) {
 
   return {
     // Datos
-    empresas, tutores, centros,
+    empresas, tutores, centros, estadisticas, cursoInfo,
+    allEstadisticas,
     filteredEmpresas,
     // Listado UI
     selectedEmpresa, handleSelectEmpresa,
     searchTerm, setSearchTerm,
+    activeTab, setActiveTab,
     showDeleteConfirm, setShowDeleteConfirm,
     handleConfirmDelete,
+    // Filtros
+    filterValoracion, setFilterValoracion,
+    filterUltimosCursos, setFilterUltimosCursos,
+    filterColaboracion, setFilterColaboracion,
+    cursosUnicos,
     // Empresa modal
     showEmpresaForm, setShowEmpresaForm,
     editingEmpresa,

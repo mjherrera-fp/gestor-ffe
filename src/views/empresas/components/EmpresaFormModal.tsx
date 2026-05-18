@@ -68,6 +68,16 @@ export function EmpresaFormModal({
             <label className={labelCls}>Email de Contacto</label>
             <input required type="email" className={inputCls} value={formData.email || ''} onChange={update('email')} />
           </div>
+          <div>
+            <label className={labelCls}>Comentarios (opcional)</label>
+            <textarea
+              rows={3}
+              className={inputCls + ' resize-none'}
+              placeholder="Notas sobre la empresa..."
+              value={formData.comentarios || ''}
+              onChange={e => onChange({ ...formData, comentarios: e.target.value })}
+            />
+          </div>
 
           {/* Convenio rápido (solo al crear) */}
           {!editing && (
