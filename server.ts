@@ -9,7 +9,7 @@ import { render } from '@react-email/render';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
-import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
+import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
@@ -273,6 +273,11 @@ async function startServer() {
   app.get('/api/cursos', (req, res) => res.json(CursoDAO.getAll()));
   app.get('/api/cursos/active', (req, res) => res.json(CursoDAO.getActive()));
   app.get('/api/cursos/archived', (req, res) => res.json(CursoDAO.getArchived()));
+  app.get('/api/cursos/:id', (req, res) => {
+    const curso = CursoDAO.getById(Number(req.params.id));
+    if (!curso) return res.status(404).json({ error: 'Curso no encontrado' });
+    res.json(curso);
+  });
   app.post('/api/cursos', (req, res) => res.json({ id: CursoDAO.create(req.body) }));
   app.put('/api/cursos/:id', (req, res) => {
     CursoDAO.update(Number(req.params.id), req.body);
@@ -379,6 +384,29 @@ async function startServer() {
   });
   app.delete('/api/tutores-empresa/:id', (req, res) => {
     TutorEmpresaDAO.delete(Number(req.params.id));
+    res.json({ success: true });
+  });
+
+  // Estadísticas Empresa
+  app.get('/api/empresas-estadisticas', (req, res) => res.json(EmpresaEstadisticaDAO.getAll()));
+  app.get('/api/empresas/:empresaId/estadisticas', (req, res) => res.json(EmpresaEstadisticaDAO.getAllByEmpresa(Number(req.params.empresaId))));
+  app.get('/api/empresas-estadisticas/by-curso', (req, res) => {
+    const { empresaId, curso } = req.query;
+    const est = EmpresaEstadisticaDAO.getByEmpresaAndCurso(Number(empresaId), curso as string);
+    res.json(est || null);
+  });
+  app.post('/api/empresas-estadisticas', (req, res) => res.json({ id: EmpresaEstadisticaDAO.create(req.body) }));
+  app.post('/api/empresas-estadisticas/upsert', (req, res) => {
+    const { empresaId, curso, numAlumnos, contratados, valoracion } = req.body;
+    const id = EmpresaEstadisticaDAO.upsert(Number(empresaId), curso, { numAlumnos, contratados, valoracion });
+    res.json({ id });
+  });
+  app.put('/api/empresas-estadisticas/:id', (req, res) => {
+    EmpresaEstadisticaDAO.update(Number(req.params.id), req.body);
+    res.json({ success: true });
+  });
+  app.delete('/api/empresas-estadisticas/:id', (req, res) => {
+    EmpresaEstadisticaDAO.delete(Number(req.params.id));
     res.json({ success: true });
   });
 

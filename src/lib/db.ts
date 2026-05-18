@@ -129,7 +129,8 @@ function setupTables() {
     ciudad TEXT NOT NULL,
     cif TEXT NOT NULL,
     email TEXT NOT NULL,
-    tlfn TEXT NOT NULL
+    tlfn TEXT NOT NULL,
+    comentarios TEXT
   );
 
   CREATE TABLE IF NOT EXISTS tutores_empresa (
@@ -140,6 +141,16 @@ function setupTables() {
     nif TEXT NOT NULL,
     email TEXT NOT NULL,
     tlfn TEXT NOT NULL,
+    FOREIGN KEY(empresaId) REFERENCES empresas(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS empresa_estadisticas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    empresaId INTEGER NOT NULL,
+    curso TEXT NOT NULL,
+    numAlumnos INTEGER NOT NULL DEFAULT 0,
+    contratados INTEGER NOT NULL DEFAULT 0,
+    valoracion REAL,
     FOREIGN KEY(empresaId) REFERENCES empresas(id) ON DELETE CASCADE
   );
 

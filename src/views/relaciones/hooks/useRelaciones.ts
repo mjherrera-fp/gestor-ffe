@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 import {
     RelacionAlumno, Convenio, TutorEmpresa, Alumno, Curso,
     RelacionEstado, PlanFormativoEstado, HorarioSemanal, SeguimientoEstado,
-    ValoracionEstado
+    ValoracionEstado, EmpresaEstadistica
 } from '../../../types/index.ts';
 import {
     DEFAULT_HORARIO,
@@ -94,6 +94,15 @@ export function useRelaciones(cursoId: number) {
         horas: 8,
         dias: { lunes: true, martes: true, miercoles: true, jueves: true, viernes: true, sabado: false, domingo: false },
     });
+
+    // ── Estadísticas de empresa ──
+    const [showEstadisticaModal, setShowEstadisticaModal] = useState(false);
+    const [estadisticaRelacion, setEstadisticaRelacion] = useState<RelacionAlumno | null>(null);
+    const [estadisticaEmpresaNombre, setEstadisticaEmpresaNombre] = useState('');
+    const [estadisticaCurso, setEstadisticaCurso] = useState('');
+    const [estadisticaNumAlumnos, setEstadisticaNumAlumnos] = useState(0);
+    const [estadisticaContratados, setEstadisticaContratados] = useState(0);
+    const [estadisticaValoracion, setEstadisticaValoracion] = useState(0);
 
     // ─────────────────────────────────────────
     //  FETCH DE DATOS
@@ -650,6 +659,60 @@ export function useRelaciones(cursoId: number) {
         } catch (error) { alert(`Error al descargar la valoración de ${nombreAlumno}`); }
     };
 
+    // ── Estadísticas handlers ──
+    const handleOpenEstadistica = async (rel: RelacionAlumno) => {
+        const conv = convenios.find(c => c.id === rel.convenioId);
+        if (!conv) return;
+        const empresaNombre = conv.empresaNombre;
+        const cursoNombre = curso ? `${new Date(curso.fechaInicio).getFullYear()}/${new Date(curso.fechaFin).getFullYear()}` : '';
+        const numAlumnos = rel.alumnos?.length ?? 0;
+
+        setEstadisticaRelacion(rel);
+        setEstadisticaEmpresaNombre(empresaNombre);
+        setEstadisticaCurso(cursoNombre);
+        setEstadisticaNumAlumnos(numAlumnos);
+
+        try {
+            const res = await fetch(`/api/empresas-estadisticas/by-curso?empresaId=${conv.empresaId}&curso=${encodeURIComponent(cursoNombre)}`);
+            if (res.ok) {
+                const data: EmpresaEstadistica | null = await res.json();
+                setEstadisticaContratados(data?.contratados ?? 0);
+                setEstadisticaValoracion(data?.valoracion ?? 0);
+            } else {
+                setEstadisticaContratados(0);
+                setEstadisticaValoracion(0);
+            }
+        } catch {
+            setEstadisticaContratados(0);
+            setEstadisticaValoracion(0);
+        }
+
+        setShowEstadisticaModal(true);
+    };
+
+    const handleEstadisticaSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const conv = convenios.find(c => c.id === estadisticaRelacion?.convenioId);
+        if (!conv) return;
+
+        try {
+            const res = await fetch('/api/empresas-estadisticas/upsert', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    empresaId: conv.empresaId,
+                    curso: estadisticaCurso,
+                    contratados: estadisticaContratados,
+                    valoracion: estadisticaValoracion,
+                }),
+            });
+            if (!res.ok) { alert('Error al guardar las estadísticas'); return; }
+            setShowEstadisticaModal(false);
+        } catch {
+            alert('Error al guardar las estadísticas');
+        }
+    };
+
     const handleDescargarTodo = async (relaciones: RelacionAlumno[]) => {
         try {
 
@@ -919,6 +982,12 @@ export function useRelaciones(cursoId: number) {
         advancePlanStatusIndividual, moveBackPlanStatusIndividual,
         advanceSeguimientoStatusIndividual, moveBackSeguimientoStatusIndividual,
         advanceValoracionStatusIndividual, moveBackValoracionStatusIndividual,
+        // Handlers estadísticas
+        showEstadisticaModal, setShowEstadisticaModal,
+        estadisticaEmpresaNombre, estadisticaCurso, estadisticaNumAlumnos,
+        estadisticaContratados, setEstadisticaContratados,
+        estadisticaValoracion, setEstadisticaValoracion,
+        handleOpenEstadistica, handleEstadisticaSubmit,
         // Descargas
         descargarRelacion, descargarPlanFormativo,
         descargarSeguimiento, descargarValoracion,
