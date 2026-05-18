@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { SeguridadSocialData } from '../../../types/index.ts';
+import { formatDate } from '../../../lib/dateUtils.ts';
 
 interface Props {
   data: SeguridadSocialData;
@@ -14,14 +15,6 @@ const MES_LABELS: Record<string, string> = {
 function formatMesLabel(mesKey: string): string {
   const [, month] = mesKey.split('-');
   return MES_LABELS[month] || month;
-}
-
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  return `${day}/${month}/${d.getFullYear()}`;
 }
 
 export function SeguridadSocialTable({ data }: Props) {
@@ -122,13 +115,13 @@ export function SeguridadSocialTable({ data }: Props) {
                   onClick={() => handleRowClick(alumno.id)}
                   className="px-3 py-2.5 text-center text-xs text-slate-600 whitespace-nowrap"
                 >
-                  {formatDate(alumno.fechaInicio)}
+                  {formatDate(alumno.fechaInicio) || '—'}
                 </td>
                 <td
                   onClick={() => handleRowClick(alumno.id)}
                   className="px-3 py-2.5 text-center text-xs text-slate-600 whitespace-nowrap"
                 >
-                  {formatDate(alumno.fechaFin)}
+                  {formatDate(alumno.fechaFin) || '—'}
                 </td>
                 {data.meses.map(mes => {
                   const key = `${alumno.id}_${mes}`;

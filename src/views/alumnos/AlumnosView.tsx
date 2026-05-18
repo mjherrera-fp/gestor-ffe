@@ -10,10 +10,11 @@ import DetalleAcademicoModal    from './components/DetalleAcademicoModal.tsx';
 
 interface Props {
   cursoId: number;
+  detalleAcademicoId?: number;
 }
 
-export default function AlumnosView({ cursoId }: Props) {
-  const ctx = useAlumnos(cursoId);
+export default function AlumnosView({ cursoId, detalleAcademicoId }: Props) {
+  const ctx = useAlumnos(cursoId, detalleAcademicoId);
 
   return (
     <div className="space-y-6">
@@ -129,6 +130,30 @@ export default function AlumnosView({ cursoId }: Props) {
             ctx.fetchAlumnos();
           }}
         />
+      )}
+
+      {/* ── MODAL: Resultado importación ── */}
+      {ctx.importResult && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 text-center">
+            <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 mb-4">Importación finalizada</h3>
+            <div className="space-y-2 text-sm text-slate-600">
+              <p><span className="font-bold text-emerald-600">{ctx.importResult.success}</span> alumnos nuevos</p>
+              <p><span className="font-bold text-blue-600">{ctx.importResult.updated}</span> alumnos actualizados</p>
+            </div>
+            <button
+              onClick={() => ctx.setImportResult(null)}
+              className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

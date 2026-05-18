@@ -15,7 +15,7 @@ export type ViewMode    = 'grid' | 'table';
 //  HOOK PRINCIPAL
 // ─────────────────────────────────────────
 
-export function useAlumnos(cursoId: number) {
+export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
 
   // ── Datos ──
   const [alumnos,    setAlumnos]    = useState<Alumno[]>([]);
@@ -52,6 +52,7 @@ export function useAlumnos(cursoId: number) {
 
   // ── Importación Excel ──
   const [isImporting,  setIsImporting]  = useState(false);
+  const [importResult, setImportResult] = useState<{ success: number; updated: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ─────────────────────────────────────────
@@ -63,16 +64,20 @@ export function useAlumnos(cursoId: number) {
   useEffect(() => {
     fetchAlumnos();
     fetchDetalles();
-  }, [cursoId]);
+  }, [cursoId, detalleAcademicoId]);
 
   // ─────────────────────────────────────────
   //  FETCH
   // ─────────────────────────────────────────
 
   const fetchAlumnos = async () => {
-    const res    = await fetch(`/api/alumnos?cursoId=${cursoId}`);
+    const params = new URLSearchParams({ cursoId: String(cursoId) });
+    if (detalleAcademicoId) params.set('detalleAcademicoId', String(detalleAcademicoId));
+    const res    = await fetch(`/api/alumnos?${params}`);
     setAlumnos(await res.json());
-    const relRes = await fetch('/api/relaciones-alumnos');
+    const relParams = new URLSearchParams();
+    if (detalleAcademicoId) relParams.set('detalleAcademicoId', String(detalleAcademicoId));
+    const relRes = await fetch(`/api/relaciones-alumnos?${relParams}`);
     if (relRes.ok) setRelaciones(await relRes.json());
   };
 
@@ -259,6 +264,11 @@ export function useAlumnos(cursoId: number) {
             fechaNacimiento,
             cursoId,
             totalHorasFFE:      Number(row['Horas pendientes FFE']) || 0,
+            fechaInicio:        '',
+            fechaFin:           '',
+            estadoPlanFormativo: 'PENDIENTE_ENVIAR_ESTUDIANTE',
+            estadoSeguimiento:  'PENDIENTE',
+            estadoValoracion:   'PENDIENTE',
             detalleAcademicoId: detalles.find(d => d.codigoGrupo === row['Código Grupo'])?.id
               || existingAlumno?.detalleAcademicoId
               || (detalles.length > 0 ? detalles[0].id : null),
@@ -279,7 +289,7 @@ export function useAlumnos(cursoId: number) {
         }
 
         fetchAlumnos();
-        alert(`Importación finalizada:\n- Alumnos nuevos: ${successCount}\n- Alumnos actualizados: ${updateCount}`);
+        setImportResult({ success: successCount, updated: updateCount });
       } catch {
         alert('Hubo un error al procesar el archivo Excel.');
       } finally {
@@ -354,6 +364,7 @@ export function useAlumnos(cursoId: number) {
     handleFileDelete,
     // Excel
     isImporting,
+    importResult, setImportResult,
     fileInputRef,
     downloadTemplate,
     handleImportExcel,

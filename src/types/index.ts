@@ -48,7 +48,6 @@ export interface Curso {
   descripcion: string;
   fechaInicio: string;
   fechaFin: string;
-  archivado: number; // 0 or 1
   festivos?: string[];
   tutorias?: string[];
 }

@@ -85,7 +85,7 @@ function setupTables() {
     smtp_host TEXT DEFAULT 'smtp.educamadrid.org',
     smtp_port INTEGER DEFAULT 587,
     smtp_user TEXT,
-    smtp_pass TEXT, -- En un entorno real, esto debería estar cifrado
+    smtp_pass TEXT,
     smtp_secure BOOLEAN DEFAULT 0
   );
 
@@ -99,6 +99,15 @@ function setupTables() {
     FOREIGN KEY(profesorId) REFERENCES profesores(id) ON DELETE CASCADE
   );
 
+  CREATE TABLE IF NOT EXISTS cursos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    descripcion TEXT NOT NULL,
+    fechaInicio TEXT NOT NULL,
+    fechaFin TEXT NOT NULL,
+    festivos TEXT,
+    tutorias TEXT
+  );
+
   CREATE TABLE IF NOT EXISTS detalles_academicos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     centroId INTEGER NOT NULL,
@@ -110,16 +119,6 @@ function setupTables() {
     codigoGrupo TEXT NOT NULL,
     resultadosAprendizaje TEXT,
     FOREIGN KEY(centroId) REFERENCES centros_educativos(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS cursos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    descripcion TEXT NOT NULL,
-    fechaInicio TEXT NOT NULL,
-    fechaFin TEXT NOT NULL,
-    archivado INTEGER DEFAULT 0,
-    festivos TEXT,
-    tutorias TEXT
   );
 
   CREATE TABLE IF NOT EXISTS empresas (
@@ -160,11 +159,22 @@ function setupTables() {
     fechaConvenio TEXT NOT NULL,
     estado TEXT NOT NULL,
     empresaId INTEGER NOT NULL,
-    cursoId INTEGER NOT NULL,
+    cursoId INTEGER,
     centroId INTEGER,
     FOREIGN KEY(empresaId) REFERENCES empresas(id) ON DELETE CASCADE,
-    FOREIGN KEY(cursoId) REFERENCES cursos(id) ON DELETE CASCADE,
+    FOREIGN KEY(cursoId) REFERENCES cursos(id) ON DELETE SET NULL,
     FOREIGN KEY(centroId) REFERENCES centros_educativos(id) ON DELETE SET NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS relaciones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    convenioId INTEGER NOT NULL,
+    tutorEmpresaId INTEGER NOT NULL,
+    numRelacion TEXT NOT NULL,
+    horario TEXT NOT NULL,
+    estado TEXT NOT NULL,
+    FOREIGN KEY (convenioId) REFERENCES convenios(id) ON DELETE CASCADE,
+    FOREIGN KEY (tutorEmpresaId) REFERENCES tutores_empresa(id)
   );
 
   CREATE TABLE IF NOT EXISTS alumnos (
@@ -187,27 +197,16 @@ function setupTables() {
     cursoId INTEGER,
     relacionId INTEGER,
     detalleAcademicoId INTEGER,
-    FOREIGN KEY(cursoId) REFERENCES cursos(id) ON DELETE CASCADE,
-    FOREIGN KEY(relacionId) REFERENCES relaciones_alumnos(id) ON DELETE SET NULL,
+    FOREIGN KEY(cursoId) REFERENCES cursos(id),
+    FOREIGN KEY(relacionId) REFERENCES relaciones(id) ON DELETE SET NULL,
     FOREIGN KEY(detalleAcademicoId) REFERENCES detalles_academicos(id) ON DELETE SET NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS relaciones (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    convenioId INTEGER NOT NULL,
-    tutorEmpresaId INTEGER NOT NULL,
-    numRelacion TEXT NOT NULL,
-    horario TEXT NOT NULL,
-    estado TEXT NOT NULL,
-    FOREIGN KEY (convenioId) REFERENCES convenios(id),
-    FOREIGN KEY (tutorEmpresaId) REFERENCES tutores_empresa(id)
   );
 
   CREATE TABLE IF NOT EXISTS intereses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     alumnoId INTEGER NOT NULL,
     empresaId INTEGER NOT NULL,
-    interesado TEXT NOT NULL, -- 'alumno' or 'empresa'
+    interesado TEXT NOT NULL,
     FOREIGN KEY(alumnoId) REFERENCES alumnos(id) ON DELETE CASCADE,
     FOREIGN KEY(empresaId) REFERENCES empresas(id) ON DELETE CASCADE
   );

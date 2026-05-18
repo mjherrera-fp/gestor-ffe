@@ -10,10 +10,11 @@ import { calculateEndDateForHours }     from './utils/relacionesUtils.ts';
 
 interface Props {
   cursoId: number;
+  detalleAcademicoId?: number;
 }
 
-export default function RelacionesView({ cursoId }: Props) {
-  const ctx = useRelaciones(cursoId);
+export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
+  const ctx = useRelaciones(cursoId, detalleAcademicoId);
 
   // Adaptador para calculateEndDateForHours que inyecta el curso del contexto
   const calcEndDate = (start: string, hours: number) =>

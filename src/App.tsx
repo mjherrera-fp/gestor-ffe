@@ -6,27 +6,15 @@ import {
   FileText,
   UserCircle,
   Trophy,
-  Settings,
   LayoutDashboard,
-  Archive,
-  Trash2,
-  Plus,
-  GraduationCap,
-  ArrowRight,
-  CheckCircle2,
-  Send,
-  Download,
-  AlertCircle,
   Menu,
   X,
   ArrowLeftRight,
   Lock,
-  Code,
-  Copy,
   Copyright
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Profesor, Curso, Alumno, Empresa, Convenio, ConvenioEstado } from './types/index.ts';
+import { Profesor, Curso, DetalleAcademico } from './types/index.ts';
 import packageJson from '../package.json';
 
 // Components
@@ -45,10 +33,12 @@ export default function App() {
   const [profesor, setProfesor] = useState<Profesor | null>(null);
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [activeCurso, setActiveCurso] = useState<Curso | null>(null);
+  const [detallesAcademicos, setDetallesAcademicos] = useState<DetalleAcademico[]>([]);
+  const [activeDetalle, setActiveDetalle] = useState<DetalleAcademico | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showGroupSelector, setShowGroupSelector] = useState(false);
 
-  // 1. Nuevos estados
   const [isLocked, setIsLocked] = useState(false);
   const [isEncrypted, setIsEncrypted] = useState(false);
   const [password, setPassword] = useState('');
@@ -70,32 +60,35 @@ export default function App() {
       }
 
       // Si no está bloqueada, sigue tu código normal:
-      const [profesorRes, cursosRes] = await Promise.all([
+      const [profesorRes, cursosRes, detallesRes] = await Promise.all([
         fetch('/api/profesor'),
-        fetch('/api/cursos')
+        fetch('/api/cursos'),
+        fetch('/api/detalles-academicos')
       ]);
       const profesorData = await profesorRes.json();
-      const cursosData = await cursosRes.json();
+      const cursosData: Curso[] = await cursosRes.json();
+      const detallesData: DetalleAcademico[] = await detallesRes.json();
 
       setProfesor(profesorData);
       setCursos(cursosData);
+      setDetallesAcademicos(detallesData);
 
-      const activeCursosList = (cursosData as Curso[]).filter(c => !c.archivado);
+      // Auto-select first curso
+      if (!activeCurso && cursosData.length > 0) {
+        setActiveCurso(cursosData[0]);
+      } else if (activeCurso) {
+        const updated = cursosData.find(c => c.id === activeCurso.id);
+        if (updated) setActiveCurso(updated);
+        else setActiveCurso(cursosData.length > 0 ? cursosData[0] : null);
+      }
 
-      // If we don't have an active curso, pick the first one
-      if (!activeCurso && activeCursosList.length > 0) {
-        setActiveCurso(activeCursosList[0]);
-      }
-      // If the current active curso was just archived (it's not in the activeCursosList anymore)
-      else if (activeCurso && !activeCursosList.some(c => c.id === activeCurso.id)) {
-        setActiveCurso(activeCursosList.length > 0 ? activeCursosList[0] : null);
-      }
-      // If the current active curso object reference changed but it's still active, update it
-      else if (activeCurso) {
-        const updatedActive = activeCursosList.find(c => c.id === activeCurso.id);
-        if (updatedActive) {
-          setActiveCurso(updatedActive);
-        }
+      // Auto-select first detalle
+      if (!activeDetalle && detallesData.length > 0) {
+        setActiveDetalle(detallesData[0]);
+      } else if (activeDetalle) {
+        const updated = detallesData.find(d => d.id === activeDetalle.id);
+        if (updated) setActiveDetalle(updated);
+        else setActiveDetalle(detallesData.length > 0 ? detallesData[0] : null);
       }
     } catch (error) {
       console.error("Error fetching initial data", error);
@@ -104,22 +97,21 @@ export default function App() {
     }
   };
 
-  const activeCursos = cursos.filter(c => !c.archivado);
-
   useEffect(() => {
     fetchData();
   }, []);
 
+  const tieneProfesor = profesor !== null;
+  const tieneCurso = activeCurso !== null;
   const navItems = [
     { id: 'dashboard', label: 'Profesor', icon: UserCircle },
-    { id: 'cursos', label: 'Cursos', icon: BookOpen },
-    { id: 'panel', label: 'Panel', icon: LayoutDashboard, disabled: activeCursos.length === 0 },
-    { id: 'alumnos', label: 'Alumnos', icon: Users, disabled: activeCursos.length === 0 },
-    { id: 'empresas', label: 'Empresas', icon: Building2, disabled: activeCursos.length === 0 },
-
-    { id: 'intereses', label: 'Intereses', icon: Trophy, disabled: activeCursos.length === 0 },
-    { id: 'convenios', label: 'Convenios', icon: FileText, disabled: activeCursos.length === 0 },
-    { id: 'relaciones', label: 'Relaciones', icon: ArrowLeftRight, disabled: activeCursos.length === 0 },
+    { id: 'cursos', label: 'Cursos', icon: BookOpen, disabled: !tieneProfesor },
+    { id: 'panel', label: 'Panel', icon: LayoutDashboard, disabled: !tieneProfesor || !tieneCurso },
+    { id: 'alumnos', label: 'Alumnos', icon: Users, disabled: !tieneProfesor || !tieneCurso },
+    { id: 'empresas', label: 'Empresas', icon: Building2, disabled: !tieneProfesor || !tieneCurso },
+    { id: 'intereses', label: 'Intereses', icon: Trophy, disabled: !tieneProfesor || !tieneCurso },
+    { id: 'convenios', label: 'Convenios', icon: FileText, disabled: !tieneProfesor || !tieneCurso },
+    { id: 'relaciones', label: 'Relaciones', icon: ArrowLeftRight, disabled: !tieneProfesor || !tieneCurso },
   ];
 
   // 3. Función para intentar desbloquear
@@ -278,20 +270,53 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2 lg:gap-4">
-            {/* Global Curso Selector */}
-            {activeTab !== 'cursos' && activeCursos.length > 0 && (
-              <div className="flex items-center gap-1.5 lg:gap-2 bg-emerald-50 text-emerald-800 px-2 lg:px-3 py-1.5 rounded-full text-[9px] lg:text-[10px] font-bold border border-emerald-100/50">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="uppercase hidden md:inline">Curso:</span>
-                <select
-                  value={activeCurso?.id || ''}
-                  onChange={(e) => setActiveCurso(activeCursos.find(c => c.id === Number(e.target.value)) || null)}
-                  className="bg-transparent border-none appearance-none outline-none font-bold cursor-pointer"
+            {/* Global Grupo Selector */}
+            {activeDetalle && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowGroupSelector(prev => !prev)}
+                  className="flex items-center gap-1.5 lg:gap-2 bg-emerald-50 text-emerald-800 px-2 lg:px-3 py-1.5 rounded-full text-[9px] lg:text-[10px] font-bold border border-emerald-100/50 hover:bg-emerald-100 transition-all"
                 >
-                  {activeCursos.map(c => (
-                    <option key={c.id} value={c.id}>{c.descripcion}</option>
-                  ))}
-                </select>
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  {activeCurso && (
+                    <span className="uppercase hidden md:inline">{activeCurso.descripcion}:</span>
+                  )}
+                  <span className="max-w-32 truncate">
+                    {activeDetalle.ciclo} {activeDetalle.nivel} - {(activeDetalle as any).centroNombre || ''}
+                  </span>
+                  <svg className="h-3 w-3 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {showGroupSelector && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowGroupSelector(false)} />
+                    <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl border border-slate-200 shadow-xl z-50 py-1 max-h-60 overflow-y-auto">
+                      {detallesAcademicos.map(d => {
+                        const isActive = d.id === activeDetalle.id;
+                        return (
+                          <button
+                            key={d.id}
+                            onClick={() => { setActiveDetalle(d); setShowGroupSelector(false); }}
+                            className={`w-full text-left px-4 py-2.5 text-sm transition-all ${
+                              isActive
+                                ? 'bg-emerald-50 text-emerald-800 font-bold'
+                                : 'text-slate-700 hover:bg-slate-50 font-medium'
+                            }`}
+                          >
+                            <span className="block truncate">{d.ciclo} {d.nivel}</span>
+                            {(d as any).centroNombre && (
+                              <span className="block text-[11px] text-slate-400 truncate">
+                                {(d as any).centroNombre}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </div>
             )}
             {/* Solo mostramos el botón si la base de datos es de tipo cifrada */}
@@ -316,6 +341,24 @@ export default function App() {
         {/* Content Area */}
         <section className="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth">
           <div className="max-w-7xl mx-auto pb-20">
+            {/* Gate: sin profesor */}
+            {!tieneProfesor && activeTab !== 'dashboard' && (
+              <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 mb-6">
+                <p className="text-sm text-amber-800 font-medium">
+                  Primero debes configurar tus datos como profesor en la sección <strong>Profesor</strong>.
+                </p>
+              </div>
+            )}
+
+            {/* Gate: profesor sí, sin curso */}
+            {tieneProfesor && !tieneCurso && activeTab !== 'dashboard' && activeTab !== 'cursos' && (
+              <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 mb-6">
+                <p className="text-sm text-amber-800 font-medium">
+                  Primero debes crear un curso académico en la sección <strong>Cursos</strong>.
+                </p>
+              </div>
+            )}
+
             {activeTab === 'dashboard' && (
               <ProfesorView
                 profesor={profesor}
@@ -331,22 +374,37 @@ export default function App() {
               />
             )}
             {activeTab === 'alumnos' && activeCurso && (
-              <AlumnosView cursoId={activeCurso.id!} />
+              <AlumnosView
+                cursoId={activeCurso.id!}
+                detalleAcademicoId={activeDetalle?.id}
+              />
             )}
             {activeTab === 'empresas' && activeCurso && (
               <EmpresasView cursoId={activeCurso.id!} />
             )}
             {activeTab === 'panel' && activeCurso && (
-              <PanelView cursoId={activeCurso.id!} />
+              <PanelView
+                cursoId={activeCurso.id!}
+                detalleAcademicoId={activeDetalle?.id}
+              />
             )}
             {activeTab === 'intereses' && activeCurso && (
-              <InteresesView cursoId={activeCurso.id!} />
+              <InteresesView
+                cursoId={activeCurso.id!}
+                detalleAcademicoId={activeDetalle?.id}
+              />
             )}
             {activeTab === 'convenios' && activeCurso && (
-              <ConveniosView cursoId={activeCurso.id!} />
+              <ConveniosView
+                cursoId={activeCurso.id!}
+                centroId={activeDetalle?.centroId}
+              />
             )}
             {activeTab === 'relaciones' && activeCurso && (
-              <RelacionesView cursoId={activeCurso.id!} />
+              <RelacionesView
+                cursoId={activeCurso.id!}
+                detalleAcademicoId={activeDetalle?.id}
+              />
             )}
           </div>
         </section>

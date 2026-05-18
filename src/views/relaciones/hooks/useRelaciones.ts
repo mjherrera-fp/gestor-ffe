@@ -37,7 +37,7 @@ export interface BulkHorario {
 //  HOOK PRINCIPAL
 // ─────────────────────────────────────────
 
-export function useRelaciones(cursoId: number) {
+export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
 
     // ── Datos del servidor ──
     const [relaciones, setRelaciones] = useState<RelacionAlumno[]>([]);
@@ -109,11 +109,16 @@ export function useRelaciones(cursoId: number) {
     // ─────────────────────────────────────────
 
     const fetchData = async () => {
+        const relParams = new URLSearchParams();
+        if (detalleAcademicoId) relParams.set('detalleAcademicoId', String(detalleAcademicoId));
+        const convParams = new URLSearchParams({ cursoId: String(cursoId) });
+        const alumParams = new URLSearchParams({ cursoId: String(cursoId) });
+        if (detalleAcademicoId) alumParams.set('detalleAcademicoId', String(detalleAcademicoId));
         const [relRes, convRes, cursoRes, alumRes] = await Promise.all([
-            fetch('/api/relaciones-alumnos'),
-            fetch(`/api/convenios?cursoId=${cursoId}`),
+            fetch(`/api/relaciones-alumnos?${relParams}`),
+            fetch(`/api/convenios?${convParams}`),
             fetch(`/api/cursos`),
-            fetch(`/api/alumnos?cursoId=${cursoId}`),
+            fetch(`/api/alumnos?${alumParams}`),
         ]);
 
         const allRelaciones: RelacionAlumno[] = await relRes.json();
@@ -132,7 +137,7 @@ export function useRelaciones(cursoId: number) {
         }
     };
 
-    useEffect(() => { fetchData(); }, [cursoId]);
+    useEffect(() => { fetchData(); }, [cursoId, detalleAcademicoId]);
 
     // Cargar tutores cuando cambia el convenio seleccionado
     useEffect(() => {

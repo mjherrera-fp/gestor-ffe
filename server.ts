@@ -271,8 +271,6 @@ async function startServer() {
 
   // Cursos
   app.get('/api/cursos', (req, res) => res.json(CursoDAO.getAll()));
-  app.get('/api/cursos/active', (req, res) => res.json(CursoDAO.getActive()));
-  app.get('/api/cursos/archived', (req, res) => res.json(CursoDAO.getArchived()));
   app.get('/api/cursos/:id', (req, res) => {
     const curso = CursoDAO.getById(Number(req.params.id));
     if (!curso) return res.status(404).json({ error: 'Curso no encontrado' });
@@ -293,20 +291,12 @@ async function startServer() {
       res.status(500).json({ error: "No se pudo eliminar el curso" });
     }
   });
-  app.post('/api/cursos/:id/archive', (req, res) => {
-    try {
-      const id = Number(req.params.id);
-      const isArchived = req.body.archive === true || req.body.archive === 1 || String(req.body.archive) === 'true';
-      CursoDAO.archive(id, isArchived);
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error archiving curso:", error);
-      res.status(500).json({ error: "No se pudo cambiar el estado del curso" });
-    }
-  });
 
   // Alumnos
-  app.get('/api/alumnos', (req, res) => res.json(AlumnoDAO.getAll(req.query.cursoId ? Number(req.query.cursoId) : undefined)));
+  app.get('/api/alumnos', (req, res) => res.json(AlumnoDAO.getAll(
+    req.query.cursoId ? Number(req.query.cursoId) : undefined,
+    req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
+  )));
   app.post('/api/alumnos', (req, res) => res.json({ id: AlumnoDAO.create(req.body) }));
   app.put('/api/alumnos/:id', (req, res) => {
     AlumnoDAO.update(Number(req.params.id), req.body);
@@ -411,7 +401,10 @@ async function startServer() {
   });
 
   // Convenios
-  app.get('/api/convenios', (req, res) => res.json(ConvenioDAO.getAll(req.query.cursoId ? Number(req.query.cursoId) : undefined)));
+  app.get('/api/convenios', (req, res) => res.json(ConvenioDAO.getAll(
+    req.query.cursoId ? Number(req.query.cursoId) : undefined,
+    req.query.centroId ? Number(req.query.centroId) : undefined
+  )));
   app.post('/api/convenios', (req, res) => {
     const { convenio } = req.body;
     if (!convenio.centroId) return res.status(400).json({ error: 'El centro educativo es obligatorio.' });
@@ -431,7 +424,9 @@ async function startServer() {
   });
 
   // Intereses
-  app.get('/api/intereses', (req, res) => res.json(InteresDAO.getIntereses()));
+  app.get('/api/intereses', (req, res) => res.json(InteresDAO.getIntereses(
+    req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
+  )));
   app.post('/api/intereses', (req, res) => {
     InteresDAO.add(req.body);
     res.json({ success: true });
@@ -447,7 +442,9 @@ async function startServer() {
     if (req.query.convenioId) {
       return res.json(RelacionAlumnoDAO.getByConvenio(Number(req.query.convenioId)));
     }
-    res.json(RelacionAlumnoDAO.getAll());
+    res.json(RelacionAlumnoDAO.getAll(
+      req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
+    ));
   });
   app.post('/api/relaciones-alumnos', (req, res) => {
     try {
@@ -1409,13 +1406,19 @@ async function startServer() {
 
   // Panel
   app.get('/api/panel/resumen', (req, res) => {
-    res.json(PanelDAO.resumen(req.query.cursoId ? Number(req.query.cursoId) : undefined));
+    res.json(PanelDAO.resumen(
+      req.query.cursoId ? Number(req.query.cursoId) : undefined,
+      req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
+    ));
   });
 
   app.get('/api/panel/seguridad-social', (req, res) => {
     const cursoId = Number(req.query.cursoId);
-    if (!cursoId) return res.status(400).json({ error: 'cursoId es obligatorio' });
-    res.json(PanelDAO.seguridadSocial(cursoId));
+    if (!cursoId) return res.json({ meses: [], alumnos: [], datos: {} });
+    res.json(PanelDAO.seguridadSocial(
+      cursoId,
+      req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
+    ));
   });
 
   // Vite setup y Rutas Estáticas (UNIFICADO)

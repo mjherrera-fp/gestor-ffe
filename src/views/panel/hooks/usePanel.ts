@@ -4,6 +4,7 @@ import {
   ConvenioEstadoLabels, RelacionEstadoLabels,
   PlanFormativoEstadoLabels, SeguimientoEstadoLabels, ValoracionEstadoLabels
 } from '../../../types/index.ts';
+import { formatDate } from '../../../lib/dateUtils.ts';
 
 export type ColumnId =
   | 'alumno' | 'fechaInicio' | 'fechaFin' | 'empresa'
@@ -52,14 +53,6 @@ export const COLUMNS: ColumnMeta[] = [
   { id: 'estadoValoracion', label: 'Valoración', type: 'status', statusLabels: ValoracionEstadoLabels, getValue: r => r.estadoValoracion },
 ];
 
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  return `${day}/${month}/${d.getFullYear()}`;
-}
-
 function compareValues(a: string | null | undefined, b: string | null | undefined, col: ColumnId, dir: SortDir): number {
   const va = a ?? '';
   const vb = b ?? '';
@@ -102,7 +95,7 @@ function applyFilters(rows: PanelResumenRow[], filters: FilterState): PanelResum
   });
 }
 
-export function usePanel(cursoId: number) {
+export function usePanel(cursoId: number, detalleAcademicoId?: number) {
   const [resumen, setResumen] = useState<PanelResumenRow[]>([]);
   const [ssData, setSsData] = useState<SeguridadSocialData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -112,13 +105,17 @@ export function usePanel(cursoId: number) {
   const [filters, setFilters] = useState<FilterState>({});
 
   const fetchResumen = async () => {
-    const res = await fetch(`/api/panel/resumen?cursoId=${cursoId}`);
+    const params = new URLSearchParams({ cursoId: String(cursoId) });
+    if (detalleAcademicoId) params.set('detalleAcademicoId', String(detalleAcademicoId));
+    const res = await fetch(`/api/panel/resumen?${params}`);
     if (!res.ok) throw new Error('Error al obtener datos del panel');
     return await res.json() as PanelResumenRow[];
   };
 
   const fetchSeguridadSocial = async () => {
-    const res = await fetch(`/api/panel/seguridad-social?cursoId=${cursoId}`);
+    const params = new URLSearchParams({ cursoId: String(cursoId) });
+    if (detalleAcademicoId) params.set('detalleAcademicoId', String(detalleAcademicoId));
+    const res = await fetch(`/api/panel/seguridad-social?${params}`);
     if (!res.ok) throw new Error('Error al obtener datos de seguridad social');
     return await res.json() as SeguridadSocialData;
   };
@@ -127,17 +124,23 @@ export function usePanel(cursoId: number) {
     setLoading(true);
     setError(null);
     try {
-      const [r, ss] = await Promise.all([fetchResumen(), fetchSeguridadSocial()]);
+      const r = await fetchResumen();
       setResumen(r);
-      setSsData(ss);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
       setLoading(false);
+      return;
     }
+    try {
+      const ss = await fetchSeguridadSocial();
+      setSsData(ss);
+    } catch {
+      // seguridad social no bloquea el panel
+    }
+    setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, [cursoId]);
+  useEffect(() => { fetchData(); }, [cursoId, detalleAcademicoId]);
 
   const toggleSort = (column: ColumnId) => {
     setSort(prev => ({

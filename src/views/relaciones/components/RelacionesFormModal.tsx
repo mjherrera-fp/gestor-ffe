@@ -9,6 +9,7 @@ import {
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { DEFAULT_HORARIO, getDayName } from '../utils/relacionesUtils.ts';
 import { BulkHorario } from '../hooks/useRelaciones.ts';
+import { formatDate } from '../../../lib/dateUtils.ts';
 
 interface RelacionFormModalProps {
   editing: RelacionAlumno | null;
@@ -181,7 +182,7 @@ export function RelacionFormModal({
                             <div className="flex items-center justify-between pt-1 border-t border-slate-50">
                               <span className="text-[9px] font-bold text-slate-400 uppercase">Fin Estimado</span>
                               <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
-                                {studentEndDate ? new Date(studentEndDate).toLocaleDateString() : '—'}
+                                {studentEndDate ? formatDate(studentEndDate) : '—'}
                               </span>
                             </div>
                           </div>
