@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3, ChevronDown, ChevronUp, Star } from 'lucide-react';
 import {
   RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels,
   PlanFormativoEstado, PlanFormativoEstadoLabels,
@@ -355,18 +355,19 @@ export function RelacionesListado({
 
                         <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                           <button
+                            onClick={() => onOpenStats(rel)}
+                            className="p-2 text-slate-400 hover:text-amber-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                            title="Estadísticas de la empresa"
+                          >
+                            <Star className="h-4 w-4" />
+                          </button>
+                          <button
                             onClick={() => onEdit(rel)}
                             className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => onOpenStats(rel)}
-                            className="p-2 text-slate-400 hover:text-amber-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
-                            title="Estadísticas de la empresa"
-                          >
-                            <BarChart3 className="h-4 w-4" />
-                          </button>
+                          
                           <button
                             onClick={() => onDeleteRequest(rel.id!)}
                             className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
