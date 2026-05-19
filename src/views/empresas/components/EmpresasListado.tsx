@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, Hash, Plus, Edit2, Trash2, Mail, Phone, X, Star, Filter } from 'lucide-react';
+import { Building, Hash, Plus, Edit2, Trash2, Mail, Phone, X, Star, Filter, Download, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { Empresa } from '../../../types/index.ts';
 
 interface EmpresasListadoProps {
@@ -11,6 +11,10 @@ interface EmpresasListadoProps {
   onNew: () => void;
   onEdit: (emp: Empresa) => void;
   onDeleteRequest: (id: number) => void;
+  // Excel
+  onDownloadTemplate: () => void;
+  onImportClick: () => void;
+  isImporting: boolean;
   // Filters
   filterValoracion: number;
   onFilterValoracionChange: (v: number) => void;
@@ -25,6 +29,7 @@ export function EmpresasListado({
   empresas, selectedEmpresa,
   searchTerm, onSearchChange,
   onSelectEmpresa, onNew, onEdit, onDeleteRequest,
+  onDownloadTemplate, onImportClick, isImporting,
   filterValoracion, onFilterValoracionChange,
   filterUltimosCursos, onFilterUltimosCursosChange,
   filterColaboracion, onFilterColaboracionChange,
@@ -51,12 +56,30 @@ export function EmpresasListado({
               Empresas e Instituciones
             </span>
           </div>
-          <button
-            onClick={onNew}
-            className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-          >
-            <Plus className="h-4 w-4" /> Nueva Empresa
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={onDownloadTemplate}
+              title="Descargar plantilla Excel"
+              className="flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all border border-slate-200"
+            >
+              <Download className="h-4 w-4" /> Plantilla
+            </button>
+            <button
+              onClick={onImportClick}
+              disabled={isImporting}
+              title="Importar desde Excel"
+              className="flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-emerald-100 transition-all border border-emerald-100 disabled:opacity-50"
+            >
+              {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
+              {isImporting ? 'Importando...' : 'Importar Excel'}
+            </button>
+            <button
+              onClick={onNew}
+              className="bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+            >
+              <Plus className="h-4 w-4" /> Nueva Empresa
+            </button>
+          </div>
         </div>
 
         {/* Buscador */}

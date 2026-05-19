@@ -42,6 +42,9 @@ export default function EmpresasView({ cursoId }: Props) {
           onNew={ctx.handleOpenNewEmpresa}
           onEdit={ctx.handleOpenEditEmpresa}
           onDeleteRequest={id => ctx.setShowDeleteConfirm({ id, type: 'empresa' })}
+          onDownloadTemplate={ctx.downloadTemplate}
+          onImportClick={() => ctx.fileInputRef.current?.click()}
+          isImporting={ctx.isImporting}
           filterValoracion={ctx.filterValoracion}
           onFilterValoracionChange={ctx.setFilterValoracion}
           filterUltimosCursos={ctx.filterUltimosCursos}
@@ -49,6 +52,15 @@ export default function EmpresasView({ cursoId }: Props) {
           filterColaboracion={ctx.filterColaboracion}
           onFilterColaboracionChange={ctx.setFilterColaboracion}
           cursosUnicos={ctx.cursosUnicos}
+        />
+
+        {/* Input Excel oculto */}
+        <input
+          type="file"
+          ref={ctx.fileInputRef}
+          onChange={ctx.handleImportExcel}
+          accept=".xlsx, .xls, .csv"
+          className="hidden"
         />
 
         {/* Columna derecha: detalle con tabs */}
@@ -170,6 +182,30 @@ export default function EmpresasView({ cursoId }: Props) {
           onSubmit={ctx.handleTutorSubmit}
           onClose={() => ctx.setShowTutorForm(false)}
         />
+      )}
+
+      {/* ── MODAL: Resultado importación ── */}
+      {ctx.importResult && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 text-center">
+            <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 mb-4">Importación finalizada</h3>
+            <div className="space-y-2 text-sm text-slate-600">
+              <p><span className="font-bold text-emerald-600">{ctx.importResult.success}</span> empresas nuevas</p>
+              <p><span className="font-bold text-blue-600">{ctx.importResult.updated}</span> empresas actualizadas</p>
+            </div>
+            <button
+              onClick={() => ctx.setImportResult(null)}
+              className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>
       )}
 
     </>

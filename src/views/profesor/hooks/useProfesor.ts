@@ -15,7 +15,7 @@ export type CentroWithDetalles = CentroEducativo & { detalles: DetalleAcademico[
 //  HOOK PRINCIPAL
 // ─────────────────────────────────────────
 
-export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) => void) {
+export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) => void, onRefresh?: () => void) {
 
   // ── Datos del perfil ──
   const [formData, setFormData] = useState<Profesor>({
@@ -209,6 +209,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
         setEditingCentro(null);
         setCentroFormData({});
         fetchCentros();
+        onRefresh?.();
       } else {
         const err = await res.json();
         alert('Error al guardar el centro: ' + (err.error || 'Error desconocido'));
@@ -224,6 +225,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     await fetch(`/api/centros/${id}`, { method: 'DELETE' });
     setShowDeleteConfirm(null);
     fetchCentros();
+    onRefresh?.();
   };
 
   // ─────────────────────────────────────────
@@ -256,6 +258,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
         setEditingDetalle(null);
         setDetalleFormData({});
         fetchCentros();
+        onRefresh?.();
       } else {
         const err = await res.json();
         alert('Error al guardar el detalle académico: ' + (err.error || 'Error desconocido'));
@@ -271,6 +274,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     await fetch(`/api/detalles-academicos/${id}`, { method: 'DELETE' });
     setShowDeleteConfirm(null);
     fetchCentros();
+    onRefresh?.();
   };
 
   const handleConfirmDelete = () => {

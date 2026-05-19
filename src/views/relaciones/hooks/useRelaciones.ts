@@ -232,11 +232,23 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
     const addAlumnoToRelacion = (alumno: Alumno) => {
         if (!selectedAlumnosIds.includes(alumno.id!)) {
             setSelectedAlumnosIds(prev => [...prev, alumno.id!]);
+            setFormData(prev => ({
+                ...prev,
+                alumnos: [...(prev.alumnos || []), {
+                    id: alumno.id,
+                    nombre: alumno.nombre,
+                    apellidos: alumno.apellidos,
+                    totalHorasFFE: alumno.totalHorasFFE,
+                    fechaInicio: '',
+                    fechaFin: '',
+                } as Alumno],
+            }));
         }
         setSearchTermAlumno('');
     };
 
     const removeAlumnoFromRelacion = (id: number) => {
+        setSelectedAlumnosIds(prev => prev.filter(aId => aId !== id));
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).filter(a => a.id !== id),
@@ -249,7 +261,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
                 const newEndDate = calculateEndDateForHours(a.fechaInicio || '', hours, prev.horario, curso);
-                return { ...a, horasPendientesFFE: hours, fechaFin: newEndDate || a.fechaFin };
+                return { ...a, totalHorasFFE: hours, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
     };
@@ -281,7 +293,10 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         if (!targetStartDate) return;
         setFormData(prev => ({
             ...prev,
-            alumnos: (prev.alumnos || []).map(a => ({ ...a, fechaInicio: targetStartDate })),
+            alumnos: (prev.alumnos || []).map(a => {
+                const endDate = calculateEndDateForHours(targetStartDate, a.totalHorasFFE || 0, prev.horario, curso);
+                return { ...a, fechaInicio: targetStartDate, fechaFin: endDate || a.fechaFin };
+            }),
         }));
     };
 
