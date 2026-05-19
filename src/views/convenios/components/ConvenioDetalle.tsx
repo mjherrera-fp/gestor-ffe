@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileText, ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { ConvenioEstado, ConvenioEstadoLabels } from '../../../types/index.ts';
+import { ConvenioEstado, ConvenioEstadoLabels, FirmaTipo, FirmaTipoLabels } from '../../../types/index.ts';
 import { ConvenioExtendido } from '../hooks/useConvenios.ts';
 import { getStatusButton } from '../utils/conveniosUtils.ts';
 
@@ -8,10 +8,37 @@ interface ConvenioDetalleProps {
   selectedConvenio: ConvenioExtendido | null;
   onAdvanceStatus:  (c: ConvenioExtendido) => void;
   onMoveBackStatus: (c: ConvenioExtendido) => void;
+  onChangeFirma: (c: ConvenioExtendido, t: FirmaTipo) => void;
+}
+
+const FIRMA_CICLO: FirmaTipo[] = [FirmaTipo.SIN_ASIGNAR, FirmaTipo.DIGITAL, FirmaTipo.MANUAL];
+
+function FirmaSelector({ value, onChange }: { value?: FirmaTipo; onChange: (v: FirmaTipo) => void }) {
+  const firma = value || FirmaTipo.SIN_ASIGNAR;
+  const next = () => {
+    const idx = FIRMA_CICLO.indexOf(firma);
+    return FIRMA_CICLO[(idx + 1) % FIRMA_CICLO.length];
+  };
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(next())}
+      className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${
+        firma === FirmaTipo.DIGITAL
+          ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
+          : firma === FirmaTipo.MANUAL
+          ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'
+          : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
+      }`}
+      title="Haz clic para cambiar tipo de firma"
+    >
+      {FirmaTipoLabels[firma]}
+    </button>
+  );
 }
 
 export function ConvenioDetalle({
-  selectedConvenio, onAdvanceStatus, onMoveBackStatus,
+  selectedConvenio, onAdvanceStatus, onMoveBackStatus, onChangeFirma,
 }: ConvenioDetalleProps) {
 
   if (!selectedConvenio) {
@@ -41,11 +68,14 @@ export function ConvenioDetalle({
       {/* Cuerpo */}
       <div className="p-6 flex-1 overflow-y-auto space-y-6">
 
-        <div>
-          <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Estado Actual</div>
-          <div className="text-sm font-bold text-warning">
-            {ConvenioEstadoLabels[selectedConvenio.estado]}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Estado Actual</div>
+            <div className="text-sm font-bold text-warning">
+              {ConvenioEstadoLabels[selectedConvenio.estado]}
+            </div>
           </div>
+          <FirmaSelector value={selectedConvenio.tipoFirma} onChange={v => onChangeFirma(selectedConvenio, v)} />
         </div>
 
         <div>

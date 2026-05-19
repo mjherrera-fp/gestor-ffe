@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Convenio, Empresa, CentroEducativo, ConvenioEstado } from '../../../types/index.ts';
+import { Convenio, Empresa, CentroEducativo, ConvenioEstado, FirmaTipo } from '../../../types/index.ts';
 import { getNextConvenioEstado, getPrevConvenioEstado } from '../utils/conveniosUtils.ts';
 
 // ─────────────────────────────────────────
@@ -54,6 +54,7 @@ export function useConvenios(cursoId: number, centroId?: number) {
   // ─────────────────────────────────────────
 
   useEffect(() => { fetchData(); }, [cursoId, centroId]);
+  useEffect(() => { setSelectedConvenio(null); }, [cursoId, centroId]);
 
   // ─────────────────────────────────────────
   //  FETCH
@@ -124,6 +125,7 @@ export function useConvenios(cursoId: number, centroId?: number) {
       empresaId: selectedEmpresa,
       cursoId,
       centroId:  selectedCentro,
+      tipoFirma: selectedConvenio?.tipoFirma || FirmaTipo.SIN_ASIGNAR,
     };
 
     const url    = isEditing ? `/api/convenios/${editingId}` : '/api/convenios';
@@ -195,6 +197,16 @@ export function useConvenios(cursoId: number, centroId?: number) {
     fetchData();
   };
 
+  const updateFirma = async (conv: ConvenioExtendido, tipo: FirmaTipo) => {
+    await fetch(`/api/convenios/${conv.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ convenio: { ...conv, tipoFirma: tipo } }),
+    });
+    setSelectedConvenio({ ...conv, tipoFirma: tipo });
+    fetchData();
+  };
+
   // ─────────────────────────────────────────
   //  DATOS DERIVADOS
   // ─────────────────────────────────────────
@@ -243,6 +255,6 @@ export function useConvenios(cursoId: number, centroId?: number) {
     searchTermEmpresa, setSearchTermEmpresa,
     // Handlers
     handleOpenNew, handleEdit, handleSubmit, handleDelete,
-    advanceStatus, moveBackStatus,
+    advanceStatus, moveBackStatus, updateFirma,
   };
 }

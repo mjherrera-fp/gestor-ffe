@@ -3,11 +3,13 @@ import { usePanel } from './hooks/usePanel.ts';
 import { ResumenTab } from './components/ResumenTab.tsx';
 import { EstadisticasTab } from './components/EstadisticasTab.tsx';
 import { SeguridadSocialTab } from './components/SeguridadSocialTab.tsx';
+import { FirmasTab } from './components/FirmasTab.tsx';
 
 const tabs = [
   { id: 'resumen', label: 'Resumen' },
   { id: 'estadisticas', label: 'Estadísticas' },
   { id: 'seguridad-social', label: 'Seguridad Social' },
+  { id: 'firmas', label: 'Firmas' },
 ];
 
 interface Props {
@@ -91,6 +93,7 @@ export default function PanelView({ cursoId, detalleAcademicoId }: Props) {
       {activeTab === 'resumen' && <ResumenTab ctx={ctx} />}
       {activeTab === 'estadisticas' && <EstadisticasTab ctx={ctx} />}
       {activeTab === 'seguridad-social' && <SeguridadSocialTab ctx={ctx} />}
+      {activeTab === 'firmas' && <FirmasTab ctx={ctx} />}
     </div>
   );
 }

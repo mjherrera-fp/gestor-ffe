@@ -161,6 +161,7 @@ function setupTables() {
     empresaId INTEGER NOT NULL,
     cursoId INTEGER,
     centroId INTEGER,
+    tipoFirma TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
     FOREIGN KEY(empresaId) REFERENCES empresas(id) ON DELETE CASCADE,
     FOREIGN KEY(cursoId) REFERENCES cursos(id) ON DELETE SET NULL,
     FOREIGN KEY(centroId) REFERENCES centros_educativos(id) ON DELETE SET NULL
@@ -173,6 +174,10 @@ function setupTables() {
     numRelacion TEXT NOT NULL,
     horario TEXT NOT NULL,
     estado TEXT NOT NULL,
+    firmaRelacion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
+    firmaPlanFormativo TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
+    firmaSeguimiento TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
+    firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
     FOREIGN KEY (convenioId) REFERENCES convenios(id) ON DELETE CASCADE,
     FOREIGN KEY (tutorEmpresaId) REFERENCES tutores_empresa(id)
   );
@@ -211,6 +216,13 @@ function setupTables() {
     FOREIGN KEY(empresaId) REFERENCES empresas(id) ON DELETE CASCADE
   );
 `);
+
+  // Migración: añadir columnas nuevas a tablas existentes
+  try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaRelacion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
+  try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaPlanFormativo TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
+  try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaSeguimiento TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
+  try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
+  try { db.exec("ALTER TABLE convenios ADD COLUMN tipoFirma TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
 }
 
 // Ejecutamos el intento inicial al importar el módulo

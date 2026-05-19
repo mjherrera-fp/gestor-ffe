@@ -293,6 +293,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
             targetDownloadRelaciones={ctx.targetDownloadRelaciones}
             setSelectedDocs={ctx.setSelectedDocs}
             selectedDocs={ctx.selectedDocs}
+            onUpdateFirma={ctx.updateFirma}
           />
         </div>
       </div>

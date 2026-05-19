@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 import {
     RelacionAlumno, Convenio, TutorEmpresa, Alumno, Curso,
     RelacionEstado, PlanFormativoEstado, HorarioSemanal, SeguimientoEstado,
-    ValoracionEstado, EmpresaEstadistica
+    ValoracionEstado, EmpresaEstadistica, FirmaTipo
 } from '../../../types/index.ts';
 import {
     DEFAULT_HORARIO,
@@ -86,6 +86,10 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         horario: { ...DEFAULT_HORARIO },
         estado: RelacionEstado.PENDIENTE_ENVIAR_EMPRESA,
         estadoPlanFormativo: PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE,
+        firmaRelacion: FirmaTipo.SIN_ASIGNAR,
+        firmaPlanFormativo: FirmaTipo.SIN_ASIGNAR,
+        firmaSeguimiento: FirmaTipo.SIN_ASIGNAR,
+        firmaValoracion: FirmaTipo.SIN_ASIGNAR,
     });
 
     const [bulkHorario, setBulkHorario] = useState<BulkHorario>({
@@ -138,6 +142,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
     };
 
     useEffect(() => { fetchData(); }, [cursoId, detalleAcademicoId]);
+    useEffect(() => { setSelectedRelacion(null); }, [cursoId, detalleAcademicoId]);
 
     // Cargar tutores cuando cambia el convenio seleccionado
     useEffect(() => {
@@ -182,6 +187,10 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
                 horario: { ...DEFAULT_HORARIO },
                 estado: RelacionEstado.PENDIENTE_ENVIAR_EMPRESA,
                 estadoPlanFormativo: PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE,
+                firmaRelacion: FirmaTipo.DIGITAL,
+                firmaPlanFormativo: FirmaTipo.DIGITAL,
+                firmaSeguimiento: FirmaTipo.DIGITAL,
+                firmaValoracion: FirmaTipo.DIGITAL,
             });
             setSearchTermConvenio('');
         }
@@ -310,6 +319,18 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             });
             return { ...prev, horario: newHorario };
         });
+    };
+
+    const updateFirma = async (campo: keyof Pick<RelacionAlumno, 'firmaRelacion' | 'firmaPlanFormativo' | 'firmaSeguimiento' | 'firmaValoracion'>, valor: FirmaTipo) => {
+        if (!selectedRelacion) return;
+        const updated = { ...selectedRelacion, [campo]: valor };
+        await fetch(`/api/relaciones-alumnos/${selectedRelacion.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updated),
+        });
+        setSelectedRelacion(updated);
+        fetchData();
     };
 
     // ─────────────────────────────────────────
@@ -995,7 +1016,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         handleOpenForm, handleSubmit, handleDelete,
         addAlumnoToRelacion, removeAlumnoFromRelacion,
         updateStudentHours, updateStudentStartDate,
-        applyTargetEndDate, applyStartDateToAll, applyBulkHorario,
+        applyTargetEndDate, applyStartDateToAll, applyBulkHorario, updateFirma,
         // Handlers estados
         advanceStatus, moveBackStatus,
         advancePlanStatus, moveBackPlanStatus,

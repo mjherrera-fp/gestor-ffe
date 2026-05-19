@@ -102,6 +102,10 @@ export interface RelacionAlumno {
   estadoPlanFormativo: PlanFormativoEstado;
   estadoSeguimiento: SeguimientoEstado;
   estadoValoracion: ValoracionEstado;
+  firmaRelacion?: FirmaTipo;
+  firmaPlanFormativo?: FirmaTipo;
+  firmaSeguimiento?: FirmaTipo;
+  firmaValoracion?: FirmaTipo;
 }
 
 export interface Empresa {
@@ -142,6 +146,7 @@ export interface Convenio {
   empresaId: number;
   cursoId: number;
   centroId: number;
+  tipoFirma?: FirmaTipo;
 }
 
 export interface InteresAlumnoEmpresa {
@@ -151,6 +156,12 @@ export interface InteresAlumnoEmpresa {
 }
 
 // 1. ENUMS (Lo que se guarda en Base de Datos y se usa en la lógica)
+export enum FirmaTipo {
+  SIN_ASIGNAR = 'SIN_ASIGNAR',
+  DIGITAL = 'DIGITAL',
+  MANUAL = 'MANUAL',
+}
+
 export enum RelacionEstado {
   PENDIENTE_ENVIAR_EMPRESA = 'PENDIENTE_ENVIAR_EMPRESA',
   PENDIENTE_FIRMA_EMPRESA = 'PENDIENTE_FIRMA_EMPRESA',
@@ -226,6 +237,12 @@ export const ValoracionEstadoLabels: Record<ValoracionEstado, string> = {
   [ValoracionEstado.RECIBIDO]: 'Recibido de empresa'
 };
 
+export const FirmaTipoLabels: Record<FirmaTipo, string> = {
+  [FirmaTipo.SIN_ASIGNAR]: 'Tipo firma',
+  [FirmaTipo.DIGITAL]: 'Digital',
+  [FirmaTipo.MANUAL]: 'Manual',
+};
+
 export interface SelectedDocs {
   relacion: boolean,
   plan: boolean,
@@ -251,6 +268,11 @@ export interface PanelResumenRow {
   estadoPlanFormativo: PlanFormativoEstado;
   estadoSeguimiento: SeguimientoEstado;
   estadoValoracion: ValoracionEstado;
+  firmaRelacion?: string;
+  firmaPlanFormativo?: string;
+  firmaSeguimiento?: string;
+  firmaValoracion?: string;
+  tipoFirmaConvenio?: string;
 }
 
 export interface SeguridadSocialData {

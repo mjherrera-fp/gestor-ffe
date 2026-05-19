@@ -11,8 +11,7 @@ interface TitleProps {
 export const Title = ({ text, children }: TitleProps) => {
   return (
     <Tippy content={text} arrow={true}>
-      {/* Es importante que el hijo pueda recibir ref, como un <button> o un <span> */}
-      {children}
+      <span>{children}</span>
     </Tippy>
   );
 };

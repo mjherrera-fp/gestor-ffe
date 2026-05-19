@@ -304,13 +304,13 @@ export const ConvenioDAO = {
   },
   getById: (id: number) => db.prepare('SELECT * FROM convenios WHERE id = ?').get(id) as Convenio,
   create: (convenio: Convenio) => {
-    const stmt = db.prepare('INSERT INTO convenios (numConvenio, fechaConvenio, estado, empresaId, cursoId, centroId) VALUES (?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(convenio.numConvenio, convenio.fechaConvenio, convenio.estado, convenio.empresaId, convenio.cursoId, convenio.centroId);
+    const stmt = db.prepare('INSERT INTO convenios (numConvenio, fechaConvenio, estado, empresaId, cursoId, centroId, tipoFirma) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(convenio.numConvenio, convenio.fechaConvenio, convenio.estado, convenio.empresaId, convenio.cursoId, convenio.centroId, convenio.tipoFirma || 'SIN_ASIGNAR');
     return info.lastInsertRowid;
   },
   update: (id: number, convenio: Convenio) => {
-    const stmt = db.prepare('UPDATE convenios SET numConvenio = ?, fechaConvenio = ?, estado = ?, centroId = ? WHERE id = ?');
-    stmt.run(convenio.numConvenio, convenio.fechaConvenio, convenio.estado, convenio.centroId, id);
+    const stmt = db.prepare('UPDATE convenios SET numConvenio = ?, fechaConvenio = ?, estado = ?, centroId = ?, tipoFirma = ? WHERE id = ?');
+    stmt.run(convenio.numConvenio, convenio.fechaConvenio, convenio.estado, convenio.centroId, convenio.tipoFirma || 'SIN_ASIGNAR', id);
   },
   delete: (id: number) => db.prepare('DELETE FROM convenios WHERE id = ?').run(id)
 };
@@ -422,8 +422,9 @@ export const RelacionAlumnoDAO = {
       // 1. Insertar la relación en 'relaciones'
       const stmtRel = db.prepare(`
         INSERT INTO relaciones (
-          convenioId, tutorEmpresaId, numRelacion, horario, estado
-        ) VALUES (?, ?, ?, ?, ?)
+          convenioId, tutorEmpresaId, numRelacion, horario, estado,
+          firmaRelacion, firmaPlanFormativo, firmaSeguimiento, firmaValoracion
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       const info = stmtRel.run(
@@ -431,7 +432,11 @@ export const RelacionAlumnoDAO = {
         rel.tutorEmpresaId,
         rel.numRelacion,
         JSON.stringify(rel.horario),
-        rel.estado
+        rel.estado,
+        rel.firmaRelacion || 'SIN_ASIGNAR',
+        rel.firmaPlanFormativo || 'SIN_ASIGNAR',
+        rel.firmaSeguimiento || 'SIN_ASIGNAR',
+        rel.firmaValoracion || 'SIN_ASIGNAR'
       );
 
       const relacionId = info.lastInsertRowid as number;
@@ -462,13 +467,20 @@ export const RelacionAlumnoDAO = {
       const stmtRel = db.prepare(`
         UPDATE relaciones SET 
           convenioId = ?, tutorEmpresaId = ?, numRelacion = ?, 
-          horario = ?, estado = ? 
+          horario = ?, estado = ?,
+          firmaRelacion = ?, firmaPlanFormativo = ?, firmaSeguimiento = ?,
+          firmaValoracion = ?
         WHERE id = ?
       `);
 
       stmtRel.run(
         rel.convenioId, rel.tutorEmpresaId, rel.numRelacion,
-        JSON.stringify(rel.horario), rel.estado, id
+        JSON.stringify(rel.horario), rel.estado,
+        rel.firmaRelacion || 'SIN_ASIGNAR',
+        rel.firmaPlanFormativo || 'SIN_ASIGNAR',
+        rel.firmaSeguimiento || 'SIN_ASIGNAR',
+        rel.firmaValoracion || 'SIN_ASIGNAR',
+        id
       );
 
       // 2. Gestionar alumnos: Primero desvinculamos a los que ya no están
@@ -517,7 +529,10 @@ export const PanelDAO = {
         a.estadoPlanFormativo, a.estadoSeguimiento, a.estadoValoracion,
         e.nombre as empresaNombre,
         c.numConvenio, c.estado as estadoConvenio,
-        r.numRelacion, r.estado as estadoRelacion
+        c.tipoFirma as tipoFirmaConvenio,
+        r.numRelacion, r.estado as estadoRelacion,
+        r.firmaRelacion, r.firmaPlanFormativo, r.firmaSeguimiento,
+        r.firmaValoracion
       FROM alumnos a
       LEFT JOIN relaciones r ON a.relacionId = r.id
       LEFT JOIN convenios c ON r.convenioId = c.id
@@ -535,7 +550,7 @@ export const PanelDAO = {
     const paramsAlumno: any[] = detalleAcademicoId ? [cursoId, detalleAcademicoId] : [cursoId];
 
     const alumnos = db.prepare(
-      `SELECT id, nombre, apellidos, fechaInicio, fechaFin FROM alumnos WHERE cursoId = ? ${filtroAlumno}`
+      `SELECT id, nombre, apellidos, fechaInicio, fechaFin FROM alumnos a WHERE a.cursoId = ? ${filtroAlumno}`
     ).all(...paramsAlumno) as { id: number; nombre: string; apellidos: string; fechaInicio: string | null; fechaFin: string | null }[];
 
     const curso = db.prepare('SELECT * FROM cursos WHERE id = ?').get(cursoId) as any;

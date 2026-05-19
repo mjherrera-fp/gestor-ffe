@@ -1,11 +1,37 @@
 import React, { useState } from 'react';
 import { FileText, ArrowLeft, Send, Clock, ShieldCheck, CheckCircle2, Calendar, FileDown, Users, CalendarDays, Download, Loader2, FileArchive } from 'lucide-react';
-import { RelacionAlumno, Alumno, RelacionEstado, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, SelectedDocs } from '../../../types/index.ts';
+import { RelacionAlumno, Alumno, RelacionEstado, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, SelectedDocs, FirmaTipo, FirmaTipoLabels } from '../../../types/index.ts';
 import { BotonDescargaPDF } from '../../../components/BotonDescargaPDF.tsx';
 import { BotonDescargaDOCX } from '../../../components/BotonDescargaDOCX.tsx';
 import { StatusBadge } from './RelacionesListado.tsx';
 import { getAnexoStatusButton, getPlanStatusButton, getSeguimientoStatusButton, getValoracionStatusButton } from '../utils/relacionesUtils.ts';
 import { Title } from '@/src/components/Title.tsx';
+
+const FIRMA_CICLO: FirmaTipo[] = [FirmaTipo.SIN_ASIGNAR, FirmaTipo.DIGITAL, FirmaTipo.MANUAL];
+
+function FirmaSelector({ value, onChange }: { value?: FirmaTipo; onChange: (v: FirmaTipo) => void }) {
+  const firma = value || FirmaTipo.SIN_ASIGNAR;
+  const next = () => {
+    const idx = FIRMA_CICLO.indexOf(firma);
+    return FIRMA_CICLO[(idx + 1) % FIRMA_CICLO.length];
+  };
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(next())}
+      className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${
+        firma === FirmaTipo.DIGITAL
+          ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
+          : firma === FirmaTipo.MANUAL
+          ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'
+          : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
+      }`}
+      title="Haz clic para cambiar tipo de firma"
+    >
+      {FirmaTipoLabels[firma]}
+    </button>
+  );
+}
 
 interface RelacionDetalleProps {
   selectedRelacion: RelacionAlumno | null;
@@ -34,6 +60,7 @@ interface RelacionDetalleProps {
   targetDownloadRelaciones: RelacionAlumno[];
   selectedDocs: SelectedDocs;
   setSelectedDocs: React.Dispatch<React.SetStateAction<SelectedDocs>>;
+  onUpdateFirma: (campo: keyof Pick<RelacionAlumno, 'firmaRelacion' | 'firmaPlanFormativo' | 'firmaSeguimiento' | 'firmaValoracion'>, valor: FirmaTipo) => void;
 }
 
 export function RelacionDetalle({
@@ -46,7 +73,8 @@ export function RelacionDetalle({
   onDescargarValoracion, onAdvanceValoracionIndividual, onMoveBackValoracionIndividual,
   onDescargarCarta, onDescargarCalendario, onHandleDescargarTodo,
   isDownloadingMasivo, downloadProgress, downloadStatus,
-  setTargetDownloadRelaciones, targetDownloadRelaciones, setSelectedDocs, selectedDocs
+  setTargetDownloadRelaciones, targetDownloadRelaciones, setSelectedDocs, selectedDocs,
+  onUpdateFirma
 }: RelacionDetalleProps) {
 
   const [isDownloading, setIsDownloading] = useState(false);
@@ -110,6 +138,9 @@ export function RelacionDetalle({
             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
               1. Anexo de Relación
             </label>
+            <FirmaSelector value={selectedRelacion.firmaRelacion} onChange={v => onUpdateFirma('firmaRelacion', v)} />
+          </div>
+          <div className="flex justify-end">
             <StatusBadge estado={selectedRelacion.estado} type="relacion" />
           </div>
 
@@ -156,6 +187,7 @@ export function RelacionDetalle({
             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
               <FileText className="h-3.5 w-3.5" /> 2. Planes Formativos
             </label>
+            <FirmaSelector value={selectedRelacion.firmaPlanFormativo} onChange={v => onUpdateFirma('firmaPlanFormativo', v)} />
           </div>
 
           <div className="space-y-3">
@@ -232,6 +264,7 @@ export function RelacionDetalle({
             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
               <FileText className="h-3.5 w-3.5" /> 3. Seguimiento
             </label>
+            <FirmaSelector value={selectedRelacion.firmaSeguimiento} onChange={v => onUpdateFirma('firmaSeguimiento', v)} />
           </div>
 
           <div className="space-y-3">
@@ -302,6 +335,7 @@ export function RelacionDetalle({
             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
               <FileText className="h-3.5 w-3.5" /> 4. Valoración
             </label>
+            <FirmaSelector value={selectedRelacion.firmaValoracion} onChange={v => onUpdateFirma('firmaValoracion', v)} />
           </div>
 
           <div className="space-y-3">
@@ -368,7 +402,7 @@ export function RelacionDetalle({
 
         {/* ── BLOQUE 5: OTROS DOCUMENTOS (por alumno) ── */}
         <section className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+          <div className="pb-2 border-b border-slate-100">
             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
               <FileText className="h-3.5 w-3.5" /> 5. Otros documentos
             </label>

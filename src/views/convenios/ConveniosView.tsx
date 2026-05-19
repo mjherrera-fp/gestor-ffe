@@ -47,6 +47,7 @@ export default function ConveniosView({ cursoId, centroId }: Props) {
           selectedConvenio={ctx.selectedConvenio}
           onAdvanceStatus={ctx.advanceStatus}
           onMoveBackStatus={ctx.moveBackStatus}
+          onChangeFirma={ctx.updateFirma}
         />
       </div>
 
