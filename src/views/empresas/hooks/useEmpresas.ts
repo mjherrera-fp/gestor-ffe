@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import { Empresa, TutorEmpresa, EmpresaEstadistica, Curso } from '../../../types/index.ts';
 
 // ─────────────────────────────────────────
@@ -66,6 +67,11 @@ export function useEmpresas(cursoId: number) {
   const [allEstadisticas,   setAllEstadisticas]   = useState<EmpresaEstadistica[]>([]);
   const [activeTab,         setActiveTab]         = useState<'tutores' | 'estadisticas'>('estadisticas');
 
+  // ── Importación Excel ──
+  const [isImporting,  setIsImporting]  = useState(false);
+  const [importResult, setImportResult] = useState<{ success: number; updated: number } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // ── Filtros ──
   const [filterValoracion,    setFilterValoracion]    = useState(0);
   const [filterUltimosCursos, setFilterUltimosCursos] = useState(0);
@@ -130,6 +136,173 @@ export function useEmpresas(cursoId: number) {
     } catch {
       console.error('Error al cargar estadísticas');
     }
+  };
+
+  // ─────────────────────────────────────────
+  //  HANDLERS: EXCEL
+  // ─────────────────────────────────────────
+
+  const downloadTemplate = () => {
+    const headers = [[
+      'Nombre', 'Dirección', 'Ciudad', 'CIF', 'Email', 'Teléfono', 'Comentarios',
+      'Nº Convenio', 'Fecha Convenio', 'Centro Convenio',
+      'Nombre Tutor', 'Apellidos Tutor', 'NIF Tutor', 'Email Tutor', 'Teléfono Tutor',
+    ]];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(headers);
+    XLSX.utils.book_append_sheet(wb, ws, 'Plantilla Empresas');
+    XLSX.writeFile(wb, 'plantilla_importacion_empresas.xlsx');
+  };
+
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const wb   = XLSX.read(bstr, { type: 'binary', cellDates: true, dateNF: 'yyyy-mm-dd' });
+        const ws   = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false }) as any[];
+
+        let successCount = 0;
+        let updateCount  = 0;
+
+        const seenCifs = new Set<string>();
+
+        for (const row of data) {
+          const nombre       = (row['Nombre'] || '').toString().trim();
+          const cif          = (row['CIF'] || '').toString().trim();
+          if (!nombre || !cif) continue;
+
+          let empresaId: number | null = null;
+          const existingEmpresa = empresas.find(e => e.cif.trim().toLowerCase() === cif.toLowerCase());
+
+          const empresaData = {
+            nombre,
+            direccion: (row['Dirección'] || '').toString().trim(),
+            ciudad:    (row['Ciudad'] || '').toString().trim(),
+            cif,
+            email:     (row['Email'] || '').toString().trim(),
+            tlfn:      (row['Teléfono'] || '').toString().trim(),
+            comentarios: (row['Comentarios'] || '').toString().trim(),
+          };
+
+          try {
+            if (existingEmpresa) {
+              await fetch(`/api/empresas/${existingEmpresa.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(empresaData),
+              });
+              empresaId = existingEmpresa.id!;
+              if (!seenCifs.has(cif)) updateCount++;
+            } else {
+              const res = await fetch('/api/empresas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(empresaData),
+              });
+              const result = await res.json();
+              empresaId = result.id;
+              if (!seenCifs.has(cif)) successCount++;
+            }
+            seenCifs.add(cif);
+          } catch {
+            console.error('Error al procesar empresa:', nombre);
+            continue;
+          }
+
+          const numConvenio = (row['Nº Convenio'] || '').toString().trim();
+          if (numConvenio && empresaId) {
+            const fechaConvenio = (row['Fecha Convenio'] || new Date().toISOString().split('T')[0]).toString().trim();
+            const centroNombre  = (row['Centro Convenio'] || '').toString().trim();
+            let centroId = centros.find(c => c.nombre.toLowerCase().includes(centroNombre.toLowerCase()))?.id;
+            if (!centroId && centros.length > 0) centroId = centros[0].id;
+
+            try {
+              const convRes = await fetch(`/api/convenios?cursoId=${cursoId}`);
+              const existingConvenios = await convRes.json();
+              const existingConv = existingConvenios.find((c: any) =>
+                c.empresaId === empresaId && c.numConvenio === numConvenio
+              );
+
+              const convenioData = {
+                numConvenio,
+                fechaConvenio,
+                estado: 'COMPLETADO',
+                empresaId,
+                cursoId,
+                centroId: centroId || '',
+              };
+
+              if (existingConv) {
+                await fetch(`/api/convenios/${existingConv.id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ convenio: convenioData }),
+                });
+              } else {
+                await fetch('/api/convenios', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ convenio: convenioData }),
+                });
+              }
+            } catch {
+              console.error('Error al procesar convenio:', numConvenio);
+            }
+          }
+
+          const tutorNombre = (row['Nombre Tutor'] || '').toString().trim();
+          const tutorApellidos = (row['Apellidos Tutor'] || '').toString().trim();
+          const tutorNif  = (row['NIF Tutor'] || '').toString().trim();
+          if (!tutorNombre || !tutorApellidos || !tutorNif) continue;
+
+          const tutorData = {
+            empresaId,
+            nombre: tutorNombre,
+            apellidos: tutorApellidos,
+            nif: tutorNif,
+            email: (row['Email Tutor'] || '').toString().trim(),
+            tlfn:  (row['Teléfono Tutor'] || '').toString().trim(),
+          };
+
+          try {
+            const existingTutorRes = await fetch(`/api/empresas/${empresaId}/tutores`);
+            const existingTutores: TutorEmpresa[] = await existingTutorRes.json();
+            const existingTutor = existingTutores.find(t => t.nif.trim().toLowerCase() === tutorNif.toLowerCase());
+
+            if (existingTutor) {
+              await fetch(`/api/tutores-empresa/${existingTutor.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(tutorData),
+              });
+            } else {
+              await fetch('/api/tutores-empresa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(tutorData),
+              });
+            }
+          } catch {
+            console.error('Error al procesar tutor:', tutorNombre);
+          }
+        }
+
+        fetchEmpresas();
+        setImportResult({ success: successCount, updated: updateCount });
+      } catch {
+        alert('Hubo un error al procesar el archivo Excel.');
+      } finally {
+        setIsImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    };
+    reader.readAsBinaryString(file);
   };
 
   // ─────────────────────────────────────────
@@ -335,5 +508,11 @@ export function useEmpresas(cursoId: number) {
     editingTutor,
     tutorFormData, setTutorFormData,
     handleOpenNewTutor, handleOpenEditTutor, handleTutorSubmit,
+    // Excel
+    isImporting,
+    importResult, setImportResult,
+    fileInputRef,
+    downloadTemplate,
+    handleImportExcel,
   };
 }

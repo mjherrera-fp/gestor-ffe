@@ -308,7 +308,7 @@ export default function App() {
                             <span className="block truncate">{d.ciclo} {d.nivel}</span>
                             {(d as any).centroNombre && (
                               <span className="block text-[11px] text-slate-400 truncate">
-                                {(d as any).centroNombre}
+                                {(d as any).centroNombre} - {(d as any).codigoGrupo}
                               </span>
                             )}
                           </button>
@@ -365,6 +365,7 @@ export default function App() {
                 onUpdate={(newProfesor) => {
                   setProfesor(newProfesor);
                 }}
+                onRefresh={fetchData}
               />
             )}
             {activeTab === 'cursos' && (
