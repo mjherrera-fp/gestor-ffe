@@ -248,8 +248,18 @@ export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
           onOpenStats={ctx.handleOpenEstadistica}
           listSearchTerm={ctx.listSearchTerm}
           onListSearchChange={ctx.setListSearchTerm}
-          statusFilter={ctx.statusFilter}
-          onStatusFilterChange={ctx.setStatusFilter}
+          statusFilters={ctx.statusFilters}
+          onStatusFilterChange={(tipo, value, negate) =>
+            ctx.setStatusFilters(prev => ({
+              ...prev,
+              [tipo]: { value, negate: negate ?? prev[tipo].negate },
+            }))
+          }
+          dateFilters={ctx.dateFilters}
+          onDateFilterChange={updates =>
+            ctx.setDateFilters(prev => ({ ...prev, ...updates }))
+          }
+          onClearFilters={ctx.clearFilters}
           sortBy={ctx.sortBy}
           sortOrder={ctx.sortOrder}
           onSortByEmpresa={() => {
