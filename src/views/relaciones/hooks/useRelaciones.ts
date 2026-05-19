@@ -50,7 +50,36 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
     const [selectedRelacion, setSelectedRelacion] = useState<RelacionAlumno | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
     const [listSearchTerm, setListSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [statusFilters, setStatusFilters] = useState({
+        relacion: { value: 'all', negate: false },
+        plan: { value: 'all', negate: false },
+        seguimiento: { value: 'all', negate: false },
+        valoracion: { value: 'all', negate: false },
+    });
+    const [dateFilters, setDateFilters] = useState({
+        inicioDias: 0,
+        finDias: 0,
+        especificaDate: '',
+        especificaField: 'inicio' as 'inicio' | 'fin',
+        especificaOp: 'on' as 'on' | 'before' | 'after',
+    });
+
+    const clearFilters = () => {
+        setListSearchTerm('');
+        setStatusFilters({
+            relacion: { value: 'all', negate: false },
+            plan: { value: 'all', negate: false },
+            seguimiento: { value: 'all', negate: false },
+            valoracion: { value: 'all', negate: false },
+        });
+        setDateFilters({
+            inicioDias: 0,
+            finDias: 0,
+            especificaDate: '',
+            especificaField: 'inicio',
+            especificaOp: 'on',
+        });
+    };
     const [sortBy, setBy] = useState<'empresa' | 'estado'>('empresa');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -959,8 +988,68 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
                 conv.empresaNombre.toLowerCase().includes(listSearchTerm.toLowerCase()) ||
                 rel.numRelacion.toLowerCase().includes(listSearchTerm.toLowerCase()) ||
                 alumnoMatch;
-            const statusMatch = statusFilter === 'all' || rel.estado === statusFilter;
-            return searchMatch && statusMatch;
+            if (!searchMatch) return false;
+
+            // Filtros de estado (AND entre tipos)
+            if (statusFilters.relacion.value !== 'all') {
+                const match = rel.estado === statusFilters.relacion.value;
+                if (statusFilters.relacion.negate ? match : !match) return false;
+            }
+            if (statusFilters.plan.value !== 'all') {
+                const match = rel.alumnos?.some(a => (a as any).estadoPlanFormativo === statusFilters.plan.value);
+                if (statusFilters.plan.negate ? (match ?? false) : !(match ?? false)) return false;
+            }
+            if (statusFilters.seguimiento.value !== 'all') {
+                const match = rel.alumnos?.some(a => (a as any).estadoSeguimiento === statusFilters.seguimiento.value);
+                if (statusFilters.seguimiento.negate ? (match ?? false) : !(match ?? false)) return false;
+            }
+            if (statusFilters.valoracion.value !== 'all') {
+                const match = rel.alumnos?.some(a => (a as any).estadoValoracion === statusFilters.valoracion.value);
+                if (statusFilters.valoracion.negate ? (match ?? false) : !(match ?? false)) return false;
+            }
+
+            // Filtros de fecha
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (dateFilters.inicioDias > 0) {
+                const match = rel.alumnos?.some(a => {
+                    if (!a.fechaInicio) return false;
+                    const inicio = new Date(a.fechaInicio);
+                    const diff = Math.ceil((inicio.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    return diff >= 0 && diff <= dateFilters.inicioDias;
+                });
+                if (!match) return false;
+            }
+
+            if (dateFilters.finDias > 0) {
+                const match = rel.alumnos?.some(a => {
+                    if (!a.fechaFin) return false;
+                    const fin = new Date(a.fechaFin);
+                    const diff = Math.ceil((fin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    return diff >= 0 && diff <= dateFilters.finDias;
+                });
+                if (!match) return false;
+            }
+
+            if (dateFilters.especificaDate) {
+                const target = new Date(dateFilters.especificaDate);
+                target.setHours(0, 0, 0, 0);
+                const match = rel.alumnos?.some(a => {
+                    const raw = dateFilters.especificaField === 'inicio' ? a.fechaInicio : a.fechaFin;
+                    if (!raw) return false;
+                    const d = new Date(raw);
+                    d.setHours(0, 0, 0, 0);
+                    switch (dateFilters.especificaOp) {
+                        case 'on':    return d.getTime() === target.getTime();
+                        case 'before': return d.getTime() < target.getTime();
+                        case 'after':  return d.getTime() > target.getTime();
+                    }
+                });
+                if (!match) return false;
+            }
+
+            return true;
         })
         .sort((a, b) => {
             let comparison = 0;
@@ -997,7 +1086,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         selectedRelacion, setSelectedRelacion,
         showDeleteConfirm, setShowDeleteConfirm,
         listSearchTerm, setListSearchTerm,
-        statusFilter, setStatusFilter,
+        statusFilters, setStatusFilters,
+        dateFilters, setDateFilters, clearFilters,
         sortBy, setBy, sortOrder, setSortOrder,
         filteredAndSortedRelaciones,
         // Formulario UI

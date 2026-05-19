@@ -11,7 +11,8 @@ import {
   X,
   ArrowLeftRight,
   Lock,
-  Copyright
+  Copyright,
+  Heart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Profesor, Curso, DetalleAcademico } from './types/index.ts';
@@ -109,7 +110,7 @@ export default function App() {
     { id: 'panel', label: 'Panel', icon: LayoutDashboard, disabled: !tieneProfesor || !tieneCurso },
     { id: 'alumnos', label: 'Alumnos', icon: Users, disabled: !tieneProfesor || !tieneCurso },
     { id: 'empresas', label: 'Empresas', icon: Building2, disabled: !tieneProfesor || !tieneCurso },
-    { id: 'intereses', label: 'Intereses', icon: Trophy, disabled: !tieneProfesor || !tieneCurso },
+    { id: 'intereses', label: 'Intereses', icon: Heart, disabled: !tieneProfesor || !tieneCurso },
     { id: 'convenios', label: 'Convenios', icon: FileText, disabled: !tieneProfesor || !tieneCurso },
     { id: 'relaciones', label: 'Relaciones', icon: ArrowLeftRight, disabled: !tieneProfesor || !tieneCurso },
   ];

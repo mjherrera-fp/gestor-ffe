@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3 } from 'lucide-react';
-import { RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels } from '../../../types/index.ts';
+import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels,
+  PlanFormativoEstado, PlanFormativoEstadoLabels,
+  SeguimientoEstado, SeguimientoEstadoLabels,
+  ValoracionEstado, ValoracionEstadoLabels,
+} from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { getStatusBadgeColor, getStatusLabel } from '../utils/relacionesUtils.ts';
 import { Title } from '@/src/components/Title.tsx';
@@ -13,13 +18,14 @@ import { formatDate } from '../../../lib/dateUtils.ts';
 interface StatusBadgeProps {
   estado: string;
   type: 'relacion' | 'plan' | 'seguimiento' | 'valoracion';
+  tooltip?: string;
 }
 
-export function StatusBadge({ estado, type }: StatusBadgeProps) {
+export function StatusBadge({ estado, type, tooltip }: StatusBadgeProps) {
   const color = getStatusBadgeColor(estado, type);
   const text = getStatusLabel(estado, type);
   return (
-    <Title text={text}>
+    <Title text={tooltip || text}>
       <span className={`px-1.5 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider whitespace-nowrap truncate border ${color}`}>
         {text}
       </span>
@@ -43,8 +49,28 @@ interface RelacionesListadoProps {
   onOpenStats: (rel: RelacionAlumno) => void;
   listSearchTerm: string;
   onListSearchChange: (val: string) => void;
-  statusFilter: string;
-  onStatusFilterChange: (val: string) => void;
+  statusFilters: {
+    relacion: { value: string; negate: boolean };
+    plan: { value: string; negate: boolean };
+    seguimiento: { value: string; negate: boolean };
+    valoracion: { value: string; negate: boolean };
+  };
+  onStatusFilterChange: (tipo: 'relacion' | 'plan' | 'seguimiento' | 'valoracion', value: string, negate?: boolean) => void;
+  dateFilters: {
+    inicioDias: number;
+    finDias: number;
+    especificaDate: string;
+    especificaField: 'inicio' | 'fin';
+    especificaOp: 'on' | 'before' | 'after';
+  };
+  onDateFilterChange: (updates: Partial<{
+    inicioDias: number;
+    finDias: number;
+    especificaDate: string;
+    especificaField: 'inicio' | 'fin';
+    especificaOp: 'on' | 'before' | 'after';
+  }>) => void;
+  onClearFilters: () => void;
   sortBy: 'empresa' | 'estado';
   sortOrder: 'asc' | 'desc';
   onSortByEmpresa: () => void;
@@ -61,64 +87,83 @@ export function RelacionesListado({
   relaciones, convenios, createRelacion, selectedRelacion,
   onSelectRelacion, onEdit, onDeleteRequest, onOpenStats,
   listSearchTerm, onListSearchChange,
-  statusFilter, onStatusFilterChange,
-  sortBy, sortOrder, onSortByEmpresa, onSortByEstado, 
+  statusFilters, onStatusFilterChange,
+  dateFilters, onDateFilterChange,
+  onClearFilters,
+  sortBy, sortOrder, onSortByEmpresa, onSortByEstado,
   onHandleDescargarTodo, setTargetDownloadRelaciones
 }: RelacionesListadoProps) {
 
   const [isDownloading, setIsDownloading] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
 
-  const estadosOptions = [
-    { id: 'all', label: 'Cualquier estado' },
-    ...Object.values(RelacionEstado).map(e => ({
-      id: e,
-      label: RelacionEstadoLabels[e as RelacionEstado],
-    })),
-  ];
+  const getEstadoOptions = (tipo: 'relacion' | 'plan' | 'seguimiento' | 'valoracion') => {
+    if (tipo === 'relacion') {
+      return [
+        { id: 'all', label: 'Cualquier estado' },
+        ...Object.values(RelacionEstado).map(e => ({ id: e, label: RelacionEstadoLabels[e as RelacionEstado] })),
+      ];
+    }
+    if (tipo === 'plan') {
+      return [
+        { id: 'all', label: 'Cualquier estado' },
+        ...Object.values(PlanFormativoEstado).map(e => ({ id: e, label: PlanFormativoEstadoLabels[e as PlanFormativoEstado] })),
+      ];
+    }
+    if (tipo === 'seguimiento') {
+      return [
+        { id: 'all', label: 'Cualquier estado' },
+        ...Object.values(SeguimientoEstado).map(e => ({ id: e, label: SeguimientoEstadoLabels[e as SeguimientoEstado] })),
+      ];
+    }
+    return [
+      { id: 'all', label: 'Cualquier estado' },
+      ...Object.values(ValoracionEstado).map(e => ({ id: e, label: ValoracionEstadoLabels[e as ValoracionEstado] })),
+    ];
+  };
+
+  const tipoLabels: Record<string, string> = {
+    relacion: 'Rel',
+    plan: 'PLA',
+    seguimiento: 'Seg',
+    valoracion: 'Val',
+  };
 
   return (
     <div className="w-full lg:flex-1 bg-white rounded-xl lg:rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
       {/* Barra de filtros */}
-      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <ArrowLeftRight className="h-5 w-5" />
+        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                <ArrowLeftRight className="h-5 w-5" />
+              </div>
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Relaciones</span>
             </div>
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Relaciones</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { if (relaciones) setTargetDownloadRelaciones(relaciones); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
+                title="Descargar todos los documentos"
+              >
+                {isDownloading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                ) : (
+                  <Download className="h-3.5 w-3.5" />
+                )}
+              </button>
+              <button
+                onClick={() => createRelacion(null)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold shadow-md shadow-blue-600/10 transition-all"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Crear Relación</span>
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {/* NUEVO BOTÓN MASIVO FILTRADO */}
-            <button
-              onClick={() => {
-                if (relaciones) {
-                  setTargetDownloadRelaciones(relaciones);
-                }
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
-              title="Descargar todos los documentos"
-            >
-              {isDownloading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-              ) : (
-                <Download className="h-3.5 w-3.5" />
 
-              )}
-            </button>
-
-            {/* Tu botón original de Crear Relación */}
-            <button
-              onClick={() => createRelacion(null)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold shadow-md shadow-blue-600/10 transition-all"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Crear Relación</span>
-            </button>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
           {/* Buscador */}
-          <div className="md:col-span-5 relative">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
             <input
               type="text"
@@ -137,35 +182,135 @@ export function RelacionesListado({
             )}
           </div>
 
-          {/* Filtro de estado */}
-          <div className="md:col-span-3">
-            <CustomSelect
-              options={estadosOptions}
-              value={statusFilter}
-              onChange={onStatusFilterChange}
-              name="estadoFilter"
-            />
+          {/* Botón desplegable filtros + ordenación */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setFilterOpen(!filterOpen)}
+                className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider hover:text-slate-700 transition-colors"
+              >
+                {filterOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                Filtros
+              </button>
+              <button
+                onClick={onClearFilters}
+                className="text-[9px] font-bold text-slate-400 hover:text-red-500 transition-colors underline"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+
+            <div className="flex bg-white border border-slate-200 rounded-lg p-1">
+              <button
+                onClick={onSortByEmpresa}
+                className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all px-2 whitespace-nowrap ${sortBy === 'empresa' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                Empresa {sortBy === 'empresa' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </button>
+              <button
+                onClick={onSortByEstado}
+                className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all px-2 whitespace-nowrap ${sortBy === 'estado' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </button>
+            </div>
           </div>
 
-          {/* Ordenación */}
-          <div className="md:col-span-4 flex bg-white border border-slate-200 rounded-lg p-1">
-            <button
-              onClick={onSortByEmpresa}
-              className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all ${sortBy === 'empresa' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                }`}
-            >
-              Empresa {sortBy === 'empresa' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </button>
-            <button
-              onClick={onSortByEstado}
-              className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all ${sortBy === 'estado' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                }`}
-            >
-              Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </button>
-          </div>
+          {/* Panel de filtros desplegable */}
+          {filterOpen && (
+            <div className="space-y-3 pt-1">
+              {/* Fila 1: Filtros de estado por tipo de documento */}
+              <div className="flex flex-wrap items-center gap-2">
+                {(['relacion', 'plan', 'seguimiento', 'valoracion'] as const).map(tipo => {
+                  const f = statusFilters[tipo];
+                  const options = getEstadoOptions(tipo);
+                  return (
+                    <div key={tipo} className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">{tipoLabels[tipo]}:</span>
+                      <select
+                        value={f.value}
+                        onChange={e => onStatusFilterChange(tipo, e.target.value)}
+                        className="text-[10px] font-semibold text-slate-700 bg-transparent border-none outline-none py-0.5 pr-4 cursor-pointer appearance-none"
+                        style={{ backgroundImage: 'none' }}
+                      >
+                        {options.map(o => (
+                          <option key={o.id} value={o.id}>{o.label}</option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => onStatusFilterChange(tipo, f.value, !f.negate)}
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all ${
+                          f.negate
+                            ? 'bg-red-50 text-red-500 border border-red-200'
+                            : 'bg-blue-50 text-blue-500 border border-blue-200'
+                        }`}
+                        title={f.negate ? 'Excluir este estado' : 'Incluir este estado'}
+                      >
+                        {f.negate ? '≠' : '='}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Fila 2: Filtros de fecha */}
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 whitespace-nowrap">
+                  Inicia
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="0"
+                    value={dateFilters.inicioDias || ''}
+                    onChange={e => onDateFilterChange({ inicioDias: Math.max(0, parseInt(e.target.value) || 0) })}
+                    className="w-12 bg-white border border-slate-200 rounded px-1.5 py-1 text-[10px] font-bold text-center outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  días
+                </label>
+
+                <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 whitespace-nowrap">
+                  Finaliza
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="0"
+                    value={dateFilters.finDias || ''}
+                    onChange={e => onDateFilterChange({ finDias: Math.max(0, parseInt(e.target.value) || 0) })}
+                    className="w-12 bg-white border border-slate-200 rounded px-1.5 py-1 text-[10px] font-bold text-center outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  días
+                </label>
+
+                <span className="text-[10px] text-slate-300 font-bold">|</span>
+
+                <span className="text-[10px] font-bold text-slate-500">Fecha específica</span>
+                <input
+                  type="date"
+                  value={dateFilters.especificaDate}
+                  onChange={e => onDateFilterChange({ especificaDate: e.target.value })}
+                  className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <select
+                  value={dateFilters.especificaField}
+                  onChange={e => onDateFilterChange({ especificaField: e.target.value as any })}
+                  className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none"
+                >
+                  <option value="inicio">Inicio</option>
+                  <option value="fin">Fin</option>
+                </select>
+                <select
+                  value={dateFilters.especificaOp}
+                  onChange={e => onDateFilterChange({ especificaOp: e.target.value as any })}
+                  className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none"
+                >
+                  <option value="on">en</option>
+                  <option value="before">antes de</option>
+                  <option value="after">después de</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
 
       {/* Tabla */}
       <div className="overflow-auto flex-1">
@@ -236,23 +381,47 @@ export function RelacionesListado({
                         {rel.alumnos?.map(alumno => (
                           <div
                             key={alumno.id}
-                            className="bg-white border border-slate-100 p-2.5 rounded-lg w-full flex items-center justify-between"
+                            className="bg-white border border-slate-100 p-2.5 rounded-lg w-full flex flex-col gap-1.5"
                           >
-                            <span className="text-xs font-bold text-slate-700">
-                              {alumno.nombre} {alumno.apellidos}{' '}
-                              <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded">
-                                {alumno.totalHorasFFE}h
-                              </span>
-                            </span>
-                            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
-                              <Calendar className="h-3 w-3" />
-                              <span className="text-blue-600">
-                                {alumno.fechaInicio ? formatDate(alumno.fechaInicio) : '—'}
-                              </span>
-                              <span className="text-slate-300">-</span>
-                              <span className="text-emerald-600">
-                                {alumno.fechaFin ? formatDate(alumno.fechaFin) : '—'}
-                              </span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[9px] text-slate-400 font-bold">PLA:</span>
+                              <StatusBadge
+                                estado={(alumno as any).estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE}
+                                type="plan"
+                                tooltip={`Plan formativo: ${getStatusLabel((alumno as any).estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE, 'plan')}`}
+                              />
+                              <span className="text-[9px] text-slate-400 font-bold ml-0.5">SEG:</span>
+                              <StatusBadge
+                                estado={(alumno as any).estadoSeguimiento || SeguimientoEstado.PENDIENTE}
+                                type="seguimiento"
+                                tooltip={`Seguimiento: ${getStatusLabel((alumno as any).estadoSeguimiento || SeguimientoEstado.PENDIENTE, 'seguimiento')}`}
+                              />
+                              <span className="text-[9px] text-slate-400 font-bold ml-0.5">VAL:</span>
+                              <StatusBadge
+                                estado={(alumno as any).estadoValoracion || ValoracionEstado.PENDIENTE}
+                                type="valoracion"
+                                tooltip={`Valoración: ${getStatusLabel((alumno as any).estadoValoracion || ValoracionEstado.PENDIENTE, 'valoracion')}`}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-xs font-bold text-slate-700 truncate">
+                                  {alumno.nombre} {alumno.apellidos}
+                                </span>
+                                <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded shrink-0">
+                                  {alumno.totalHorasFFE}h
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 shrink-0">
+                                <Calendar className="h-3 w-3" />
+                                <span className="text-blue-600">
+                                  {alumno.fechaInicio ? formatDate(alumno.fechaInicio) : '—'}
+                                </span>
+                                <span className="text-slate-300">-</span>
+                                <span className="text-emerald-600">
+                                  {alumno.fechaFin ? formatDate(alumno.fechaFin) : '—'}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         ))}
