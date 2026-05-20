@@ -1,5 +1,5 @@
-import React from 'react';
-import { Mail, Settings, Send, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, Settings, Send, Loader2, Eye, EyeOff } from 'lucide-react';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
@@ -27,6 +27,8 @@ interface Props {
 }
 
 export function TabCorreo({ emailConfig, onChange, saving, success, error, onSubmit, testing, testResult, onTest, profesorEmail }: Props) {
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     onChange({
@@ -71,11 +73,28 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
             </div>
             <div>
               <label className={labelClass}>Usuario EducaMadrid</label>
-              <input type="email" name="smtp_user" value={emailConfig.smtp_user} onChange={handleChange} placeholder="usuario@educamadrid.org" className={inputClass} />
+              <input type="text" name="smtp_user" value={emailConfig.smtp_user} onChange={handleChange} placeholder="usuario de educamadrid sin el @educa.madrid.org" className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Contraseña</label>
-              <input type="password" name="smtp_pass" value={emailConfig.smtp_pass} onChange={handleChange} placeholder="••••••••" className={inputClass} />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="smtp_pass"
+                  value={emailConfig.smtp_pass}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  className={`${inputClass} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
           </div>
 

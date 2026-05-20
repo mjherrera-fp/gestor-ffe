@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 import {
     RelacionAlumno, Convenio, TutorEmpresa, Alumno, Curso,
     RelacionEstado, PlanFormativoEstado, HorarioSemanal, SeguimientoEstado,
-    ValoracionEstado, EmpresaEstadistica, FirmaTipo
+    ValoracionEstado, EmpresaEstadistica, FirmaTipo, SelectedDocs
 } from '../../../types/index.ts';
 import {
     DEFAULT_HORARIO,
@@ -110,6 +110,9 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [downloadStatus, setDownloadStatus] = useState('');
 
+    // Control del modal de selección previa para email
+    const [targetEmailRelaciones, setTargetEmailRelaciones] = useState<RelacionAlumno[]>([]);
+
     const [formData, setFormData] = useState<Partial<RelacionAlumno>>({
         alumnos: [],
         numRelacion: '',
@@ -185,6 +188,15 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             }
         }
     }, [formData.convenioId, convenios]);
+
+    // Cargar tutores cuando se selecciona una relación existente
+    useEffect(() => {
+        if (selectedRelacion?.empresa?.id) {
+            fetch(`/api/empresas/${selectedRelacion.empresa.id}/tutores`)
+                .then(res => res.json())
+                .then(setTutores);
+        }
+    }, [selectedRelacion?.empresa?.id]);
 
     // Sincronizar fechas fin cuando cambia el horario
     useEffect(() => {
@@ -1095,12 +1107,18 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         return email ? [email] : [];
     };
 
+    const getTutorEmail = (): string[] => {
+        if (!selectedRelacion) return [];
+        const tutor = tutores.find(t => t.id === selectedRelacion.tutorEmpresaId);
+        return tutor?.email ? [tutor.email] : [];
+    };
+
     const getPlanDestinatarios = (alumno: Alumno): { to: string[]; bcc: string[] } => {
         const estado = alumno.estadoPlanFormativo;
         if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE || estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE) {
             return { to: getEstudianteEmail(alumno), bcc: [] };
         }
-        return { to: getEmpresaEmail(), bcc: [] };
+        return { to: getTutorEmail(), bcc: [] };
     };
 
     const handleEmailConRelacion = async (tipo: 'docx' | 'pdf') => {
@@ -1138,7 +1156,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Seguimiento_${numRel}_${nombreAlumno}.docx`);
-        setEmailTo(getEmpresaEmail());
+        setEmailTo(getTutorEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
         setShowEmailModal(true);
@@ -1151,7 +1169,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Valoracion_${numRel}_${nombreAlumno}.docx`);
-        setEmailTo(getEmpresaEmail());
+        setEmailTo(getTutorEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
         setShowEmailModal(true);
@@ -1180,56 +1198,102 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Calendario_${numRel}_${nombreAlumno}.pdf`);
         setEmailTo(getEmpresaEmail());
-        setEmailBcc(getEstudianteEmail(alumno));
+        setEmailBcc([]);
         setEmailAttachments([att]);
         setShowEmailModal(true);
     };
 
-    const handleEmailConTodo = async () => {
-        if (!selectedRelacion || !selectedRelacion.alumnos?.length) return;
+    const handleEmailConTodo = async (relaciones: RelacionAlumno[]) => {
+        if (!relaciones.length) return;
+
+        const docsAlumno: (keyof SelectedDocs)[] = ['plan', 'seguimiento', 'valoracion', 'calendario'];
+
+        const hasAlumnoDocs = docsAlumno.some(k => selectedDocs[k]);
+        const hasRelacionDocs = (['relacion', 'carta'] as (keyof SelectedDocs)[]).some(k => selectedDocs[k]);
+
+        if (!hasAlumnoDocs && !hasRelacionDocs) {
+            alert('Debes seleccionar al menos un tipo de documento para enviar.');
+            return;
+        }
+
+        setTargetEmailRelaciones([]);
+
         const atts: EmailAttachment[] = [];
-        const alumnos = selectedRelacion.alumnos;
+        const destinatarios = new Set<string>();
+        const soloRelacion = selectedDocs.relacion && !hasAlumnoDocs && !selectedDocs.carta;
 
-        for (const alumno of alumnos) {
-            const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
-            const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        for (const relacion of relaciones) {
+            if (!relacion.alumnos?.length) continue;
 
-            const planBlob = await crearPlanFormativo('pdf', alumno, selectedRelacion);
-            if (planBlob) {
-                const a = await uploadGeneratedAttachment(planBlob, `Plan_${numRel}_${nombreAlumno}.pdf`);
-                atts.push(a);
+            const numRel = relacion.numRelacion.replace(/\//g, '_');
+
+            // Recipiente por relación
+            let recipient: string | undefined;
+            if (soloRelacion) {
+                recipient = relacion.empresa?.email;
+            } else {
+                const tutor = tutores.find(t => t.id === relacion.tutorEmpresaId);
+                recipient = tutor?.email || relacion.empresa?.email;
+            }
+            if (recipient) destinatarios.add(recipient);
+
+            for (const alumno of relacion.alumnos) {
+                const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+
+                if (selectedDocs.plan) {
+                    const blob = await crearPlanFormativo('pdf', alumno, relacion);
+                    if (blob) {
+                        const a = await uploadGeneratedAttachment(blob, `Plan_${numRel}_${nombreAlumno}.pdf`);
+                        atts.push(a);
+                    }
+                }
+
+                if (selectedDocs.seguimiento) {
+                    const blob = await crearSeguimiento(alumno, relacion);
+                    if (blob) {
+                        const a = await uploadGeneratedAttachment(blob, `Seguimiento_${numRel}_${nombreAlumno}.docx`);
+                        atts.push(a);
+                    }
+                }
+
+                if (selectedDocs.valoracion) {
+                    const blob = await crearValoracion(alumno, relacion);
+                    if (blob) {
+                        const a = await uploadGeneratedAttachment(blob, `Valoracion_${numRel}_${nombreAlumno}.docx`);
+                        atts.push(a);
+                    }
+                }
+
+                if (selectedDocs.calendario) {
+                    const blob = await crearCalendario(alumno, relacion);
+                    if (blob) {
+                        const a = await uploadGeneratedAttachment(blob, `Calendario_${numRel}_${nombreAlumno}.pdf`);
+                        atts.push(a);
+                    }
+                }
             }
 
-            const segBlob = await crearSeguimiento(alumno, selectedRelacion);
-            if (segBlob) {
-                const a = await uploadGeneratedAttachment(segBlob, `Seguimiento_${numRel}_${nombreAlumno}.docx`);
-                atts.push(a);
+            if (selectedDocs.carta) {
+                const blob = await crearCarta(relacion);
+                if (blob) {
+                    let nombreEmpresa = 'Empresa';
+                    const convenio = convenios.find(c => c.id === relacion.convenioId);
+                    if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
+                    const a = await uploadGeneratedAttachment(blob, `Carta_${numRel}_${nombreEmpresa}.pdf`);
+                    atts.push(a);
+                }
             }
 
-            const valBlob = await crearValoracion(alumno, selectedRelacion);
-            if (valBlob) {
-                const a = await uploadGeneratedAttachment(valBlob, `Valoracion_${numRel}_${nombreAlumno}.docx`);
-                atts.push(a);
-            }
-
-            const calBlob = await crearCalendario(alumno, selectedRelacion);
-            if (calBlob) {
-                const a = await uploadGeneratedAttachment(calBlob, `Calendario_${numRel}_${nombreAlumno}.pdf`);
-                atts.push(a);
+            if (selectedDocs.relacion) {
+                const blob = await crearDocumentoRelacion('pdf', relacion);
+                if (blob) {
+                    const a = await uploadGeneratedAttachment(blob, `Relacion_${numRel}.pdf`);
+                    atts.push(a);
+                }
             }
         }
 
-        const cartaBlob = await crearCarta(selectedRelacion);
-        if (cartaBlob) {
-            const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
-            let nombreEmpresa = 'Empresa';
-            const convenio = convenios.find(c => c.id === selectedRelacion.convenioId);
-            if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
-            const a = await uploadGeneratedAttachment(cartaBlob, `Carta_${numRel}_${nombreEmpresa}.pdf`);
-            atts.push(a);
-        }
-
-        setEmailTo(getEmpresaEmail());
+        setEmailTo(Array.from(destinatarios));
         setEmailBcc([]);
         setEmailAttachments(atts);
         setShowEmailModal(true);
@@ -1291,7 +1355,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         handleEmailConRelacion, handleEmailConPlanFormativo,
         handleEmailConSeguimiento, handleEmailConValoracion,
         handleEmailConCarta, handleEmailConCalendario,
-        handleEmailConTodo,
+        handleEmailConTodo, targetEmailRelaciones, setTargetEmailRelaciones,
     };
 
 }

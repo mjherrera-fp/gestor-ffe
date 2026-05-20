@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Lock, ShieldCheck, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Lock, ShieldCheck, RefreshCw, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
@@ -32,6 +32,8 @@ export function TabSeguridad({
   onNewPasswordChange, onConfirmPasswordChange,
   onEncrypt, onExecuteEncryption, onCloseConfirmModal,
 }: TabSeguridadProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   return (
     <>
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -82,23 +84,43 @@ export function TabSeguridad({
               <label className={labelClass}>
                 {isEncrypted ? 'Nueva Contraseña' : 'Establecer Contraseña'}
               </label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={e => onNewPasswordChange(e.target.value)}
-                className={inputClass}
-                placeholder="Escribe la clave..."
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={e => onNewPasswordChange(e.target.value)}
+                  className={`${inputClass} pr-10`}
+                  placeholder="Escribe la clave..."
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div>
               <label className={labelClass}>Confirmar Contraseña</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={e => onConfirmPasswordChange(e.target.value)}
-                className={inputClass}
-                placeholder="Repite la clave..."
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={e => onConfirmPasswordChange(e.target.value)}
+                  className={`${inputClass} pr-10`}
+                  placeholder="Repite la clave..."
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
           </div>
 

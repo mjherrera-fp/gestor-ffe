@@ -14,11 +14,11 @@ export interface EmailConfig {
 export function useConfiguracion() {
   // ── Email Config ──
   const [emailConfig, setEmailConfig] = useState<EmailConfig>({
-    smtp_host: 'smtp.educamadrid.org',
-    smtp_port: 587,
+    smtp_host: 'smtp01.educa.madrid.org',
+    smtp_port: 465,
     smtp_user: '',
     smtp_pass: '',
-    smtp_secure: false,
+    smtp_secure: true,
     send_delay_ms: 1500,
   });
   const [savingEmail, setSavingEmail] = useState(false);
@@ -49,19 +49,22 @@ export function useConfiguracion() {
 
   const loadEmailConfig = async () => {
     try {
-      const res = await fetch('/api/profesor');
-      const profesor = await res.json();
-      if (profesor) {
+      const res = await fetch('/api/profesor/config/correo');
+      if (res.ok) {
+        const cfg = await res.json();
         setEmailConfig({
-          smtp_host: profesor.smtp_host || 'smtp.educamadrid.org',
-          smtp_port: profesor.smtp_port || 587,
-          smtp_user: profesor.smtp_user || '',
-          smtp_pass: profesor.smtp_pass || '',
-          smtp_secure: !!profesor.smtp_secure,
-          send_delay_ms: profesor.send_delay_ms ?? 1500,
+          smtp_host: cfg.smtp_host || 'smtp01.educa.madrid.org',
+          smtp_port: cfg.smtp_port ? Number(cfg.smtp_port) : 465,
+          smtp_user: cfg.smtp_user || '',
+          smtp_pass: cfg.smtp_pass || '',
+          smtp_secure: cfg.smtp_secure === '1',
+          send_delay_ms: cfg.send_delay_ms ? Number(cfg.send_delay_ms) : 1500,
         });
-        setProfesorEmail(profesor.email || '');
       }
+      // Cargar email del profesor para test-email
+      const profRes = await fetch('/api/profesor');
+      const profesor = await profRes.json();
+      if (profesor) setProfesorEmail(profesor.email || '');
     } catch {
       console.error('Error al cargar configuración de correo');
     }
@@ -85,14 +88,9 @@ export function useConfiguracion() {
     setSuccessEmail(false);
     setErrorEmail('');
 
-    if (!emailConfig.smtp_user?.includes('@')) {
-      setErrorEmail('El usuario debe ser un correo válido');
-      setSavingEmail(false);
-      return;
-    }
 
     try {
-      const res = await fetch('/api/profesor/email-config', {
+      const res = await fetch('/api/profesor/config/correo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(emailConfig),

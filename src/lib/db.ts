@@ -81,13 +81,7 @@ function setupTables() {
     apellidos TEXT NOT NULL,
     nif TEXT NOT NULL,
     email TEXT NOT NULL,
-    telefono TEXT NOT NULL,
-    smtp_host TEXT DEFAULT 'smtp.educamadrid.org',
-    smtp_port INTEGER DEFAULT 587,
-    smtp_user TEXT,
-    smtp_pass TEXT,
-    smtp_secure BOOLEAN DEFAULT 0,
-    send_delay_ms INTEGER DEFAULT 1500
+    telefono TEXT NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS centros_educativos (
@@ -215,6 +209,16 @@ function setupTables() {
     interesado TEXT NOT NULL,
     FOREIGN KEY(alumnoId) REFERENCES alumnos(id) ON DELETE CASCADE,
     FOREIGN KEY(empresaId) REFERENCES empresas(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS configuracion (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profesorId INTEGER NOT NULL,
+    tipo TEXT NOT NULL,
+    clave TEXT NOT NULL,
+    valor TEXT,
+    FOREIGN KEY(profesorId) REFERENCES profesores(id) ON DELETE CASCADE,
+    UNIQUE(profesorId, tipo, clave)
   );
 `);
 

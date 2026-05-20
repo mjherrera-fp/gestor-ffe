@@ -4,11 +4,163 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import {
   X, Send, Building2, GraduationCap, Paperclip, Bold, Italic, Underline,
-  List, ListOrdered, Heading1, Heading2, Trash2, Loader2, FileText
+  List, ListOrdered, Heading1, Heading2, Trash2, Loader2, FileText, User, Briefcase, GraduationCap as StudentIcon
 } from 'lucide-react';
 import { EmailTemplate, EmailAttachment, EmailSendRequest } from '../types/email.ts';
 import { EMAIL_TEMPLATES } from '../data/emailTemplates.ts';
 import { uploadAttachment, deleteAttachment } from '../utils/emailUtils.ts';
+
+interface EmailContact {
+  id: number;
+  nombre: string;
+  apellidos?: string;
+  email: string;
+  emailEduca?: string;
+  emailPersonal?: string;
+  empresaNombre?: string;
+  type: 'empresa' | 'tutor' | 'alumno';
+}
+
+interface AutocompleteFieldProps {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  contacts: EmailContact[];
+  active: boolean;
+  onFocus: () => void;
+  onBlur: () => void;
+}
+
+function EmailAutocompleteField({ value, onChange, placeholder, contacts, active, onFocus, onBlur }: AutocompleteFieldProps) {
+  const [focused, setFocused] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const parts = value.split(',');
+  const lastPart = parts.length > 0 ? parts[parts.length - 1].trim() : '';
+  const cursorAtEnd = value.endsWith(lastPart);
+
+  useEffect(() => {
+    if (cursorAtEnd) {
+      setSearchTerm(lastPart.toLowerCase());
+    }
+  }, [value]);
+
+  const filtered = searchTerm.length > 0 && !searchTerm.includes('@')
+    ? contacts.filter(c => {
+        const q = searchTerm;
+        return c.nombre.toLowerCase().includes(q)
+          || (c.apellidos && c.apellidos.toLowerCase().includes(q))
+          || c.email.toLowerCase().includes(q)
+          || (c.emailEduca && c.emailEduca.toLowerCase().includes(q))
+          || (c.emailPersonal && c.emailPersonal.toLowerCase().includes(q));
+      }).slice(0, 20)
+    : [];
+
+  const show = active && focused && filtered.length > 0;
+
+  // Reset highlight when results change
+  useEffect(() => { setHighlightedIndex(-1); }, [filtered.length]);
+
+  const handleSelect = (contact: EmailContact) => {
+    const email = contact.type === 'alumno' ? (contact.emailEduca || contact.emailPersonal || '') : contact.email;
+    if (!email) return;
+    const prefix = parts.slice(0, -1).join(',');
+    const newVal = prefix ? `${prefix}, ${email}, ` : `${email}, `;
+    onChange(newVal);
+    setSearchTerm('');
+    setHighlightedIndex(-1);
+    inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!show) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex(prev => Math.min(prev + 1, filtered.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex(prev => Math.max(prev - 1, 0));
+    } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+      e.preventDefault();
+      handleSelect(filtered[highlightedIndex]);
+    } else if (e.key === 'Escape') {
+      setHighlightedIndex(-1);
+      setFocused(false);
+      onBlur();
+    }
+  };
+
+  const handleFocus = () => {
+    setFocused(true);
+    onFocus();
+  };
+
+  const handleBlur = () => {
+    timerRef.current = setTimeout(() => {
+      setFocused(false);
+      setHighlightedIndex(-1);
+      onBlur();
+    }, 200);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const contactIcon = (c: EmailContact) => {
+    switch (c.type) {
+      case 'empresa': return <Briefcase className="h-3.5 w-3.5 text-blue-500 shrink-0" />;
+      case 'tutor': return <User className="h-3.5 w-3.5 text-amber-500 shrink-0" />;
+      case 'alumno': return <StudentIcon className="h-3.5 w-3.5 text-emerald-500 shrink-0" />;
+    }
+  };
+
+  const contactLabel = (c: EmailContact) => {
+    const name = c.apellidos ? `${c.nombre} ${c.apellidos}` : c.nombre;
+    const email = c.type === 'alumno' ? (c.emailEduca || c.emailPersonal) : c.email;
+    const extra = c.type === 'tutor' && c.empresaNombre ? ` - ${c.empresaNombre}` : '';
+    return `${name}${extra} <${email}>`;
+  };
+
+  return (
+    <div className="relative">
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+      />
+      {show && (
+        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          {filtered.map((c, i) => (
+            <button
+              key={`${c.type}-${c.id}`}
+              type="button"
+              onMouseDown={e => { e.preventDefault(); handleSelect(c); }}
+              onMouseEnter={() => setHighlightedIndex(i)}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-slate-50 last:border-0 ${
+                i === highlightedIndex ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              {contactIcon(c)}
+              <span className="truncate">{contactLabel(c)}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface EmailModalProps {
   isOpen: boolean;
@@ -34,6 +186,8 @@ export function EmailModal({
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [sendIndividual, setSendIndividual] = useState(false);
+  const [contacts, setContacts] = useState<EmailContact[]>([]);
+  const [activeAutocomplete, setActiveAutocomplete] = useState<'to' | 'cc' | 'bcc' | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -57,7 +211,7 @@ export function EmailModal({
       setAttachments(initialAttachments);
       setError('');
       setSending(false);
-      setSendIndividual(initialTo.length + initialBcc.length > 1);
+      setSendIndividual(initialTo.length > 1);
       editor?.commands.setContent('');
     }
   }, [isOpen]);
@@ -87,6 +241,22 @@ export function EmailModal({
     } catch {}
     setAttachments(prev => prev.filter(a => a.id !== attachment.id));
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch('/api/email-contacts')
+        .then(res => res.json())
+        .then((data: { empresas: any[]; tutores: any[]; alumnos: any[] }) => {
+          const all: EmailContact[] = [
+            ...data.empresas.map(e => ({ ...e, type: 'empresa' as const, apellidos: undefined, emailEduca: undefined, emailPersonal: undefined })),
+            ...data.tutores.map(t => ({ ...t, type: 'tutor' as const, emailEduca: undefined, emailPersonal: undefined })),
+            ...data.alumnos.map(a => ({ ...a, type: 'alumno' as const, email: '' })),
+          ];
+          setContacts(all);
+        })
+        .catch(() => {});
+    }
+  }, [isOpen]);
 
   const parseEmails = (str: string): string[] =>
     str.split(',').map(s => s.trim()).filter(s => s.includes('@'));
@@ -231,33 +401,9 @@ export function EmailModal({
 
               {/* Para */}
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Para</label>
-                <input
-                  type="text"
-                  value={to}
-                  onChange={e => setTo(e.target.value)}
-                  placeholder="email@ejemplo.com, otro@ejemplo.com"
-                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
-                />
-              </div>
-
-              {/* CC */}
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">CC</label>
-                <input
-                  type="text"
-                  value={cc}
-                  onChange={e => setCc(e.target.value)}
-                  placeholder="con.copia@ejemplo.com"
-                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
-                />
-              </div>
-
-              {/* BCC */}
-              <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">CCO</label>
-                  {parseEmails(bcc).length > 1 && (
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Para</label>
+                  {parseEmails(to).length > 1 && (
                     <button
                       type="button"
                       onClick={() => setSendIndividual(!sendIndividual)}
@@ -271,18 +417,85 @@ export function EmailModal({
                     </button>
                   )}
                 </div>
-                <input
-                  type="text"
-                  value={bcc}
-                  onChange={e => setBcc(e.target.value)}
-                  placeholder="cco@ejemplo.com"
-                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+                <EmailAutocompleteField
+                  value={to}
+                  onChange={setTo}
+                  placeholder="email@ejemplo.com, otro@ejemplo.com"
+                  contacts={contacts}
+                  active={activeAutocomplete === 'to'}
+                  onFocus={() => setActiveAutocomplete('to')}
+                  onBlur={() => setActiveAutocomplete(null)}
                 />
-                {sendIndividual && parseEmails(bcc).length > 1 && (
+                {sendIndividual && parseEmails(to).length > 1 && (
                   <p className="text-[10px] text-amber-600 mt-1">
                     Se enviará un correo individual a cada destinatario con 1.5s de espera entre envíos
                   </p>
                 )}
+              </div>
+
+              {/* Permutar Para / CCO */}
+              {(parseEmails(to).length > 0 || parseEmails(bcc).length > 0) && (
+                <div className="flex items-center justify-end gap-3 -mt-1">
+                  {parseEmails(to).length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newBcc = bcc ? `${bcc}, ${to}` : to;
+                        setBcc(newBcc);
+                        setTo('');
+                        setSendIndividual(false);
+                      }}
+                      className="text-[10px] font-semibold text-slate-400 hover:text-blue-600 transition-colors"
+                    >
+                      Pasar destinatarios a CCO →
+                    </button>
+                  )}
+                  {parseEmails(to).length > 0 && parseEmails(bcc).length > 0 && (
+                    <span className="text-slate-300 text-[10px]">|</span>
+                  )}
+                  {parseEmails(bcc).length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newTo = to ? `${to}, ${bcc}` : bcc;
+                        setTo(newTo);
+                        setBcc('');
+                        setSendIndividual(true);
+                      }}
+                      className="text-[10px] font-semibold text-slate-400 hover:text-blue-600 transition-colors"
+                    >
+                      ← Pasar destinatarios al Para
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* CC */}
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">CC</label>
+                <EmailAutocompleteField
+                  value={cc}
+                  onChange={setCc}
+                  placeholder="con.copia@ejemplo.com"
+                  contacts={contacts}
+                  active={activeAutocomplete === 'cc'}
+                  onFocus={() => setActiveAutocomplete('cc')}
+                  onBlur={() => setActiveAutocomplete(null)}
+                />
+              </div>
+
+              {/* BCC */}
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">CCO</label>
+                <EmailAutocompleteField
+                  value={bcc}
+                  onChange={setBcc}
+                  placeholder="cco@ejemplo.com"
+                  contacts={contacts}
+                  active={activeAutocomplete === 'bcc'}
+                  onFocus={() => setActiveAutocomplete('bcc')}
+                  onBlur={() => setActiveAutocomplete(null)}
+                />
               </div>
 
               {/* Asunto */}

@@ -20,7 +20,7 @@ export function EmailTypeSelector({
   if (!isOpen) return null;
 
   const options: { value: EmailTargetType; label: string; description: string; color: string }[] = [
-    { value: 'educamadrid', label: 'Correo EducaMadrid', description: 'usuario@educamadrid.org', color: 'blue' },
+    { value: 'educamadrid', label: 'Correo EducaMadrid', description: 'usuario@educa.madrid.org', color: 'blue' },
     { value: 'personal', label: 'Correo Personal', description: 'Correo particular del alumno', color: 'slate' },
     { value: 'ambos', label: 'Ambos', description: 'Enviar a las dos direcciones', color: 'slate' },
   ];

@@ -98,13 +98,6 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                       <Mail className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => onAcademicDetail(alumno)}
-                      title="Ver Expediente"
-                      className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
-                    >
-                      <GraduationCap className="h-4 w-4" />
-                    </button>
-                    <button
                       onClick={() => onEdit(alumno)}
                       className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
                     >

@@ -9,7 +9,7 @@ import { render } from '@react-email/render';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
-import { ProfesorDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
+import { ProfesorDAO, ConfiguracionDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
@@ -214,6 +214,18 @@ async function startServer() {
     ProfesorDAO.updateConfigEmail(existing.id!, req.body);
     res.json({ success: true });
   });
+  app.get('/api/profesor/config/:tipo', (req, res) => {
+    const existing = ProfesorDAO.get();
+    if (!existing) return res.status(400).json({ error: 'No hay profesor' });
+    const config = ConfiguracionDAO.getConfig(existing.id!, req.params.tipo);
+    res.json(config);
+  });
+  app.post('/api/profesor/config/:tipo', (req, res) => {
+    const existing = ProfesorDAO.get();
+    if (!existing) return res.status(400).json({ error: 'No hay profesor' });
+    ConfiguracionDAO.setConfig(existing.id!, req.params.tipo, req.body);
+    res.json({ success: true });
+  });
   app.post('/api/profesor/test-email', async (req, res) => {
     const { to, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure } = req.body;
     if (!to || !smtp_host || !smtp_port || !smtp_user || !smtp_pass) {
@@ -234,6 +246,7 @@ async function startServer() {
       });
       res.json({ success: true });
     } catch (error: any) {
+      console.error('Error test-email:', error.message || error);
       res.status(500).json({ error: error.message || 'Error al enviar correo de prueba' });
     }
   });
@@ -301,30 +314,37 @@ async function startServer() {
 
     try {
       const profesor = ProfesorDAO.get();
+      if (!profesor) return res.status(400).json({ error: "No hay profesor" });
 
-      if (!profesor || !profesor.smtp_user || !profesor.smtp_pass) {
+      // Leer config de correo desde tabla configuracion
+      const emailCfg = ConfiguracionDAO.getConfig(profesor.id!, 'correo');
+      const smtp_host = emailCfg.smtp_host || profesor.smtp_host || 'smtp01.educa.madrid.org';
+      const smtp_port = emailCfg.smtp_port ? parseInt(emailCfg.smtp_port, 10) : (profesor.smtp_port || 465);
+      const smtp_user = emailCfg.smtp_user || profesor.smtp_user || '';
+      const smtp_pass = emailCfg.smtp_pass || profesor.smtp_pass || '';
+      const smtp_secure = emailCfg.smtp_secure === '1' || !!profesor.smtp_secure;
+
+      if (!smtp_user || !smtp_pass) {
         return res.status(400).json({ error: "Configuración de email incompleta" });
       }
 
       const transporter = nodemailer.createTransport({
-        host: profesor.smtp_host,
-        port: profesor.smtp_port,
-        secure: profesor.smtp_secure,
-        auth: {
-          user: profesor.smtp_user,
-          pass: profesor.smtp_pass,
-        },
+        host: smtp_host,
+        port: smtp_port,
+        secure: smtp_secure,
+        auth: { user: smtp_user, pass: smtp_pass },
       });
 
-      const fromStr = `"${profesor.nombre} ${profesor.apellidos}" <${profesor.smtp_user}>`;
+      const fromStr = `"${profesor.nombre} ${profesor.apellidos}" <${smtp_user}>`;
 
       const mailAttachments = (attachments || []).map((a: { filename: string; path: string }) => ({
         filename: a.filename,
         path: a.path,
       }));
 
+      const sendDelay = delayMs || (emailCfg.send_delay_ms ? parseInt(emailCfg.send_delay_ms, 10) : (profesor.send_delay_ms || 1500));
+
       if (sendIndividual && to?.length > 1) {
-        const delay = delayMs || profesor.send_delay_ms || 1500;
         for (let i = 0; i < to.length; i++) {
           await transporter.sendMail({
             from: fromStr,
@@ -335,7 +355,7 @@ async function startServer() {
             attachments: mailAttachments,
           });
           if (i < to.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise(resolve => setTimeout(resolve, sendDelay));
           }
         }
       } else {
@@ -444,6 +464,9 @@ async function startServer() {
   app.get('/uploads/:filename', (req, res) => {
     res.sendFile(path.resolve('uploads', req.params.filename));
   });
+
+  // Contactos para autocompletado de email
+  app.get('/api/email-contacts', (req, res) => res.json(EmailContactsDAO.getAll()));
 
   // Empresas
   app.get('/api/empresas', (req, res) => res.json(EmpresaDAO.getAll()));
