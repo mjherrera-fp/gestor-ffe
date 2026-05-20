@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Download, FileSpreadsheet, Search, LayoutGrid, List, ArrowUpDown,
-  GraduationCap,
+  GraduationCap, Mail,
   Plus,
 } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
@@ -33,6 +33,7 @@ interface AlumnosToolbarProps {
   onDownloadTemplate: () => void;
   onImportClick: () => void;
   onNewAlumno: () => void;
+  onBulkEmail: () => void;
 }
 
 export function AlumnosToolbar({
@@ -41,6 +42,7 @@ export function AlumnosToolbar({
   filterStatus, onFilterStatusChange,
   sortBy, sortOrder, onToggleSort,
   isImporting, onDownloadTemplate, onImportClick, onNewAlumno,
+  onBulkEmail,
 }: AlumnosToolbarProps) {
   return (
     <div className="space-y-4">
@@ -66,6 +68,13 @@ export function AlumnosToolbar({
           >
             <FileSpreadsheet className="h-4 w-4" />
             {isImporting ? 'Importando...' : 'Importar Excel'}
+          </button>
+          <button
+            onClick={onBulkEmail}
+            title="Enviar correo a alumnos filtrados"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-50 text-blue-600 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-blue-100 transition-all border border-blue-100"
+          >
+            <Mail className="h-4 w-4" />
           </button>
           <button
             onClick={onNewAlumno}

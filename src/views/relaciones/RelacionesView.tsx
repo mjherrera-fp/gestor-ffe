@@ -7,6 +7,7 @@ import { RelacionDetalle }              from './components/RelacionesDetalle.tsx
 import { RelacionFormModal }            from './components/RelacionesFormModal.tsx';
 import { RelacionEstadisticaFormModal } from './components/RelacionEstadisticaFormModal.tsx';
 import { calculateEndDateForHours }     from './utils/relacionesUtils.ts';
+import { EmailModal }                   from '../../components/EmailModal.tsx';
 
 interface Props {
   cursoId: number;
@@ -295,6 +296,13 @@ export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
             onDescargarRelacion={ctx.descargarRelacion}
             onDescargarCarta={ctx.descargarCarta}
             onDescargarCalendario={ctx.descargarCalendario}
+            onEmailRelacion={ctx.handleEmailConRelacion}
+            onEmailPlanFormativo={ctx.handleEmailConPlanFormativo}
+            onEmailSeguimiento={ctx.handleEmailConSeguimiento}
+            onEmailValoracion={ctx.handleEmailConValoracion}
+            onEmailCarta={ctx.handleEmailConCarta}
+            onEmailCalendario={ctx.handleEmailConCalendario}
+            onEmailTodo={ctx.handleEmailConTodo}
             onHandleDescargarTodo={ctx.handleDescargarTodo}
             isDownloadingMasivo={ctx.isDownloadingMasivo}
             downloadProgress={ctx.downloadProgress}
@@ -392,6 +400,15 @@ export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
           onClose={() => ctx.setShowEstadisticaModal(false)}
         />
       )}
+
+      {/* ── MODAL: Email ── */}
+      <EmailModal
+        isOpen={ctx.showEmailModal}
+        onClose={() => ctx.setShowEmailModal(false)}
+        initialTo={ctx.emailTo}
+        initialBcc={ctx.emailBcc}
+        initialAttachments={ctx.emailAttachments}
+      />
     </div>
   );
 }

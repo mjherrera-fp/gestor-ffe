@@ -86,7 +86,8 @@ function setupTables() {
     smtp_port INTEGER DEFAULT 587,
     smtp_user TEXT,
     smtp_pass TEXT,
-    smtp_secure BOOLEAN DEFAULT 0
+    smtp_secure BOOLEAN DEFAULT 0,
+    send_delay_ms INTEGER DEFAULT 1500
   );
 
   CREATE TABLE IF NOT EXISTS centros_educativos (
@@ -223,6 +224,7 @@ function setupTables() {
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaSeguimiento TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE convenios ADD COLUMN tipoFirma TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
+  try { db.exec("ALTER TABLE profesores ADD COLUMN send_delay_ms INTEGER DEFAULT 1500"); } catch {}
 }
 
 // Ejecutamos el intento inicial al importar el módulo

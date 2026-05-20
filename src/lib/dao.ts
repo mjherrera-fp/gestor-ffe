@@ -83,10 +83,10 @@ export const ProfesorDAO = {
   updateConfigEmail: (id: number, config: Partial<Profesor>) => {
     const stmt = db.prepare(`
       UPDATE profesores SET 
-        smtp_host = ?, smtp_port = ?, smtp_user = ?, smtp_pass = ?, smtp_secure = ?
+        smtp_host = ?, smtp_port = ?, smtp_user = ?, smtp_pass = ?, smtp_secure = ?, send_delay_ms = ?
       WHERE id = ?
     `);
-    stmt.run(config.smtp_host, config.smtp_port, config.smtp_user, config.smtp_pass, config.smtp_secure, id);
+    stmt.run(config.smtp_host, config.smtp_port, config.smtp_user, config.smtp_pass, config.smtp_secure, config.send_delay_ms ?? 1500, id);
   },
 };
 

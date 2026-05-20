@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Phone, GraduationCap, Edit2, Trash2, CheckCircle, Clock, Search } from 'lucide-react';
+import { User, Phone, GraduationCap, Edit2, Trash2, Send, CheckCircle, Clock, Search, Mail } from 'lucide-react';
 import { Alumno } from '../../../types/index.ts';
 
 interface AlumnosTableProps {
@@ -7,9 +7,10 @@ interface AlumnosTableProps {
   onEdit: (a: Alumno) => void;
   onDelete: (id: number) => void;
   onAcademicDetail: (a: Alumno) => void;
+  onEmail: (a: Alumno) => void;
 }
 
-export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail }: AlumnosTableProps) {
+export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEmail }: AlumnosTableProps) {
   return (
     <div className="bg-white rounded-4xl border border-slate-100 shadow-sm overflow-hidden overflow-x-auto">
       <table className="w-full text-left border-collapse min-w-250">
@@ -89,6 +90,13 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail }: Al
                 {/* Acciones */}
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={() => onEmail(alumno)}
+                      title="Enviar correo"
+                      className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                    >
+                      <Mail className="h-4 w-4" />
+                    </button>
                     <button
                       onClick={() => onAcademicDetail(alumno)}
                       title="Ver Expediente"

@@ -11,6 +11,9 @@ interface EmpresasListadoProps {
   onNew: () => void;
   onEdit: (emp: Empresa) => void;
   onDeleteRequest: (id: number) => void;
+  // Email
+  onIndividualEmail: (emp: Empresa) => void;
+  onBulkEmail: () => void;
   // Excel
   onDownloadTemplate: () => void;
   onImportClick: () => void;
@@ -29,6 +32,7 @@ export function EmpresasListado({
   empresas, selectedEmpresa,
   searchTerm, onSearchChange,
   onSelectEmpresa, onNew, onEdit, onDeleteRequest,
+  onIndividualEmail, onBulkEmail,
   onDownloadTemplate, onImportClick, isImporting,
   filterValoracion, onFilterValoracionChange,
   filterUltimosCursos, onFilterUltimosCursosChange,
@@ -57,6 +61,13 @@ export function EmpresasListado({
             </span>
           </div>
           <div className="flex gap-2">
+            <button
+              onClick={onBulkEmail}
+              title="Enviar correo a empresas filtradas"
+              className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-blue-100 transition-all border border-blue-100"
+            >
+              <Mail className="h-4 w-4" />
+            </button>
             <button
               onClick={onDownloadTemplate}
               title="Descargar plantilla Excel"
@@ -185,6 +196,13 @@ export function EmpresasListado({
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <button
+                  onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
+                  title="Enviar correo"
+                  className="p-2 text-text-muted hover:text-blue-500"
+                >
+                  <Mail className="h-4 w-4" />
+                </button>
+                <button
                   onClick={e => { e.stopPropagation(); onEdit(emp); }}
                   className="p-2 text-text-muted hover:text-primary"
                 >
@@ -232,6 +250,13 @@ export function EmpresasListado({
                 </td>
                 <td className="px-5 py-4 text-right">
                   <div className="flex items-center gap-2 justify-end">
+                    <button
+                      onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
+                      title="Enviar correo"
+                      className="p-1.5 text-text-muted hover:text-blue-500 transition-colors"
+                    >
+                      <Mail className="h-4 w-4" />
+                    </button>
                     <button
                       onClick={e => { e.stopPropagation(); onEdit(emp); }}
                       className="p-1.5 text-text-muted hover:text-primary transition-colors"

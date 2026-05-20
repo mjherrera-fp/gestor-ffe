@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { Empresa, TutorEmpresa, EmpresaEstadistica, Curso } from '../../../types/index.ts';
+import { EmailAttachment } from '../../../types/email.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -478,6 +479,29 @@ export function useEmpresas(cursoId: number) {
   });
 
   // ─────────────────────────────────────────
+  //  EMAIL
+  // ─────────────────────────────────────────
+
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailTo, setEmailTo] = useState<string[]>([]);
+  const [emailBcc, setEmailBcc] = useState<string[]>([]);
+  const [emailAttachments, setEmailAttachments] = useState<EmailAttachment[]>([]);
+
+  const handleOpenIndividualEmail = (empresa: Empresa) => {
+    setEmailTo(empresa.email ? [empresa.email] : []);
+    setEmailBcc([]);
+    setEmailAttachments([]);
+    setShowEmailModal(true);
+  };
+
+  const handleOpenBulkEmail = () => {
+    setEmailTo([]);
+    setEmailBcc(filteredEmpresas.map(e => e.email).filter(Boolean) as string[]);
+    setEmailAttachments([]);
+    setShowEmailModal(true);
+  };
+
+  // ─────────────────────────────────────────
   //  RETURN
   // ─────────────────────────────────────────
 
@@ -514,5 +538,9 @@ export function useEmpresas(cursoId: number) {
     fileInputRef,
     downloadTemplate,
     handleImportExcel,
+    // Email
+    showEmailModal, setShowEmailModal,
+    emailTo, emailBcc, emailAttachments,
+    handleOpenIndividualEmail, handleOpenBulkEmail,
   };
 }

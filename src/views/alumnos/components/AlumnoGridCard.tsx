@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  User, Mail, Phone, GraduationCap, Edit2, Trash2,
+  User, Mail, Phone, GraduationCap, Edit2, Trash2, Send,
   FileUp, CheckCircle, Clock, X, Eye
 } from 'lucide-react';
 import { Alumno } from '../../../types/index.ts';
@@ -10,12 +10,13 @@ interface AlumnoGridCardProps {
   onEdit: (a: Alumno) => void;
   onDelete: (id: number) => void;
   onAcademicDetail: (a: Alumno) => void;
+  onEmail: (a: Alumno) => void;
   onFileUpload: (id: number, file: File) => void;
   onFileDelete: (id: number) => void;
 }
 
 export function AlumnoGridCard({
-  alumno, onEdit, onDelete, onAcademicDetail, onFileUpload, onFileDelete
+  alumno, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete
 }: AlumnoGridCardProps) {
   const isAssigned = alumno.relacionId !== null;
   const [isDeleting, setIsDeleting] = useState(false);
@@ -68,6 +69,13 @@ export function AlumnoGridCard({
               }`}
             >
               <GraduationCap className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => onEmail(alumno)}
+              title="Enviar correo"
+              className="p-1.5 text-slate-400 hover:text-blue-500 transition-colors hover:bg-blue-50 rounded-md"
+            >
+              <Mail className="h-4 w-4" />
             </button>
             <button
               onClick={() => onEdit(alumno)}

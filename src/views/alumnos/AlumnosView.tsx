@@ -7,6 +7,8 @@ import { AlumnoGridCard }       from './components/AlumnoGridCard.tsx';
 import { AlumnosTable }         from './components/AlumnosTable.tsx';
 import { AlumnoFormModal }      from './components/AlumnoFormModal.tsx';
 import DetalleAcademicoModal    from './components/DetalleAcademicoModal.tsx';
+import { EmailModal }           from '../../components/EmailModal.tsx';
+import { EmailTypeSelector }    from '../../components/EmailTypeSelector.tsx';
 
 interface Props {
   cursoId: number;
@@ -34,6 +36,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId }: Props) {
         onDownloadTemplate={ctx.downloadTemplate}
         onImportClick={() => ctx.fileInputRef.current?.click()}
         onNewAlumno={() => ctx.handleOpenForm(null)}
+        onBulkEmail={ctx.handleOpenBulkEmail}
       />
 
       {/* Input Excel oculto */}
@@ -107,6 +110,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId }: Props) {
               onEdit={ctx.handleOpenForm}
               onDelete={ctx.setShowDeleteConfirm}
               onAcademicDetail={ctx.setAcademicDetailAlumno}
+              onEmail={ctx.handleOpenIndividualEmail}
               onFileUpload={ctx.handleFileUpload}
               onFileDelete={ctx.handleFileDelete}
             />
@@ -118,6 +122,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId }: Props) {
           onEdit={ctx.handleOpenForm}
           onDelete={ctx.setShowDeleteConfirm}
           onAcademicDetail={ctx.setAcademicDetailAlumno}
+          onEmail={ctx.handleOpenIndividualEmail}
         />
       )}
 
@@ -155,6 +160,23 @@ export default function AlumnosView({ cursoId, detalleAcademicoId }: Props) {
           </div>
         </div>
       )}
+
+      {/* ── MODAL: Email type selector ── */}
+      <EmailTypeSelector
+        isOpen={ctx.showEmailTypeSelector}
+        onClose={() => { ctx.setShowEmailTypeSelector(false); ctx.setPendingEmailTarget(null); }}
+        onConfirm={ctx.handleEmailTypeConfirm}
+        nombreAlumno={ctx.pendingEmailTarget?.alumno ? `${ctx.pendingEmailTarget.alumno.nombre} ${ctx.pendingEmailTarget.alumno.apellidos}` : undefined}
+      />
+
+      {/* ── MODAL: Email ── */}
+      <EmailModal
+        isOpen={ctx.showEmailModal}
+        onClose={() => ctx.setShowEmailModal(false)}
+        initialTo={ctx.emailTo}
+        initialBcc={ctx.emailBcc}
+        initialAttachments={ctx.emailAttachments}
+      />
     </div>
   );
 }

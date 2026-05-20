@@ -18,7 +18,8 @@ import {
     getNextValoracionEstado,
     getPrevValoracionEstado
 } from '../utils/relacionesUtils.ts';
-import { blob } from 'stream/consumers';
+import { EmailAttachment } from '../../../types/email.ts';
+import { uploadGeneratedAttachment } from '../../../utils/emailUtils.ts';
 
 //todo el estado y lógica de relaciones-alumnos, incluyendo gestión de alumnos en el formulario, cambios de estado y descargas de planes formativos
 
@@ -1076,6 +1077,165 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
     );
 
     // ─────────────────────────────────────────
+    //  EMAIL
+    // ─────────────────────────────────────────
+
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [emailTo, setEmailTo] = useState<string[]>([]);
+    const [emailBcc, setEmailBcc] = useState<string[]>([]);
+    const [emailAttachments, setEmailAttachments] = useState<EmailAttachment[]>([]);
+
+    const getEmpresaEmail = (): string[] => {
+        const email = selectedRelacion?.empresa?.email;
+        return email ? [email] : [];
+    };
+
+    const getEstudianteEmail = (alumno: Alumno): string[] => {
+        const email = alumno.emailEduca || alumno.emailPersonal;
+        return email ? [email] : [];
+    };
+
+    const getPlanDestinatarios = (alumno: Alumno): { to: string[]; bcc: string[] } => {
+        const estado = alumno.estadoPlanFormativo;
+        if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE || estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE) {
+            return { to: getEstudianteEmail(alumno), bcc: [] };
+        }
+        return { to: getEmpresaEmail(), bcc: [] };
+    };
+
+    const handleEmailConRelacion = async (tipo: 'docx' | 'pdf') => {
+        if (!selectedRelacion) return;
+        const blob = await crearDocumentoRelacion(tipo, selectedRelacion);
+        if (!blob) return;
+        const ext = tipo === 'pdf' ? 'pdf' : 'docx';
+        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const att = await uploadGeneratedAttachment(blob, `Relacion_${numRel}.${ext}`);
+        setEmailTo(getEmpresaEmail());
+        setEmailBcc([]);
+        setEmailAttachments([att]);
+        setShowEmailModal(true);
+    };
+
+    const handleEmailConPlanFormativo = async (tipo: 'docx' | 'pdf', alumno: Alumno) => {
+        if (!selectedRelacion) return;
+        const blob = await crearPlanFormativo(tipo, alumno, selectedRelacion);
+        if (!blob) return;
+        const ext = tipo === 'pdf' ? 'pdf' : 'docx';
+        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        const att = await uploadGeneratedAttachment(blob, `Plan_${numRel}_${nombreAlumno}.${ext}`);
+        const { to, bcc } = getPlanDestinatarios(alumno);
+        setEmailTo(to);
+        setEmailBcc(bcc);
+        setEmailAttachments([att]);
+        setShowEmailModal(true);
+    };
+
+    const handleEmailConSeguimiento = async (alumno: Alumno) => {
+        if (!selectedRelacion) return;
+        const blob = await crearSeguimiento(alumno, selectedRelacion);
+        if (!blob) return;
+        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        const att = await uploadGeneratedAttachment(blob, `Seguimiento_${numRel}_${nombreAlumno}.docx`);
+        setEmailTo(getEmpresaEmail());
+        setEmailBcc([]);
+        setEmailAttachments([att]);
+        setShowEmailModal(true);
+    };
+
+    const handleEmailConValoracion = async (alumno: Alumno) => {
+        if (!selectedRelacion) return;
+        const blob = await crearValoracion(alumno, selectedRelacion);
+        if (!blob) return;
+        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        const att = await uploadGeneratedAttachment(blob, `Valoracion_${numRel}_${nombreAlumno}.docx`);
+        setEmailTo(getEmpresaEmail());
+        setEmailBcc([]);
+        setEmailAttachments([att]);
+        setShowEmailModal(true);
+    };
+
+    const handleEmailConCarta = async () => {
+        if (!selectedRelacion) return;
+        const blob = await crearCarta(selectedRelacion);
+        if (!blob) return;
+        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
+        let nombreEmpresa = 'Empresa';
+        const convenio = convenios.find(c => c.id === selectedRelacion.convenioId);
+        if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
+        const att = await uploadGeneratedAttachment(blob, `Carta_${numRel}_${nombreEmpresa}.pdf`);
+        setEmailTo(getEmpresaEmail());
+        setEmailBcc([]);
+        setEmailAttachments([att]);
+        setShowEmailModal(true);
+    };
+
+    const handleEmailConCalendario = async (alumno: Alumno) => {
+        if (!selectedRelacion) return;
+        const blob = await crearCalendario(alumno, selectedRelacion);
+        if (!blob) return;
+        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
+        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+        const att = await uploadGeneratedAttachment(blob, `Calendario_${numRel}_${nombreAlumno}.pdf`);
+        setEmailTo(getEmpresaEmail());
+        setEmailBcc(getEstudianteEmail(alumno));
+        setEmailAttachments([att]);
+        setShowEmailModal(true);
+    };
+
+    const handleEmailConTodo = async () => {
+        if (!selectedRelacion || !selectedRelacion.alumnos?.length) return;
+        const atts: EmailAttachment[] = [];
+        const alumnos = selectedRelacion.alumnos;
+
+        for (const alumno of alumnos) {
+            const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
+            const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
+
+            const planBlob = await crearPlanFormativo('pdf', alumno, selectedRelacion);
+            if (planBlob) {
+                const a = await uploadGeneratedAttachment(planBlob, `Plan_${numRel}_${nombreAlumno}.pdf`);
+                atts.push(a);
+            }
+
+            const segBlob = await crearSeguimiento(alumno, selectedRelacion);
+            if (segBlob) {
+                const a = await uploadGeneratedAttachment(segBlob, `Seguimiento_${numRel}_${nombreAlumno}.docx`);
+                atts.push(a);
+            }
+
+            const valBlob = await crearValoracion(alumno, selectedRelacion);
+            if (valBlob) {
+                const a = await uploadGeneratedAttachment(valBlob, `Valoracion_${numRel}_${nombreAlumno}.docx`);
+                atts.push(a);
+            }
+
+            const calBlob = await crearCalendario(alumno, selectedRelacion);
+            if (calBlob) {
+                const a = await uploadGeneratedAttachment(calBlob, `Calendario_${numRel}_${nombreAlumno}.pdf`);
+                atts.push(a);
+            }
+        }
+
+        const cartaBlob = await crearCarta(selectedRelacion);
+        if (cartaBlob) {
+            const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
+            let nombreEmpresa = 'Empresa';
+            const convenio = convenios.find(c => c.id === selectedRelacion.convenioId);
+            if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
+            const a = await uploadGeneratedAttachment(cartaBlob, `Carta_${numRel}_${nombreEmpresa}.pdf`);
+            atts.push(a);
+        }
+
+        setEmailTo(getEmpresaEmail());
+        setEmailBcc([]);
+        setEmailAttachments(atts);
+        setShowEmailModal(true);
+    };
+
+    // ─────────────────────────────────────────
     //  RETURN
     // ─────────────────────────────────────────
 
@@ -1124,8 +1284,14 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         descargarSeguimiento, descargarValoracion,
         descargarCarta, descargarCalendario, handleDescargarTodo,
         isDownloadingMasivo, downloadProgress, downloadStatus,
-        targetDownloadRelaciones, setTargetDownloadRelaciones, setSelectedDocs, selectedDocs
+        targetDownloadRelaciones, setTargetDownloadRelaciones, setSelectedDocs, selectedDocs,
+        // Email
+        showEmailModal, setShowEmailModal,
+        emailTo, emailBcc, emailAttachments, setEmailAttachments,
+        handleEmailConRelacion, handleEmailConPlanFormativo,
+        handleEmailConSeguimiento, handleEmailConValoracion,
+        handleEmailConCarta, handleEmailConCalendario,
+        handleEmailConTodo,
     };
-
 
 }

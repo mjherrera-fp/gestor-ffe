@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { Alumno, DetalleAcademico, RelacionAlumno } from '../../../types/index.ts';
+import { EmailAttachment, EmailTargetType } from '../../../types/email.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -334,6 +335,61 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     });
 
   // ─────────────────────────────────────────
+  //  EMAIL
+  // ─────────────────────────────────────────
+
+  const [showEmailTypeSelector, setShowEmailTypeSelector] = useState(false);
+  const [pendingEmailTarget, setPendingEmailTarget] = useState<{ type: 'individual' | 'bulk'; alumno?: Alumno } | null>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailTo, setEmailTo] = useState<string[]>([]);
+  const [emailBcc, setEmailBcc] = useState<string[]>([]);
+  const [emailAttachments, setEmailAttachments] = useState<EmailAttachment[]>([]);
+
+  const handleOpenIndividualEmail = (alumno: Alumno) => {
+    setPendingEmailTarget({ type: 'individual', alumno });
+    setShowEmailTypeSelector(true);
+  };
+
+  const handleOpenBulkEmail = () => {
+    setPendingEmailTarget({ type: 'bulk' });
+    setShowEmailTypeSelector(true);
+  };
+
+  const handleEmailTypeConfirm = (tipo: EmailTargetType) => {
+    setShowEmailTypeSelector(false);
+
+    if (!pendingEmailTarget) return;
+
+    if (pendingEmailTarget.type === 'individual' && pendingEmailTarget.alumno) {
+      const emails: string[] = [];
+      if (tipo === 'educamadrid' || tipo === 'ambos') {
+        if (pendingEmailTarget.alumno.emailEduca) emails.push(pendingEmailTarget.alumno.emailEduca);
+      }
+      if (tipo === 'personal' || tipo === 'ambos') {
+        if (pendingEmailTarget.alumno.emailPersonal) emails.push(pendingEmailTarget.alumno.emailPersonal);
+      }
+      setEmailTo(emails);
+      setEmailBcc([]);
+    } else if (pendingEmailTarget.type === 'bulk') {
+      const emails: string[] = [];
+      for (const a of filteredAndSortedAlumnos) {
+        if (tipo === 'educamadrid' || tipo === 'ambos') {
+          if (a.emailEduca) emails.push(a.emailEduca);
+        }
+        if (tipo === 'personal' || tipo === 'ambos') {
+          if (a.emailPersonal) emails.push(a.emailPersonal);
+        }
+      }
+      setEmailTo([]);
+      setEmailBcc([...new Set(emails)]);
+    }
+
+    setEmailAttachments([]);
+    setShowEmailModal(true);
+    setPendingEmailTarget(null);
+  };
+
+  // ─────────────────────────────────────────
   //  RETURN
   // ─────────────────────────────────────────
 
@@ -368,5 +424,12 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     fileInputRef,
     downloadTemplate,
     handleImportExcel,
+    // Email
+    showEmailTypeSelector, setShowEmailTypeSelector,
+    pendingEmailTarget, setPendingEmailTarget,
+    showEmailModal, setShowEmailModal,
+    emailTo, emailBcc, emailAttachments,
+    handleOpenIndividualEmail, handleOpenBulkEmail,
+    handleEmailTypeConfirm,
   };
 }

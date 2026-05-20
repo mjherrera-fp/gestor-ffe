@@ -4,11 +4,9 @@ import { Profesor } from '../../types/index.ts';
 
 import { useProfesor }          from './hooks/useProfesor.ts';
 import { ProfesorForm }         from './components/ProfesorForm.tsx';
-import { SeguridadPanel }       from './components/SeguridadPanel.tsx';
 import { CentrosEducativos }    from './components/CentrosEducativos.tsx';
 import { CentroFormModal }      from './components/CentroFormModal.tsx';
 import { DetalleFormModal }     from './components/DetalleFormModal.tsx';
-import { EmailConfigPanel } from './components/EmailConfigPanel.tsx';
 
 interface Props {
   profesor: Profesor | null;
@@ -70,31 +68,6 @@ export default function ProfesorView({ profesor, onUpdate, onRefresh }: Props) {
         saving={ctx.saving}
         success={ctx.success}
         onSubmit={ctx.handleSubmitProfesor}
-      />
-
-      {/* ── PANEL SEGURIDAD ── */}
-      <SeguridadPanel
-        isEncrypted={ctx.isEncrypted}
-        isEncrypting={ctx.isEncrypting}
-        newPassword={ctx.newPassword}
-        confirmPassword={ctx.confirmPassword}
-        message={ctx.message}
-        showConfirmModal={ctx.showConfirmModal}
-        onNewPasswordChange={ctx.setNewPassword}
-        onConfirmPasswordChange={ctx.setConfirmPassword}
-        onEncrypt={ctx.handleEncryptDatabase}
-        onExecuteEncryption={ctx.executeEncryption}
-        onCloseConfirmModal={() => ctx.setShowConfirmModal(false)}
-      />
-
-      {/* ── PANEL CONFIGURACIÓN EMAIL (NUEVO) ── */}
-      <EmailConfigPanel
-        formData={ctx.formData}
-        setFormData={ctx.setFormData}
-        saving={ctx.savingEmail}
-        success={ctx.successEmail}
-        error={ctx.errorEmail}
-        onSubmit={ctx.handleSaveEmailConfig}
       />
 
       {/* ── CENTROS EDUCATIVOS ── */}
