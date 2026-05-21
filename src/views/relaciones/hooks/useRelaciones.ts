@@ -245,6 +245,11 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             alert('Por favor, selecciona al menos un convenio y un tutor válidos.');
             return;
         }
+        const convenio = convenios.find(c => c.id === formData.convenioId);
+        if (convenio && convenio.estado !== 'COMPLETADO') {
+            alert('No se puede crear una relación si el convenio no está completado.');
+            return;
+        }
         const method = editing ? 'PUT' : 'POST';
         const url = editing ? `/api/relaciones-alumnos/${editing.id}` : '/api/relaciones-alumnos';
         try {
@@ -1085,6 +1090,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         : [];
 
     const filteredConvenios = convenios.filter(c =>
+        c.estado === 'COMPLETADO' &&
         `${c.empresaNombre} ${c.numConvenio}`.toLowerCase().includes(searchTermConvenio.toLowerCase())
     );
 

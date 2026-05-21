@@ -611,6 +611,13 @@ async function startServer() {
   });
   app.post('/api/relaciones-alumnos', (req, res) => {
     try {
+      const convenio = ConvenioDAO.getById(req.body.convenioId);
+      if (!convenio) {
+        return res.status(400).json({ error: 'El convenio seleccionado no existe.' });
+      }
+      if (convenio.estado !== 'COMPLETADO') {
+        return res.status(400).json({ error: 'No se puede crear una relación si el convenio no está completado.' });
+      }
       const id = RelacionAlumnoDAO.create(req.body);
       res.json({ id });
     } catch (error) {
