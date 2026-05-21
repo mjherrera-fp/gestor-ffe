@@ -7,13 +7,15 @@ import { RelacionDetalle }              from './components/RelacionesDetalle.tsx
 import { RelacionFormModal }            from './components/RelacionesFormModal.tsx';
 import { RelacionEstadisticaFormModal } from './components/RelacionEstadisticaFormModal.tsx';
 import { calculateEndDateForHours }     from './utils/relacionesUtils.ts';
+import { EmailModal }                   from '../../components/EmailModal.tsx';
 
 interface Props {
   cursoId: number;
   detalleAcademicoId?: number;
+  onGoToConfig?: () => void;
 }
 
-export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
+export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConfig }: Props) {
   const ctx = useRelaciones(cursoId, detalleAcademicoId);
 
   // Adaptador para calculateEndDateForHours que inyecta el curso del contexto
@@ -171,6 +173,151 @@ export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
         </div>
       )}
 
+      {/* MODAL 2: SELECCIÓN DE DOCUMENTOS A ENVIAR POR EMAIL */}
+      {ctx.targetEmailRelaciones.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">          
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-100">
+
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-slate-800">Seleccionar Documentación</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Elige qué archivos deseas adjuntar en el correo electrónico.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 mb-2">
+              <button
+                type="button"
+                onClick={() => ctx.setSelectedDocs({
+                  plan: true,
+                  seguimiento: true,
+                  valoracion: true,
+                  calendario: true,
+                  relacion: true,
+                  carta: true
+                })}
+                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-wider"
+              >
+                Seleccionar Todos
+              </button>
+              <span className="text-slate-300 text-[11px]">|</span>
+              <button
+                type="button"
+                onClick={() => ctx.setSelectedDocs({
+                  plan: false,
+                  seguimiento: false,
+                  valoracion: false,
+                  calendario: false,
+                  relacion: false,
+                  carta: false
+                })}
+                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors uppercase tracking-wider"
+              >
+                Deseleccionar Todos
+              </button>
+            </div>
+
+            <div className="space-y-3 my-6">
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={ctx.selectedDocs.relacion}
+                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, relacion: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">Relación de alumnos</p>
+                  <p className="text-[11px] text-slate-400">Documento en formato Word (.docx) y PDF con la relación de alumnos</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={ctx.selectedDocs.plan}
+                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, plan: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">Plan Formativo</p>
+                  <p className="text-[11px] text-slate-400">Documento por alumno en formato Word (.docx) y PDF</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={ctx.selectedDocs.seguimiento}
+                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, seguimiento: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">Ficha de Seguimiento Periódico</p>
+                  <p className="text-[11px] text-slate-400">Plantilla editable por alumno en formato Word (.docx)</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={ctx.selectedDocs.valoracion}
+                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, valoracion: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">Valoración Final</p>
+                  <p className="text-[11px] text-slate-400">Plantilla editable por alumno en formato Word (.docx)</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={ctx.selectedDocs.calendario}
+                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, calendario: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">Calendario de Prácticas</p>
+                  <p className="text-[11px] text-slate-400">Documento de asistencia por alumno en formato PDF</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={ctx.selectedDocs.carta}
+                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, carta: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">Carta a la empresa</p>
+                  <p className="text-[11px] text-slate-400">Documento explicativo sobre las FFE</p>
+                </div>
+              </label>
+            </div>
+
+            <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => ctx.setTargetEmailRelaciones([])}
+                className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => ctx.handleEmailConTodo(ctx.targetEmailRelaciones)}
+                className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md shadow-blue-600/10 transition-all transform active:scale-98"
+              >
+                Aceptar y Enviar
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
       {/* MODAL DE PROGRESO DE DESCARGA */}
       {ctx.isDownloadingMasivo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
@@ -272,6 +419,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
           }}
           onHandleDescargarTodo={ctx.handleDescargarTodo}
           setTargetDownloadRelaciones={ctx.setTargetDownloadRelaciones}
+          setTargetEmailRelaciones={ctx.setTargetEmailRelaciones}
         />
 
         {/* Columna derecha: detalle */}
@@ -295,6 +443,12 @@ export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
             onDescargarRelacion={ctx.descargarRelacion}
             onDescargarCarta={ctx.descargarCarta}
             onDescargarCalendario={ctx.descargarCalendario}
+            onEmailRelacion={ctx.handleEmailConRelacion}
+            onEmailPlanFormativo={ctx.handleEmailConPlanFormativo}
+            onEmailSeguimiento={ctx.handleEmailConSeguimiento}
+            onEmailValoracion={ctx.handleEmailConValoracion}
+            onEmailCarta={ctx.handleEmailConCarta}
+            onEmailCalendario={ctx.handleEmailConCalendario}
             onHandleDescargarTodo={ctx.handleDescargarTodo}
             isDownloadingMasivo={ctx.isDownloadingMasivo}
             downloadProgress={ctx.downloadProgress}
@@ -303,6 +457,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
             targetDownloadRelaciones={ctx.targetDownloadRelaciones}
             setSelectedDocs={ctx.setSelectedDocs}
             selectedDocs={ctx.selectedDocs}
+            setTargetEmailRelaciones={ctx.setTargetEmailRelaciones}
             onUpdateFirma={ctx.updateFirma}
           />
         </div>
@@ -392,6 +547,16 @@ export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
           onClose={() => ctx.setShowEstadisticaModal(false)}
         />
       )}
+
+      {/* ── MODAL: Email ── */}
+      <EmailModal
+        isOpen={ctx.showEmailModal}
+        onClose={() => ctx.setShowEmailModal(false)}
+        initialTo={ctx.emailTo}
+        initialBcc={ctx.emailBcc}
+        initialAttachments={ctx.emailAttachments}
+        onGoToConfig={onGoToConfig}
+      />
     </div>
   );
 }

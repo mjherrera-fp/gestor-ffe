@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Lock, ShieldCheck, RefreshCw, AlertTriangle } from 'lucide-react';
-import { Message } from '../hooks/useProfesor.ts';
+import { Lock, ShieldCheck, RefreshCw, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { labelClass, inputClass } from '../ProfesorView.tsx';
 
-interface SeguridadPanelProps {
+const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
+const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+
+interface Message {
+  type: 'success' | 'error' | '';
+  text: string;
+}
+
+interface TabSeguridadProps {
   isEncrypted: boolean;
   isEncrypting: boolean;
   newPassword: string;
@@ -19,18 +25,18 @@ interface SeguridadPanelProps {
   onCloseConfirmModal: () => void;
 }
 
-export function SeguridadPanel({
+export function TabSeguridad({
   isEncrypted, isEncrypting,
   newPassword, confirmPassword,
   message, showConfirmModal,
   onNewPasswordChange, onConfirmPasswordChange,
   onEncrypt, onExecuteEncryption, onCloseConfirmModal,
-}: SeguridadPanelProps) {
+}: TabSeguridadProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-8">
-
-        {/* Cabecera */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-6 border-b border-slate-100 bg-slate-50">
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg ${isEncrypted ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
@@ -48,7 +54,6 @@ export function SeguridadPanel({
         </div>
 
         <div className="p-6">
-          {/* Aviso cuando está cifrando */}
           {isEncrypting && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 flex gap-3">
               <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
@@ -62,7 +67,6 @@ export function SeguridadPanel({
             </div>
           )}
 
-          {/* Mensaje éxito / error */}
           {message.text && (
             <div className={`p-3 rounded-lg mb-4 text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1 ${message.type === 'success'
               ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
@@ -75,34 +79,52 @@ export function SeguridadPanel({
             </div>
           )}
 
-          {/* Campos de contraseña */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
               <label className={labelClass}>
                 {isEncrypted ? 'Nueva Contraseña' : 'Establecer Contraseña'}
               </label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={e => onNewPasswordChange(e.target.value)}
-                className={inputClass}
-                placeholder="Escribe la clave..."
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={e => onNewPasswordChange(e.target.value)}
+                  className={`${inputClass} pr-10`}
+                  placeholder="Escribe la clave..."
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div>
               <label className={labelClass}>Confirmar Contraseña</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={e => onConfirmPasswordChange(e.target.value)}
-                className={inputClass}
-                placeholder="Repite la clave..."
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={e => onConfirmPasswordChange(e.target.value)}
+                  className={`${inputClass} pr-10`}
+                  placeholder="Repite la clave..."
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
           </div>
 
           <div className="flex justify-start pt-4 border-t border-slate-100">
-
             <button
               onClick={onEncrypt}
               disabled={isEncrypting || !newPassword}
@@ -122,7 +144,6 @@ export function SeguridadPanel({
         </div>
       </div>
 
-      {/* Modal de confirmación */}
       {createPortal(
         <AnimatePresence>
           {showConfirmModal && (
@@ -177,7 +198,7 @@ export function SeguridadPanel({
             </>
           )}
         </AnimatePresence>,
-        document.body // <--- ESTO TELETRANSPORTA EL MODAL AL BODY DIRECTAMENTE
+        document.body
       )}
     </>
   );

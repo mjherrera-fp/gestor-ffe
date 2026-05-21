@@ -83,10 +83,34 @@ export const ProfesorDAO = {
   updateConfigEmail: (id: number, config: Partial<Profesor>) => {
     const stmt = db.prepare(`
       UPDATE profesores SET 
-        smtp_host = ?, smtp_port = ?, smtp_user = ?, smtp_pass = ?, smtp_secure = ?
+        smtp_host = ?, smtp_port = ?, smtp_user = ?, smtp_pass = ?, smtp_secure = ?, send_delay_ms = ?
       WHERE id = ?
     `);
-    stmt.run(config.smtp_host, config.smtp_port, config.smtp_user, config.smtp_pass, config.smtp_secure, id);
+    stmt.run(config.smtp_host, config.smtp_port, config.smtp_user, config.smtp_pass, config.smtp_secure ? 1 : 0, config.send_delay_ms ?? 1500, id);
+  },
+};
+
+export const ConfiguracionDAO = {
+  getConfig: (profesorId: number, tipo: string): Record<string, string> => {
+    const rows = db.prepare('SELECT clave, valor FROM configuracion WHERE profesorId = ? AND tipo = ?').all(profesorId, tipo) as { clave: string; valor: string }[];
+    const result: Record<string, string> = {};
+    for (const row of rows) {
+      result[row.clave] = row.valor;
+    }
+    return result;
+  },
+  setConfig: (profesorId: number, tipo: string, data: Record<string, string | number | boolean | null | undefined>) => {
+    const del = db.prepare('DELETE FROM configuracion WHERE profesorId = ? AND tipo = ?');
+    const insert = db.prepare('INSERT INTO configuracion (profesorId, tipo, clave, valor) VALUES (?, ?, ?, ?)');
+    const transaction = db.transaction(() => {
+      del.run(profesorId, tipo);
+      for (const [clave, valor] of Object.entries(data)) {
+        if (valor !== undefined && valor !== null && valor !== '') {
+          insert.run(profesorId, tipo, clave, typeof valor === 'boolean' ? (valor ? '1' : '0') : String(valor));
+        }
+      }
+    });
+    transaction();
   },
 };
 
@@ -223,6 +247,18 @@ export const AlumnoDAO = {
   },
   delete: (id: number) => db.prepare('DELETE FROM alumnos WHERE id = ?').run(id),
   updateCV: (id: number, cvPath: string | null) => db.prepare('UPDATE alumnos SET cvPath = ? WHERE id = ?').run(cvPath, id)
+};
+
+export const EmailContactsDAO = {
+  getAll: () => {
+    const empresas = db.prepare('SELECT id, nombre, email FROM empresas').all() as { id: number; nombre: string; email: string }[];
+    const tutores = db.prepare(`
+      SELECT t.id, t.nombre, t.apellidos, t.email, e.nombre as empresaNombre
+      FROM tutores_empresa t JOIN empresas e ON e.id = t.empresaId
+    `).all() as { id: number; nombre: string; apellidos: string; email: string; empresaNombre: string }[];
+    const alumnos = db.prepare('SELECT id, nombre, apellidos, emailEduca, emailPersonal FROM alumnos').all() as { id: number; nombre: string; apellidos: string; emailEduca: string; emailPersonal: string }[];
+    return { empresas, tutores, alumnos };
+  },
 };
 
 export const EmpresaDAO = {

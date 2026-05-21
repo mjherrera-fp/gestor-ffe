@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3, ChevronDown, ChevronUp, Star } from 'lucide-react';
+import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3, ChevronDown, ChevronUp, Star, Mail } from 'lucide-react';
 import {
   RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels,
   PlanFormativoEstado, PlanFormativoEstadoLabels,
@@ -77,6 +77,7 @@ interface RelacionesListadoProps {
   onSortByEstado: () => void;
   onHandleDescargarTodo: (relaciones: RelacionAlumno[]) => Promise<void>;
   setTargetDownloadRelaciones: React.Dispatch<React.SetStateAction<RelacionAlumno[]>>;
+  setTargetEmailRelaciones: React.Dispatch<React.SetStateAction<RelacionAlumno[]>>;
 }
 
 // ─────────────────────────────────────────
@@ -91,7 +92,8 @@ export function RelacionesListado({
   dateFilters, onDateFilterChange,
   onClearFilters,
   sortBy, sortOrder, onSortByEmpresa, onSortByEstado,
-  onHandleDescargarTodo, setTargetDownloadRelaciones
+  onHandleDescargarTodo, setTargetDownloadRelaciones,
+  setTargetEmailRelaciones
 }: RelacionesListadoProps) {
 
   const [isDownloading, setIsDownloading] = useState(false);
@@ -141,6 +143,7 @@ export function RelacionesListado({
               <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Relaciones</span>
             </div>
             <div className="flex items-center gap-2">
+              
               <button
                 onClick={() => { if (relaciones) setTargetDownloadRelaciones(relaciones); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"

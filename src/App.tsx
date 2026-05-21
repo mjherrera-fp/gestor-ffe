@@ -12,7 +12,8 @@ import {
   ArrowLeftRight,
   Lock,
   Copyright,
-  Heart
+  Heart,
+  Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Profesor, Curso, DetalleAcademico } from './types/index.ts';
@@ -28,6 +29,7 @@ import InteresesView from './views/intereses/InteresesView.tsx';
 import RelacionesView from './views/relaciones/RelacionesView.tsx';
 import PanelView from './views/panel/PanelView.tsx';
 import LockView from './views/lock/LockView.tsx';
+import ConfiguracionView from './views/configuracion/ConfiguracionView.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -35,6 +37,7 @@ export default function App() {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [activeCurso, setActiveCurso] = useState<Curso | null>(null);
   const [detallesAcademicos, setDetallesAcademicos] = useState<DetalleAcademico[]>([]);
+  const [configTab, setConfigTab] = useState<'general' | 'correo' | 'seguridad'>('general');
   const [activeDetalle, setActiveDetalle] = useState<DetalleAcademico | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -259,13 +262,13 @@ export default function App() {
                 {profesor ? `Bienvenido, ${profesor.nombre}` : `Bienvenido al Gestor FFE`}
               </p>
               <h2 className="text-lg lg:text-xl font-bold text-text-main leading-none">
-                {navItems.find(i => i.id === activeTab)?.label}
+                {activeTab === 'configuracion' ? 'Configuración' : navItems.find(i => i.id === activeTab)?.label}
               </h2>
 
             </div>
             <div className="sm:hidden">
               <h2 className="text-base font-bold text-text-main">
-                {navItems.find(i => i.id === activeTab)?.label}
+                {activeTab === 'configuracion' ? 'Configuración' : navItems.find(i => i.id === activeTab)?.label}
               </h2>
             </div>
           </div>
@@ -330,6 +333,13 @@ export default function App() {
                 <Lock className="h-5 w-5" />
               </button>
             )}
+            <button
+              onClick={() => setActiveTab('configuracion')}
+              title="Configuración"
+              className="p-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all"
+            >
+              <Settings className="h-5 w-5" />
+            </button>
             <div
               onClick={() => setActiveTab('dashboard')}
               className="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-primary-light flex items-center justify-center text-primary cursor-pointer hover:bg-primary/10 transition-colors"
@@ -343,7 +353,7 @@ export default function App() {
         <section className="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth">
           <div className="max-w-7xl mx-auto pb-20">
             {/* Gate: sin profesor */}
-            {!tieneProfesor && activeTab !== 'dashboard' && (
+            {!tieneProfesor && activeTab !== 'dashboard' && activeTab !== 'configuracion' && (
               <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 mb-6">
                 <p className="text-sm text-amber-800 font-medium">
                   Primero debes configurar tus datos como profesor en la sección <strong>Profesor</strong>.
@@ -352,7 +362,7 @@ export default function App() {
             )}
 
             {/* Gate: profesor sí, sin curso */}
-            {tieneProfesor && !tieneCurso && activeTab !== 'dashboard' && activeTab !== 'cursos' && (
+            {tieneProfesor && !tieneCurso && activeTab !== 'dashboard' && activeTab !== 'cursos' && activeTab !== 'configuracion' && (
               <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 mb-6">
                 <p className="text-sm text-amber-800 font-medium">
                   Primero debes crear un curso académico en la sección <strong>Cursos</strong>.
@@ -379,10 +389,11 @@ export default function App() {
               <AlumnosView
                 cursoId={activeCurso.id!}
                 detalleAcademicoId={activeDetalle?.id}
+                onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }}
               />
             )}
             {activeTab === 'empresas' && activeCurso && (
-              <EmpresasView cursoId={activeCurso.id!} />
+              <EmpresasView cursoId={activeCurso.id!} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} />
             )}
             {activeTab === 'panel' && activeCurso && (
               <PanelView
@@ -402,12 +413,10 @@ export default function App() {
                 centroId={activeDetalle?.centroId}
               />
             )}
-            {activeTab === 'relaciones' && activeCurso && (
-              <RelacionesView
-                cursoId={activeCurso.id!}
-                detalleAcademicoId={activeDetalle?.id}
-              />
-            )}
+          {activeTab === 'relaciones' && activeCurso && (
+            <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} />
+          )}
+          {activeTab === 'configuracion' && <ConfiguracionView initialTab={configTab} />}
           </div>
         </section>
       </main>

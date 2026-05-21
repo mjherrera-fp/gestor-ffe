@@ -7,12 +7,14 @@ import { TutoresPanel }               from './components/TutoresPanel.tsx';
 import { EmpresaFormModal }           from './components/EmpresaFormModal.tsx';
 import { TutorFormModal }             from './components/TutorFormModal.tsx';
 import { EmpresaEstadisticasPanel }   from './components/EmpresaEstadisticasPanel.tsx';
+import { EmailModal }                 from '../../components/EmailModal.tsx';
 
 interface Props {
   cursoId: number;
+  onGoToConfig?: () => void;
 }
 
-export default function EmpresasView({ cursoId }: Props) {
+export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
   const ctx = useEmpresas(cursoId);
 
   return (
@@ -42,6 +44,8 @@ export default function EmpresasView({ cursoId }: Props) {
           onNew={ctx.handleOpenNewEmpresa}
           onEdit={ctx.handleOpenEditEmpresa}
           onDeleteRequest={id => ctx.setShowDeleteConfirm({ id, type: 'empresa' })}
+          onIndividualEmail={ctx.handleOpenIndividualEmail}
+          onBulkEmail={ctx.handleOpenBulkEmail}
           onDownloadTemplate={ctx.downloadTemplate}
           onImportClick={() => ctx.fileInputRef.current?.click()}
           isImporting={ctx.isImporting}
@@ -207,6 +211,16 @@ export default function EmpresasView({ cursoId }: Props) {
           </div>
         </div>
       )}
+
+      {/* ── MODAL: Email ── */}
+      <EmailModal
+        isOpen={ctx.showEmailModal}
+        onClose={() => ctx.setShowEmailModal(false)}
+        initialTo={ctx.emailTo}
+        initialBcc={ctx.emailBcc}
+        initialAttachments={ctx.emailAttachments}
+        onGoToConfig={onGoToConfig}
+      />
 
     </>
   );

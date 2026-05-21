@@ -20,15 +20,9 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   // ── Datos del perfil ──
   const [formData, setFormData] = useState<Profesor>({
     nombre: '', apellidos: '', nif: '', email: '', telefono: '',
-    smtp_host: 'smtp.educamadrid.org', smtp_port: 587, smtp_user: '', smtp_pass: '', smtp_secure: false
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
-
-  // Estados independientes para el formulario de email
-  const [savingEmail, setSavingEmail] = useState(false);
-  const [successEmail, setSuccessEmail] = useState(false);
-  const [errorEmail, setErrorEmail] = useState('');
 
   // ── Centros ──
   const [centros, setCentros] = useState<CentroWithDetalles[]>([]);
@@ -53,31 +47,13 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     modulo: '', codigo: '', ra: '', nombre: '', impartidoEmpresa: false, actividadFormativa: '',
   });
 
-  // ── Seguridad / cifrado ──
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isEncrypting, setIsEncrypting] = useState(false);
-  const [isEncrypted, setIsEncrypted] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [message, setMessage] = useState<Message>({ type: '', text: '' });
-
   // ─────────────────────────────────────────
   //  EFECTOS
   // ─────────────────────────────────────────
 
-  useEffect(() => { checkEncryptionStatus(); }, []);
-
   useEffect(() => {
     if (profesor) {
-      setFormData({
-        ...profesor,
-        // Al cargar de BD, si no hay datos SMTP ponemos los de defecto
-        smtp_host: profesor.smtp_host || 'smtp.educamadrid.org',
-        smtp_port: profesor.smtp_port || 587,
-        smtp_user: profesor.smtp_user || '',
-        smtp_pass: profesor.smtp_pass || '',
-        smtp_secure: !!profesor.smtp_secure // Aseguramos que sea boolean
-      });
+      setFormData({ ...profesor });
       fetchCentros();
     }
   }, [profesor]);
@@ -107,16 +83,6 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     }
   };
 
-  const checkEncryptionStatus = async () => {
-    try {
-      const res = await fetch('/api/auth/status');
-      const data = await res.json();
-      setIsEncrypted(data.encrypted);
-    } catch {
-      console.error('Error al comprobar estado de cifrado');
-    }
-  };
-
   // ─────────────────────────────────────────
   //  HANDLERS: PERFIL
   // ─────────────────────────────────────────
@@ -141,41 +107,6 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
       console.error(error);
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleSaveEmailConfig = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSavingEmail(true);
-    setSuccessEmail(false);
-    setErrorEmail('');
-
-    if (!formData.smtp_user?.includes('@')) {
-      setErrorEmail('El usuario debe ser un correo válido');
-      setSavingEmail(false);
-      return;
-    }
-
-    try {
-      // Reutilizamos el endpoint existente que actualiza el Profesor entero
-      const res = await fetch('/api/profesor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        onUpdate({ ...formData, id: data.id });
-        setSuccessEmail(true);
-        setTimeout(() => setSuccessEmail(false), 3000);
-      } else {
-        setErrorEmail('Error al guardar en el servidor');
-      }
-    } catch (error) {
-      console.error(error);
-      setErrorEmail('Error de conexión al servidor');
-    } finally {
-      setSavingEmail(false);
     }
   };
 
@@ -316,45 +247,6 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   };
 
   // ─────────────────────────────────────────
-  //  HANDLERS: CIFRADO
-  // ─────────────────────────────────────────
-
-  const handleEncryptDatabase = () => {
-    if (newPassword !== confirmPassword) {
-      setMessage({ type: 'error', text: 'Las contraseñas no coinciden.' });
-      return;
-    }
-    if (newPassword.length < 4) {
-      setMessage({ type: 'error', text: 'La contraseña debe tener al menos 4 caracteres.' });
-      return;
-    }
-    setShowConfirmModal(true);
-  };
-
-  const executeEncryption = async () => {
-    setIsEncrypting(true);
-    try {
-      const res = await fetch('/api/auth/encrypt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: newPassword }),
-      });
-      if (res.ok) {
-        setMessage({ type: 'success', text: 'Base de datos cifrada correctamente. Se requerirá en el próximo inicio.' });
-        setNewPassword('');
-        setConfirmPassword('');
-      } else {
-        throw new Error('Error al cifrar');
-      }
-    } catch {
-      setMessage({ type: 'error', text: 'No se pudo cifrar la base de datos.' });
-    } finally {
-      setIsEncrypting(false);
-      setShowConfirmModal(false);
-    }
-  };
-
-  // ─────────────────────────────────────────
   //  RETURN
   // ─────────────────────────────────────────
 
@@ -363,9 +255,6 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     formData, setFormData,
     saving, success,
     handleSubmitProfesor,
-    // Email Config
-    savingEmail, successEmail, errorEmail,
-    handleSaveEmailConfig,
     // Centros
     centros, loadingCentros,
     showCentroForm, setShowCentroForm,
@@ -383,12 +272,5 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     // Eliminar
     showDeleteConfirm, setShowDeleteConfirm,
     handleConfirmDelete,
-    // Cifrado
-    newPassword, setNewPassword,
-    confirmPassword, setConfirmPassword,
-    isEncrypting, isEncrypted,
-    showConfirmModal, setShowConfirmModal,
-    message,
-    handleEncryptDatabase, executeEncryption,
   };
 }
