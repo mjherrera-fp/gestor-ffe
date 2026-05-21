@@ -11,9 +11,10 @@ import { EmailModal }                 from '../../components/EmailModal.tsx';
 
 interface Props {
   cursoId: number;
+  onGoToConfig?: () => void;
 }
 
-export default function EmpresasView({ cursoId }: Props) {
+export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
   const ctx = useEmpresas(cursoId);
 
   return (
@@ -218,6 +219,7 @@ export default function EmpresasView({ cursoId }: Props) {
         initialTo={ctx.emailTo}
         initialBcc={ctx.emailBcc}
         initialAttachments={ctx.emailAttachments}
+        onGoToConfig={onGoToConfig}
       />
 
     </>

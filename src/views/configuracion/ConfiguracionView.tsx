@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, ShieldCheck, Mail } from 'lucide-react';
 import { useConfiguracion } from './hooks/useConfiguracion.ts';
 import { TabGeneral } from './components/TabGeneral.tsx';
@@ -13,8 +13,16 @@ const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'seguridad', label: 'Seguridad', icon: ShieldCheck },
 ];
 
-export default function ConfiguracionView() {
-  const [activeTab, setActiveTab] = useState<TabId>('general');
+interface Props {
+  initialTab?: TabId;
+}
+
+export default function ConfiguracionView({ initialTab }: Props = {}) {
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab || 'general');
+
+  useEffect(() => {
+    if (initialTab) setActiveTab(initialTab);
+  }, [initialTab]);
   const ctx = useConfiguracion();
 
   return (
@@ -54,6 +62,8 @@ export default function ConfiguracionView() {
           testResult={ctx.testEmailResult}
           onTest={ctx.handleTestEmail}
           profesorEmail={ctx.profesorEmail}
+          profesorNombre={ctx.profesorNombre}
+          profesorApellidos={ctx.profesorApellidos}
         />
       )}
       {activeTab === 'seguridad' && (

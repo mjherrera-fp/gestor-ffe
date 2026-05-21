@@ -7,6 +7,7 @@ export interface EmailConfig {
   smtp_port: number;
   smtp_user: string;
   smtp_pass: string;
+  smtp_email: string;
   smtp_secure: boolean;
   send_delay_ms: number;
 }
@@ -18,6 +19,7 @@ export function useConfiguracion() {
     smtp_port: 465,
     smtp_user: '',
     smtp_pass: '',
+    smtp_email: '',
     smtp_secure: true,
     send_delay_ms: 1500,
   });
@@ -29,8 +31,10 @@ export function useConfiguracion() {
   const [testingEmail, setTestingEmail] = useState(false);
   const [testEmailResult, setTestEmailResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  // ── Profesor email (para prueba) ──
+  // ── Profesor data (para test-email y mostrar en UI) ──
   const [profesorEmail, setProfesorEmail] = useState('');
+  const [profesorNombre, setProfesorNombre] = useState('');
+  const [profesorApellidos, setProfesorApellidos] = useState('');
 
   // ── Seguridad / cifrado ──
   const [newPassword, setNewPassword] = useState('');
@@ -57,14 +61,19 @@ export function useConfiguracion() {
           smtp_port: cfg.smtp_port ? Number(cfg.smtp_port) : 465,
           smtp_user: cfg.smtp_user || '',
           smtp_pass: cfg.smtp_pass || '',
+          smtp_email: cfg.smtp_email || (cfg.smtp_user ? `${cfg.smtp_user}@educa.madrid.org` : ''),
           smtp_secure: cfg.smtp_secure === '1',
           send_delay_ms: cfg.send_delay_ms ? Number(cfg.send_delay_ms) : 1500,
         });
       }
-      // Cargar email del profesor para test-email
+      // Cargar datos del profesor
       const profRes = await fetch('/api/profesor');
       const profesor = await profRes.json();
-      if (profesor) setProfesorEmail(profesor.email || '');
+      if (profesor) {
+        setProfesorEmail(profesor.email || '');
+        setProfesorNombre(profesor.nombre || '');
+        setProfesorApellidos(profesor.apellidos || '');
+      }
     } catch {
       console.error('Error al cargar configuración de correo');
     }
@@ -126,6 +135,7 @@ export function useConfiguracion() {
           smtp_port: emailConfig.smtp_port,
           smtp_user: emailConfig.smtp_user,
           smtp_pass: emailConfig.smtp_pass,
+          smtp_email: emailConfig.smtp_email,
           smtp_secure: emailConfig.smtp_secure,
         }),
       });
@@ -187,7 +197,7 @@ export function useConfiguracion() {
     handleSaveEmailConfig,
     // Test Email
     testingEmail, testEmailResult,
-    profesorEmail,
+    profesorEmail, profesorNombre, profesorApellidos,
     handleTestEmail,
     // Cifrado
     newPassword, setNewPassword,

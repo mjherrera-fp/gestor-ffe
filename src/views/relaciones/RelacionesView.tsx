@@ -12,9 +12,10 @@ import { EmailModal }                   from '../../components/EmailModal.tsx';
 interface Props {
   cursoId: number;
   detalleAcademicoId?: number;
+  onGoToConfig?: () => void;
 }
 
-export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
+export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConfig }: Props) {
   const ctx = useRelaciones(cursoId, detalleAcademicoId);
 
   // Adaptador para calculateEndDateForHours que inyecta el curso del contexto
@@ -554,6 +555,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId }: Props) {
         initialTo={ctx.emailTo}
         initialBcc={ctx.emailBcc}
         initialAttachments={ctx.emailAttachments}
+        onGoToConfig={onGoToConfig}
       />
     </div>
   );

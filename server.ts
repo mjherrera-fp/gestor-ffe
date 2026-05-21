@@ -227,7 +227,7 @@ async function startServer() {
     res.json({ success: true });
   });
   app.post('/api/profesor/test-email', async (req, res) => {
-    const { to, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure } = req.body;
+    const { to, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure, smtp_email } = req.body;
     if (!to || !smtp_host || !smtp_port || !smtp_user || !smtp_pass) {
       return res.status(400).json({ error: 'Faltan datos de configuración SMTP' });
     }
@@ -238,8 +238,9 @@ async function startServer() {
         secure: smtp_secure,
         auth: { user: smtp_user, pass: smtp_pass },
       });
+      const fromEmail = smtp_email || `${smtp_user}@educa.madrid.org`;
       await transporter.sendMail({
-        from: `"Test Configuración" <${smtp_user}>`,
+        from: `"Test Configuración" <${fromEmail}>`,
         to,
         subject: 'Prueba de configuración de correo - Gestor FFE',
         html: '<p>Este es un correo de prueba para verificar la configuración SMTP del Gestor FFE.</p><p>Si recibes este mensaje, la configuración es correcta.</p>',
@@ -323,6 +324,7 @@ async function startServer() {
       const smtp_user = emailCfg.smtp_user || profesor.smtp_user || '';
       const smtp_pass = emailCfg.smtp_pass || profesor.smtp_pass || '';
       const smtp_secure = emailCfg.smtp_secure === '1' || !!profesor.smtp_secure;
+      const smtp_email = emailCfg.smtp_email || profesor.smtp_email || '';
 
       if (!smtp_user || !smtp_pass) {
         return res.status(400).json({ error: "Configuración de email incompleta" });
@@ -335,7 +337,8 @@ async function startServer() {
         auth: { user: smtp_user, pass: smtp_pass },
       });
 
-      const fromStr = `"${profesor.nombre} ${profesor.apellidos}" <${smtp_user}>`;
+      const fromEmail = smtp_email || `${smtp_user}@educa.madrid.org`;
+      const fromStr = `"${profesor.nombre} ${profesor.apellidos}" <${fromEmail}>`;
 
       const mailAttachments = (attachments || []).map((a: { filename: string; path: string }) => ({
         filename: a.filename,

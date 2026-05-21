@@ -13,9 +13,10 @@ import { EmailTypeSelector }    from '../../components/EmailTypeSelector.tsx';
 interface Props {
   cursoId: number;
   detalleAcademicoId?: number;
+  onGoToConfig?: () => void;
 }
 
-export default function AlumnosView({ cursoId, detalleAcademicoId }: Props) {
+export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig }: Props) {
   const ctx = useAlumnos(cursoId, detalleAcademicoId);
 
   return (
@@ -176,6 +177,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId }: Props) {
         initialTo={ctx.emailTo}
         initialBcc={ctx.emailBcc}
         initialAttachments={ctx.emailAttachments}
+        onGoToConfig={onGoToConfig}
       />
     </div>
   );

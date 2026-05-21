@@ -37,6 +37,7 @@ export default function App() {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [activeCurso, setActiveCurso] = useState<Curso | null>(null);
   const [detallesAcademicos, setDetallesAcademicos] = useState<DetalleAcademico[]>([]);
+  const [configTab, setConfigTab] = useState<'general' | 'correo' | 'seguridad'>('general');
   const [activeDetalle, setActiveDetalle] = useState<DetalleAcademico | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -388,10 +389,11 @@ export default function App() {
               <AlumnosView
                 cursoId={activeCurso.id!}
                 detalleAcademicoId={activeDetalle?.id}
+                onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }}
               />
             )}
             {activeTab === 'empresas' && activeCurso && (
-              <EmpresasView cursoId={activeCurso.id!} />
+              <EmpresasView cursoId={activeCurso.id!} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} />
             )}
             {activeTab === 'panel' && activeCurso && (
               <PanelView
@@ -412,9 +414,9 @@ export default function App() {
               />
             )}
           {activeTab === 'relaciones' && activeCurso && (
-            <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} />
+            <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} />
           )}
-          {activeTab === 'configuracion' && <ConfiguracionView />}
+          {activeTab === 'configuracion' && <ConfiguracionView initialTab={configTab} />}
           </div>
         </section>
       </main>

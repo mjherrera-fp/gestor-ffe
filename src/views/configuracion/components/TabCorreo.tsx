@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Settings, Send, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Settings, Send, Loader2, Eye, EyeOff, Trash2 } from 'lucide-react';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
@@ -9,6 +9,7 @@ interface EmailConfig {
   smtp_port: number;
   smtp_user: string;
   smtp_pass: string;
+  smtp_email: string;
   smtp_secure: boolean;
   send_delay_ms: number;
 }
@@ -24,17 +25,33 @@ interface Props {
   testResult: { type: 'success' | 'error'; message: string } | null;
   onTest: () => void;
   profesorEmail: string;
+  profesorNombre: string;
+  profesorApellidos: string;
 }
 
-export function TabCorreo({ emailConfig, onChange, saving, success, error, onSubmit, testing, testResult, onTest, profesorEmail }: Props) {
+export function TabCorreo({ emailConfig, onChange, saving, success, error, onSubmit, testing, testResult, onTest, profesorEmail, profesorNombre, profesorApellidos }: Props) {
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleDelete = () => {
+    onChange({
+      ...emailConfig,
+      smtp_user: '',
+      smtp_pass: '',
+      smtp_email: '',
+    });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    onChange({
+    const newValue = type === 'checkbox' ? checked : (type === 'number' ? Number(value) : value);
+    const updated = {
       ...emailConfig,
-      [name]: type === 'checkbox' ? checked : (type === 'number' ? Number(value) : value),
-    });
+      [name]: newValue,
+    };
+    if (name === 'smtp_user' && typeof newValue === 'string') {
+      updated.smtp_email = newValue ? `${newValue}@educa.madrid.org` : '';
+    }
+    onChange(updated);
   };
 
   return (
@@ -98,6 +115,20 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
             </div>
           </div>
 
+          <input type="hidden" name="smtp_email" value={emailConfig.smtp_email} />
+          {emailConfig.smtp_user ? (
+            <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <p className="text-xs text-slate-500 mb-1">El FROM de los correos será:</p>
+              <p className="text-sm font-semibold text-slate-800">
+                {profesorNombre && profesorApellidos ? `${profesorNombre} ${profesorApellidos}` : 'Nombre Apellidos'} &lt;{emailConfig.smtp_email}&gt;
+              </p>
+            </div>
+          ) : (
+            <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+              <p className="text-xs text-amber-700 font-medium">Es necesario configurar el usuario de EducaMadrid</p>
+            </div>
+          )}
+
           <div className="flex items-center">
             <input type="checkbox" id="smtp_secure" name="smtp_secure" checked={emailConfig.smtp_secure} onChange={handleChange} className="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" />
             <label htmlFor="smtp_secure" className="ml-2 text-sm text-slate-600">
@@ -135,8 +166,15 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
 
             <button type="button" onClick={onTest} disabled={testing || !profesorEmail} className="px-6 py-2.5 bg-white text-sky-600 border border-sky-200 text-sm font-semibold rounded-xl hover:bg-sky-50 disabled:opacity-50 transition-colors">
               <span className="flex items-center justify-center gap-2">
-                {testing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 {testing ? 'Enviando...' : 'Probar Configuración'}
+              </span>
+            </button>
+
+            <button type="button" onClick={handleDelete} className="px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl transition-colors ml-auto">
+              <span className="flex items-center justify-center gap-2">
+                <Trash2 className="h-4 w-4" />
+                Eliminar
               </span>
             </button>
           </div>

@@ -9,6 +9,7 @@ export interface Profesor {
   smtp_port?: number;
   smtp_user?: string;
   smtp_pass?: string;
+  smtp_email?: string;
   smtp_secure?: boolean;
   send_delay_ms?: number;
 }
