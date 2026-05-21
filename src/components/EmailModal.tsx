@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -29,24 +29,19 @@ interface AutocompleteFieldProps {
   active: boolean;
   onFocus: () => void;
   onBlur: () => void;
+  suggestedContacts?: EmailContact[];
+  allEmails?: string[];
+  blurTimerRef?: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
 }
 
-function EmailAutocompleteField({ value, onChange, placeholder, contacts, active, onFocus, onBlur }: AutocompleteFieldProps) {
-  const [focused, setFocused] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+function EmailAutocompleteField({ value, onChange, placeholder, contacts, active, onFocus, onBlur, suggestedContacts = [], allEmails = [], blurTimerRef }: AutocompleteFieldProps) {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const parts = value.split(',');
   const lastPart = parts.length > 0 ? parts[parts.length - 1].trim() : '';
   const cursorAtEnd = value.endsWith(lastPart);
-
-  useEffect(() => {
-    if (cursorAtEnd) {
-      setSearchTerm(lastPart.toLowerCase());
-    }
-  }, [value]);
+  const searchTerm = cursorAtEnd ? lastPart.toLowerCase() : '';
 
   const filtered = searchTerm.length > 0 && !searchTerm.includes('@')
     ? contacts.filter(c => {
@@ -59,48 +54,84 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
       }).slice(0, 20)
     : [];
 
-  const show = active && focused && filtered.length > 0;
+  const getContactEmail = (c: EmailContact): string =>
+    c.type === 'alumno' ? (c.emailEduca || c.emailPersonal || '') : c.email;
+
+  interface SuggestionItem {
+    contact: EmailContact;
+    email: string;
+    label: string;
+  }
+
+  const availableSuggestions: SuggestionItem[] = suggestedContacts.flatMap(c => {
+    if (c.type === 'alumno') {
+      const items: SuggestionItem[] = [];
+      if (c.emailEduca && !allEmails.includes(c.emailEduca))
+        items.push({ contact: c, email: c.emailEduca, label: `${c.nombre} ${c.apellidos || ''} <${c.emailEduca}>` });
+      if (c.emailPersonal && !allEmails.includes(c.emailPersonal))
+        items.push({ contact: c, email: c.emailPersonal, label: `${c.nombre} ${c.apellidos || ''} <${c.emailPersonal}>` });
+      return items;
+    }
+    const email = c.email;
+    return email && !allEmails.includes(email)
+      ? [{ contact: c, email, label: `${c.apellidos ? `${c.nombre} ${c.apellidos}` : c.nombre}${c.type === 'tutor' && c.empresaNombre ? ` - ${c.empresaNombre}` : ''} <${email}>` }]
+      : [];
+  });
+
+  const showSuggestions = active && !searchTerm && availableSuggestions.length > 0;
+  const show = active && filtered.length > 0;
 
   // Reset highlight when results change
   useEffect(() => { setHighlightedIndex(-1); }, [filtered.length]);
 
   const handleSelect = (contact: EmailContact) => {
-    const email = contact.type === 'alumno' ? (contact.emailEduca || contact.emailPersonal || '') : contact.email;
+    const email = getContactEmail(contact);
     if (!email) return;
     const prefix = parts.slice(0, -1).join(',');
     const newVal = prefix ? `${prefix}, ${email}, ` : `${email}, `;
     onChange(newVal);
-    setSearchTerm('');
     setHighlightedIndex(-1);
     inputRef.current?.focus();
   };
 
+  const handleSelectSuggestion = (suggestion: SuggestionItem) => {
+    const newVal = value ? `${value}, ${suggestion.email}, ` : `${suggestion.email}, `;
+    onChange(newVal);
+    setHighlightedIndex(-1);
+    inputRef.current?.focus();
+  };
+
+  const dropdownItems: (EmailContact | SuggestionItem)[] = showSuggestions ? availableSuggestions : filtered;
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!show) return;
+    if (!show && !showSuggestions) return;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlightedIndex(prev => Math.min(prev + 1, filtered.length - 1));
+      setHighlightedIndex(prev => Math.min(prev + 1, dropdownItems.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setHighlightedIndex(prev => Math.max(prev - 1, 0));
     } else if (e.key === 'Enter' && highlightedIndex >= 0) {
       e.preventDefault();
-      handleSelect(filtered[highlightedIndex]);
+      const item = dropdownItems[highlightedIndex];
+      if (showSuggestions) {
+        handleSelectSuggestion(item as SuggestionItem);
+      } else {
+        handleSelect(item as EmailContact);
+      }
     } else if (e.key === 'Escape') {
       setHighlightedIndex(-1);
-      setFocused(false);
       onBlur();
     }
   };
 
   const handleFocus = () => {
-    setFocused(true);
+    if (blurTimerRef?.current) clearTimeout(blurTimerRef.current);
     onFocus();
   };
 
   const handleBlur = () => {
-    timerRef.current = setTimeout(() => {
-      setFocused(false);
+    blurTimerRef!.current = setTimeout(() => {
       setHighlightedIndex(-1);
       onBlur();
     }, 200);
@@ -108,7 +139,7 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (blurTimerRef?.current) clearTimeout(blurTimerRef.current);
     };
   }, []);
 
@@ -140,7 +171,28 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
         placeholder={placeholder}
         className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
       />
-      {show && (
+      {showSuggestions && (
+        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          <div className="px-3 py-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100">
+            Sugerencias
+          </div>
+          {availableSuggestions.map((s, i) => (
+            <button
+              key={`sug-${s.contact.type}-${s.contact.id}-${s.email}`}
+              type="button"
+              onMouseDown={e => { e.preventDefault(); handleSelectSuggestion(s); }}
+              onMouseEnter={() => setHighlightedIndex(i)}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-slate-50 last:border-0 ${
+                i === highlightedIndex ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              {contactIcon(s.contact)}
+              <span className="truncate">{s.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {show && !showSuggestions && (
         <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
           {filtered.map((c, i) => (
             <button
@@ -169,6 +221,7 @@ interface EmailModalProps {
   initialBcc?: string[];
   initialAttachments?: EmailAttachment[];
   onGoToConfig?: () => void;
+  contextualContactIds?: Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>;
 }
 
 export function EmailModal({
@@ -178,6 +231,7 @@ export function EmailModal({
   initialBcc = [],
   initialAttachments = [],
   onGoToConfig,
+  contextualContactIds = [],
 }: EmailModalProps) {
   const [to, setTo] = useState('');
   const [cc, setCc] = useState('');
@@ -190,11 +244,11 @@ export function EmailModal({
   const [sendIndividual, setSendIndividual] = useState(false);
   const [contacts, setContacts] = useState<EmailContact[]>([]);
   const [activeAutocomplete, setActiveAutocomplete] = useState<'to' | 'cc' | 'bcc' | null>(null);
-  const [configOk, setConfigOk] = useState<boolean | null>(null);
+  const [configOk, setConfigOk] = useState<boolean>(true);
+  const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      setConfigOk(null);
       fetch('/api/profesor/config/correo')
         .then(res => res.json())
         .then(cfg => setConfigOk(!!cfg.smtp_user))
@@ -273,6 +327,17 @@ export function EmailModal({
 
   const parseEmails = (str: string): string[] =>
     str.split(',').map(s => s.trim()).filter(s => s.includes('@'));
+
+  const suggestedContacts = useMemo(() => {
+    if (!contextualContactIds.length || !contacts.length) return [];
+    return contextualContactIds
+      .map(ctx => contacts.find(c => c.type === ctx.type && c.id === ctx.id))
+      .filter((c): c is EmailContact => c !== undefined);
+  }, [contextualContactIds, contacts]);
+
+  const allEmails = useMemo(() => {
+    return [...parseEmails(to), ...parseEmails(cc), ...parseEmails(bcc)];
+  }, [to, cc, bcc]);
 
   const handleSend = async () => {
     setError('');
@@ -357,11 +422,7 @@ export function EmailModal({
         </div>
 
         {/* Body */}
-        {configOk === null ? (
-          <div className="flex-1 flex items-center justify-center p-12">
-            <Loader2 className="h-8 w-8 animate-spin text-slate-300" />
-          </div>
-        ) : configOk === false ? (
+        {configOk === false ? (
           <div className="flex-1 flex items-center justify-center p-12">
             <div className="text-center max-w-md">
               <div className="p-3 rounded-full bg-amber-100 text-amber-600 w-fit mx-auto mb-4">
@@ -473,6 +534,9 @@ export function EmailModal({
                     active={activeAutocomplete === 'to'}
                     onFocus={() => setActiveAutocomplete('to')}
                     onBlur={() => setActiveAutocomplete(null)}
+                    suggestedContacts={suggestedContacts}
+                    allEmails={allEmails}
+                    blurTimerRef={blurTimerRef}
                   />
                   {sendIndividual && parseEmails(to).length > 1 && (
                     <p className="text-[10px] text-amber-600 mt-1">
@@ -529,6 +593,9 @@ export function EmailModal({
                     active={activeAutocomplete === 'cc'}
                     onFocus={() => setActiveAutocomplete('cc')}
                     onBlur={() => setActiveAutocomplete(null)}
+                    suggestedContacts={suggestedContacts}
+                    allEmails={allEmails}
+                    blurTimerRef={blurTimerRef}
                   />
                 </div>
 
@@ -543,6 +610,9 @@ export function EmailModal({
                     active={activeAutocomplete === 'bcc'}
                     onFocus={() => setActiveAutocomplete('bcc')}
                     onBlur={() => setActiveAutocomplete(null)}
+                    suggestedContacts={suggestedContacts}
+                    allEmails={allEmails}
+                    blurTimerRef={blurTimerRef}
                   />
                 </div>
 

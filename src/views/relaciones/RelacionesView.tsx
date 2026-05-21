@@ -556,6 +556,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         initialBcc={ctx.emailBcc}
         initialAttachments={ctx.emailAttachments}
         onGoToConfig={onGoToConfig}
+        contextualContactIds={ctx.contextualContactIds}
       />
     </div>
   );

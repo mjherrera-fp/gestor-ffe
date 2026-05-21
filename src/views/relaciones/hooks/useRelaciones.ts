@@ -1096,6 +1096,19 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
     const [emailTo, setEmailTo] = useState<string[]>([]);
     const [emailBcc, setEmailBcc] = useState<string[]>([]);
     const [emailAttachments, setEmailAttachments] = useState<EmailAttachment[]>([]);
+    const [contextualContactIds, setContextualContactIds] = useState<Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>>([]);
+
+    const getContextualContactIds = (): Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }> => {
+        if (!selectedRelacion) return [];
+        const ids: Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }> = [
+            { type: 'empresa', id: selectedRelacion.empresa.id! },
+            { type: 'tutor', id: selectedRelacion.tutorEmpresaId },
+        ];
+        for (const a of selectedRelacion.alumnos) {
+            if (a.id) ids.push({ type: 'alumno', id: a.id });
+        }
+        return ids;
+    };
 
     const getEmpresaEmail = (): string[] => {
         const email = selectedRelacion?.empresa?.email;
@@ -1131,6 +1144,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setEmailTo(getEmpresaEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
+        setContextualContactIds(getContextualContactIds());
         setShowEmailModal(true);
     };
 
@@ -1146,6 +1160,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setEmailTo(to);
         setEmailBcc(bcc);
         setEmailAttachments([att]);
+        setContextualContactIds(getContextualContactIds());
         setShowEmailModal(true);
     };
 
@@ -1159,6 +1174,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setEmailTo(getTutorEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
+        setContextualContactIds(getContextualContactIds());
         setShowEmailModal(true);
     };
 
@@ -1172,6 +1188,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setEmailTo(getTutorEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
+        setContextualContactIds(getContextualContactIds());
         setShowEmailModal(true);
     };
 
@@ -1187,6 +1204,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setEmailTo(getEmpresaEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
+        setContextualContactIds(getContextualContactIds());
         setShowEmailModal(true);
     };
 
@@ -1200,6 +1218,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setEmailTo(getEmpresaEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
+        setContextualContactIds(getContextualContactIds());
         setShowEmailModal(true);
     };
 
@@ -1296,6 +1315,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setEmailTo(Array.from(destinatarios));
         setEmailBcc([]);
         setEmailAttachments(atts);
+        setContextualContactIds([]);
         setShowEmailModal(true);
     };
 
@@ -1351,7 +1371,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         targetDownloadRelaciones, setTargetDownloadRelaciones, setSelectedDocs, selectedDocs,
         // Email
         showEmailModal, setShowEmailModal,
-        emailTo, emailBcc, emailAttachments, setEmailAttachments,
+        emailTo, emailBcc, emailAttachments, setEmailAttachments, contextualContactIds,
         handleEmailConRelacion, handleEmailConPlanFormativo,
         handleEmailConSeguimiento, handleEmailConValoracion,
         handleEmailConCarta, handleEmailConCalendario,
