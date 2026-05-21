@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { db } from './src/lib/db.ts';
-import { ProfesorDAO, ConfiguracionDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
+import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
@@ -227,6 +227,15 @@ async function startServer() {
     ConfiguracionDAO.setConfig(existing.id!, req.params.tipo, req.body);
     res.json({ success: true });
   });
+  app.get('/api/profesor/aceptacion-uso', (req, res) => {
+    res.json({ aceptado: AceptacionUsoDAO.getAceptado() });
+  });
+  app.post('/api/profesor/aceptacion-uso', (req, res) => {
+    const profesorId = AceptacionUsoDAO.crearProfesorSiNoExiste();
+    AceptacionUsoDAO.setAceptado(profesorId);
+    res.json({ success: true });
+  });
+
   app.post('/api/profesor/test-email', async (req, res) => {
     const { to, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure, smtp_email } = req.body;
     if (!to || !smtp_host || !smtp_port || !smtp_user || !smtp_pass) {
