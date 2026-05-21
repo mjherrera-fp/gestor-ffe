@@ -30,6 +30,8 @@ import RelacionesView from './views/relaciones/RelacionesView.tsx';
 import PanelView from './views/panel/PanelView.tsx';
 import LockView from './views/lock/LockView.tsx';
 import ConfiguracionView from './views/configuracion/ConfiguracionView.tsx';
+import CopyrightModal from './components/CopyrightModal.tsx';
+import TermsView from './components/TermsView.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -42,6 +44,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showGroupSelector, setShowGroupSelector] = useState(false);
+  const [showCopyright, setShowCopyright] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   const [isLocked, setIsLocked] = useState(false);
   const [isEncrypted, setIsEncrypted] = useState(false);
@@ -61,6 +65,14 @@ export default function App() {
 
       if (encrypted) {
         setIsEncrypted(true);
+      }
+
+      const termsRes = await fetch('/api/profesor/aceptacion-uso');
+      const { aceptado } = await termsRes.json();
+      if (!aceptado) {
+        setShowTerms(true);
+        setLoading(false);
+        return;
       }
 
       // Si no está bloqueada, sigue tu código normal:
@@ -162,6 +174,15 @@ export default function App() {
     return <LockView onUnlock={handleUnlock} error={authError} />;
   }
 
+  if (showTerms) {
+    return <TermsView onAccept={async () => {
+      await fetch('/api/profesor/aceptacion-uso', { method: 'POST' });
+      setShowTerms(false);
+      setLoading(true);
+      fetchData();
+    }} />;
+  }
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
@@ -241,7 +262,7 @@ export default function App() {
         <div className="p-6 mt-auto border-t border-slate-50">
           <p className="text-[10px] text-text-muted font-medium uppercase tracking-widest">v{packageJson.version}</p>
           <p className="text-[9px] text-slate-400 mt-1">
-            <Copyright size={12} className="inline"/> <a href="https://github.com/mjherrera-fp" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-colors">mjherrera-fp</a>
+            <Copyright size={12} className="inline"/> <button onClick={() => setShowCopyright(true)} className="hover:text-blue-500 transition-colors cursor-pointer">mjherrera-fp</button>
           </p>
         </div>
       </aside>
@@ -420,6 +441,10 @@ export default function App() {
           </div>
         </section>
       </main>
+
+      <AnimatePresence>
+        {showCopyright && <CopyrightModal onClose={() => setShowCopyright(false)} />}
+      </AnimatePresence>
     </div>
   );
 }

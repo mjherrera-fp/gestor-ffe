@@ -114,6 +114,30 @@ export const ConfiguracionDAO = {
   },
 };
 
+export const AceptacionUsoDAO = {
+  getAceptado: (): boolean => {
+    const existing = db.prepare('SELECT id FROM profesores LIMIT 1').get() as { id: number } | undefined;
+    if (!existing) return false;
+    const row = db.prepare(
+      "SELECT valor FROM configuracion WHERE profesorId = ? AND tipo = 'app' AND clave = 'aceptacion_uso'"
+    ).get(existing.id) as { valor: string } | undefined;
+    return !!row;
+  },
+  setAceptado: (profesorId: number): void => {
+    db.prepare(
+      "INSERT OR REPLACE INTO configuracion (profesorId, tipo, clave, valor) VALUES (?, 'app', 'aceptacion_uso', datetime('now'))"
+    ).run(profesorId);
+  },
+  crearProfesorSiNoExiste: (): number => {
+    const existing = db.prepare('SELECT id FROM profesores LIMIT 1').get() as { id: number } | undefined;
+    if (existing) return existing.id;
+    const info = db.prepare(
+      "INSERT INTO profesores (nombre, apellidos, nif, email, telefono) VALUES ('Pendiente', 'de configuración', '', '', '')"
+    ).run();
+    return info.lastInsertRowid as number;
+  },
+};
+
 export const CentroDAO = {
   getAllByProfesor: (profesorId: number) => db.prepare('SELECT * FROM centros_educativos WHERE profesorId = ?').all(profesorId) as CentroEducativo[],
   getById: (id: number) => db.prepare('SELECT * FROM centros_educativos WHERE id = ?').get(id) as CentroEducativo | undefined,

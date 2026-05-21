@@ -174,8 +174,10 @@ export function TabSeguridad({
                         <p className="mt-2 text-sm text-slate-500 leading-relaxed">
                           {isEncrypted
                             ? 'Estás a punto de cambiar la clave maestra. Asegúrate de recordarla bien.'
-                            : 'Toda la base de datos se encriptará. Si olvidas esta contraseña en el futuro, los datos serán totalmente irrecuperables. Esta operación NO se puede revertir'}
+                            : 'Toda la base de datos se encriptará. Si olvidas esta contraseña en el futuro, los datos serán totalmente irrecuperables.'}
                         </p>
+                        {!isEncrypted && (
+                            <p className='mt-2 text-sm text-slate-500 leading-relaxed'>Una vez cifrada, la base de datos permanecerá cifrada para siempre. Esta operación <span className='text-orange-700 font-bold'>NO</span> se puede revertir</p>)}
                       </div>
                     </div>
                   </div>

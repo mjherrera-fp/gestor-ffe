@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { fork } from 'child_process';
@@ -53,8 +53,24 @@ function createWindow() {
     icon: path.join(__dirname, 'assets/favicon.ico'),
     show: false,
     webPreferences: {
-      nodeIntegration: false, // APAGADO para evitar conflictos con React
-      contextIsolation: true  // ENCENDIDO para proteger la ventana
+      nodeIntegration: false,
+      contextIsolation: true,
+      nativeWindowOpen: true
+    }
+  });
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('https://') || url.startsWith('http://')) {
+      shell.openExternal(url);
+      return { action: 'deny' };
+    }
+    return { action: 'allow' };
+  });
+
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url.startsWith('https://') || url.startsWith('http://')) {
+      event.preventDefault();
+      shell.openExternal(url);
     }
   });
 
