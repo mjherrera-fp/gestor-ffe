@@ -344,6 +344,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
   const [emailTo, setEmailTo] = useState<string[]>([]);
   const [emailBcc, setEmailBcc] = useState<string[]>([]);
   const [emailAttachments, setEmailAttachments] = useState<EmailAttachment[]>([]);
+  const [contextualContactIds, setContextualContactIds] = useState<Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>>([]);
 
   const handleOpenIndividualEmail = (alumno: Alumno) => {
     setPendingEmailTarget({ type: 'individual', alumno });
@@ -355,7 +356,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     setShowEmailTypeSelector(true);
   };
 
-  const handleEmailTypeConfirm = (tipo: EmailTargetType) => {
+  const handleEmailTypeConfirm = async (tipo: EmailTargetType) => {
     setShowEmailTypeSelector(false);
 
     if (!pendingEmailTarget) return;
@@ -370,6 +371,12 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
       }
       setEmailTo(emails);
       setEmailBcc([]);
+      try {
+        const res = await fetch(`/api/email-contexto?alumnoId=${pendingEmailTarget.alumno.id}`);
+        setContextualContactIds(await res.json());
+      } catch {
+        setContextualContactIds([]);
+      }
     } else if (pendingEmailTarget.type === 'bulk') {
       const emails: string[] = [];
       for (const a of filteredAndSortedAlumnos) {
@@ -382,6 +389,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
       }
       setEmailTo([]);
       setEmailBcc([...new Set(emails)]);
+      setContextualContactIds([]);
     }
 
     setEmailAttachments([]);
@@ -428,7 +436,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     showEmailTypeSelector, setShowEmailTypeSelector,
     pendingEmailTarget, setPendingEmailTarget,
     showEmailModal, setShowEmailModal,
-    emailTo, emailBcc, emailAttachments,
+    emailTo, emailBcc, emailAttachments, contextualContactIds,
     handleOpenIndividualEmail, handleOpenBulkEmail,
     handleEmailTypeConfirm,
   };

@@ -9,6 +9,7 @@ import { render } from '@react-email/render';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
+import { db } from './src/lib/db.ts';
 import { ProfesorDAO, ConfiguracionDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
@@ -470,6 +471,41 @@ async function startServer() {
 
   // Contactos para autocompletado de email
   app.get('/api/email-contacts', (req, res) => res.json(EmailContactsDAO.getAll()));
+
+  // Contexto para sugerencias de email
+  app.get('/api/email-contexto', (req, res) => {
+    const { empresaId, alumnoId } = req.query;
+    const ids: { type: string; id: number }[] = [];
+    if (empresaId) {
+      const eId = Number(empresaId);
+      ids.push({ type: 'empresa', id: eId });
+      const tutores = db.prepare('SELECT id FROM tutores_empresa WHERE empresaId = ?').all(eId) as any[];
+      for (const t of tutores) ids.push({ type: 'tutor', id: t.id });
+      const alumnos = db.prepare(`
+        SELECT DISTINCT a.id FROM alumnos a
+        JOIN relaciones r ON a.relacionId = r.id
+        JOIN convenios c ON r.convenioId = c.id
+        WHERE c.empresaId = ?
+      `).all(eId) as any[];
+      for (const a of alumnos) ids.push({ type: 'alumno', id: a.id });
+    }
+    if (alumnoId) {
+      const aId = Number(alumnoId);
+      ids.push({ type: 'alumno', id: aId });
+      const row = db.prepare(`
+        SELECT c.empresaId, r.tutorEmpresaId FROM alumnos a
+        JOIN relaciones r ON a.relacionId = r.id
+        JOIN convenios c ON r.convenioId = c.id
+        WHERE a.id = ?
+        LIMIT 1
+      `).get(aId) as any;
+      if (row) {
+        ids.push({ type: 'empresa', id: row.empresaId });
+        if (row.tutorEmpresaId) ids.push({ type: 'tutor', id: row.tutorEmpresaId });
+      }
+    }
+    res.json(ids);
+  });
 
   // Empresas
   app.get('/api/empresas', (req, res) => res.json(EmpresaDAO.getAll()));

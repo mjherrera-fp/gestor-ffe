@@ -220,6 +220,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
         initialBcc={ctx.emailBcc}
         initialAttachments={ctx.emailAttachments}
         onGoToConfig={onGoToConfig}
+        contextualContactIds={ctx.contextualContactIds}
       />
 
     </>

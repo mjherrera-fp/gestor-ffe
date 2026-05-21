@@ -486,11 +486,18 @@ export function useEmpresas(cursoId: number) {
   const [emailTo, setEmailTo] = useState<string[]>([]);
   const [emailBcc, setEmailBcc] = useState<string[]>([]);
   const [emailAttachments, setEmailAttachments] = useState<EmailAttachment[]>([]);
+  const [contextualContactIds, setContextualContactIds] = useState<Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>>([]);
 
-  const handleOpenIndividualEmail = (empresa: Empresa) => {
+  const handleOpenIndividualEmail = async (empresa: Empresa) => {
     setEmailTo(empresa.email ? [empresa.email] : []);
     setEmailBcc([]);
     setEmailAttachments([]);
+    try {
+      const res = await fetch(`/api/email-contexto?empresaId=${empresa.id}`);
+      setContextualContactIds(await res.json());
+    } catch {
+      setContextualContactIds([]);
+    }
     setShowEmailModal(true);
   };
 
@@ -540,7 +547,7 @@ export function useEmpresas(cursoId: number) {
     handleImportExcel,
     // Email
     showEmailModal, setShowEmailModal,
-    emailTo, emailBcc, emailAttachments,
+    emailTo, emailBcc, emailAttachments, contextualContactIds,
     handleOpenIndividualEmail, handleOpenBulkEmail,
   };
 }

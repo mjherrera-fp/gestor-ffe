@@ -178,6 +178,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
         initialBcc={ctx.emailBcc}
         initialAttachments={ctx.emailAttachments}
         onGoToConfig={onGoToConfig}
+        contextualContactIds={ctx.contextualContactIds}
       />
     </div>
   );
