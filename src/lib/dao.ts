@@ -1,5 +1,5 @@
 import { db, isDbEncrypted, unlockDB, lockDB } from './db.ts';
-import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, EmpresaEstadistica, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData } from '../types/index.ts';
+import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, EmpresaEstadistica, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData, Aviso } from '../types/index.ts';
 
 const safeParse = (str: any, fallback: any) => {
   if (!str || str === 'undefined' || str === 'null') return fallback;
@@ -870,5 +870,123 @@ export const PanelDAO = {
 
     return { meses, alumnos, datos };
   }
+};
+
+export const AvisosDAO = {
+  getActivos: (): Aviso[] => {
+    return db.prepare("SELECT * FROM avisos WHERE estado IN ('pendiente', 'pospuesto') ORDER BY created_at DESC").all() as Aviso[];
+  },
+
+  getPendientes: (): Aviso[] => {
+    return db.prepare("SELECT * FROM avisos WHERE estado = 'pendiente' ORDER BY created_at DESC").all() as Aviso[];
+  },
+
+  getPospuestos: (): Aviso[] => {
+    return db.prepare("SELECT * FROM avisos WHERE estado = 'pospuesto' ORDER BY created_at DESC").all() as Aviso[];
+  },
+
+  crear: (data: { fecha_aviso: string; asunto: string; descripcion: string; origen?: string; alumno_id?: number | null; tipo_aviso?: string | null }): number => {
+    const stmt = db.prepare(`
+      INSERT INTO avisos (fecha_aviso, asunto, descripcion, origen, estado, alumno_id, tipo_aviso)
+      VALUES (?, ?, ?, ?, 'pendiente', ?, ?)
+    `);
+    const info = stmt.run(data.fecha_aviso, data.asunto, data.descripcion, data.origen || 'automatico', data.alumno_id ?? null, data.tipo_aviso ?? null);
+    return Number(info.lastInsertRowid);
+  },
+
+  descartar: (id: number): void => {
+    db.prepare("UPDATE avisos SET estado = 'descartado', pospuesto_en = NULL WHERE id = ?").run(id);
+  },
+
+  posponer: (id: number): void => {
+    db.prepare("UPDATE avisos SET estado = 'pospuesto', pospuesto_en = datetime('now') WHERE id = ?").run(id);
+  },
+
+  reactivarVencidos: (): void => {
+    db.prepare("UPDATE avisos SET estado = 'pendiente', pospuesto_en = NULL WHERE estado = 'pospuesto' AND pospuesto_en IS NOT NULL AND datetime(pospuesto_en) < datetime('now', '-24 hours')").run();
+  },
+
+  existeAutomatico: (alumnoId: number, tipoAviso: string): boolean => {
+    const row = db.prepare("SELECT 1 FROM avisos WHERE origen = 'automatico' AND alumno_id = ? AND tipo_aviso = ? LIMIT 1").get(alumnoId, tipoAviso);
+    return !!row;
+  },
+
+  generarAutomaticos: (profesorId: number): Aviso[] => {
+    // 1. Reactivar pospuestos vencidos (>24h)
+    AvisosDAO.reactivarVencidos();
+
+    // 2. Penderizar pospuestos automáticos (reaparecen al arrancar)
+    db.prepare("UPDATE avisos SET estado = 'pendiente', pospuesto_en = NULL WHERE origen = 'automatico' AND estado = 'pospuesto'").run();
+
+    // 3. Obtener config
+    const config = ConfiguracionDAO.getConfig(profesorId, 'avisos');
+    const semanasInicio = parseInt(config.semanas_inicio || '1');
+    const semanasInicioDocs = parseInt(config.semanas_inicio_documentos || '2');
+    const semanasFin = parseInt(config.semanas_fin || '1');
+
+    // 4. Obtener alumnos con fechaInicio y fechaFin
+    const alumnos = db.prepare(`
+      SELECT id, nombre, apellidos, fechaInicio, fechaFin,
+             estadoPlanFormativo, estadoSeguimiento, estadoValoracion
+      FROM alumnos
+      WHERE fechaInicio IS NOT NULL AND fechaFin IS NOT NULL
+    `).all() as any[];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const alu of alumnos) {
+      const fechaInicio = new Date(alu.fechaInicio + 'T00:00:00');
+      const fechaFin = new Date(alu.fechaFin + 'T00:00:00');
+      const diffInicioMs = today.getTime() - fechaInicio.getTime();
+      const diffFinMs = fechaFin.getTime() - today.getTime();
+      const diasDesdeInicio = Math.floor(diffInicioMs / (1000 * 60 * 60 * 24));
+      const diasHastaFin = Math.floor(diffFinMs / (1000 * 60 * 60 * 24));
+
+      const nombreCompleto = `${alu.nombre} ${alu.apellidos}`;
+
+      // Alumnos a X semanas de empezar
+      if (diasDesdeInicio >= semanasInicio * 7 && !AvisosDAO.existeAutomatico(alu.id, 'inicio')) {
+        AvisosDAO.crear({
+          fecha_aviso: today.toISOString().split('T')[0],
+          asunto: `Alumno a ${semanasInicio} semana(s) de empezar`,
+          descripcion: `${nombreCompleto} - Inició las prácticas el ${alu.fechaInicio}`,
+          origen: 'automatico',
+          alumno_id: alu.id,
+          tipo_aviso: 'inicio',
+        });
+      }
+
+      // Alumnos a X semanas de empezar con documentos no finalizados
+      const tieneDocsPendientes = alu.estadoPlanFormativo !== 'COMPLETADO'
+        || alu.estadoSeguimiento !== 'RECIBIDO'
+        || alu.estadoValoracion !== 'RECIBIDO';
+
+      if (diasDesdeInicio >= semanasInicioDocs * 7 && tieneDocsPendientes && !AvisosDAO.existeAutomatico(alu.id, 'inicio_documentos')) {
+        AvisosDAO.crear({
+          fecha_aviso: today.toISOString().split('T')[0],
+          asunto: `Documentos pendientes a ${semanasInicioDocs} semana(s) de empezar`,
+          descripcion: `${nombreCompleto} - Tiene documentos sin finalizar (Plan Formativo: ${alu.estadoPlanFormativo}, Seguimiento: ${alu.estadoSeguimiento}, Valoración: ${alu.estadoValoracion})`,
+          origen: 'automatico',
+          alumno_id: alu.id,
+          tipo_aviso: 'inicio_documentos',
+        });
+      }
+
+      // Alumnos a X semanas de terminar
+      if (diasHastaFin >= semanasFin * 7 && diasHastaFin > 0 && !AvisosDAO.existeAutomatico(alu.id, 'fin')) {
+        AvisosDAO.crear({
+          fecha_aviso: today.toISOString().split('T')[0],
+          asunto: `Alumno a ${semanasFin} semana(s) de terminar`,
+          descripcion: `${nombreCompleto} - Finaliza las prácticas el ${alu.fechaFin}`,
+          origen: 'automatico',
+          alumno_id: alu.id,
+          tipo_aviso: 'fin',
+        });
+      }
+    }
+
+    return AvisosDAO.getActivos();
+  },
 };
 

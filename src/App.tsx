@@ -15,10 +15,11 @@ import {
   Heart,
   Settings,
   ScrollText,
-  History
+  History,
+  Bell
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Profesor, Curso, DetalleAcademico } from './types/index.ts';
+import { Profesor, Curso, DetalleAcademico, Aviso } from './types/index.ts';
 import packageJson from '../package.json';
 
 // Components
@@ -35,6 +36,9 @@ import ConfiguracionView from './views/configuracion/ConfiguracionView.tsx';
 import CopyrightModal from './components/CopyrightModal.tsx';
 import TermsView from './components/TermsView.tsx';
 import HistoricoView from './views/historico/HistoricoView.tsx';
+import ToastContainer from './components/ToastContainer.tsx';
+import NotificationBell from './components/NotificationBell.tsx';
+import CreateNotificationModal from './components/CreateNotificationModal.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -49,11 +53,40 @@ export default function App() {
   const [showGroupSelector, setShowGroupSelector] = useState(false);
   const [showCopyright, setShowCopyright] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [avisos, setAvisos] = useState<Aviso[]>([]);
+  const [showCreateNotification, setShowCreateNotification] = useState(false);
 
   const [isLocked, setIsLocked] = useState(false);
   const [isEncrypted, setIsEncrypted] = useState(false);
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
+
+  const generarAvisos = async () => {
+    try {
+      const res = await fetch('/api/avisos/generate', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        setAvisos(data);
+      }
+    } catch { }
+  };
+
+  const handleDescartarAviso = async (id: number) => {
+    await fetch(`/api/avisos/${id}/descartar`, { method: 'PUT' });
+    setAvisos(prev => prev.filter(a => a.id !== id));
+  };
+
+  const handlePosponerAviso = async (id: number) => {
+    await fetch(`/api/avisos/${id}/posponer`, { method: 'PUT' });
+    setAvisos(prev => prev.map(a => a.id === id ? { ...a, estado: 'pospuesto' } : a));
+  };
+
+  const refrescarAvisos = async () => {
+    try {
+      const res = await fetch('/api/avisos');
+      if (res.ok) setAvisos(await res.json());
+    } catch { }
+  };
 
   const fetchData = async () => {
     try {
@@ -109,6 +142,8 @@ export default function App() {
         if (updated) setActiveDetalle(updated);
         else setActiveDetalle(detallesData.length > 0 ? detallesData[0] : null);
       }
+
+      await generarAvisos();
     } catch (error) {
       console.error("Error fetching initial data", error);
     } finally {
@@ -364,6 +399,11 @@ export default function App() {
             >
               <History className="h-5 w-5" />
             </button>
+            <NotificationBell
+              avisos={avisos}
+              onDescartar={handleDescartarAviso}
+              onAbrirCrear={() => setShowCreateNotification(true)}
+            />
             <button
               onClick={() => setActiveTab('configuracion')}
               title="Configuración"
@@ -456,6 +496,17 @@ export default function App() {
       <AnimatePresence>
         {showCopyright && <CopyrightModal onClose={() => setShowCopyright(false)} />}
       </AnimatePresence>
+
+      <ToastContainer
+        avisos={avisos}
+        onDescartar={handleDescartarAviso}
+        onPosponer={handlePosponerAviso}
+      />
+      <CreateNotificationModal
+        open={showCreateNotification}
+        onClose={() => setShowCreateNotification(false)}
+        onCreado={refrescarAvisos}
+      />
     </div>
   );
 }

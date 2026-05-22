@@ -282,3 +282,16 @@ export interface SeguridadSocialData {
   alumnos: { id: number; nombre: string; apellidos: string; fechaInicio: string | null; fechaFin: string | null }[];
   datos: Record<string, number>;
 }
+
+export interface Aviso {
+  id: number;
+  fecha_aviso: string;
+  asunto: string;
+  descripcion: string;
+  origen: 'automatico' | 'manual';
+  estado: 'pendiente' | 'pospuesto' | 'descartado';
+  alumno_id: number | null;
+  tipo_aviso: string | null;
+  pospuesto_en: string | null;
+  created_at: string;
+}

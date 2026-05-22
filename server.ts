@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { db } from './src/lib/db.ts';
-import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
+import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
@@ -702,6 +702,58 @@ async function startServer() {
   });
   app.get('/api/historico/estados', (req, res) => {
     res.json(HistoricoDAO.getCambiosEstado(req.query as any));
+  });
+
+  // ─── AVISOS ──────────────────────────────────────────
+
+  app.post('/api/avisos/generate', (req, res) => {
+    try {
+      const profesor = ProfesorDAO.get();
+      if (!profesor?.id) return res.status(400).json({ error: 'Profesor no encontrado' });
+      const avisos = AvisosDAO.generarAutomaticos(profesor.id);
+      res.json(avisos);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get('/api/avisos', (req, res) => {
+    try {
+      res.json(AvisosDAO.getActivos());
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/avisos', (req, res) => {
+    try {
+      const { fecha_aviso, asunto, descripcion } = req.body;
+      if (!fecha_aviso || !asunto || !descripcion) {
+        return res.status(400).json({ error: 'fecha_aviso, asunto y descripcion son requeridos' });
+      }
+      const id = AvisosDAO.crear({ fecha_aviso, asunto, descripcion, origen: 'manual' });
+      res.json({ id });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.put('/api/avisos/:id/descartar', (req, res) => {
+    try {
+      AvisosDAO.descartar(Number(req.params.id));
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.put('/api/avisos/:id/posponer', (req, res) => {
+    try {
+      AvisosDAO.posponer(Number(req.params.id));
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
   });
 
   // GENERAR DOCX

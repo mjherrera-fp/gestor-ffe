@@ -258,6 +258,21 @@ function setupTables() {
     );
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS avisos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      fecha_aviso TEXT NOT NULL,
+      asunto TEXT NOT NULL,
+      descripcion TEXT NOT NULL,
+      origen TEXT NOT NULL DEFAULT 'automatico',
+      estado TEXT NOT NULL DEFAULT 'pendiente',
+      alumno_id INTEGER,
+      tipo_aviso TEXT,
+      pospuesto_en TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+  `);
+
   // Migración: añadir columnas nuevas a tablas existentes
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaRelacion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaPlanFormativo TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}

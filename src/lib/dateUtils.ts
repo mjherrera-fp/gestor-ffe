@@ -12,7 +12,7 @@ export function formatDateTime(iso: string | null | undefined): string {
   const [datePart, timePart] = iso.split(' ');
   if (!datePart || !timePart) return iso;
   const [y, m, d] = datePart.split('-').map(Number);
-  const [hh, mm, ss = '0'] = timePart.split(':').map(Number);
+  const [hh, mm, ss = 0] = timePart.split(':').map(Number);
   const date = new Date(Date.UTC(y, m - 1, d, hh, mm, ss));
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
