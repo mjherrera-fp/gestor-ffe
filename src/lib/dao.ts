@@ -451,7 +451,7 @@ export const EmailContactsDAO = {
     const empresas = db.prepare('SELECT id, nombre, email FROM empresas').all() as { id: number; nombre: string; email: string }[];
     const tutores = db.prepare(`
       SELECT t.id, t.nombre, t.apellidos, t.email, e.nombre as empresaNombre
-      FROM tutores_empresa t JOIN empresas e ON e.id = t.empresaId
+      FROM empresa_tutores t JOIN empresas e ON e.id = t.empresaId
     `).all() as { id: number; nombre: string; apellidos: string; email: string; empresaNombre: string }[];
     const alumnos = db.prepare('SELECT id, nombre, apellidos, emailEduca, emailPersonal FROM alumnos').all() as { id: number; nombre: string; apellidos: string; emailEduca: string; emailPersonal: string }[];
     return { empresas, tutores, alumnos };
@@ -474,18 +474,18 @@ export const EmpresaDAO = {
 };
 
 export const TutorEmpresaDAO = {
-  getAllByEmpresa: (empresaId: number) => db.prepare('SELECT * FROM tutores_empresa WHERE empresaId = ?').all(empresaId) as TutorEmpresa[],
-  getById: (id: number) => db.prepare('SELECT * FROM tutores_empresa WHERE id = ?').get(id) as TutorEmpresa,
+  getAllByEmpresa: (empresaId: number) => db.prepare('SELECT * FROM empresa_tutores WHERE empresaId = ?').all(empresaId) as TutorEmpresa[],
+  getById: (id: number) => db.prepare('SELECT * FROM empresa_tutores WHERE id = ?').get(id) as TutorEmpresa,
   create: (tutor: TutorEmpresa) => {
-    const stmt = db.prepare('INSERT INTO tutores_empresa (empresaId, nombre, apellidos, nif, email, tlfn) VALUES (?, ?, ?, ?, ?, ?)');
+    const stmt = db.prepare('INSERT INTO empresa_tutores (empresaId, nombre, apellidos, nif, email, tlfn) VALUES (?, ?, ?, ?, ?, ?)');
     const info = stmt.run(tutor.empresaId, tutor.nombre, tutor.apellidos, tutor.nif, tutor.email, tutor.tlfn);
     return info.lastInsertRowid;
   },
   update: (id: number, tutor: TutorEmpresa) => {
-    const stmt = db.prepare('UPDATE tutores_empresa SET nombre = ?, apellidos = ?, nif = ?, email = ?, tlfn = ? WHERE id = ?');
+    const stmt = db.prepare('UPDATE empresa_tutores SET nombre = ?, apellidos = ?, nif = ?, email = ?, tlfn = ? WHERE id = ?');
     stmt.run(tutor.nombre, tutor.apellidos, tutor.nif, tutor.email, tutor.tlfn, id);
   },
-  delete: (id: number) => db.prepare('DELETE FROM tutores_empresa WHERE id = ?').run(id)
+  delete: (id: number) => db.prepare('DELETE FROM empresa_tutores WHERE id = ?').run(id)
 };
 
 export const EmpresaEstadisticaDAO = {
@@ -545,7 +545,10 @@ export const ConvenioDAO = {
     const stmt = db.prepare('UPDATE convenios SET numConvenio = ?, fechaConvenio = ?, estado = ?, centroId = ?, tipoFirma = ? WHERE id = ?');
     stmt.run(convenio.numConvenio, convenio.fechaConvenio, convenio.estado, convenio.centroId, convenio.tipoFirma || 'SIN_ASIGNAR', id);
   },
-  delete: (id: number) => db.prepare('DELETE FROM convenios WHERE id = ?').run(id)
+  delete: (id: number) => db.prepare('DELETE FROM convenios WHERE id = ?').run(id),
+  getEmpresaIdsConConvenio: (): number[] => {
+    return (db.prepare('SELECT DISTINCT empresaId FROM convenios').all() as { empresaId: number }[]).map(r => r.empresaId);
+  },
 };
 
 export const InteresDAO = {

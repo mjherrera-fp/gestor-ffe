@@ -407,7 +407,7 @@ export default function App() {
             <button
               onClick={() => setActiveTab('configuracion')}
               title="Configuración"
-              className="p-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all"
+              className="rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all"
             >
               <Settings className="h-5 w-5" />
             </button>

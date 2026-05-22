@@ -127,7 +127,7 @@ function setupTables() {
     comentarios TEXT
   );
 
-  CREATE TABLE IF NOT EXISTS tutores_empresa (
+  CREATE TABLE IF NOT EXISTS empresa_tutores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     empresaId INTEGER NOT NULL,
     nombre TEXT NOT NULL,
@@ -174,7 +174,7 @@ function setupTables() {
     firmaSeguimiento TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
     firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
     FOREIGN KEY (convenioId) REFERENCES convenios(id) ON DELETE CASCADE,
-    FOREIGN KEY (tutorEmpresaId) REFERENCES tutores_empresa(id)
+    FOREIGN KEY (tutorEmpresaId) REFERENCES empresa_tutores(id)
   );
 
   CREATE TABLE IF NOT EXISTS alumnos (
@@ -280,6 +280,37 @@ function setupTables() {
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE convenios ADD COLUMN tipoFirma TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE profesores ADD COLUMN send_delay_ms INTEGER DEFAULT 1500"); } catch {}
+
+  // Migración: renombrar tutores_empresa → empresa_tutores
+  try {
+    db.exec("PRAGMA foreign_keys = OFF");
+    const oldExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='tutores_empresa'").get();
+    if (oldExists) {
+      db.exec("ALTER TABLE tutores_empresa RENAME TO empresa_tutores");
+      const relacionesData = db.prepare("SELECT * FROM relaciones").all();
+      db.exec("DROP TABLE relaciones");
+      db.exec(`CREATE TABLE relaciones (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        convenioId INTEGER NOT NULL,
+        tutorEmpresaId INTEGER NOT NULL,
+        numRelacion TEXT NOT NULL,
+        horario TEXT NOT NULL,
+        estado TEXT NOT NULL,
+        firmaRelacion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
+        firmaPlanFormativo TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
+        firmaSeguimiento TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
+        firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
+        FOREIGN KEY (convenioId) REFERENCES convenios(id) ON DELETE CASCADE,
+        FOREIGN KEY (tutorEmpresaId) REFERENCES empresa_tutores(id)
+      )`);
+      for (const row of relacionesData as any[]) {
+        db.prepare(`INSERT INTO relaciones (id, convenioId, tutorEmpresaId, numRelacion, horario, estado, firmaRelacion, firmaPlanFormativo, firmaSeguimiento, firmaValoracion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(row.id, row.convenioId, row.tutorEmpresaId, row.numRelacion, row.horario, row.estado, row.firmaRelacion || 'SIN_ASIGNAR', row.firmaPlanFormativo || 'SIN_ASIGNAR', row.firmaSeguimiento || 'SIN_ASIGNAR', row.firmaValoracion || 'SIN_ASIGNAR');
+      }
+    }
+    db.exec("PRAGMA foreign_keys = ON");
+  } catch (e) {
+    console.error("Migration rename tutores_empresa (may be already applied):", e);
+  }
 }
 
 // Ejecutamos el intento inicial al importar el módulo
