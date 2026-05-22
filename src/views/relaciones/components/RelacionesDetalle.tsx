@@ -18,7 +18,7 @@ function FirmaSelector({ value, onChange }: { value?: FirmaTipo; onChange: (v: F
   return (
     <button
       type="button"
-      onClick={() => onChange(next())}
+      onClick={(e) => { e.stopPropagation(); onChange(next()); }}
       className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${firma === FirmaTipo.DIGITAL
           ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
           : firma === FirmaTipo.MANUAL
@@ -173,16 +173,16 @@ export function RelacionDetalle({
         {/* ── BLOQUE 1: ANEXO DE RELACIÓN ── */}
         <section className={`rounded-2xl p-4 space-y-4 transition-colors bg-slate-50/50 border ${anexoBtn ? 'border-slate-100' : 'border-emerald-100'
           }`}>
-          <button
+          <div
             onClick={() => toggleCard('anexo')}
-            className="w-full flex items-center justify-between text-left"
+            className="w-full flex items-center justify-between text-left cursor-pointer"
           >
             <label className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 cursor-pointer ${anexoBtn ? 'text-blue-600' : 'text-emerald-600'
               }`}>
               <FileText className="h-3.5 w-3.5" />1. Anexo de Relación
             </label>
             <FirmaSelector value={selectedRelacion.firmaRelacion} onChange={v => onUpdateFirma('firmaRelacion', v)} />
-          </button>
+          </div>
 
           {(!(collapsedCards['anexo'] ?? !anexoBtn)) && (
             <>
@@ -240,16 +240,16 @@ export function RelacionDetalle({
         {/* ── BLOQUE 2: PLANES FORMATIVOS (por alumno) ── */}
         <section className={`rounded-2xl p-4 space-y-4 transition-colors bg-blue-50/30 border ${allPlanesCompleted ? 'border-emerald-100' : 'border-blue-100'
           }`}>
-          <button
+          <div
             onClick={() => toggleCard('allPlanes')}
-            className="w-full flex items-center justify-between text-left"
+            className="w-full flex items-center justify-between text-left cursor-pointer"
           >
             <label className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 cursor-pointer ${allPlanesCompleted ? 'text-emerald-600' : 'text-blue-600'
               }`}>
               <FileText className="h-3.5 w-3.5" /> 2. Planes Formativos
             </label>
             <FirmaSelector value={selectedRelacion.firmaPlanFormativo} onChange={v => onUpdateFirma('firmaPlanFormativo', v)} />
-          </button>
+          </div>
 
           {(!(collapsedCards['allPlanes'] ?? allPlanesCompleted)) && (
             <div className="space-y-3">
@@ -335,16 +335,16 @@ export function RelacionDetalle({
         {/* ── BLOQUE 3: SEGUIMIENTO (por alumno) ── */}
         <section className={`rounded-2xl p-4 space-y-4 transition-colors bg-blue-50/30 border ${allSeguimientosCompleted ? 'border-emerald-100' : 'border-blue-100'
           }`}>
-          <button
+          <div
             onClick={() => toggleCard('allSeg')}
-            className="w-full flex items-center justify-between text-left"
+            className="w-full flex items-center justify-between text-left cursor-pointer"
           >
             <label className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 cursor-pointer ${allSeguimientosCompleted ? 'text-emerald-600' : 'text-blue-600'
               }`}>
               <FileText className="h-3.5 w-3.5" /> 3. Seguimiento
             </label>
             <FirmaSelector value={selectedRelacion.firmaSeguimiento} onChange={v => onUpdateFirma('firmaSeguimiento', v)} />
-          </button>
+          </div>
 
           {(!(collapsedCards['allSeg'] ?? allSeguimientosCompleted)) && (
             <div className="space-y-3">
@@ -424,16 +424,16 @@ export function RelacionDetalle({
         {/* ── BLOQUE 4: VALORACION (por alumno) ── */}
         <section className={`rounded-2xl p-4 space-y-4 transition-colors bg-blue-50/30 border ${allValoracionesCompleted ? 'border-emerald-100' : 'border-blue-100'
           }`}>
-          <button
+          <div
             onClick={() => toggleCard('allVal')}
-            className="w-full flex items-center justify-between text-left"
+            className="w-full flex items-center justify-between text-left cursor-pointer"
           >
             <label className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 cursor-pointer ${allValoracionesCompleted ? 'text-emerald-600' : 'text-blue-600'
               }`}>
               <FileText className="h-3.5 w-3.5" /> 4. Valoración
             </label>
             <FirmaSelector value={selectedRelacion.firmaValoracion} onChange={v => onUpdateFirma('firmaValoracion', v)} />
-          </button>
+          </div>
 
           {(!(collapsedCards['allVal'] ?? allValoracionesCompleted)) && (
             <div className="space-y-3">
