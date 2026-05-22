@@ -222,6 +222,42 @@ function setupTables() {
   );
 `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS historico_comunicaciones (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      para TEXT, cc TEXT, cco TEXT,
+      fecha_hora TEXT NOT NULL DEFAULT (datetime('now')),
+      asunto TEXT, cuerpo TEXT,
+      ficheros_adjuntos TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS historico_operaciones_convenio (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tipo_operacion TEXT NOT NULL,
+      fecha_hora TEXT NOT NULL DEFAULT (datetime('now')),
+      convenio_id INTEGER,
+      referencia TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS historico_operaciones_relacion (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tipo_operacion TEXT NOT NULL,
+      fecha_hora TEXT NOT NULL DEFAULT (datetime('now')),
+      relacion_id INTEGER,
+      referencia TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS historico_cambios_estado (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tipo_proceso TEXT NOT NULL,
+      fecha_hora TEXT NOT NULL DEFAULT (datetime('now')),
+      estado_origen TEXT NOT NULL,
+      estado_destino TEXT NOT NULL,
+      entidad_id INTEGER,
+      referencia TEXT
+    );
+  `);
+
   // Migración: añadir columnas nuevas a tablas existentes
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaRelacion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaPlanFormativo TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}

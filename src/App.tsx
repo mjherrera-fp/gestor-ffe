@@ -13,7 +13,9 @@ import {
   Lock,
   Copyright,
   Heart,
-  Settings
+  Settings,
+  ScrollText,
+  History
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Profesor, Curso, DetalleAcademico } from './types/index.ts';
@@ -32,6 +34,7 @@ import LockView from './views/lock/LockView.tsx';
 import ConfiguracionView from './views/configuracion/ConfiguracionView.tsx';
 import CopyrightModal from './components/CopyrightModal.tsx';
 import TermsView from './components/TermsView.tsx';
+import HistoricoView from './views/historico/HistoricoView.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -283,13 +286,13 @@ export default function App() {
                 {profesor ? `Bienvenido, ${profesor.nombre}` : `Bienvenido al Gestor FFE`}
               </p>
               <h2 className="text-lg lg:text-xl font-bold text-text-main leading-none">
-                {activeTab === 'configuracion' ? 'Configuración' : navItems.find(i => i.id === activeTab)?.label}
+                {activeTab === 'configuracion' ? 'Configuración' : activeTab === 'historico' ? 'Histórico' : navItems.find(i => i.id === activeTab)?.label}
               </h2>
 
             </div>
             <div className="sm:hidden">
               <h2 className="text-base font-bold text-text-main">
-                {activeTab === 'configuracion' ? 'Configuración' : navItems.find(i => i.id === activeTab)?.label}
+                {activeTab === 'configuracion' ? 'Configuración' : activeTab === 'historico' ? 'Histórico' : navItems.find(i => i.id === activeTab)?.label}
               </h2>
             </div>
           </div>
@@ -354,6 +357,13 @@ export default function App() {
                 <Lock className="h-5 w-5" />
               </button>
             )}
+            <button
+              onClick={() => setActiveTab('historico')}
+              title="Histórico"
+              className="pl-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all"
+            >
+              <History className="h-5 w-5" />
+            </button>
             <button
               onClick={() => setActiveTab('configuracion')}
               title="Configuración"
@@ -437,6 +447,7 @@ export default function App() {
           {activeTab === 'relaciones' && activeCurso && (
             <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} />
           )}
+          {activeTab === 'historico' && <HistoricoView />}
           {activeTab === 'configuracion' && <ConfiguracionView initialTab={configTab} />}
           </div>
         </section>

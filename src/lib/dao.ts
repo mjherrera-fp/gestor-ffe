@@ -138,6 +138,179 @@ export const AceptacionUsoDAO = {
   },
 };
 
+interface PaginacionFiltros {
+  page: number;
+  limit: number;
+  [key: string]: any;
+}
+
+function buildPaginacion(baseSql: string, countSql: string, params: any[], filtros: PaginacionFiltros): { sql: string; countParams: any[]; total: number; page: number; limit: number } {
+  const countParams = [...params];
+  const total = (db.prepare(countSql).get(...countParams) as { total: number }).total;
+  const page = Math.max(1, filtros.page || 1);
+  const limit = Math.min(200, Math.max(1, filtros.limit || 50));
+  const offset = (page - 1) * limit;
+  const sql = `${baseSql} LIMIT ? OFFSET ?`;
+  return { sql, countParams, total, page, limit };
+}
+
+interface PaginacionResultado<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export const HistoricoDAO = {
+  logComunicacion(para: string, cc: string, cco: string, asunto: string, cuerpo: string, ficheros: string[]): void {
+    db.prepare(
+      "INSERT INTO historico_comunicaciones (para, cc, cco, asunto, cuerpo, ficheros_adjuntos) VALUES (?, ?, ?, ?, ?, ?)"
+    ).run(para, cc, cco, asunto, cuerpo, JSON.stringify(ficheros));
+  },
+
+  logOperacionConvenio(tipo: string, convenioId?: number, referencia?: string): void {
+    db.prepare(
+      "INSERT INTO historico_operaciones_convenio (tipo_operacion, convenio_id, referencia) VALUES (?, ?, ?)"
+    ).run(tipo, convenioId || null, referencia || null);
+  },
+
+  logOperacionRelacion(tipo: string, relacionId?: number, referencia?: string): void {
+    db.prepare(
+      "INSERT INTO historico_operaciones_relacion (tipo_operacion, relacion_id, referencia) VALUES (?, ?, ?)"
+    ).run(tipo, relacionId || null, referencia || null);
+  },
+
+  logCambioEstado(tipoProceso: string, estadoOrigen: string, estadoDestino: string, entidadId?: number, referencia?: string): void {
+    db.prepare(
+      "INSERT INTO historico_cambios_estado (tipo_proceso, estado_origen, estado_destino, entidad_id, referencia) VALUES (?, ?, ?, ?, ?)"
+    ).run(tipoProceso, estadoOrigen, estadoDestino, entidadId || null, referencia || null);
+  },
+
+  getComunicaciones(filtros: PaginacionFiltros): PaginacionResultado<{
+    id: number; para: string; cc: string; cco: string; fecha_hora: string;
+    asunto: string; cuerpo: string; ficheros_adjuntos: string
+  }> {
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    if (filtros.destinatario) {
+      conditions.push("(para LIKE ? OR cc LIKE ? OR cco LIKE ?)");
+      const q = `%${filtros.destinatario}%`;
+      params.push(q, q, q);
+    }
+    if (filtros.fechaDesde) {
+      conditions.push("fecha_hora >= ?");
+      params.push(filtros.fechaDesde);
+    }
+    if (filtros.fechaHasta) {
+      conditions.push("fecha_hora <= ?");
+      params.push(filtros.fechaHasta + ' 23:59:59');
+    }
+    if (filtros.correo) {
+      conditions.push("(asunto LIKE ? OR cuerpo LIKE ? OR ficheros_adjuntos LIKE ?)");
+      const q = `%${filtros.correo}%`;
+      params.push(q, q, q);
+    }
+    if (filtros.tieneAdjuntos !== undefined && filtros.tieneAdjuntos !== '') {
+      if (filtros.tieneAdjuntos === 'true' || filtros.tieneAdjuntos === true) {
+        conditions.push("ficheros_adjuntos IS NOT NULL AND ficheros_adjuntos != '[]'");
+      } else {
+        conditions.push("(ficheros_adjuntos IS NULL OR ficheros_adjuntos = '[]')");
+      }
+    }
+
+    const where = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+    const baseSql = `SELECT * FROM historico_comunicaciones${where} ORDER BY fecha_hora DESC`;
+    const countSql = `SELECT count(*) as total FROM historico_comunicaciones${where}`;
+    const { sql, countParams, total, page, limit } = buildPaginacion(baseSql, countSql, params, filtros);
+    const data = db.prepare(sql).all(...countParams, limit, (page - 1) * limit) as any[];
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  },
+
+  getOperacionesConvenio(filtros: PaginacionFiltros): PaginacionResultado<{
+    id: number; tipo_operacion: string; fecha_hora: string; convenio_id: number; referencia: string
+  }> {
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    if (filtros.tipoOperacion) {
+      conditions.push("tipo_operacion = ?");
+      params.push(filtros.tipoOperacion);
+    }
+    if (filtros.fechaDesde) {
+      conditions.push("fecha_hora >= ?");
+      params.push(filtros.fechaDesde);
+    }
+    if (filtros.fechaHasta) {
+      conditions.push("fecha_hora <= ?");
+      params.push(filtros.fechaHasta + ' 23:59:59');
+    }
+
+    const where = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+    const baseSql = `SELECT * FROM historico_operaciones_convenio${where} ORDER BY fecha_hora DESC`;
+    const countSql = `SELECT count(*) as total FROM historico_operaciones_convenio${where}`;
+    const { sql, countParams, total, page, limit } = buildPaginacion(baseSql, countSql, params, filtros);
+    const data = db.prepare(sql).all(...countParams, limit, (page - 1) * limit) as any[];
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  },
+
+  getOperacionesRelacion(filtros: PaginacionFiltros): PaginacionResultado<{
+    id: number; tipo_operacion: string; fecha_hora: string; relacion_id: number; referencia: string
+  }> {
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    if (filtros.tipoOperacion) {
+      conditions.push("tipo_operacion = ?");
+      params.push(filtros.tipoOperacion);
+    }
+    if (filtros.fechaDesde) {
+      conditions.push("fecha_hora >= ?");
+      params.push(filtros.fechaDesde);
+    }
+    if (filtros.fechaHasta) {
+      conditions.push("fecha_hora <= ?");
+      params.push(filtros.fechaHasta + ' 23:59:59');
+    }
+
+    const where = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+    const baseSql = `SELECT * FROM historico_operaciones_relacion${where} ORDER BY fecha_hora DESC`;
+    const countSql = `SELECT count(*) as total FROM historico_operaciones_relacion${where}`;
+    const { sql, countParams, total, page, limit } = buildPaginacion(baseSql, countSql, params, filtros);
+    const data = db.prepare(sql).all(...countParams, limit, (page - 1) * limit) as any[];
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  },
+
+  getCambiosEstado(filtros: PaginacionFiltros): PaginacionResultado<{
+    id: number; tipo_proceso: string; fecha_hora: string;
+    estado_origen: string; estado_destino: string; entidad_id: number; referencia: string
+  }> {
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    if (filtros.tipoProceso) {
+      conditions.push("tipo_proceso = ?");
+      params.push(filtros.tipoProceso);
+    }
+    if (filtros.fechaDesde) {
+      conditions.push("fecha_hora >= ?");
+      params.push(filtros.fechaDesde);
+    }
+    if (filtros.fechaHasta) {
+      conditions.push("fecha_hora <= ?");
+      params.push(filtros.fechaHasta + ' 23:59:59');
+    }
+
+    const where = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+    const baseSql = `SELECT * FROM historico_cambios_estado${where} ORDER BY fecha_hora DESC`;
+    const countSql = `SELECT count(*) as total FROM historico_cambios_estado${where}`;
+    const { sql, countParams, total, page, limit } = buildPaginacion(baseSql, countSql, params, filtros);
+    const data = db.prepare(sql).all(...countParams, limit, (page - 1) * limit) as any[];
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  },
+};
+
 export const CentroDAO = {
   getAllByProfesor: (profesorId: number) => db.prepare('SELECT * FROM centros_educativos WHERE profesorId = ?').all(profesorId) as CentroEducativo[],
   getById: (id: number) => db.prepare('SELECT * FROM centros_educativos WHERE id = ?').get(id) as CentroEducativo | undefined,
