@@ -23,8 +23,8 @@ interface EmpresasListadoProps {
   onFilterValoracionChange: (v: number) => void;
   filterUltimosCursos: number;
   onFilterUltimosCursosChange: (v: number) => void;
-  filterColaboracion: 'todas' | 'con' | 'sin';
-  onFilterColaboracionChange: (v: 'todas' | 'con' | 'sin') => void;
+  filterColaboracion: 'todas' | 'con' | 'sin' | 'sin_convenio';
+  onFilterColaboracionChange: (v: 'todas' | 'con' | 'sin' | 'sin_convenio') => void;
   cursosUnicos: string[];
 }
 
@@ -123,11 +123,12 @@ export function EmpresasListado({
           <select
             className="text-[10px] bg-white border border-border-base rounded-lg px-2 py-1.5 font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
             value={filterColaboracion}
-            onChange={e => onFilterColaboracionChange(e.target.value as 'todas' | 'con' | 'sin')}
+            onChange={e => onFilterColaboracionChange(e.target.value as 'todas' | 'con' | 'sin' | 'sin_convenio')}
           >
             <option value="todas">Todas las empresas</option>
             <option value="con">Con colaboración</option>
             <option value="sin">Sin colaboración</option>
+            <option value="sin_convenio">Sin convenio</option>
           </select>
 
           {cursosUnicos.length > 0 && (

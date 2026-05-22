@@ -513,7 +513,7 @@ async function startServer() {
     if (empresaId) {
       const eId = Number(empresaId);
       ids.push({ type: 'empresa', id: eId });
-      const tutores = db.prepare('SELECT id FROM tutores_empresa WHERE empresaId = ?').all(eId) as any[];
+      const tutores = db.prepare('SELECT id FROM empresa_tutores WHERE empresaId = ?').all(eId) as any[];
       for (const t of tutores) ids.push({ type: 'tutor', id: t.id });
       const alumnos = db.prepare(`
         SELECT DISTINCT a.id FROM alumnos a
@@ -552,6 +552,8 @@ async function startServer() {
     EmpresaDAO.delete(Number(req.params.id));
     res.json({ success: true });
   });
+
+  app.get('/api/empresas/con-convenio', (req, res) => res.json(ConvenioDAO.getEmpresaIdsConConvenio()));
 
   // Tutores Empresa
   app.get('/api/empresas/:empresaId/tutores', (req, res) => res.json(TutorEmpresaDAO.getAllByEmpresa(Number(req.params.empresaId))));

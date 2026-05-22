@@ -76,7 +76,8 @@ export function useEmpresas(cursoId: number) {
   // ── Filtros ──
   const [filterValoracion,    setFilterValoracion]    = useState(0);
   const [filterUltimosCursos, setFilterUltimosCursos] = useState(0);
-  const [filterColaboracion,  setFilterColaboracion]  = useState<'todas' | 'con' | 'sin'>('todas');
+  const [filterColaboracion,  setFilterColaboracion]  = useState<'todas' | 'con' | 'sin' | 'sin_convenio'>('todas');
+  const [empresaIdsConConvenio, setEmpresaIdsConConvenio] = useState<number[]>([]);
 
   // ─────────────────────────────────────────
   //  EFECTOS
@@ -87,6 +88,7 @@ export function useEmpresas(cursoId: number) {
     fetchCentros();
     fetchCurso();
     fetchAllEstadisticas();
+    fetchEmpresasConConvenio();
   }, []);
 
   // ─────────────────────────────────────────
@@ -136,6 +138,15 @@ export function useEmpresas(cursoId: number) {
       if (res.ok) setAllEstadisticas(await res.json());
     } catch {
       console.error('Error al cargar estadísticas');
+    }
+  };
+
+  const fetchEmpresasConConvenio = async () => {
+    try {
+      const res = await fetch('/api/empresas/con-convenio');
+      if (res.ok) setEmpresaIdsConConvenio(await res.json());
+    } catch {
+      console.error('Error al cargar empresas con convenio');
     }
   };
 
@@ -474,6 +485,7 @@ export function useEmpresas(cursoId: number) {
 
     if (filterColaboracion === 'con' && !empresaCursos[emp.id]) return false;
     if (filterColaboracion === 'sin' && empresaCursos[emp.id]) return false;
+    if (filterColaboracion === 'sin_convenio' && empresaIdsConConvenio.includes(emp.id)) return false;
 
     return true;
   });
@@ -528,6 +540,7 @@ export function useEmpresas(cursoId: number) {
     filterUltimosCursos, setFilterUltimosCursos,
     filterColaboracion, setFilterColaboracion,
     cursosUnicos,
+    empresaIdsConConvenio,
     // Empresa modal
     showEmpresaForm, setShowEmpresaForm,
     editingEmpresa,
