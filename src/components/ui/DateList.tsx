@@ -11,15 +11,19 @@ interface DateListProps {
   onAdd: () => void;
   onRemove: (d: string) => void;
   emptyText: string;
+  headerExtra?: React.ReactNode;
 }
 
-export function DateList({ label, count, dates, newDate, onNewDateChange, onAdd, onRemove, emptyText }: DateListProps) {
+export function DateList({ label, count, dates, newDate, onNewDateChange, onAdd, onRemove, emptyText, headerExtra }: DateListProps) {
   return (
     <div className="pt-4 border-t border-slate-100">
-      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-        {label}
-        <span className="text-[10px] font-bold text-slate-400 tracking-widest ml-1">({count} añadidos)</span>
-      </label>
+      <div className="flex items-center justify-between mb-1.5">
+        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+          {label}
+          <span className="text-[10px] font-bold text-slate-400 tracking-widest ml-1">({count} añadidos)</span>
+        </label>
+        {headerExtra}
+      </div>
       <div className="flex gap-2 mb-4 mt-2">
         <input
           type="date"

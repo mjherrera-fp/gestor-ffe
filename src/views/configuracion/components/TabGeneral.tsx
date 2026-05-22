@@ -101,7 +101,7 @@ export function TabGeneral() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className={labelClass}>Semanas desde inicio (doc. pendientes)</label>
+              <label className={labelClass}>Semanas antes del inicio (doc. pendientes)</label>
               <input
                 type="number"
                 name="semanas_inicio_documentos"
@@ -112,11 +112,11 @@ export function TabGeneral() {
                 max={52}
               />
               <p className="text-[10px] text-slate-400 mt-1">
-                Alumnos con documentos sin finalizar a N semanas de empezar.
+                Alumnos con documentos sin finalizar a {config.semanas_inicio_documentos} semana/s de empezar.
               </p>
             </div>
             <div>
-              <label className={labelClass}>Semanas desde inicio</label>
+              <label className={labelClass}>Semanas antes del inicio</label>
               <input
                 type="number"
                 name="semanas_inicio"
@@ -127,7 +127,7 @@ export function TabGeneral() {
                 max={52}
               />
               <p className="text-[10px] text-slate-400 mt-1">
-                Alumnos a N semanas de haber empezado las prácticas.
+                Alumnos a {config.semanas_inicio} semana/s de empezar las prácticas.
               </p>
             </div>
             <div>
@@ -142,7 +142,7 @@ export function TabGeneral() {
                 max={52}
               />
               <p className="text-[10px] text-slate-400 mt-1">
-                Alumnos a N semanas de finalizar las prácticas.
+                Alumnos a {config.semanas_fin} semana/s de finalizar las prácticas.
               </p>
             </div>
           </div>

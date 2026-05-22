@@ -1712,6 +1712,27 @@ async function startServer() {
     ));
   });
 
+  app.get('/api/festivos/obtener', async (req, res) => {
+    const slug = req.query.slug as string;
+    if (!slug) return res.status(400).json({ error: 'slug es requerido' });
+
+    const cursos = CursoDAO.getAll();
+    if (cursos.length === 0) return res.status(400).json({ error: 'No hay curso activo' });
+    const year = new Date(cursos[0].fechaFin).getFullYear();
+
+    try {
+      const response = await fetch(`https://calendariosnacionales.com/es/v1/${year}/localidades/mad/madrid/${slug}.json`);
+      if (!response.ok) return res.status(502).json({ error: 'Error al consultar la API externa' });
+
+      const data = await response.json();
+      const fechas: string[] = (data.holidays?.calendar || []).map((h: any) => h.date);
+
+      res.json({ fechas });
+    } catch {
+      res.status(502).json({ error: 'No se pudo conectar con la API de festivos' });
+    }
+  });
+
   // Vite setup y Rutas Estáticas (UNIFICADO)
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
