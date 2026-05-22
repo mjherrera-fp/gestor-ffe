@@ -312,23 +312,33 @@ export const HistoricoDAO = {
 };
 
 export const CentroDAO = {
-  getAllByProfesor: (profesorId: number) => db.prepare('SELECT * FROM centros_educativos WHERE profesorId = ?').all(profesorId) as CentroEducativo[],
-  getById: (id: number) => db.prepare('SELECT * FROM centros_educativos WHERE id = ?').get(id) as CentroEducativo | undefined,
+  getAllByProfesor: (profesorId: number) => (db.prepare('SELECT * FROM centros_educativos WHERE profesorId = ?').all(profesorId) as any[]).map(c => ({
+    ...c,
+    festivos: c.festivos ? JSON.parse(c.festivos) : []
+  })) as CentroEducativo[],
+  getById: (id: number) => {
+    const c = db.prepare('SELECT * FROM centros_educativos WHERE id = ?').get(id) as any;
+    if (!c) return undefined;
+    return {
+      ...c,
+      festivos: c.festivos ? JSON.parse(c.festivos) : []
+    } as CentroEducativo;
+  },
   create: (centro: CentroEducativo) => {
     const stmt = db.prepare(`
-      INSERT INTO centros_educativos (profesorId, nombre, ciudad, telefono, email)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO centros_educativos (profesorId, nombre, ciudad, telefono, email, festivos)
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
-    const info = stmt.run(centro.profesorId, centro.nombre, centro.ciudad, centro.telefono, centro.email);
+    const info = stmt.run(centro.profesorId, centro.nombre, centro.ciudad, centro.telefono, centro.email, JSON.stringify(centro.festivos || []));
     return info.lastInsertRowid;
   },
   update: (id: number, centro: CentroEducativo) => {
     const stmt = db.prepare(`
       UPDATE centros_educativos SET 
-        nombre = ?, ciudad = ?, telefono = ?, email = ?
+        nombre = ?, ciudad = ?, telefono = ?, email = ?, festivos = ?
       WHERE id = ?
     `);
-    stmt.run(centro.nombre, centro.ciudad, centro.telefono, centro.email, id);
+    stmt.run(centro.nombre, centro.ciudad, centro.telefono, centro.email, JSON.stringify(centro.festivos || []), id);
   },
   delete: (id: number) => db.prepare('DELETE FROM centros_educativos WHERE id = ?').run(id)
 };
@@ -340,62 +350,53 @@ export const DetalleAcademicoDAO = {
     JOIN centros_educativos c ON d.centroId = c.id
   `).all() as any[]).map(d => ({
     ...d,
-    resultadosAprendizaje: d.resultadosAprendizaje ? JSON.parse(d.resultadosAprendizaje) : []
+    resultadosAprendizaje: d.resultadosAprendizaje ? JSON.parse(d.resultadosAprendizaje) : [],
+    tutorias: d.tutorias ? JSON.parse(d.tutorias) : []
   })),
   getAllByCentro: (centroId: number) => (db.prepare('SELECT * FROM detalles_academicos WHERE centroId = ?').all(centroId) as any[]).map(d => ({
     ...d,
-    resultadosAprendizaje: d.resultadosAprendizaje ? JSON.parse(d.resultadosAprendizaje) : []
+    resultadosAprendizaje: d.resultadosAprendizaje ? JSON.parse(d.resultadosAprendizaje) : [],
+    tutorias: d.tutorias ? JSON.parse(d.tutorias) : []
   })),
   getById: (id: number) => {
     const d = db.prepare('SELECT * FROM detalles_academicos WHERE id = ?').get(id) as any;
     if (!d) return undefined;
     return {
       ...d,
-      resultadosAprendizaje: d.resultadosAprendizaje ? JSON.parse(d.resultadosAprendizaje) : []
+      resultadosAprendizaje: d.resultadosAprendizaje ? JSON.parse(d.resultadosAprendizaje) : [],
+      tutorias: d.tutorias ? JSON.parse(d.tutorias) : []
     } as DetalleAcademico;
   },
   create: (detalle: DetalleAcademico) => {
     const stmt = db.prepare(`
-      INSERT INTO detalles_academicos (centroId, ciclo, codigo, nivel, grado, regimen, codigoGrupo, resultadosAprendizaje)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO detalles_academicos (centroId, ciclo, codigo, nivel, grado, regimen, codigoGrupo, resultadosAprendizaje, tutorias)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    const info = stmt.run(detalle.centroId, detalle.ciclo, detalle.codigo, detalle.nivel, detalle.grado, detalle.regimen, detalle.codigoGrupo, JSON.stringify(detalle.resultadosAprendizaje || []));
+    const info = stmt.run(detalle.centroId, detalle.ciclo, detalle.codigo, detalle.nivel, detalle.grado, detalle.regimen, detalle.codigoGrupo, JSON.stringify(detalle.resultadosAprendizaje || []), JSON.stringify(detalle.tutorias || []));
     return info.lastInsertRowid;
   },
   update: (id: number, detalle: DetalleAcademico) => {
     const stmt = db.prepare(`
       UPDATE detalles_academicos SET 
-        ciclo = ?, codigo = ?, nivel = ?, grado = ?, regimen = ?, codigoGrupo = ?, resultadosAprendizaje = ?
+        ciclo = ?, codigo = ?, nivel = ?, grado = ?, regimen = ?, codigoGrupo = ?, resultadosAprendizaje = ?, tutorias = ?
       WHERE id = ?
     `);
-    stmt.run(detalle.ciclo, detalle.codigo, detalle.nivel, detalle.grado, detalle.regimen, detalle.codigoGrupo, JSON.stringify(detalle.resultadosAprendizaje || []), id);
+    stmt.run(detalle.ciclo, detalle.codigo, detalle.nivel, detalle.grado, detalle.regimen, detalle.codigoGrupo, JSON.stringify(detalle.resultadosAprendizaje || []), JSON.stringify(detalle.tutorias || []), id);
   },
   delete: (id: number) => db.prepare('DELETE FROM detalles_academicos WHERE id = ?').run(id)
 };
 
 export const CursoDAO = {
-  getAll: () => (db.prepare('SELECT * FROM cursos').all() as any[]).map(c => ({
-    ...c,
-    festivos: c.festivos ? JSON.parse(c.festivos) : [],
-    tutorias: c.tutorias ? JSON.parse(c.tutorias) : []
-  })),
-  getById: (id: number) => {
-    const c = db.prepare('SELECT * FROM cursos WHERE id = ?').get(id) as any;
-    if (!c) return undefined;
-    return {
-      ...c,
-      festivos: c.festivos ? JSON.parse(c.festivos) : [],
-      tutorias: c.tutorias ? JSON.parse(c.tutorias) : []
-    } as Curso;
-  },
+  getAll: () => db.prepare('SELECT * FROM cursos').all() as Curso[],
+  getById: (id: number) => db.prepare('SELECT * FROM cursos WHERE id = ?').get(id) as Curso | undefined,
   create: (curso: Curso) => {
-    const stmt = db.prepare('INSERT INTO cursos (descripcion, fechaInicio, fechaFin, festivos, tutorias) VALUES (?, ?, ?, ?, ?)');
-    const info = stmt.run(curso.descripcion, curso.fechaInicio, curso.fechaFin, JSON.stringify(curso.festivos || []), JSON.stringify(curso.tutorias || []));
+    const stmt = db.prepare('INSERT INTO cursos (descripcion, fechaInicio, fechaFin) VALUES (?, ?, ?)');
+    const info = stmt.run(curso.descripcion, curso.fechaInicio, curso.fechaFin);
     return info.lastInsertRowid;
   },
   update: (id: number, curso: Curso) => {
-    const stmt = db.prepare('UPDATE cursos SET descripcion = ?, fechaInicio = ?, fechaFin = ?, festivos = ?, tutorias = ? WHERE id = ?');
-    stmt.run(curso.descripcion, curso.fechaInicio, curso.fechaFin, JSON.stringify(curso.festivos || []), JSON.stringify(curso.tutorias || []), id);
+    const stmt = db.prepare('UPDATE cursos SET descripcion = ?, fechaInicio = ?, fechaFin = ? WHERE id = ?');
+    stmt.run(curso.descripcion, curso.fechaInicio, curso.fechaFin, id);
   },
   delete: (id: number) => {
     const delRelaciones = db.prepare('DELETE FROM relaciones WHERE convenioId IN (SELECT id FROM convenios WHERE cursoId = ?)');
@@ -789,12 +790,6 @@ export const PanelDAO = {
       `SELECT id, nombre, apellidos, fechaInicio, fechaFin FROM alumnos a WHERE a.cursoId = ? ${filtroAlumno}`
     ).all(...paramsAlumno) as { id: number; nombre: string; apellidos: string; fechaInicio: string | null; fechaFin: string | null }[];
 
-    const curso = db.prepare('SELECT * FROM cursos WHERE id = ?').get(cursoId) as any;
-    if (!curso) return { meses: [], alumnos: [], datos: {} };
-
-    const festivos: string[] = curso.festivos ? JSON.parse(curso.festivos) : [];
-    const festivosSet = new Set(festivos);
-
     const toLocalDate = (iso: string | null): Date | null => {
       if (!iso) return null;
       const [y, m, d] = iso.split('-').map(Number);
@@ -809,11 +804,29 @@ export const PanelDAO = {
     };
 
     const relaciones = db.prepare(`
-      SELECT r.id, r.horario, a.id as alumnoId, a.fechaInicio as aluInicio, a.fechaFin as aluFin
+      SELECT r.id, r.horario, r.convenioId, a.id as alumnoId, a.fechaInicio as aluInicio, a.fechaFin as aluFin
       FROM relaciones r
       JOIN alumnos a ON a.relacionId = r.id
       WHERE a.cursoId = ? ${filtroAlumno}
     `).all(...paramsAlumno) as any[];
+
+    // Build per-centro festivos map
+    const convenioIds = [...new Set(relaciones.map(r => r.convenioId))];
+    const centroFestivosMap: Record<number, Set<string>> = {};
+    for (const convId of convenioIds) {
+      const conv = db.prepare('SELECT centroId FROM convenios WHERE id = ?').get(convId) as any;
+      if (conv?.centroId && !centroFestivosMap[conv.centroId]) {
+        const centro = db.prepare('SELECT festivos FROM centros_educativos WHERE id = ?').get(conv.centroId) as any;
+        const festivos: string[] = centro?.festivos ? JSON.parse(centro.festivos) : [];
+        centroFestivosMap[conv.centroId] = new Set(festivos);
+      }
+    }
+    // Map relacionId → centroId
+    const relCentroMap: Record<number, number> = {};
+    for (const r of relaciones) {
+      const conv = db.prepare('SELECT centroId FROM convenios WHERE id = ?').get(r.convenioId) as any;
+      if (conv) relCentroMap[r.id] = conv.centroId;
+    }
 
     let minDate: Date | null = null;
     let maxDate: Date | null = null;
@@ -847,6 +860,9 @@ export const PanelDAO = {
         lunes: 1, martes: 2, miercoles: 3, jueves: 4, viernes: 5, sabado: 6, domingo: 0
       };
       const diasSet = new Set(diasSemana.map(d => diaMap[d]));
+
+      const centroId = relCentroMap[rel.id];
+      const festivosSet = centroFestivosMap[centroId] || new Set<string>();
 
       const aluInicio = toLocalDate(rel.aluInicio) || minDate;
       const aluFin = toLocalDate(rel.aluFin) || maxDate;

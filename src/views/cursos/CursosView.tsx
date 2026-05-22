@@ -109,14 +109,6 @@ export default function CursosView({ cursos, onUpdate }: Props) {
           editing={ctx.editing}
           formData={ctx.formData}
           setFormData={ctx.setFormData}
-          newFestivo={ctx.newFestivo}
-          setNewFestivo={ctx.setNewFestivo}
-          onAddFestivo={ctx.addFestivo}
-          onRemoveFestivo={ctx.removeFestivo}
-          newTutoria={ctx.newTutoria}
-          setNewTutoria={ctx.setNewTutoria}
-          onAddTutoria={ctx.addTutoria}
-          onRemoveTutoria={ctx.removeTutoria}
           onSubmit={ctx.handleSubmit}
           onClose={() => ctx.setShowForm(false)}
         />

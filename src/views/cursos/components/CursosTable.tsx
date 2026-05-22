@@ -17,14 +17,13 @@ export function CursosTable({ cursos, onEdit, onDeleteRequest }: CursosTableProp
           <tr className="bg-slate-50 border-b border-border-base">
             <th className="px-6 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Descripción</th>
             <th className="px-6 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Período</th>
-            <th className="px-6 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider text-center">Festivos</th>
             <th className="px-6 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider text-right">Acciones</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border-base font-sans">
           {cursos.length === 0 ? (
             <tr>
-              <td colSpan={4} className="px-6 py-12 text-center text-text-muted text-sm italic">
+              <td colSpan={3} className="px-6 py-12 text-center text-text-muted text-sm italic">
                 No hay cursos registrados.
               </td>
             </tr>
@@ -39,11 +38,6 @@ export function CursosTable({ cursos, onEdit, onDeleteRequest }: CursosTableProp
                     <Calendar className="h-3.5 w-3.5 opacity-50" />
                     {formatDate(curso.fechaInicio)} — {formatDate(curso.fechaFin)}
                   </div>
-                </td>
-                <td className="px-6 py-4 text-center text-[10px] font-bold text-slate-500">
-                  <span className="px-2 py-0.5 rounded border bg-slate-100 text-slate-500 border-slate-200">
-                    {curso.festivos?.length || 0}
-                  </span>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">

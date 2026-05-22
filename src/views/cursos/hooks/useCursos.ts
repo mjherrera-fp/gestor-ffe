@@ -5,8 +5,6 @@ const EMPTY_FORM: Partial<Curso> = {
   descripcion: '',
   fechaInicio: '',
   fechaFin: '',
-  festivos: [],
-  tutorias: [],
 };
 
 export function useCursos(cursos: Curso[], onUpdate: () => void) {
@@ -17,9 +15,6 @@ export function useCursos(cursos: Curso[], onUpdate: () => void) {
   const [showForm, setShowForm] = useState(false);
   const [editing,  setEditing]  = useState<Curso | null>(null);
   const [formData, setFormData] = useState<Partial<Curso>>(EMPTY_FORM);
-
-  const [newFestivo, setNewFestivo] = useState('');
-  const [newTutoria, setNewTutoria] = useState('');
 
   const handleOpenNew = () => {
     if (cursos.length > 0) {
@@ -74,26 +69,6 @@ export function useCursos(cursos: Curso[], onUpdate: () => void) {
     }
   };
 
-  const addFestivo = () => {
-    if (!newFestivo) return;
-    setFormData(prev => ({ ...prev, festivos: [...(prev.festivos || []), newFestivo] }));
-    setNewFestivo('');
-  };
-
-  const removeFestivo = (date: string) => {
-    setFormData(prev => ({ ...prev, festivos: (prev.festivos || []).filter(f => f !== date) }));
-  };
-
-  const addTutoria = () => {
-    if (!newTutoria) return;
-    setFormData(prev => ({ ...prev, tutorias: [...(prev.tutorias || []), newTutoria] }));
-    setNewTutoria('');
-  };
-
-  const removeTutoria = (date: string) => {
-    setFormData(prev => ({ ...prev, tutorias: (prev.tutorias || []).filter(f => f !== date) }));
-  };
-
   const handleDelete = async (id: number) => {
     try {
       const res = await fetch(`/api/cursos/${id}`, { method: 'DELETE' });
@@ -114,8 +89,6 @@ export function useCursos(cursos: Curso[], onUpdate: () => void) {
     editing,
     formData, setFormData,
     handleSubmit,
-    newFestivo, setNewFestivo, addFestivo, removeFestivo,
-    newTutoria, setNewTutoria, addTutoria, removeTutoria,
     handleDelete,
   };
 }

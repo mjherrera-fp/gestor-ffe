@@ -21,6 +21,7 @@ export interface CentroEducativo {
   ciudad: string;
   telefono: string;
   email: string;
+  festivos?: string[];
 }
 
 export interface DetalleAcademico {
@@ -33,6 +34,7 @@ export interface DetalleAcademico {
   regimen: string;
   codigoGrupo: string;
   resultadosAprendizaje?: ResultadoAprendizaje[];
+  tutorias?: string[];
 }
 
 export interface ResultadoAprendizaje {
@@ -50,8 +52,6 @@ export interface Curso {
   descripcion: string;
   fechaInicio: string;
   fechaFin: string;
-  festivos?: string[];
-  tutorias?: string[];
 }
 
 export interface HorarioDia {

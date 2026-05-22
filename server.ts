@@ -278,6 +278,11 @@ async function startServer() {
     res.json({ success: true });
   });
 
+  app.get('/api/centros/:id', (req, res) => {
+    const centro = CentroDAO.getById(Number(req.params.id));
+    if (!centro) return res.status(404).json({ error: 'Centro no encontrado' });
+    res.json(centro);
+  });
   app.get('/api/centros/:centroId/detalles', (req, res) => {
     res.json(DetalleAcademicoDAO.getAllByCentro(Number(req.params.centroId)));
   });
@@ -1294,9 +1299,11 @@ async function startServer() {
       // Buscar datos específicos del alumno dentro de la relación
       if (!alumno.fechaInicio || !alumno.fechaFin) return res.status(404).json({ error: 'Alumno no vinculado a esta relación' });
 
-      // Parsear festivos del curso
-      const festivos = curso.festivos || [];
-      const tutorias = curso.tutorias || [];
+      // Obtener festivos del centro educativo y tutorías del detalle académico
+      const centro = CentroDAO.getById(convenio.centroId);
+      const detalle = DetalleAcademicoDAO.getById(alumno.detalleAcademicoId);
+      const festivos = centro?.festivos || [];
+      const tutorias = detalle?.tutorias || [];
 
       // --- LÓGICA DE GENERACIÓN DE MESES PARA EL CALENDARIO ---
       const mesesData = [];

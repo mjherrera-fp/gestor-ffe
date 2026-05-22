@@ -47,6 +47,10 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     modulo: '', codigo: '', ra: '', nombre: '', impartidoEmpresa: false, actividadFormativa: '',
   });
 
+  // ── Festivos / Tutorías ──
+  const [newFestivo, setNewFestivo] = useState('');
+  const [newTutoria, setNewTutoria] = useState('');
+
   // ─────────────────────────────────────────
   //  EFECTOS
   // ─────────────────────────────────────────
@@ -247,6 +251,42 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   };
 
   // ─────────────────────────────────────────
+  //  HANDLERS: FESTIVOS / TUTORÍAS
+  // ─────────────────────────────────────────
+
+  const addFestivo = () => {
+    if (!newFestivo) return;
+    setCentroFormData(prev => ({
+      ...prev,
+      festivos: [...(prev.festivos || []), newFestivo],
+    }));
+    setNewFestivo('');
+  };
+
+  const removeFestivo = (date: string) => {
+    setCentroFormData(prev => ({
+      ...prev,
+      festivos: (prev.festivos || []).filter(f => f !== date),
+    }));
+  };
+
+  const addTutoria = () => {
+    if (!newTutoria) return;
+    setDetalleFormData(prev => ({
+      ...prev,
+      tutorias: [...(prev.tutorias || []), newTutoria],
+    }));
+    setNewTutoria('');
+  };
+
+  const removeTutoria = (date: string) => {
+    setDetalleFormData(prev => ({
+      ...prev,
+      tutorias: (prev.tutorias || []).filter(f => f !== date),
+    }));
+  };
+
+  // ─────────────────────────────────────────
   //  RETURN
   // ─────────────────────────────────────────
 
@@ -269,6 +309,9 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     // RAs
     newRA, setNewRA,
     addRA, removeRA,
+    // Festivos / Tutorías
+    newFestivo, setNewFestivo, addFestivo, removeFestivo,
+    newTutoria, setNewTutoria, addTutoria, removeTutoria,
     // Eliminar
     showDeleteConfirm, setShowDeleteConfirm,
     handleConfirmDelete,

@@ -144,7 +144,7 @@ export function RelacionFormModal({
                       {formData.alumnos?.map(ar => {
                         const alum            = alumnos.find(a => a.id === ar.id);
                         const studentStartDate = ar.fechaInicio || '';
-                        const studentEndDate   = calculateEndDateForHours(studentStartDate, alum?.totalHorasFFE!);
+                        const studentEndDate   = calculateEndDateForHours(studentStartDate, ar.totalHorasFFE);
                         return (
                           <div key={ar.id} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                             <div className="flex items-center justify-between">

@@ -1,19 +1,28 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { CentroEducativo } from '../../../types/index.ts';
+import { DateList } from '../../../components/ui/DateList.tsx';
 
-const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
+const labelClass = 'block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
 
 interface CentroFormModalProps {
   editing: CentroEducativo | null;
   formData: Partial<CentroEducativo>;
   onChange: (data: Partial<CentroEducativo>) => void;
+  newFestivo: string;
+  setNewFestivo: (v: string) => void;
+  onAddFestivo: () => void;
+  onRemoveFestivo: (d: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }
 
-export function CentroFormModal({ editing, formData, onChange, onSubmit, onClose }: CentroFormModalProps) {
+export function CentroFormModal({
+  editing, formData, onChange,
+  newFestivo, setNewFestivo, onAddFestivo, onRemoveFestivo,
+  onSubmit, onClose,
+}: CentroFormModalProps) {
   const update = (field: keyof CentroEducativo) => (e: React.ChangeEvent<HTMLInputElement>) =>
     onChange({ ...formData, [field]: e.target.value });
 
@@ -32,7 +41,7 @@ export function CentroFormModal({ editing, formData, onChange, onSubmit, onClose
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-8 space-y-4">
+        <form onSubmit={onSubmit} className="p-8 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
           <div>
             <label className={labelClass}>Nombre del Centro</label>
             <input
@@ -72,6 +81,19 @@ export function CentroFormModal({ editing, formData, onChange, onSubmit, onClose
               />
             </div>
           </div>
+
+          {/* Festivos */}
+          <DateList
+            label="Días Festivos"
+            count={formData.festivos?.length || 0}
+            dates={formData.festivos || []}
+            newDate={newFestivo}
+            onNewDateChange={setNewFestivo}
+            onAdd={onAddFestivo}
+            onRemove={onRemoveFestivo}
+            emptyText="No se han añadido días festivos todavía."
+          />
+
           <button
             type="submit"
             className="w-full bg-primary text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all mt-6 shadow-xl shadow-primary/20"
