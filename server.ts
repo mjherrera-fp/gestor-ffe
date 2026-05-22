@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { db } from './src/lib/db.ts';
-import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
+import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
@@ -382,6 +382,19 @@ async function startServer() {
         });
       }
 
+      // Registrar en histórico
+      try {
+        const adjNames = (attachments || []).map((a: { filename: string }) => a.filename);
+        HistoricoDAO.logComunicacion(
+          Array.isArray(to) ? to.join(', ') : (to || ''),
+          Array.isArray(cc) ? cc.join(', ') : (cc || ''),
+          Array.isArray(req.body.bcc) ? req.body.bcc.join(', ') : (req.body.bcc || ''),
+          subject || '',
+          html || '',
+          adjNames
+        );
+      } catch (e) { /* silencioso */ }
+
       // Limpiar adjuntos temporales
       for (const a of mailAttachments) {
         try { if (fs.existsSync(a.path)) fs.unlinkSync(a.path); } catch {}
@@ -428,15 +441,27 @@ async function startServer() {
     res.json({ success: true });
   });
   app.put('/api/alumnos/:id/estado-plan-formativo', (req, res) => {
+    const old = AlumnoDAO.getById(Number(req.params.id));
     AlumnoDAO.updateEstadoPlanFormativo(Number(req.params.id), req.body.estadoPlanFormativo);
+    try {
+      if (old) HistoricoDAO.logCambioEstado('plan_formativo', old.estadoPlanFormativo, req.body.estadoPlanFormativo, Number(req.params.id));
+    } catch {}
     res.json({ success: true });
   });
   app.put('/api/alumnos/:id/estado-seguimiento', (req, res) => {
+    const old = AlumnoDAO.getById(Number(req.params.id));
     AlumnoDAO.updateEstadoSeguimiento(Number(req.params.id), req.body.estadoSeguimiento);
+    try {
+      if (old) HistoricoDAO.logCambioEstado('seguimiento', old.estadoSeguimiento, req.body.estadoSeguimiento, Number(req.params.id));
+    } catch {}
     res.json({ success: true });
   });
   app.put('/api/alumnos/:id/estado-valoracion', (req, res) => {
+    const old = AlumnoDAO.getById(Number(req.params.id));
     AlumnoDAO.updateEstadoValoracion(Number(req.params.id), req.body.estadoValoracion);
+    try {
+      if (old) HistoricoDAO.logCambioEstado('valoracion', old.estadoValoracion, req.body.estadoValoracion, Number(req.params.id));
+    } catch {}
     res.json({ success: true });
   });
   app.delete('/api/alumnos/:id', (req, res) => {
@@ -572,17 +597,27 @@ async function startServer() {
     const { convenio } = req.body;
     if (!convenio.centroId) return res.status(400).json({ error: 'El centro educativo es obligatorio.' });
     const id = ConvenioDAO.create(convenio);
+    try { HistoricoDAO.logOperacionConvenio('CREATE', id as number, convenio.numConvenio); } catch {}
     res.json({ id });
   });
 
   app.put('/api/convenios/:id', (req, res) => {
     const { convenio } = req.body;
     if (!convenio.centroId) return res.status(400).json({ error: 'El centro educativo es obligatorio.' });
+    const old = ConvenioDAO.getById(Number(req.params.id));
     ConvenioDAO.update(Number(req.params.id), convenio);
+    try {
+      HistoricoDAO.logOperacionConvenio('UPDATE', Number(req.params.id), convenio.numConvenio);
+      if (old && old.estado !== convenio.estado) {
+        HistoricoDAO.logCambioEstado('convenio', old.estado, convenio.estado, Number(req.params.id), convenio.numConvenio);
+      }
+    } catch {}
     res.json({ success: true });
   });
   app.delete('/api/convenios/:id', (req, res) => {
+    const old = ConvenioDAO.getById(Number(req.params.id));
     ConvenioDAO.delete(Number(req.params.id));
+    try { HistoricoDAO.logOperacionConvenio('DELETE', Number(req.params.id), old?.numConvenio); } catch {}
     res.json({ success: true });
   });
 
@@ -619,6 +654,7 @@ async function startServer() {
         return res.status(400).json({ error: 'No se puede crear una relación si el convenio no está completado.' });
       }
       const id = RelacionAlumnoDAO.create(req.body);
+      try { HistoricoDAO.logOperacionRelacion('CREATE', id as number, req.body.numRelacion); } catch {}
       res.json({ id });
     } catch (error) {
       console.error(error);
@@ -627,7 +663,14 @@ async function startServer() {
   });
   app.put('/api/relaciones-alumnos/:id', (req, res) => {
     try {
+      const old = RelacionAlumnoDAO.getById(Number(req.params.id));
       RelacionAlumnoDAO.update(Number(req.params.id), req.body);
+      try {
+        HistoricoDAO.logOperacionRelacion('UPDATE', Number(req.params.id), req.body.numRelacion);
+        if (old && old.estado !== req.body.estado) {
+          HistoricoDAO.logCambioEstado('relacion', old.estado, req.body.estado, Number(req.params.id), req.body.numRelacion);
+        }
+      } catch {}
       res.json({ success: true });
     } catch (error) {
       console.error(error);
@@ -636,12 +679,29 @@ async function startServer() {
   });
   app.delete('/api/relaciones-alumnos/:id', (req, res) => {
     try {
+      const old = RelacionAlumnoDAO.getById(Number(req.params.id));
       RelacionAlumnoDAO.delete(Number(req.params.id));
+      try { HistoricoDAO.logOperacionRelacion('DELETE', Number(req.params.id), old?.numRelacion); } catch {}
       res.json({ success: true });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Error al eliminar' });
     }
+  });
+
+  // ─── HISTÓRICO ──────────────────────────────────────
+
+  app.get('/api/historico/comunicaciones', (req, res) => {
+    res.json(HistoricoDAO.getComunicaciones(req.query as any));
+  });
+  app.get('/api/historico/convenios', (req, res) => {
+    res.json(HistoricoDAO.getOperacionesConvenio(req.query as any));
+  });
+  app.get('/api/historico/relaciones', (req, res) => {
+    res.json(HistoricoDAO.getOperacionesRelacion(req.query as any));
+  });
+  app.get('/api/historico/estados', (req, res) => {
+    res.json(HistoricoDAO.getCambiosEstado(req.query as any));
   });
 
   // GENERAR DOCX
