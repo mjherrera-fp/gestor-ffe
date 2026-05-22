@@ -7,7 +7,6 @@ import {
   PlanFormativoEstadoLabels,
   SeguimientoEstado,
   SeguimientoEstadoLabels,
-  Curso,
   ValoracionEstado,
   ValoracionEstadoLabels,
 } from '../../../types/index.ts';
@@ -58,12 +57,11 @@ export const calculateEndDateForHours = (
   startDate: string,
   totalHours: number,
   horario: HorarioSemanal | undefined,
-  curso: Curso | null
+  festivos: string[]
 ): string | null => {
-  if (!startDate || !totalHours || !horario || !curso) return null;
+  if (!startDate || !totalHours || !horario) return null;
 
   const startParts = startDate.split('-').map(Number);
-  const festivos = curso.festivos || [];
   let remainingHoras = totalHours;
   let current = new Date(startParts[0], startParts[1] - 1, startParts[2]);
   let iterations = 0;
@@ -98,12 +96,11 @@ export const calculateStartDateFromEnd = (
   targetEndDate: string,
   totalHours: number,
   horario: HorarioSemanal | undefined,
-  curso: Curso | null
+  festivos: string[]
 ): string | null => {
-  if (!targetEndDate || !totalHours || !horario || !curso) return null;
+  if (!targetEndDate || !totalHours || !horario) return null;
 
   const [year, month, day] = targetEndDate.split('-').map(Number);
-  const festivos = curso.festivos || [];
   let remainingHoras = totalHours;
   let current = new Date(year, month - 1, day);
   let iterations = 0;

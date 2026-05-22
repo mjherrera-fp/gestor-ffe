@@ -98,9 +98,7 @@ function setupTables() {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     descripcion TEXT NOT NULL,
     fechaInicio TEXT NOT NULL,
-    fechaFin TEXT NOT NULL,
-    festivos TEXT,
-    tutorias TEXT
+    fechaFin TEXT NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS detalles_academicos (
@@ -280,6 +278,13 @@ function setupTables() {
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE convenios ADD COLUMN tipoFirma TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE profesores ADD COLUMN send_delay_ms INTEGER DEFAULT 1500"); } catch {}
+
+  // Migración: añadir festivos a centros_educativos y tutorias a detalles_academicos
+  try { db.exec("ALTER TABLE centros_educativos ADD COLUMN festivos TEXT"); } catch {}
+  try { db.exec("ALTER TABLE detalles_academicos ADD COLUMN tutorias TEXT"); } catch {}
+  // Migración: eliminar festivos y tutorias de cursos
+  try { db.exec("ALTER TABLE cursos DROP COLUMN festivos"); } catch {}
+  try { db.exec("ALTER TABLE cursos DROP COLUMN tutorias"); } catch {}
 
   // Migración: renombrar tutores_empresa → empresa_tutores
   try {

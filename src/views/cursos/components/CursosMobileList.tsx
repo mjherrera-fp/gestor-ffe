@@ -33,9 +33,6 @@ export function CursosMobileList({ cursos, onEdit, onDeleteRequest }: CursosMobi
           </div>
 
           <div className="flex items-center justify-between pt-2">
-            <div className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2">
-              <Calendar className="h-3 w-3" /> {curso.festivos?.length || 0} festivos
-            </div>
             <div className="flex gap-2">
               <button
                 onClick={() => onEdit(curso)}

@@ -18,9 +18,9 @@ interface Props {
 export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConfig }: Props) {
   const ctx = useRelaciones(cursoId, detalleAcademicoId);
 
-  // Adaptador para calculateEndDateForHours que inyecta el curso del contexto
+  // Adaptador para calculateEndDateForHours que inyecta los festivos del centro
   const calcEndDate = (start: string, hours: number) =>
-    calculateEndDateForHours(start, hours, ctx.formData.horario, ctx.curso);
+    calculateEndDateForHours(start, hours, ctx.formData.horario, ctx.centroFestivos);
 
   return (
     <div className="space-y-6 flex flex-col h-full animate-in fade-in duration-500">

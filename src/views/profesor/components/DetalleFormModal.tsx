@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus, Trash2, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { DetalleAcademico, ResultadoAprendizaje } from '../../../types/index.ts';
+import { DateList } from '../../../components/ui/DateList.tsx';
 
 const labelClass = 'block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
@@ -13,6 +14,10 @@ interface DetalleFormModalProps {
   onNewRAChange: (ra: Partial<ResultadoAprendizaje>) => void;
   onAddRA: () => void;
   onRemoveRA: (id: string) => void;
+  newTutoria: string;
+  setNewTutoria: (v: string) => void;
+  onAddTutoria: () => void;
+  onRemoveTutoria: (d: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }
@@ -20,6 +25,7 @@ interface DetalleFormModalProps {
 export function DetalleFormModal({
   editing, formData, onChange,
   newRA, onNewRAChange, onAddRA, onRemoveRA,
+  newTutoria, setNewTutoria, onAddTutoria, onRemoveTutoria,
   onSubmit, onClose,
 }: DetalleFormModalProps) {
   const update = (field: keyof DetalleAcademico) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -110,6 +116,20 @@ export function DetalleFormModal({
                 />
               </div>
             </div>
+          </div>
+
+          {/* ── Tutorías ── */}
+          <div>
+            <DateList
+              label="Días de Tutorías"
+              count={formData.tutorias?.length || 0}
+              dates={formData.tutorias || []}
+              newDate={newTutoria}
+              onNewDateChange={setNewTutoria}
+              onAdd={onAddTutoria}
+              onRemove={onRemoveTutoria}
+              emptyText="No se han añadido días de tutoría todavía."
+            />
           </div>
 
           {/* ── Resultados de Aprendizaje ── */}

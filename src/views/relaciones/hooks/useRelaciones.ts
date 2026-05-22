@@ -46,6 +46,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
     const [alumnos, setAlumnos] = useState<Alumno[]>([]);
     const [tutores, setTutores] = useState<TutorEmpresa[]>([]);
     const [curso, setCurso] = useState<Curso | null>(null);
+    const [centroFestivos, setCentroFestivos] = useState<string[]>([]);
 
     // ── UI de listado ──
     const [selectedRelacion, setSelectedRelacion] = useState<RelacionAlumno | null>(null);
@@ -185,6 +186,10 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
                 fetch(`/api/empresas/${conv.empresaId}/tutores`)
                     .then(res => res.json())
                     .then(setTutores);
+                fetch(`/api/centros/${conv.centroId}`)
+                    .then(res => res.json())
+                    .then(centro => setCentroFestivos(centro.festivos || []))
+                    .catch(() => setCentroFestivos([]));
             }
         }
     }, [formData.convenioId, convenios]);
@@ -204,7 +209,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             setFormData(prev => ({
                 ...prev,
                 alumnos: (prev.alumnos || []).map(ar => {
-                    const endDate = calculateEndDateForHours(ar.fechaInicio || '', ar.totalHorasFFE, prev.horario, curso);
+                    const endDate = calculateEndDateForHours(ar.fechaInicio || '', ar.totalHorasFFE, prev.horario, centroFestivos);
                     return endDate ? { ...ar, fechaFin: endDate } : ar;
                 }),
             }));
@@ -316,7 +321,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = calculateEndDateForHours(a.fechaInicio || '', hours, prev.horario, curso);
+                const newEndDate = calculateEndDateForHours(a.fechaInicio || '', hours, prev.horario, centroFestivos);
                 return { ...a, totalHorasFFE: hours, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -327,7 +332,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = calculateEndDateForHours(date, a.totalHorasFFE || 0, prev.horario, curso);
+                const newEndDate = calculateEndDateForHours(date, a.totalHorasFFE || 0, prev.horario, centroFestivos);
                 return { ...a, fechaInicio: date, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -339,7 +344,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             ...prev,
             alumnos: (prev.alumnos || []).map(a => ({
                 ...a,
-                fechaInicio: calculateStartDateFromEnd(targetEndDate, a.totalHorasFFE, prev.horario, curso) || a.fechaInicio,
+                fechaInicio: calculateStartDateFromEnd(targetEndDate, a.totalHorasFFE, prev.horario, centroFestivos) || a.fechaInicio,
                 fechaFin: targetEndDate,
             })),
         }));
@@ -350,7 +355,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
-                const endDate = calculateEndDateForHours(targetStartDate, a.totalHorasFFE || 0, prev.horario, curso);
+                const endDate = calculateEndDateForHours(targetStartDate, a.totalHorasFFE || 0, prev.horario, centroFestivos);
                 return { ...a, fechaInicio: targetStartDate, fechaFin: endDate || a.fechaFin };
             }),
         }));
@@ -1331,7 +1336,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
 
     return {
         // Datos
-        relaciones, convenios, alumnos, tutores, curso,
+        relaciones, convenios, alumnos, tutores, curso, centroFestivos,
         // Listado UI
         selectedRelacion, setSelectedRelacion,
         showDeleteConfirm, setShowDeleteConfirm,
