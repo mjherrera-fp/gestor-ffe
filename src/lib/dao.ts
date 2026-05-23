@@ -565,13 +565,13 @@ export const EmpresaEstadisticaDAO = {
 
 export const ConvenioDAO = {
   getAll: (cursoId?: number, centroId?: number) => {
-    let query = "SELECT c.*, e.nombre as empresaNombre, ce.nombre as centroNombre FROM convenios c JOIN empresas e ON c.empresaId = e.id LEFT JOIN centros_educativos ce ON c.centroId = ce.id";
+    let query = "SELECT c.*, e.nombre as empresaNombre, e.ciudad as empresaCiudad, ce.nombre as centroNombre FROM convenios c JOIN empresas e ON c.empresaId = e.id LEFT JOIN centros_educativos ce ON c.centroId = ce.id";
     const params: any[] = [];
     const conditions: string[] = [];
     if (cursoId) { conditions.push('c.cursoId = ?'); params.push(cursoId); }
     if (centroId) { conditions.push('c.centroId = ?'); params.push(centroId); }
     if (conditions.length > 0) query += ' WHERE ' + conditions.join(' AND ');
-    return db.prepare(query).all(...params) as (Convenio & { empresaNombre: string, centroNombre?: string })[];
+    return db.prepare(query).all(...params) as (Convenio & { empresaNombre: string, empresaCiudad?: string, centroNombre?: string })[];
   },
   getById: (id: number) => db.prepare('SELECT * FROM convenios WHERE id = ?').get(id) as Convenio,
   create: (convenio: Convenio) => {

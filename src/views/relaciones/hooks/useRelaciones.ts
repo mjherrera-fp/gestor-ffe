@@ -42,7 +42,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
 
     // ── Datos del servidor ──
     const [relaciones, setRelaciones] = useState<RelacionAlumno[]>([]);
-    const [convenios, setConvenios] = useState<(Convenio & { empresaNombre: string })[]>([]);
+    const [convenios, setConvenios] = useState<(Convenio & { empresaNombre: string; empresaCiudad?: string })[]>([]);
     const [alumnos, setAlumnos] = useState<Alumno[]>([]);
     const [tutores, setTutores] = useState<TutorEmpresa[]>([]);
     const [curso, setCurso] = useState<Curso | null>(null);
@@ -254,6 +254,12 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             setFormData({ ...rel, alumnos: rel.alumnos || [] });
             const conv = convenios.find(c => c.id === rel.convenioId);
             setSearchTermConvenio(conv ? `${conv.empresaNombre} (Ref: ${conv.numConvenio})` : '');
+            // Sincronizar festivos de empresa inmediatamente desde datos ya cargados
+            if (conv?.empresaCiudad && empresaFestivosMap[conv.empresaCiudad]) {
+                setEmpresaFestivosActuales(empresaFestivosMap[conv.empresaCiudad]);
+            } else {
+                setEmpresaFestivosActuales([]);
+            }
         } else {
             setEditing(null);
             setFormData({
@@ -268,6 +274,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
                 firmaValoracion: FirmaTipo.DIGITAL,
             });
             setSearchTermConvenio('');
+            setEmpresaFestivosActuales([]);
         }
         setShowForm(true);
     };
@@ -1365,6 +1372,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
     return {
         // Datos
         relaciones, convenios, alumnos, tutores, curso, centroFestivos,
+        usarFestivos, usarFestivosEmpresa, empresaFestivosActuales,
         // Listado UI
         selectedRelacion, setSelectedRelacion,
         showDeleteConfirm, setShowDeleteConfirm,
