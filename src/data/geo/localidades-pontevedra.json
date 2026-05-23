@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "GAL",
+    "slug": "gal",
+    "name": "Galicia"
+  },
+  "province": {
+    "code": "36",
+    "slug": "pontevedra",
+    "name": "Pontevedra"
+  },
+  "municipalities": [
+    {
+      "ine": "36020",
+      "slug": "agolada",
+      "name": "Agolada"
+    },
+    {
+      "ine": "36001",
+      "slug": "arbo",
+      "name": "Arbo"
+    },
+    {
+      "ine": "36003",
+      "slug": "baiona",
+      "name": "Baiona"
+    },
+    {
+      "ine": "36002",
+      "slug": "barro",
+      "name": "Barro"
+    },
+    {
+      "ine": "36004",
+      "slug": "bueu",
+      "name": "Bueu"
+    },
+    {
+      "ine": "36005",
+      "slug": "caldas-de-reis",
+      "name": "Caldas de Reis"
+    },
+    {
+      "ine": "36006",
+      "slug": "cambados",
+      "name": "Cambados"
+    },
+    {
+      "ine": "36007",
+      "slug": "campo-lameiro",
+      "name": "Campo Lameiro"
+    },
+    {
+      "ine": "36008",
+      "slug": "cangas",
+      "name": "Cangas"
+    },
+    {
+      "ine": "36009",
+      "slug": "caniza-a",
+      "name": "Cañiza, A"
+    },
+    {
+      "ine": "36010",
+      "slug": "catoira",
+      "name": "Catoira"
+    },
+    {
+      "ine": "36902",
+      "slug": "cerdedo-cotobade",
+      "name": "Cerdedo-Cotobade"
+    },
+    {
+      "ine": "36013",
+      "slug": "covelo",
+      "name": "Covelo"
+    },
+    {
+      "ine": "36014",
+      "slug": "crecente",
+      "name": "Crecente"
+    },
+    {
+      "ine": "36015",
+      "slug": "cuntis",
+      "name": "Cuntis"
+    },
+    {
+      "ine": "36016",
+      "slug": "dozon",
+      "name": "Dozón"
+    },
+    {
+      "ine": "36017",
+      "slug": "estrada-a",
+      "name": "Estrada, A"
+    },
+    {
+      "ine": "36018",
+      "slug": "forcarei",
+      "name": "Forcarei"
+    },
+    {
+      "ine": "36019",
+      "slug": "fornelos-de-montes",
+      "name": "Fornelos de Montes"
+    },
+    {
+      "ine": "36021",
+      "slug": "gondomar",
+      "name": "Gondomar"
+    },
+    {
+      "ine": "36022",
+      "slug": "grove-o",
+      "name": "Grove, O"
+    },
+    {
+      "ine": "36023",
+      "slug": "guarda-a",
+      "name": "Guarda, A"
+    },
+    {
+      "ine": "36901",
+      "slug": "illa-de-arousa-a",
+      "name": "Illa de Arousa, A"
+    },
+    {
+      "ine": "36024",
+      "slug": "lalin",
+      "name": "Lalín"
+    },
+    {
+      "ine": "36025",
+      "slug": "lama-a",
+      "name": "Lama, A"
+    },
+    {
+      "ine": "36026",
+      "slug": "marin",
+      "name": "Marín"
+    },
+    {
+      "ine": "36027",
+      "slug": "meano",
+      "name": "Meaño"
+    },
+    {
+      "ine": "36028",
+      "slug": "meis",
+      "name": "Meis"
+    },
+    {
+      "ine": "36029",
+      "slug": "moana",
+      "name": "Moaña"
+    },
+    {
+      "ine": "36030",
+      "slug": "mondariz",
+      "name": "Mondariz"
+    },
+    {
+      "ine": "36031",
+      "slug": "mondariz-balneario",
+      "name": "Mondariz-Balneario"
+    },
+    {
+      "ine": "36032",
+      "slug": "morana",
+      "name": "Moraña"
+    },
+    {
+      "ine": "36033",
+      "slug": "mos",
+      "name": "Mos"
+    },
+    {
+      "ine": "36034",
+      "slug": "neves-as",
+      "name": "Neves, As"
+    },
+    {
+      "ine": "36035",
+      "slug": "nigran",
+      "name": "Nigrán"
+    },
+    {
+      "ine": "36036",
+      "slug": "oia",
+      "name": "Oia"
+    },
+    {
+      "ine": "36037",
+      "slug": "pazos-de-borben",
+      "name": "Pazos de Borbén"
+    },
+    {
+      "ine": "36041",
+      "slug": "poio",
+      "name": "Poio"
+    },
+    {
+      "ine": "36043",
+      "slug": "ponte-caldelas",
+      "name": "Ponte Caldelas"
+    },
+    {
+      "ine": "36042",
+      "slug": "ponteareas",
+      "name": "Ponteareas"
+    },
+    {
+      "ine": "36044",
+      "slug": "pontecesures",
+      "name": "Pontecesures"
+    },
+    {
+      "ine": "36038",
+      "slug": "pontevedra",
+      "name": "Pontevedra"
+    },
+    {
+      "ine": "36039",
+      "slug": "porrino-o",
+      "name": "Porriño, O"
+    },
+    {
+      "ine": "36040",
+      "slug": "portas",
+      "name": "Portas"
+    },
+    {
+      "ine": "36045",
+      "slug": "redondela",
+      "name": "Redondela"
+    },
+    {
+      "ine": "36046",
+      "slug": "ribadumia",
+      "name": "Ribadumia"
+    },
+    {
+      "ine": "36047",
+      "slug": "rodeiro",
+      "name": "Rodeiro"
+    },
+    {
+      "ine": "36048",
+      "slug": "rosal-o",
+      "name": "Rosal, O"
+    },
+    {
+      "ine": "36049",
+      "slug": "salceda-de-caselas",
+      "name": "Salceda de Caselas"
+    },
+    {
+      "ine": "36050",
+      "slug": "salvaterra-de-mino",
+      "name": "Salvaterra de Miño"
+    },
+    {
+      "ine": "36051",
+      "slug": "sanxenxo",
+      "name": "Sanxenxo"
+    },
+    {
+      "ine": "36052",
+      "slug": "silleda",
+      "name": "Silleda"
+    },
+    {
+      "ine": "36053",
+      "slug": "soutomaior",
+      "name": "Soutomaior"
+    },
+    {
+      "ine": "36054",
+      "slug": "tomino",
+      "name": "Tomiño"
+    },
+    {
+      "ine": "36055",
+      "slug": "tui",
+      "name": "Tui"
+    },
+    {
+      "ine": "36056",
+      "slug": "valga",
+      "name": "Valga"
+    },
+    {
+      "ine": "36057",
+      "slug": "vigo",
+      "name": "Vigo"
+    },
+    {
+      "ine": "36059",
+      "slug": "vila-de-cruces",
+      "name": "Vila de Cruces"
+    },
+    {
+      "ine": "36058",
+      "slug": "vilaboa",
+      "name": "Vilaboa"
+    },
+    {
+      "ine": "36060",
+      "slug": "vilagarcia-de-arousa",
+      "name": "Vilagarcía de Arousa"
+    },
+    {
+      "ine": "36061",
+      "slug": "vilanova-de-arousa",
+      "name": "Vilanova de Arousa"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

@@ -20,7 +20,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
 
   // Adaptador para calculateEndDateForHours que inyecta los festivos del centro
   const calcEndDate = (start: string, hours: number) =>
-    calculateEndDateForHours(start, hours, ctx.formData.horario, ctx.centroFestivos);
+    calculateEndDateForHours(start, hours, ctx.formData.horario, ctx.centroFestivos, ctx.usarFestivos, ctx.empresaFestivosActuales, ctx.usarFestivosEmpresa);
 
   return (
     <div className="space-y-6 flex flex-col h-full animate-in fade-in duration-500">

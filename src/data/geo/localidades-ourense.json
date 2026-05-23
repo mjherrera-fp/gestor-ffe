@@ -1,0 +1,480 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "GAL",
+    "slug": "gal",
+    "name": "Galicia"
+  },
+  "province": {
+    "code": "32",
+    "slug": "ourense",
+    "name": "Ourense"
+  },
+  "municipalities": [
+    {
+      "ine": "32001",
+      "slug": "allariz",
+      "name": "Allariz"
+    },
+    {
+      "ine": "32002",
+      "slug": "amoeiro",
+      "name": "Amoeiro"
+    },
+    {
+      "ine": "32003",
+      "slug": "arnoia-a",
+      "name": "Arnoia, A"
+    },
+    {
+      "ine": "32004",
+      "slug": "avion",
+      "name": "Avión"
+    },
+    {
+      "ine": "32005",
+      "slug": "baltar",
+      "name": "Baltar"
+    },
+    {
+      "ine": "32006",
+      "slug": "bande",
+      "name": "Bande"
+    },
+    {
+      "ine": "32007",
+      "slug": "banos-de-molgas",
+      "name": "Baños de Molgas"
+    },
+    {
+      "ine": "32008",
+      "slug": "barbadas",
+      "name": "Barbadás"
+    },
+    {
+      "ine": "32009",
+      "slug": "barco-de-valdeorras-o",
+      "name": "Barco de Valdeorras, O"
+    },
+    {
+      "ine": "32010",
+      "slug": "beade",
+      "name": "Beade"
+    },
+    {
+      "ine": "32011",
+      "slug": "beariz",
+      "name": "Beariz"
+    },
+    {
+      "ine": "32012",
+      "slug": "blancos-os",
+      "name": "Blancos, Os"
+    },
+    {
+      "ine": "32013",
+      "slug": "boboras",
+      "name": "Boborás"
+    },
+    {
+      "ine": "32014",
+      "slug": "bola-a",
+      "name": "Bola, A"
+    },
+    {
+      "ine": "32015",
+      "slug": "bolo-o",
+      "name": "Bolo, O"
+    },
+    {
+      "ine": "32016",
+      "slug": "calvos-de-randin",
+      "name": "Calvos de Randín"
+    },
+    {
+      "ine": "32018",
+      "slug": "carballeda-de-avia",
+      "name": "Carballeda de Avia"
+    },
+    {
+      "ine": "32017",
+      "slug": "carballeda-de-valdeorras",
+      "name": "Carballeda de Valdeorras"
+    },
+    {
+      "ine": "32019",
+      "slug": "carballino-o",
+      "name": "Carballiño, O"
+    },
+    {
+      "ine": "32020",
+      "slug": "cartelle",
+      "name": "Cartelle"
+    },
+    {
+      "ine": "32022",
+      "slug": "castrelo-de-mino",
+      "name": "Castrelo de Miño"
+    },
+    {
+      "ine": "32021",
+      "slug": "castrelo-do-val",
+      "name": "Castrelo do Val"
+    },
+    {
+      "ine": "32023",
+      "slug": "castro-caldelas",
+      "name": "Castro Caldelas"
+    },
+    {
+      "ine": "32024",
+      "slug": "celanova",
+      "name": "Celanova"
+    },
+    {
+      "ine": "32025",
+      "slug": "cenlle",
+      "name": "Cenlle"
+    },
+    {
+      "ine": "32029",
+      "slug": "chandrexa-de-queixa",
+      "name": "Chandrexa de Queixa"
+    },
+    {
+      "ine": "32026",
+      "slug": "coles",
+      "name": "Coles"
+    },
+    {
+      "ine": "32027",
+      "slug": "cortegada",
+      "name": "Cortegada"
+    },
+    {
+      "ine": "32028",
+      "slug": "cualedro",
+      "name": "Cualedro"
+    },
+    {
+      "ine": "32030",
+      "slug": "entrimo",
+      "name": "Entrimo"
+    },
+    {
+      "ine": "32031",
+      "slug": "esgos",
+      "name": "Esgos"
+    },
+    {
+      "ine": "32033",
+      "slug": "gomesende",
+      "name": "Gomesende"
+    },
+    {
+      "ine": "32034",
+      "slug": "gudina-a",
+      "name": "Gudiña, A"
+    },
+    {
+      "ine": "32035",
+      "slug": "irixo-o",
+      "name": "Irixo, O"
+    },
+    {
+      "ine": "32038",
+      "slug": "larouco",
+      "name": "Larouco"
+    },
+    {
+      "ine": "32039",
+      "slug": "laza",
+      "name": "Laza"
+    },
+    {
+      "ine": "32040",
+      "slug": "leiro",
+      "name": "Leiro"
+    },
+    {
+      "ine": "32041",
+      "slug": "lobeira",
+      "name": "Lobeira"
+    },
+    {
+      "ine": "32042",
+      "slug": "lobios",
+      "name": "Lobios"
+    },
+    {
+      "ine": "32043",
+      "slug": "maceda",
+      "name": "Maceda"
+    },
+    {
+      "ine": "32044",
+      "slug": "manzaneda",
+      "name": "Manzaneda"
+    },
+    {
+      "ine": "32045",
+      "slug": "maside",
+      "name": "Maside"
+    },
+    {
+      "ine": "32046",
+      "slug": "melon",
+      "name": "Melón"
+    },
+    {
+      "ine": "32047",
+      "slug": "merca-a",
+      "name": "Merca, A"
+    },
+    {
+      "ine": "32048",
+      "slug": "mezquita-a",
+      "name": "Mezquita, A"
+    },
+    {
+      "ine": "32049",
+      "slug": "montederramo",
+      "name": "Montederramo"
+    },
+    {
+      "ine": "32050",
+      "slug": "monterrei",
+      "name": "Monterrei"
+    },
+    {
+      "ine": "32051",
+      "slug": "muinos",
+      "name": "Muíños"
+    },
+    {
+      "ine": "32052",
+      "slug": "nogueira-de-ramuin",
+      "name": "Nogueira de Ramuín"
+    },
+    {
+      "ine": "32053",
+      "slug": "oimbra",
+      "name": "Oímbra"
+    },
+    {
+      "ine": "32054",
+      "slug": "ourense",
+      "name": "Ourense"
+    },
+    {
+      "ine": "32055",
+      "slug": "paderne-de-allariz",
+      "name": "Paderne de Allariz"
+    },
+    {
+      "ine": "32056",
+      "slug": "padrenda",
+      "name": "Padrenda"
+    },
+    {
+      "ine": "32057",
+      "slug": "parada-de-sil",
+      "name": "Parada de Sil"
+    },
+    {
+      "ine": "32058",
+      "slug": "pereiro-de-aguiar-o",
+      "name": "Pereiro de Aguiar, O"
+    },
+    {
+      "ine": "32059",
+      "slug": "peroxa-a",
+      "name": "Peroxa, A"
+    },
+    {
+      "ine": "32060",
+      "slug": "petin",
+      "name": "Petín"
+    },
+    {
+      "ine": "32061",
+      "slug": "pinor",
+      "name": "Piñor"
+    },
+    {
+      "ine": "32063",
+      "slug": "pobra-de-trives-a",
+      "name": "Pobra de Trives, A"
+    },
+    {
+      "ine": "32064",
+      "slug": "pontedeva",
+      "name": "Pontedeva"
+    },
+    {
+      "ine": "32062",
+      "slug": "porqueira",
+      "name": "Porqueira"
+    },
+    {
+      "ine": "32065",
+      "slug": "punxin",
+      "name": "Punxín"
+    },
+    {
+      "ine": "32066",
+      "slug": "quintela-de-leirado",
+      "name": "Quintela de Leirado"
+    },
+    {
+      "ine": "32067",
+      "slug": "rairiz-de-veiga",
+      "name": "Rairiz de Veiga"
+    },
+    {
+      "ine": "32068",
+      "slug": "ramiras",
+      "name": "Ramirás"
+    },
+    {
+      "ine": "32069",
+      "slug": "ribadavia",
+      "name": "Ribadavia"
+    },
+    {
+      "ine": "32071",
+      "slug": "rios",
+      "name": "Riós"
+    },
+    {
+      "ine": "32072",
+      "slug": "rua-a",
+      "name": "Rúa, A"
+    },
+    {
+      "ine": "32073",
+      "slug": "rubia",
+      "name": "Rubiá"
+    },
+    {
+      "ine": "32074",
+      "slug": "san-amaro",
+      "name": "San Amaro"
+    },
+    {
+      "ine": "32075",
+      "slug": "san-cibrao-das-vinas",
+      "name": "San Cibrao das Viñas"
+    },
+    {
+      "ine": "32076",
+      "slug": "san-cristovo-de-cea",
+      "name": "San Cristovo de Cea"
+    },
+    {
+      "ine": "32070",
+      "slug": "san-xoan-de-rio",
+      "name": "San Xoán de Río"
+    },
+    {
+      "ine": "32077",
+      "slug": "sandias",
+      "name": "Sandiás"
+    },
+    {
+      "ine": "32078",
+      "slug": "sarreaus",
+      "name": "Sarreaus"
+    },
+    {
+      "ine": "32079",
+      "slug": "taboadela",
+      "name": "Taboadela"
+    },
+    {
+      "ine": "32080",
+      "slug": "teixeira-a",
+      "name": "Teixeira, A"
+    },
+    {
+      "ine": "32081",
+      "slug": "toen",
+      "name": "Toén"
+    },
+    {
+      "ine": "32082",
+      "slug": "trasmiras",
+      "name": "Trasmiras"
+    },
+    {
+      "ine": "32083",
+      "slug": "veiga-a",
+      "name": "Veiga, A"
+    },
+    {
+      "ine": "32084",
+      "slug": "verea",
+      "name": "Verea"
+    },
+    {
+      "ine": "32085",
+      "slug": "verin",
+      "name": "Verín"
+    },
+    {
+      "ine": "32086",
+      "slug": "viana-do-bolo",
+      "name": "Viana do Bolo"
+    },
+    {
+      "ine": "32087",
+      "slug": "vilamarin",
+      "name": "Vilamarín"
+    },
+    {
+      "ine": "32088",
+      "slug": "vilamartin-de-valdeorras",
+      "name": "Vilamartín de Valdeorras"
+    },
+    {
+      "ine": "32089",
+      "slug": "vilar-de-barrio",
+      "name": "Vilar de Barrio"
+    },
+    {
+      "ine": "32090",
+      "slug": "vilar-de-santos",
+      "name": "Vilar de Santos"
+    },
+    {
+      "ine": "32091",
+      "slug": "vilardevos",
+      "name": "Vilardevós"
+    },
+    {
+      "ine": "32092",
+      "slug": "vilarino-de-conso",
+      "name": "Vilariño de Conso"
+    },
+    {
+      "ine": "32032",
+      "slug": "xinzo-de-limia",
+      "name": "Xinzo de Limia"
+    },
+    {
+      "ine": "32036",
+      "slug": "xunqueira-de-ambia",
+      "name": "Xunqueira de Ambía"
+    },
+    {
+      "ine": "32037",
+      "slug": "xunqueira-de-espadanedo",
+      "name": "Xunqueira de Espadanedo"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

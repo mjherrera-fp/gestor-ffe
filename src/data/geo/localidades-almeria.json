@@ -1,0 +1,535 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "AND",
+    "slug": "and",
+    "name": "Andalucía"
+  },
+  "province": {
+    "code": "04",
+    "slug": "almeria",
+    "name": "Almería"
+  },
+  "municipalities": [
+    {
+      "ine": "04001",
+      "slug": "abla",
+      "name": "Abla"
+    },
+    {
+      "ine": "04002",
+      "slug": "abrucena",
+      "name": "Abrucena"
+    },
+    {
+      "ine": "04003",
+      "slug": "adra",
+      "name": "Adra"
+    },
+    {
+      "ine": "04004",
+      "slug": "albanchez",
+      "name": "Albánchez"
+    },
+    {
+      "ine": "04005",
+      "slug": "alboloduy",
+      "name": "Alboloduy"
+    },
+    {
+      "ine": "04006",
+      "slug": "albox",
+      "name": "Albox"
+    },
+    {
+      "ine": "04007",
+      "slug": "alcolea",
+      "name": "Alcolea"
+    },
+    {
+      "ine": "04008",
+      "slug": "alcontar",
+      "name": "Alcóntar"
+    },
+    {
+      "ine": "04009",
+      "slug": "alcudia-de-monteagud",
+      "name": "Alcudia de Monteagud"
+    },
+    {
+      "ine": "04010",
+      "slug": "alhabia",
+      "name": "Alhabia"
+    },
+    {
+      "ine": "04011",
+      "slug": "alhama-de-almeria",
+      "name": "Alhama de Almería"
+    },
+    {
+      "ine": "04012",
+      "slug": "alicun",
+      "name": "Alicún"
+    },
+    {
+      "ine": "04013",
+      "slug": "almeria",
+      "name": "Almería"
+    },
+    {
+      "ine": "04014",
+      "slug": "almocita",
+      "name": "Almócita"
+    },
+    {
+      "ine": "04015",
+      "slug": "alsodux",
+      "name": "Alsodux"
+    },
+    {
+      "ine": "04016",
+      "slug": "antas",
+      "name": "Antas"
+    },
+    {
+      "ine": "04017",
+      "slug": "arboleas",
+      "name": "Arboleas"
+    },
+    {
+      "ine": "04018",
+      "slug": "armuna-de-almanzora",
+      "name": "Armuña de Almanzora"
+    },
+    {
+      "ine": "04019",
+      "slug": "bacares",
+      "name": "Bacares"
+    },
+    {
+      "ine": "04904",
+      "slug": "balanegra",
+      "name": "Balanegra"
+    },
+    {
+      "ine": "04020",
+      "slug": "bayarcal",
+      "name": "Bayárcal"
+    },
+    {
+      "ine": "04021",
+      "slug": "bayarque",
+      "name": "Bayarque"
+    },
+    {
+      "ine": "04022",
+      "slug": "bedar",
+      "name": "Bédar"
+    },
+    {
+      "ine": "04023",
+      "slug": "beires",
+      "name": "Beires"
+    },
+    {
+      "ine": "04024",
+      "slug": "benahadux",
+      "name": "Benahadux"
+    },
+    {
+      "ine": "04026",
+      "slug": "benitagla",
+      "name": "Benitagla"
+    },
+    {
+      "ine": "04027",
+      "slug": "benizalon",
+      "name": "Benizalón"
+    },
+    {
+      "ine": "04028",
+      "slug": "bentarique",
+      "name": "Bentarique"
+    },
+    {
+      "ine": "04029",
+      "slug": "berja",
+      "name": "Berja"
+    },
+    {
+      "ine": "04030",
+      "slug": "canjayar",
+      "name": "Canjáyar"
+    },
+    {
+      "ine": "04031",
+      "slug": "cantoria",
+      "name": "Cantoria"
+    },
+    {
+      "ine": "04032",
+      "slug": "carboneras",
+      "name": "Carboneras"
+    },
+    {
+      "ine": "04033",
+      "slug": "castro-de-filabres",
+      "name": "Castro de Filabres"
+    },
+    {
+      "ine": "04036",
+      "slug": "chercos",
+      "name": "Chercos"
+    },
+    {
+      "ine": "04037",
+      "slug": "chirivel",
+      "name": "Chirivel"
+    },
+    {
+      "ine": "04034",
+      "slug": "cobdar",
+      "name": "Cóbdar"
+    },
+    {
+      "ine": "04035",
+      "slug": "cuevas-del-almanzora",
+      "name": "Cuevas del Almanzora"
+    },
+    {
+      "ine": "04038",
+      "slug": "dalias",
+      "name": "Dalías"
+    },
+    {
+      "ine": "04902",
+      "slug": "ejido-el",
+      "name": "Ejido, El"
+    },
+    {
+      "ine": "04041",
+      "slug": "enix",
+      "name": "Enix"
+    },
+    {
+      "ine": "04043",
+      "slug": "felix",
+      "name": "Felix"
+    },
+    {
+      "ine": "04044",
+      "slug": "fines",
+      "name": "Fines"
+    },
+    {
+      "ine": "04045",
+      "slug": "finana",
+      "name": "Fiñana"
+    },
+    {
+      "ine": "04046",
+      "slug": "fondon",
+      "name": "Fondón"
+    },
+    {
+      "ine": "04047",
+      "slug": "gador",
+      "name": "Gádor"
+    },
+    {
+      "ine": "04048",
+      "slug": "gallardos-los",
+      "name": "Gallardos, Los"
+    },
+    {
+      "ine": "04049",
+      "slug": "garrucha",
+      "name": "Garrucha"
+    },
+    {
+      "ine": "04050",
+      "slug": "gergal",
+      "name": "Gérgal"
+    },
+    {
+      "ine": "04051",
+      "slug": "huecija",
+      "name": "Huécija"
+    },
+    {
+      "ine": "04052",
+      "slug": "huercal-de-almeria",
+      "name": "Huércal de Almería"
+    },
+    {
+      "ine": "04053",
+      "slug": "huercal-overa",
+      "name": "Huércal-Overa"
+    },
+    {
+      "ine": "04054",
+      "slug": "illar",
+      "name": "Íllar"
+    },
+    {
+      "ine": "04055",
+      "slug": "instincion",
+      "name": "Instinción"
+    },
+    {
+      "ine": "04056",
+      "slug": "laroya",
+      "name": "Laroya"
+    },
+    {
+      "ine": "04057",
+      "slug": "laujar-de-andarax",
+      "name": "Láujar de Andarax"
+    },
+    {
+      "ine": "04058",
+      "slug": "lijar",
+      "name": "Líjar"
+    },
+    {
+      "ine": "04059",
+      "slug": "lubrin",
+      "name": "Lubrín"
+    },
+    {
+      "ine": "04060",
+      "slug": "lucainena-de-las-torres",
+      "name": "Lucainena de las Torres"
+    },
+    {
+      "ine": "04061",
+      "slug": "lucar",
+      "name": "Lúcar"
+    },
+    {
+      "ine": "04062",
+      "slug": "macael",
+      "name": "Macael"
+    },
+    {
+      "ine": "04063",
+      "slug": "maria",
+      "name": "María"
+    },
+    {
+      "ine": "04064",
+      "slug": "mojacar",
+      "name": "Mojácar"
+    },
+    {
+      "ine": "04903",
+      "slug": "mojonera-la",
+      "name": "Mojonera, La"
+    },
+    {
+      "ine": "04065",
+      "slug": "nacimiento",
+      "name": "Nacimiento"
+    },
+    {
+      "ine": "04066",
+      "slug": "nijar",
+      "name": "Níjar"
+    },
+    {
+      "ine": "04067",
+      "slug": "ohanes",
+      "name": "Ohanes"
+    },
+    {
+      "ine": "04068",
+      "slug": "olula-de-castro",
+      "name": "Olula de Castro"
+    },
+    {
+      "ine": "04069",
+      "slug": "olula-del-rio",
+      "name": "Olula del Río"
+    },
+    {
+      "ine": "04070",
+      "slug": "oria",
+      "name": "Oria"
+    },
+    {
+      "ine": "04071",
+      "slug": "padules",
+      "name": "Padules"
+    },
+    {
+      "ine": "04072",
+      "slug": "partaloa",
+      "name": "Partaloa"
+    },
+    {
+      "ine": "04073",
+      "slug": "paterna-del-rio",
+      "name": "Paterna del Río"
+    },
+    {
+      "ine": "04074",
+      "slug": "pechina",
+      "name": "Pechina"
+    },
+    {
+      "ine": "04075",
+      "slug": "pulpi",
+      "name": "Pulpí"
+    },
+    {
+      "ine": "04076",
+      "slug": "purchena",
+      "name": "Purchena"
+    },
+    {
+      "ine": "04077",
+      "slug": "ragol",
+      "name": "Rágol"
+    },
+    {
+      "ine": "04078",
+      "slug": "rioja",
+      "name": "Rioja"
+    },
+    {
+      "ine": "04079",
+      "slug": "roquetas-de-mar",
+      "name": "Roquetas de Mar"
+    },
+    {
+      "ine": "04080",
+      "slug": "santa-cruz-de-marchena",
+      "name": "Santa Cruz de Marchena"
+    },
+    {
+      "ine": "04081",
+      "slug": "santa-fe-de-mondujar",
+      "name": "Santa Fe de Mondújar"
+    },
+    {
+      "ine": "04082",
+      "slug": "senes",
+      "name": "Senés"
+    },
+    {
+      "ine": "04083",
+      "slug": "seron",
+      "name": "Serón"
+    },
+    {
+      "ine": "04084",
+      "slug": "sierro",
+      "name": "Sierro"
+    },
+    {
+      "ine": "04085",
+      "slug": "somontin",
+      "name": "Somontín"
+    },
+    {
+      "ine": "04086",
+      "slug": "sorbas",
+      "name": "Sorbas"
+    },
+    {
+      "ine": "04087",
+      "slug": "sufli",
+      "name": "Suflí"
+    },
+    {
+      "ine": "04088",
+      "slug": "tabernas",
+      "name": "Tabernas"
+    },
+    {
+      "ine": "04089",
+      "slug": "taberno",
+      "name": "Taberno"
+    },
+    {
+      "ine": "04090",
+      "slug": "tahal",
+      "name": "Tahal"
+    },
+    {
+      "ine": "04091",
+      "slug": "terque",
+      "name": "Terque"
+    },
+    {
+      "ine": "04092",
+      "slug": "tijola",
+      "name": "Tíjola"
+    },
+    {
+      "ine": "04901",
+      "slug": "tres-villas-las",
+      "name": "Tres Villas, Las"
+    },
+    {
+      "ine": "04093",
+      "slug": "turre",
+      "name": "Turre"
+    },
+    {
+      "ine": "04094",
+      "slug": "turrillas",
+      "name": "Turrillas"
+    },
+    {
+      "ine": "04095",
+      "slug": "uleila-del-campo",
+      "name": "Uleila del Campo"
+    },
+    {
+      "ine": "04096",
+      "slug": "urracal",
+      "name": "Urrácal"
+    },
+    {
+      "ine": "04097",
+      "slug": "velefique",
+      "name": "Velefique"
+    },
+    {
+      "ine": "04098",
+      "slug": "velez-blanco",
+      "name": "Vélez-Blanco"
+    },
+    {
+      "ine": "04099",
+      "slug": "velez-rubio",
+      "name": "Vélez-Rubio"
+    },
+    {
+      "ine": "04100",
+      "slug": "vera",
+      "name": "Vera"
+    },
+    {
+      "ine": "04101",
+      "slug": "viator",
+      "name": "Viator"
+    },
+    {
+      "ine": "04102",
+      "slug": "vicar",
+      "name": "Vícar"
+    },
+    {
+      "ine": "04103",
+      "slug": "zurgena",
+      "name": "Zurgena"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

@@ -22,6 +22,7 @@ export interface ConvenioRapidoState {
 
 const EMPTY_EMPRESA: Partial<Empresa> = {
   nombre: '', direccion: '', ciudad: '', cif: '', email: '', tlfn: '',
+  personaContacto: '', comunidad: 'Comunidad de Madrid', provincia: 'Madrid',
 };
 
 const EMPTY_TUTOR: Partial<TutorEmpresa> = {

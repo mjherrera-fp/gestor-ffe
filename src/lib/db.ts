@@ -285,6 +285,10 @@ function setupTables() {
   // Migración: eliminar festivos y tutorias de cursos
   try { db.exec("ALTER TABLE cursos DROP COLUMN festivos"); } catch {}
   try { db.exec("ALTER TABLE cursos DROP COLUMN tutorias"); } catch {}
+  // Migración: añadir columnas a empresas
+  try { db.exec("ALTER TABLE empresas ADD COLUMN personaContacto TEXT"); } catch {}
+  try { db.exec("ALTER TABLE empresas ADD COLUMN comunidad TEXT"); } catch {}
+  try { db.exec("ALTER TABLE empresas ADD COLUMN provincia TEXT"); } catch {}
 
   // Migración: renombrar tutores_empresa → empresa_tutores
   try {

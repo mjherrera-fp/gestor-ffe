@@ -119,6 +119,9 @@ export interface Empresa {
   email: string;
   tlfn: string;
   comentarios?: string;
+  personaContacto?: string;
+  comunidad?: string;
+  provincia?: string;
 }
 
 export interface TutorEmpresa {

@@ -1,0 +1,975 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "CYL",
+    "slug": "cyl",
+    "name": "Castilla y León"
+  },
+  "province": {
+    "code": "34",
+    "slug": "palencia",
+    "name": "Palencia"
+  },
+  "municipalities": [
+    {
+      "ine": "34001",
+      "slug": "abarca-de-campos",
+      "name": "Abarca de Campos"
+    },
+    {
+      "ine": "34003",
+      "slug": "abia-de-las-torres",
+      "name": "Abia de las Torres"
+    },
+    {
+      "ine": "34004",
+      "slug": "aguilar-de-campoo",
+      "name": "Aguilar de Campoo"
+    },
+    {
+      "ine": "34005",
+      "slug": "alar-del-rey",
+      "name": "Alar del Rey"
+    },
+    {
+      "ine": "34006",
+      "slug": "alba-de-cerrato",
+      "name": "Alba de Cerrato"
+    },
+    {
+      "ine": "34009",
+      "slug": "amayuelas-de-arriba",
+      "name": "Amayuelas de Arriba"
+    },
+    {
+      "ine": "34010",
+      "slug": "ampudia",
+      "name": "Ampudia"
+    },
+    {
+      "ine": "34011",
+      "slug": "amusco",
+      "name": "Amusco"
+    },
+    {
+      "ine": "34012",
+      "slug": "antiguedad",
+      "name": "Antigüedad"
+    },
+    {
+      "ine": "34015",
+      "slug": "arconada",
+      "name": "Arconada"
+    },
+    {
+      "ine": "34017",
+      "slug": "astudillo",
+      "name": "Astudillo"
+    },
+    {
+      "ine": "34018",
+      "slug": "autilla-del-pino",
+      "name": "Autilla del Pino"
+    },
+    {
+      "ine": "34019",
+      "slug": "autillo-de-campos",
+      "name": "Autillo de Campos"
+    },
+    {
+      "ine": "34020",
+      "slug": "ayuela",
+      "name": "Ayuela"
+    },
+    {
+      "ine": "34022",
+      "slug": "baltanas",
+      "name": "Baltanás"
+    },
+    {
+      "ine": "34024",
+      "slug": "baquerin-de-campos",
+      "name": "Baquerín de Campos"
+    },
+    {
+      "ine": "34025",
+      "slug": "barcena-de-campos",
+      "name": "Bárcena de Campos"
+    },
+    {
+      "ine": "34027",
+      "slug": "barruelo-de-santullan",
+      "name": "Barruelo de Santullán"
+    },
+    {
+      "ine": "34028",
+      "slug": "bascones-de-ojeda",
+      "name": "Báscones de Ojeda"
+    },
+    {
+      "ine": "34029",
+      "slug": "becerril-de-campos",
+      "name": "Becerril de Campos"
+    },
+    {
+      "ine": "34031",
+      "slug": "belmonte-de-campos",
+      "name": "Belmonte de Campos"
+    },
+    {
+      "ine": "34032",
+      "slug": "berzosilla",
+      "name": "Berzosilla"
+    },
+    {
+      "ine": "34033",
+      "slug": "boada-de-campos",
+      "name": "Boada de Campos"
+    },
+    {
+      "ine": "34035",
+      "slug": "boadilla-de-rioseco",
+      "name": "Boadilla de Rioseco"
+    },
+    {
+      "ine": "34034",
+      "slug": "boadilla-del-camino",
+      "name": "Boadilla del Camino"
+    },
+    {
+      "ine": "34036",
+      "slug": "branosera",
+      "name": "Brañosera"
+    },
+    {
+      "ine": "34037",
+      "slug": "buenavista-de-valdavia",
+      "name": "Buenavista de Valdavia"
+    },
+    {
+      "ine": "34038",
+      "slug": "bustillo-de-la-vega",
+      "name": "Bustillo de la Vega"
+    },
+    {
+      "ine": "34039",
+      "slug": "bustillo-del-paramo-de-carrion",
+      "name": "Bustillo del Páramo de Carrión"
+    },
+    {
+      "ine": "34041",
+      "slug": "calahorra-de-boedo",
+      "name": "Calahorra de Boedo"
+    },
+    {
+      "ine": "34042",
+      "slug": "calzada-de-los-molinos",
+      "name": "Calzada de los Molinos"
+    },
+    {
+      "ine": "34045",
+      "slug": "capillas",
+      "name": "Capillas"
+    },
+    {
+      "ine": "34046",
+      "slug": "cardenosa-de-volpejera",
+      "name": "Cardeñosa de Volpejera"
+    },
+    {
+      "ine": "34047",
+      "slug": "carrion-de-los-condes",
+      "name": "Carrión de los Condes"
+    },
+    {
+      "ine": "34048",
+      "slug": "castil-de-vela",
+      "name": "Castil de Vela"
+    },
+    {
+      "ine": "34049",
+      "slug": "castrejon-de-la-pena",
+      "name": "Castrejón de la Peña"
+    },
+    {
+      "ine": "34050",
+      "slug": "castrillo-de-don-juan",
+      "name": "Castrillo de Don Juan"
+    },
+    {
+      "ine": "34051",
+      "slug": "castrillo-de-onielo",
+      "name": "Castrillo de Onielo"
+    },
+    {
+      "ine": "34052",
+      "slug": "castrillo-de-villavega",
+      "name": "Castrillo de Villavega"
+    },
+    {
+      "ine": "34053",
+      "slug": "castromocho",
+      "name": "Castromocho"
+    },
+    {
+      "ine": "34055",
+      "slug": "cervatos-de-la-cueza",
+      "name": "Cervatos de la Cueza"
+    },
+    {
+      "ine": "34056",
+      "slug": "cervera-de-pisuerga",
+      "name": "Cervera de Pisuerga"
+    },
+    {
+      "ine": "34057",
+      "slug": "cevico-de-la-torre",
+      "name": "Cevico de la Torre"
+    },
+    {
+      "ine": "34058",
+      "slug": "cevico-navero",
+      "name": "Cevico Navero"
+    },
+    {
+      "ine": "34059",
+      "slug": "cisneros",
+      "name": "Cisneros"
+    },
+    {
+      "ine": "34060",
+      "slug": "cobos-de-cerrato",
+      "name": "Cobos de Cerrato"
+    },
+    {
+      "ine": "34061",
+      "slug": "collazos-de-boedo",
+      "name": "Collazos de Boedo"
+    },
+    {
+      "ine": "34062",
+      "slug": "congosto-de-valdavia",
+      "name": "Congosto de Valdavia"
+    },
+    {
+      "ine": "34063",
+      "slug": "cordovilla-la-real",
+      "name": "Cordovilla la Real"
+    },
+    {
+      "ine": "34066",
+      "slug": "cubillas-de-cerrato",
+      "name": "Cubillas de Cerrato"
+    },
+    {
+      "ine": "34067",
+      "slug": "dehesa-de-montejo",
+      "name": "Dehesa de Montejo"
+    },
+    {
+      "ine": "34068",
+      "slug": "dehesa-de-romanos",
+      "name": "Dehesa de Romanos"
+    },
+    {
+      "ine": "34069",
+      "slug": "duenas",
+      "name": "Dueñas"
+    },
+    {
+      "ine": "34070",
+      "slug": "espinosa-de-cerrato",
+      "name": "Espinosa de Cerrato"
+    },
+    {
+      "ine": "34071",
+      "slug": "espinosa-de-villagonzalo",
+      "name": "Espinosa de Villagonzalo"
+    },
+    {
+      "ine": "34072",
+      "slug": "frechilla",
+      "name": "Frechilla"
+    },
+    {
+      "ine": "34073",
+      "slug": "fresno-del-rio",
+      "name": "Fresno del Río"
+    },
+    {
+      "ine": "34074",
+      "slug": "fromista",
+      "name": "Frómista"
+    },
+    {
+      "ine": "34076",
+      "slug": "fuentes-de-nava",
+      "name": "Fuentes de Nava"
+    },
+    {
+      "ine": "34077",
+      "slug": "fuentes-de-valdepero",
+      "name": "Fuentes de Valdepero"
+    },
+    {
+      "ine": "34079",
+      "slug": "grijota",
+      "name": "Grijota"
+    },
+    {
+      "ine": "34080",
+      "slug": "guardo",
+      "name": "Guardo"
+    },
+    {
+      "ine": "34081",
+      "slug": "guaza-de-campos",
+      "name": "Guaza de Campos"
+    },
+    {
+      "ine": "34082",
+      "slug": "hermedes-de-cerrato",
+      "name": "Hérmedes de Cerrato"
+    },
+    {
+      "ine": "34083",
+      "slug": "herrera-de-pisuerga",
+      "name": "Herrera de Pisuerga"
+    },
+    {
+      "ine": "34084",
+      "slug": "herrera-de-valdecanas",
+      "name": "Herrera de Valdecañas"
+    },
+    {
+      "ine": "34086",
+      "slug": "hontoria-de-cerrato",
+      "name": "Hontoria de Cerrato"
+    },
+    {
+      "ine": "34087",
+      "slug": "hornillos-de-cerrato",
+      "name": "Hornillos de Cerrato"
+    },
+    {
+      "ine": "34088",
+      "slug": "husillos",
+      "name": "Husillos"
+    },
+    {
+      "ine": "34089",
+      "slug": "itero-de-la-vega",
+      "name": "Itero de la Vega"
+    },
+    {
+      "ine": "34091",
+      "slug": "lagartos",
+      "name": "Lagartos"
+    },
+    {
+      "ine": "34092",
+      "slug": "lantadilla",
+      "name": "Lantadilla"
+    },
+    {
+      "ine": "34094",
+      "slug": "ledigos",
+      "name": "Ledigos"
+    },
+    {
+      "ine": "34903",
+      "slug": "loma-de-ucieza",
+      "name": "Loma de Ucieza"
+    },
+    {
+      "ine": "34096",
+      "slug": "lomas",
+      "name": "Lomas"
+    },
+    {
+      "ine": "34098",
+      "slug": "magaz-de-pisuerga",
+      "name": "Magaz de Pisuerga"
+    },
+    {
+      "ine": "34099",
+      "slug": "manquillos",
+      "name": "Manquillos"
+    },
+    {
+      "ine": "34100",
+      "slug": "mantinos",
+      "name": "Mantinos"
+    },
+    {
+      "ine": "34101",
+      "slug": "marcilla-de-campos",
+      "name": "Marcilla de Campos"
+    },
+    {
+      "ine": "34102",
+      "slug": "mazariegos",
+      "name": "Mazariegos"
+    },
+    {
+      "ine": "34103",
+      "slug": "mazuecos-de-valdeginate",
+      "name": "Mazuecos de Valdeginate"
+    },
+    {
+      "ine": "34104",
+      "slug": "melgar-de-yuso",
+      "name": "Melgar de Yuso"
+    },
+    {
+      "ine": "34106",
+      "slug": "meneses-de-campos",
+      "name": "Meneses de Campos"
+    },
+    {
+      "ine": "34107",
+      "slug": "micieces-de-ojeda",
+      "name": "Micieces de Ojeda"
+    },
+    {
+      "ine": "34108",
+      "slug": "monzon-de-campos",
+      "name": "Monzón de Campos"
+    },
+    {
+      "ine": "34109",
+      "slug": "moratinos",
+      "name": "Moratinos"
+    },
+    {
+      "ine": "34110",
+      "slug": "muda",
+      "name": "Mudá"
+    },
+    {
+      "ine": "34112",
+      "slug": "nogal-de-las-huertas",
+      "name": "Nogal de las Huertas"
+    },
+    {
+      "ine": "34113",
+      "slug": "olea-de-boedo",
+      "name": "Olea de Boedo"
+    },
+    {
+      "ine": "34114",
+      "slug": "olmos-de-ojeda",
+      "name": "Olmos de Ojeda"
+    },
+    {
+      "ine": "34116",
+      "slug": "osornillo",
+      "name": "Osornillo"
+    },
+    {
+      "ine": "34901",
+      "slug": "osorno-la-mayor",
+      "name": "Osorno la Mayor"
+    },
+    {
+      "ine": "34120",
+      "slug": "palencia",
+      "name": "Palencia"
+    },
+    {
+      "ine": "34121",
+      "slug": "palenzuela",
+      "name": "Palenzuela"
+    },
+    {
+      "ine": "34122",
+      "slug": "paramo-de-boedo",
+      "name": "Páramo de Boedo"
+    },
+    {
+      "ine": "34123",
+      "slug": "paredes-de-nava",
+      "name": "Paredes de Nava"
+    },
+    {
+      "ine": "34124",
+      "slug": "payo-de-ojeda",
+      "name": "Payo de Ojeda"
+    },
+    {
+      "ine": "34125",
+      "slug": "pedraza-de-campos",
+      "name": "Pedraza de Campos"
+    },
+    {
+      "ine": "34126",
+      "slug": "pedrosa-de-la-vega",
+      "name": "Pedrosa de la Vega"
+    },
+    {
+      "ine": "34127",
+      "slug": "perales",
+      "name": "Perales"
+    },
+    {
+      "ine": "34904",
+      "slug": "pernia-la",
+      "name": "Pernía, La"
+    },
+    {
+      "ine": "34129",
+      "slug": "pino-del-rio",
+      "name": "Pino del Río"
+    },
+    {
+      "ine": "34130",
+      "slug": "pina-de-campos",
+      "name": "Piña de Campos"
+    },
+    {
+      "ine": "34131",
+      "slug": "poblacion-de-arroyo",
+      "name": "Población de Arroyo"
+    },
+    {
+      "ine": "34132",
+      "slug": "poblacion-de-campos",
+      "name": "Población de Campos"
+    },
+    {
+      "ine": "34133",
+      "slug": "poblacion-de-cerrato",
+      "name": "Población de Cerrato"
+    },
+    {
+      "ine": "34134",
+      "slug": "polentinos",
+      "name": "Polentinos"
+    },
+    {
+      "ine": "34135",
+      "slug": "pomar-de-valdivia",
+      "name": "Pomar de Valdivia"
+    },
+    {
+      "ine": "34136",
+      "slug": "poza-de-la-vega",
+      "name": "Poza de la Vega"
+    },
+    {
+      "ine": "34137",
+      "slug": "pozo-de-urama",
+      "name": "Pozo de Urama"
+    },
+    {
+      "ine": "34139",
+      "slug": "pradanos-de-ojeda",
+      "name": "Prádanos de Ojeda"
+    },
+    {
+      "ine": "34140",
+      "slug": "puebla-de-valdavia-la",
+      "name": "Puebla de Valdavia, La"
+    },
+    {
+      "ine": "34141",
+      "slug": "quintana-del-puente",
+      "name": "Quintana del Puente"
+    },
+    {
+      "ine": "34143",
+      "slug": "quintanilla-de-onsona",
+      "name": "Quintanilla de Onsoña"
+    },
+    {
+      "ine": "34146",
+      "slug": "reinoso-de-cerrato",
+      "name": "Reinoso de Cerrato"
+    },
+    {
+      "ine": "34147",
+      "slug": "renedo-de-la-vega",
+      "name": "Renedo de la Vega"
+    },
+    {
+      "ine": "34149",
+      "slug": "requena-de-campos",
+      "name": "Requena de Campos"
+    },
+    {
+      "ine": "34151",
+      "slug": "respenda-de-la-pena",
+      "name": "Respenda de la Peña"
+    },
+    {
+      "ine": "34152",
+      "slug": "revenga-de-campos",
+      "name": "Revenga de Campos"
+    },
+    {
+      "ine": "34154",
+      "slug": "revilla-de-collazos",
+      "name": "Revilla de Collazos"
+    },
+    {
+      "ine": "34155",
+      "slug": "ribas-de-campos",
+      "name": "Ribas de Campos"
+    },
+    {
+      "ine": "34156",
+      "slug": "riberos-de-la-cueza",
+      "name": "Riberos de la Cueza"
+    },
+    {
+      "ine": "34157",
+      "slug": "saldana",
+      "name": "Saldaña"
+    },
+    {
+      "ine": "34158",
+      "slug": "salinas-de-pisuerga",
+      "name": "Salinas de Pisuerga"
+    },
+    {
+      "ine": "34159",
+      "slug": "san-cebrian-de-campos",
+      "name": "San Cebrián de Campos"
+    },
+    {
+      "ine": "34160",
+      "slug": "san-cebrian-de-muda",
+      "name": "San Cebrián de Mudá"
+    },
+    {
+      "ine": "34161",
+      "slug": "san-cristobal-de-boedo",
+      "name": "San Cristóbal de Boedo"
+    },
+    {
+      "ine": "34163",
+      "slug": "san-mames-de-campos",
+      "name": "San Mamés de Campos"
+    },
+    {
+      "ine": "34165",
+      "slug": "san-roman-de-la-cuba",
+      "name": "San Román de la Cuba"
+    },
+    {
+      "ine": "34167",
+      "slug": "santa-cecilia-del-alcor",
+      "name": "Santa Cecilia del Alcor"
+    },
+    {
+      "ine": "34168",
+      "slug": "santa-cruz-de-boedo",
+      "name": "Santa Cruz de Boedo"
+    },
+    {
+      "ine": "34169",
+      "slug": "santervas-de-la-vega",
+      "name": "Santervás de la Vega"
+    },
+    {
+      "ine": "34170",
+      "slug": "santibanez-de-ecla",
+      "name": "Santibáñez de Ecla"
+    },
+    {
+      "ine": "34171",
+      "slug": "santibanez-de-la-pena",
+      "name": "Santibáñez de la Peña"
+    },
+    {
+      "ine": "34174",
+      "slug": "santoyo",
+      "name": "Santoyo"
+    },
+    {
+      "ine": "34175",
+      "slug": "serna-la",
+      "name": "Serna, La"
+    },
+    {
+      "ine": "34177",
+      "slug": "soto-de-cerrato",
+      "name": "Soto de Cerrato"
+    },
+    {
+      "ine": "34176",
+      "slug": "sotobanado-y-priorato",
+      "name": "Sotobañado y Priorato"
+    },
+    {
+      "ine": "34178",
+      "slug": "tabanera-de-cerrato",
+      "name": "Tabanera de Cerrato"
+    },
+    {
+      "ine": "34179",
+      "slug": "tabanera-de-valdavia",
+      "name": "Tabanera de Valdavia"
+    },
+    {
+      "ine": "34180",
+      "slug": "tamara-de-campos",
+      "name": "Támara de Campos"
+    },
+    {
+      "ine": "34181",
+      "slug": "tariego-de-cerrato",
+      "name": "Tariego de Cerrato"
+    },
+    {
+      "ine": "34182",
+      "slug": "torquemada",
+      "name": "Torquemada"
+    },
+    {
+      "ine": "34184",
+      "slug": "torremormojon",
+      "name": "Torremormojón"
+    },
+    {
+      "ine": "34185",
+      "slug": "triollo",
+      "name": "Triollo"
+    },
+    {
+      "ine": "34186",
+      "slug": "valbuena-de-pisuerga",
+      "name": "Valbuena de Pisuerga"
+    },
+    {
+      "ine": "34192",
+      "slug": "valde-ucieza",
+      "name": "Valde-Ucieza"
+    },
+    {
+      "ine": "34189",
+      "slug": "valdeolmillos",
+      "name": "Valdeolmillos"
+    },
+    {
+      "ine": "34190",
+      "slug": "valderrabano",
+      "name": "Valderrábano"
+    },
+    {
+      "ine": "34196",
+      "slug": "valle-de-cerrato",
+      "name": "Valle de Cerrato"
+    },
+    {
+      "ine": "34902",
+      "slug": "valle-del-retortillo",
+      "name": "Valle del Retortillo"
+    },
+    {
+      "ine": "34199",
+      "slug": "velilla-del-rio-carrion",
+      "name": "Velilla del Río Carrión"
+    },
+    {
+      "ine": "34023",
+      "slug": "venta-de-banos",
+      "name": "Venta de Baños"
+    },
+    {
+      "ine": "34201",
+      "slug": "vertavillo",
+      "name": "Vertavillo"
+    },
+    {
+      "ine": "34093",
+      "slug": "vid-de-ojeda-la",
+      "name": "Vid de Ojeda, La"
+    },
+    {
+      "ine": "34202",
+      "slug": "villabasta-de-valdavia",
+      "name": "Villabasta de Valdavia"
+    },
+    {
+      "ine": "34204",
+      "slug": "villacidaler",
+      "name": "Villacidaler"
+    },
+    {
+      "ine": "34205",
+      "slug": "villaconancio",
+      "name": "Villaconancio"
+    },
+    {
+      "ine": "34206",
+      "slug": "villada",
+      "name": "Villada"
+    },
+    {
+      "ine": "34208",
+      "slug": "villaeles-de-valdavia",
+      "name": "Villaeles de Valdavia"
+    },
+    {
+      "ine": "34210",
+      "slug": "villahan",
+      "name": "Villahán"
+    },
+    {
+      "ine": "34211",
+      "slug": "villaherreros",
+      "name": "Villaherreros"
+    },
+    {
+      "ine": "34213",
+      "slug": "villalaco",
+      "name": "Villalaco"
+    },
+    {
+      "ine": "34214",
+      "slug": "villalba-de-guardo",
+      "name": "Villalba de Guardo"
+    },
+    {
+      "ine": "34215",
+      "slug": "villalcazar-de-sirga",
+      "name": "Villalcázar de Sirga"
+    },
+    {
+      "ine": "34216",
+      "slug": "villalcon",
+      "name": "Villalcón"
+    },
+    {
+      "ine": "34217",
+      "slug": "villalobon",
+      "name": "Villalobón"
+    },
+    {
+      "ine": "34218",
+      "slug": "villaluenga-de-la-vega",
+      "name": "Villaluenga de la Vega"
+    },
+    {
+      "ine": "34220",
+      "slug": "villamartin-de-campos",
+      "name": "Villamartín de Campos"
+    },
+    {
+      "ine": "34221",
+      "slug": "villamediana",
+      "name": "Villamediana"
+    },
+    {
+      "ine": "34222",
+      "slug": "villameriel",
+      "name": "Villameriel"
+    },
+    {
+      "ine": "34223",
+      "slug": "villamoronta",
+      "name": "Villamoronta"
+    },
+    {
+      "ine": "34224",
+      "slug": "villamuera-de-la-cueza",
+      "name": "Villamuera de la Cueza"
+    },
+    {
+      "ine": "34225",
+      "slug": "villamuriel-de-cerrato",
+      "name": "Villamuriel de Cerrato"
+    },
+    {
+      "ine": "34227",
+      "slug": "villanueva-del-rebollar",
+      "name": "Villanueva del Rebollar"
+    },
+    {
+      "ine": "34228",
+      "slug": "villanuno-de-valdavia",
+      "name": "Villanuño de Valdavia"
+    },
+    {
+      "ine": "34229",
+      "slug": "villaprovedo",
+      "name": "Villaprovedo"
+    },
+    {
+      "ine": "34230",
+      "slug": "villarmentero-de-campos",
+      "name": "Villarmentero de Campos"
+    },
+    {
+      "ine": "34231",
+      "slug": "villarrabe",
+      "name": "Villarrabé"
+    },
+    {
+      "ine": "34232",
+      "slug": "villarramiel",
+      "name": "Villarramiel"
+    },
+    {
+      "ine": "34233",
+      "slug": "villasarracino",
+      "name": "Villasarracino"
+    },
+    {
+      "ine": "34234",
+      "slug": "villasila-de-valdavia",
+      "name": "Villasila de Valdavia"
+    },
+    {
+      "ine": "34236",
+      "slug": "villaturde",
+      "name": "Villaturde"
+    },
+    {
+      "ine": "34237",
+      "slug": "villaumbrales",
+      "name": "Villaumbrales"
+    },
+    {
+      "ine": "34238",
+      "slug": "villaviudas",
+      "name": "Villaviudas"
+    },
+    {
+      "ine": "34240",
+      "slug": "villerias-de-campos",
+      "name": "Villerías de Campos"
+    },
+    {
+      "ine": "34241",
+      "slug": "villodre",
+      "name": "Villodre"
+    },
+    {
+      "ine": "34242",
+      "slug": "villodrigo",
+      "name": "Villodrigo"
+    },
+    {
+      "ine": "34243",
+      "slug": "villoldo",
+      "name": "Villoldo"
+    },
+    {
+      "ine": "34245",
+      "slug": "villota-del-paramo",
+      "name": "Villota del Páramo"
+    },
+    {
+      "ine": "34246",
+      "slug": "villovieco",
+      "name": "Villovieco"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

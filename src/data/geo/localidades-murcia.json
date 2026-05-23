@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "MUR",
+    "slug": "mur",
+    "name": "Región de Murcia"
+  },
+  "province": {
+    "code": "30",
+    "slug": "murcia",
+    "name": "Murcia"
+  },
+  "municipalities": [
+    {
+      "ine": "30001",
+      "slug": "abanilla",
+      "name": "Abanilla"
+    },
+    {
+      "ine": "30002",
+      "slug": "abaran",
+      "name": "Abarán"
+    },
+    {
+      "ine": "30003",
+      "slug": "aguilas",
+      "name": "Águilas"
+    },
+    {
+      "ine": "30004",
+      "slug": "albudeite",
+      "name": "Albudeite"
+    },
+    {
+      "ine": "30005",
+      "slug": "alcantarilla",
+      "name": "Alcantarilla"
+    },
+    {
+      "ine": "30902",
+      "slug": "alcazares-los",
+      "name": "Alcázares, Los"
+    },
+    {
+      "ine": "30006",
+      "slug": "aledo",
+      "name": "Aledo"
+    },
+    {
+      "ine": "30007",
+      "slug": "alguazas",
+      "name": "Alguazas"
+    },
+    {
+      "ine": "30008",
+      "slug": "alhama-de-murcia",
+      "name": "Alhama de Murcia"
+    },
+    {
+      "ine": "30009",
+      "slug": "archena",
+      "name": "Archena"
+    },
+    {
+      "ine": "30010",
+      "slug": "beniel",
+      "name": "Beniel"
+    },
+    {
+      "ine": "30011",
+      "slug": "blanca",
+      "name": "Blanca"
+    },
+    {
+      "ine": "30012",
+      "slug": "bullas",
+      "name": "Bullas"
+    },
+    {
+      "ine": "30013",
+      "slug": "calasparra",
+      "name": "Calasparra"
+    },
+    {
+      "ine": "30014",
+      "slug": "campos-del-rio",
+      "name": "Campos del Río"
+    },
+    {
+      "ine": "30015",
+      "slug": "caravaca-de-la-cruz",
+      "name": "Caravaca de la Cruz"
+    },
+    {
+      "ine": "30016",
+      "slug": "cartagena",
+      "name": "Cartagena"
+    },
+    {
+      "ine": "30017",
+      "slug": "cehegin",
+      "name": "Cehegín"
+    },
+    {
+      "ine": "30018",
+      "slug": "ceuti",
+      "name": "Ceutí"
+    },
+    {
+      "ine": "30019",
+      "slug": "cieza",
+      "name": "Cieza"
+    },
+    {
+      "ine": "30020",
+      "slug": "fortuna",
+      "name": "Fortuna"
+    },
+    {
+      "ine": "30021",
+      "slug": "fuente-alamo-de-murcia",
+      "name": "Fuente Álamo de Murcia"
+    },
+    {
+      "ine": "30022",
+      "slug": "jumilla",
+      "name": "Jumilla"
+    },
+    {
+      "ine": "30023",
+      "slug": "librilla",
+      "name": "Librilla"
+    },
+    {
+      "ine": "30024",
+      "slug": "lorca",
+      "name": "Lorca"
+    },
+    {
+      "ine": "30025",
+      "slug": "lorqui",
+      "name": "Lorquí"
+    },
+    {
+      "ine": "30026",
+      "slug": "mazarron",
+      "name": "Mazarrón"
+    },
+    {
+      "ine": "30027",
+      "slug": "molina-de-segura",
+      "name": "Molina de Segura"
+    },
+    {
+      "ine": "30028",
+      "slug": "moratalla",
+      "name": "Moratalla"
+    },
+    {
+      "ine": "30029",
+      "slug": "mula",
+      "name": "Mula"
+    },
+    {
+      "ine": "30030",
+      "slug": "murcia",
+      "name": "Murcia"
+    },
+    {
+      "ine": "30031",
+      "slug": "ojos",
+      "name": "Ojós"
+    },
+    {
+      "ine": "30032",
+      "slug": "pliego",
+      "name": "Pliego"
+    },
+    {
+      "ine": "30033",
+      "slug": "puerto-lumbreras",
+      "name": "Puerto Lumbreras"
+    },
+    {
+      "ine": "30034",
+      "slug": "ricote",
+      "name": "Ricote"
+    },
+    {
+      "ine": "30035",
+      "slug": "san-javier",
+      "name": "San Javier"
+    },
+    {
+      "ine": "30036",
+      "slug": "san-pedro-del-pinatar",
+      "name": "San Pedro del Pinatar"
+    },
+    {
+      "ine": "30901",
+      "slug": "santomera",
+      "name": "Santomera"
+    },
+    {
+      "ine": "30037",
+      "slug": "torre-pacheco",
+      "name": "Torre-Pacheco"
+    },
+    {
+      "ine": "30038",
+      "slug": "torres-de-cotillas-las",
+      "name": "Torres de Cotillas, Las"
+    },
+    {
+      "ine": "30039",
+      "slug": "totana",
+      "name": "Totana"
+    },
+    {
+      "ine": "30040",
+      "slug": "ulea",
+      "name": "Ulea"
+    },
+    {
+      "ine": "30041",
+      "slug": "union-la",
+      "name": "Unión, La"
+    },
+    {
+      "ine": "30042",
+      "slug": "villanueva-del-rio-segura",
+      "name": "Villanueva del Río Segura"
+    },
+    {
+      "ine": "30043",
+      "slug": "yecla",
+      "name": "Yecla"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

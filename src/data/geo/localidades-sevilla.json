@@ -1,0 +1,545 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "AND",
+    "slug": "and",
+    "name": "Andalucía"
+  },
+  "province": {
+    "code": "41",
+    "slug": "sevilla",
+    "name": "Sevilla"
+  },
+  "municipalities": [
+    {
+      "ine": "41001",
+      "slug": "aguadulce",
+      "name": "Aguadulce"
+    },
+    {
+      "ine": "41002",
+      "slug": "alanis",
+      "name": "Alanís"
+    },
+    {
+      "ine": "41003",
+      "slug": "albaida-del-aljarafe",
+      "name": "Albaida del Aljarafe"
+    },
+    {
+      "ine": "41004",
+      "slug": "alcala-de-guadaira",
+      "name": "Alcalá de Guadaíra"
+    },
+    {
+      "ine": "41005",
+      "slug": "alcala-del-rio",
+      "name": "Alcalá del Río"
+    },
+    {
+      "ine": "41006",
+      "slug": "alcolea-del-rio",
+      "name": "Alcolea del Río"
+    },
+    {
+      "ine": "41007",
+      "slug": "algaba-la",
+      "name": "Algaba, La"
+    },
+    {
+      "ine": "41008",
+      "slug": "algamitas",
+      "name": "Algámitas"
+    },
+    {
+      "ine": "41009",
+      "slug": "almaden-de-la-plata",
+      "name": "Almadén de la Plata"
+    },
+    {
+      "ine": "41010",
+      "slug": "almensilla",
+      "name": "Almensilla"
+    },
+    {
+      "ine": "41011",
+      "slug": "arahal",
+      "name": "Arahal"
+    },
+    {
+      "ine": "41012",
+      "slug": "aznalcazar",
+      "name": "Aznalcázar"
+    },
+    {
+      "ine": "41013",
+      "slug": "aznalcollar",
+      "name": "Aznalcóllar"
+    },
+    {
+      "ine": "41014",
+      "slug": "badolatosa",
+      "name": "Badolatosa"
+    },
+    {
+      "ine": "41015",
+      "slug": "benacazon",
+      "name": "Benacazón"
+    },
+    {
+      "ine": "41016",
+      "slug": "bollullos-de-la-mitacion",
+      "name": "Bollullos de la Mitación"
+    },
+    {
+      "ine": "41017",
+      "slug": "bormujos",
+      "name": "Bormujos"
+    },
+    {
+      "ine": "41018",
+      "slug": "brenes",
+      "name": "Brenes"
+    },
+    {
+      "ine": "41019",
+      "slug": "burguillos",
+      "name": "Burguillos"
+    },
+    {
+      "ine": "41020",
+      "slug": "cabezas-de-san-juan-las",
+      "name": "Cabezas de San Juan, Las"
+    },
+    {
+      "ine": "41021",
+      "slug": "camas",
+      "name": "Camas"
+    },
+    {
+      "ine": "41022",
+      "slug": "campana-la",
+      "name": "Campana, La"
+    },
+    {
+      "ine": "41023",
+      "slug": "cantillana",
+      "name": "Cantillana"
+    },
+    {
+      "ine": "41901",
+      "slug": "canada-rosal",
+      "name": "Cañada Rosal"
+    },
+    {
+      "ine": "41024",
+      "slug": "carmona",
+      "name": "Carmona"
+    },
+    {
+      "ine": "41025",
+      "slug": "carrion-de-los-cespedes",
+      "name": "Carrión de los Céspedes"
+    },
+    {
+      "ine": "41026",
+      "slug": "casariche",
+      "name": "Casariche"
+    },
+    {
+      "ine": "41027",
+      "slug": "castilblanco-de-los-arroyos",
+      "name": "Castilblanco de los Arroyos"
+    },
+    {
+      "ine": "41028",
+      "slug": "castilleja-de-guzman",
+      "name": "Castilleja de Guzmán"
+    },
+    {
+      "ine": "41029",
+      "slug": "castilleja-de-la-cuesta",
+      "name": "Castilleja de la Cuesta"
+    },
+    {
+      "ine": "41030",
+      "slug": "castilleja-del-campo",
+      "name": "Castilleja del Campo"
+    },
+    {
+      "ine": "41031",
+      "slug": "castillo-de-las-guardas-el",
+      "name": "Castillo de las Guardas, El"
+    },
+    {
+      "ine": "41032",
+      "slug": "cazalla-de-la-sierra",
+      "name": "Cazalla de la Sierra"
+    },
+    {
+      "ine": "41033",
+      "slug": "constantina",
+      "name": "Constantina"
+    },
+    {
+      "ine": "41034",
+      "slug": "coria-del-rio",
+      "name": "Coria del Río"
+    },
+    {
+      "ine": "41035",
+      "slug": "coripe",
+      "name": "Coripe"
+    },
+    {
+      "ine": "41036",
+      "slug": "coronil-el",
+      "name": "Coronil, El"
+    },
+    {
+      "ine": "41037",
+      "slug": "corrales-los",
+      "name": "Corrales, Los"
+    },
+    {
+      "ine": "41903",
+      "slug": "cuervo-de-sevilla-el",
+      "name": "Cuervo de Sevilla, El"
+    },
+    {
+      "ine": "41038",
+      "slug": "dos-hermanas",
+      "name": "Dos Hermanas"
+    },
+    {
+      "ine": "41039",
+      "slug": "ecija",
+      "name": "Écija"
+    },
+    {
+      "ine": "41040",
+      "slug": "espartinas",
+      "name": "Espartinas"
+    },
+    {
+      "ine": "41041",
+      "slug": "estepa",
+      "name": "Estepa"
+    },
+    {
+      "ine": "41042",
+      "slug": "fuentes-de-andalucia",
+      "name": "Fuentes de Andalucía"
+    },
+    {
+      "ine": "41043",
+      "slug": "garrobo-el",
+      "name": "Garrobo, El"
+    },
+    {
+      "ine": "41044",
+      "slug": "gelves",
+      "name": "Gelves"
+    },
+    {
+      "ine": "41045",
+      "slug": "gerena",
+      "name": "Gerena"
+    },
+    {
+      "ine": "41046",
+      "slug": "gilena",
+      "name": "Gilena"
+    },
+    {
+      "ine": "41047",
+      "slug": "gines",
+      "name": "Gines"
+    },
+    {
+      "ine": "41048",
+      "slug": "guadalcanal",
+      "name": "Guadalcanal"
+    },
+    {
+      "ine": "41049",
+      "slug": "guillena",
+      "name": "Guillena"
+    },
+    {
+      "ine": "41050",
+      "slug": "herrera",
+      "name": "Herrera"
+    },
+    {
+      "ine": "41051",
+      "slug": "huevar-del-aljarafe",
+      "name": "Huévar del Aljarafe"
+    },
+    {
+      "ine": "41902",
+      "slug": "isla-mayor",
+      "name": "Isla Mayor"
+    },
+    {
+      "ine": "41052",
+      "slug": "lantejuela",
+      "name": "Lantejuela"
+    },
+    {
+      "ine": "41053",
+      "slug": "lebrija",
+      "name": "Lebrija"
+    },
+    {
+      "ine": "41054",
+      "slug": "lora-de-estepa",
+      "name": "Lora de Estepa"
+    },
+    {
+      "ine": "41055",
+      "slug": "lora-del-rio",
+      "name": "Lora del Río"
+    },
+    {
+      "ine": "41056",
+      "slug": "luisiana-la",
+      "name": "Luisiana, La"
+    },
+    {
+      "ine": "41057",
+      "slug": "madrono-el",
+      "name": "Madroño, El"
+    },
+    {
+      "ine": "41058",
+      "slug": "mairena-del-alcor",
+      "name": "Mairena del Alcor"
+    },
+    {
+      "ine": "41059",
+      "slug": "mairena-del-aljarafe",
+      "name": "Mairena del Aljarafe"
+    },
+    {
+      "ine": "41060",
+      "slug": "marchena",
+      "name": "Marchena"
+    },
+    {
+      "ine": "41061",
+      "slug": "marinaleda",
+      "name": "Marinaleda"
+    },
+    {
+      "ine": "41062",
+      "slug": "martin-de-la-jara",
+      "name": "Martín de la Jara"
+    },
+    {
+      "ine": "41063",
+      "slug": "molares-los",
+      "name": "Molares, Los"
+    },
+    {
+      "ine": "41064",
+      "slug": "montellano",
+      "name": "Montellano"
+    },
+    {
+      "ine": "41065",
+      "slug": "moron-de-la-frontera",
+      "name": "Morón de la Frontera"
+    },
+    {
+      "ine": "41066",
+      "slug": "navas-de-la-concepcion-las",
+      "name": "Navas de la Concepción, Las"
+    },
+    {
+      "ine": "41067",
+      "slug": "olivares",
+      "name": "Olivares"
+    },
+    {
+      "ine": "41068",
+      "slug": "osuna",
+      "name": "Osuna"
+    },
+    {
+      "ine": "41069",
+      "slug": "palacios-y-villafranca-los",
+      "name": "Palacios y Villafranca, Los"
+    },
+    {
+      "ine": "41070",
+      "slug": "palomares-del-rio",
+      "name": "Palomares del Río"
+    },
+    {
+      "ine": "41071",
+      "slug": "paradas",
+      "name": "Paradas"
+    },
+    {
+      "ine": "41072",
+      "slug": "pedrera",
+      "name": "Pedrera"
+    },
+    {
+      "ine": "41073",
+      "slug": "pedroso-el",
+      "name": "Pedroso, El"
+    },
+    {
+      "ine": "41074",
+      "slug": "penaflor",
+      "name": "Peñaflor"
+    },
+    {
+      "ine": "41075",
+      "slug": "pilas",
+      "name": "Pilas"
+    },
+    {
+      "ine": "41076",
+      "slug": "pruna",
+      "name": "Pruna"
+    },
+    {
+      "ine": "41077",
+      "slug": "puebla-de-cazalla-la",
+      "name": "Puebla de Cazalla, La"
+    },
+    {
+      "ine": "41078",
+      "slug": "puebla-de-los-infantes-la",
+      "name": "Puebla de los Infantes, La"
+    },
+    {
+      "ine": "41079",
+      "slug": "puebla-del-rio-la",
+      "name": "Puebla del Río, La"
+    },
+    {
+      "ine": "41080",
+      "slug": "real-de-la-jara-el",
+      "name": "Real de la Jara, El"
+    },
+    {
+      "ine": "41081",
+      "slug": "rinconada-la",
+      "name": "Rinconada, La"
+    },
+    {
+      "ine": "41082",
+      "slug": "roda-de-andalucia-la",
+      "name": "Roda de Andalucía, La"
+    },
+    {
+      "ine": "41083",
+      "slug": "ronquillo-el",
+      "name": "Ronquillo, El"
+    },
+    {
+      "ine": "41084",
+      "slug": "rubio-el",
+      "name": "Rubio, El"
+    },
+    {
+      "ine": "41085",
+      "slug": "salteras",
+      "name": "Salteras"
+    },
+    {
+      "ine": "41086",
+      "slug": "san-juan-de-aznalfarache",
+      "name": "San Juan de Aznalfarache"
+    },
+    {
+      "ine": "41088",
+      "slug": "san-nicolas-del-puerto",
+      "name": "San Nicolás del Puerto"
+    },
+    {
+      "ine": "41087",
+      "slug": "sanlucar-la-mayor",
+      "name": "Sanlúcar la Mayor"
+    },
+    {
+      "ine": "41089",
+      "slug": "santiponce",
+      "name": "Santiponce"
+    },
+    {
+      "ine": "41090",
+      "slug": "saucejo-el",
+      "name": "Saucejo, El"
+    },
+    {
+      "ine": "41091",
+      "slug": "sevilla",
+      "name": "Sevilla"
+    },
+    {
+      "ine": "41092",
+      "slug": "tocina",
+      "name": "Tocina"
+    },
+    {
+      "ine": "41093",
+      "slug": "tomares",
+      "name": "Tomares"
+    },
+    {
+      "ine": "41094",
+      "slug": "umbrete",
+      "name": "Umbrete"
+    },
+    {
+      "ine": "41095",
+      "slug": "utrera",
+      "name": "Utrera"
+    },
+    {
+      "ine": "41096",
+      "slug": "valencina-de-la-concepcion",
+      "name": "Valencina de la Concepción"
+    },
+    {
+      "ine": "41097",
+      "slug": "villamanrique-de-la-condesa",
+      "name": "Villamanrique de la Condesa"
+    },
+    {
+      "ine": "41100",
+      "slug": "villanueva-de-san-juan",
+      "name": "Villanueva de San Juan"
+    },
+    {
+      "ine": "41098",
+      "slug": "villanueva-del-ariscal",
+      "name": "Villanueva del Ariscal"
+    },
+    {
+      "ine": "41099",
+      "slug": "villanueva-del-rio-y-minas",
+      "name": "Villanueva del Río y Minas"
+    },
+    {
+      "ine": "41101",
+      "slug": "villaverde-del-rio",
+      "name": "Villaverde del Río"
+    },
+    {
+      "ine": "41102",
+      "slug": "viso-del-alcor-el",
+      "name": "Viso del Alcor, El"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

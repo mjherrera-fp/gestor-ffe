@@ -1,0 +1,1485 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "ARA",
+    "slug": "ara",
+    "name": "Aragón"
+  },
+  "province": {
+    "code": "50",
+    "slug": "zaragoza",
+    "name": "Zaragoza"
+  },
+  "municipalities": [
+    {
+      "ine": "50001",
+      "slug": "abanto",
+      "name": "Abanto"
+    },
+    {
+      "ine": "50002",
+      "slug": "acered",
+      "name": "Acered"
+    },
+    {
+      "ine": "50003",
+      "slug": "agon",
+      "name": "Agón"
+    },
+    {
+      "ine": "50004",
+      "slug": "aguaron",
+      "name": "Aguarón"
+    },
+    {
+      "ine": "50005",
+      "slug": "aguilon",
+      "name": "Aguilón"
+    },
+    {
+      "ine": "50006",
+      "slug": "ainzon",
+      "name": "Ainzón"
+    },
+    {
+      "ine": "50007",
+      "slug": "aladren",
+      "name": "Aladrén"
+    },
+    {
+      "ine": "50008",
+      "slug": "alagon",
+      "name": "Alagón"
+    },
+    {
+      "ine": "50009",
+      "slug": "alarba",
+      "name": "Alarba"
+    },
+    {
+      "ine": "50010",
+      "slug": "alberite-de-san-juan",
+      "name": "Alberite de San Juan"
+    },
+    {
+      "ine": "50011",
+      "slug": "albeta",
+      "name": "Albeta"
+    },
+    {
+      "ine": "50012",
+      "slug": "alborge",
+      "name": "Alborge"
+    },
+    {
+      "ine": "50013",
+      "slug": "alcala-de-ebro",
+      "name": "Alcalá de Ebro"
+    },
+    {
+      "ine": "50014",
+      "slug": "alcala-de-moncayo",
+      "name": "Alcalá de Moncayo"
+    },
+    {
+      "ine": "50015",
+      "slug": "alconchel-de-ariza",
+      "name": "Alconchel de Ariza"
+    },
+    {
+      "ine": "50016",
+      "slug": "aldehuela-de-liestos",
+      "name": "Aldehuela de Liestos"
+    },
+    {
+      "ine": "50017",
+      "slug": "alfajarin",
+      "name": "Alfajarín"
+    },
+    {
+      "ine": "50018",
+      "slug": "alfamen",
+      "name": "Alfamén"
+    },
+    {
+      "ine": "50019",
+      "slug": "alforque",
+      "name": "Alforque"
+    },
+    {
+      "ine": "50020",
+      "slug": "alhama-de-aragon",
+      "name": "Alhama de Aragón"
+    },
+    {
+      "ine": "50021",
+      "slug": "almochuel",
+      "name": "Almochuel"
+    },
+    {
+      "ine": "50022",
+      "slug": "almolda-la",
+      "name": "Almolda, La"
+    },
+    {
+      "ine": "50023",
+      "slug": "almonacid-de-la-cuba",
+      "name": "Almonacid de la Cuba"
+    },
+    {
+      "ine": "50024",
+      "slug": "almonacid-de-la-sierra",
+      "name": "Almonacid de la Sierra"
+    },
+    {
+      "ine": "50025",
+      "slug": "almunia-de-dona-godina-la",
+      "name": "Almunia de Doña Godina, La"
+    },
+    {
+      "ine": "50026",
+      "slug": "alpartir",
+      "name": "Alpartir"
+    },
+    {
+      "ine": "50027",
+      "slug": "ambel",
+      "name": "Ambel"
+    },
+    {
+      "ine": "50028",
+      "slug": "anento",
+      "name": "Anento"
+    },
+    {
+      "ine": "50029",
+      "slug": "aninon",
+      "name": "Aniñón"
+    },
+    {
+      "ine": "50030",
+      "slug": "anon-de-moncayo",
+      "name": "Añón de Moncayo"
+    },
+    {
+      "ine": "50031",
+      "slug": "aranda-de-moncayo",
+      "name": "Aranda de Moncayo"
+    },
+    {
+      "ine": "50032",
+      "slug": "arandiga",
+      "name": "Arándiga"
+    },
+    {
+      "ine": "50033",
+      "slug": "ardisa",
+      "name": "Ardisa"
+    },
+    {
+      "ine": "50034",
+      "slug": "ariza",
+      "name": "Ariza"
+    },
+    {
+      "ine": "50035",
+      "slug": "artieda",
+      "name": "Artieda"
+    },
+    {
+      "ine": "50036",
+      "slug": "asin",
+      "name": "Asín"
+    },
+    {
+      "ine": "50037",
+      "slug": "atea",
+      "name": "Atea"
+    },
+    {
+      "ine": "50038",
+      "slug": "ateca",
+      "name": "Ateca"
+    },
+    {
+      "ine": "50039",
+      "slug": "azuara",
+      "name": "Azuara"
+    },
+    {
+      "ine": "50040",
+      "slug": "badules",
+      "name": "Badules"
+    },
+    {
+      "ine": "50041",
+      "slug": "bagues",
+      "name": "Bagüés"
+    },
+    {
+      "ine": "50042",
+      "slug": "balconchan",
+      "name": "Balconchán"
+    },
+    {
+      "ine": "50043",
+      "slug": "barboles",
+      "name": "Bárboles"
+    },
+    {
+      "ine": "50044",
+      "slug": "bardallur",
+      "name": "Bardallur"
+    },
+    {
+      "ine": "50045",
+      "slug": "belchite",
+      "name": "Belchite"
+    },
+    {
+      "ine": "50046",
+      "slug": "belmonte-de-gracian",
+      "name": "Belmonte de Gracián"
+    },
+    {
+      "ine": "50047",
+      "slug": "berdejo",
+      "name": "Berdejo"
+    },
+    {
+      "ine": "50048",
+      "slug": "berrueco",
+      "name": "Berrueco"
+    },
+    {
+      "ine": "50901",
+      "slug": "biel",
+      "name": "Biel"
+    },
+    {
+      "ine": "50050",
+      "slug": "bijuesca",
+      "name": "Bijuesca"
+    },
+    {
+      "ine": "50051",
+      "slug": "biota",
+      "name": "Biota"
+    },
+    {
+      "ine": "50052",
+      "slug": "bisimbre",
+      "name": "Bisimbre"
+    },
+    {
+      "ine": "50053",
+      "slug": "boquineni",
+      "name": "Boquiñeni"
+    },
+    {
+      "ine": "50054",
+      "slug": "bordalba",
+      "name": "Bordalba"
+    },
+    {
+      "ine": "50055",
+      "slug": "borja",
+      "name": "Borja"
+    },
+    {
+      "ine": "50056",
+      "slug": "botorrita",
+      "name": "Botorrita"
+    },
+    {
+      "ine": "50057",
+      "slug": "brea-de-aragon",
+      "name": "Brea de Aragón"
+    },
+    {
+      "ine": "50058",
+      "slug": "bubierca",
+      "name": "Bubierca"
+    },
+    {
+      "ine": "50059",
+      "slug": "bujaraloz",
+      "name": "Bujaraloz"
+    },
+    {
+      "ine": "50060",
+      "slug": "bulbuente",
+      "name": "Bulbuente"
+    },
+    {
+      "ine": "50061",
+      "slug": "bureta",
+      "name": "Bureta"
+    },
+    {
+      "ine": "50062",
+      "slug": "burgo-de-ebro-el",
+      "name": "Burgo de Ebro, El"
+    },
+    {
+      "ine": "50063",
+      "slug": "buste-el",
+      "name": "Buste, El"
+    },
+    {
+      "ine": "50064",
+      "slug": "cabanas-de-ebro",
+      "name": "Cabañas de Ebro"
+    },
+    {
+      "ine": "50065",
+      "slug": "cabolafuente",
+      "name": "Cabolafuente"
+    },
+    {
+      "ine": "50066",
+      "slug": "cadrete",
+      "name": "Cadrete"
+    },
+    {
+      "ine": "50067",
+      "slug": "calatayud",
+      "name": "Calatayud"
+    },
+    {
+      "ine": "50068",
+      "slug": "calatorao",
+      "name": "Calatorao"
+    },
+    {
+      "ine": "50069",
+      "slug": "calcena",
+      "name": "Calcena"
+    },
+    {
+      "ine": "50070",
+      "slug": "calmarza",
+      "name": "Calmarza"
+    },
+    {
+      "ine": "50071",
+      "slug": "campillo-de-aragon",
+      "name": "Campillo de Aragón"
+    },
+    {
+      "ine": "50072",
+      "slug": "carenas",
+      "name": "Carenas"
+    },
+    {
+      "ine": "50073",
+      "slug": "carinena",
+      "name": "Cariñena"
+    },
+    {
+      "ine": "50074",
+      "slug": "caspe",
+      "name": "Caspe"
+    },
+    {
+      "ine": "50075",
+      "slug": "castejon-de-alarba",
+      "name": "Castejón de Alarba"
+    },
+    {
+      "ine": "50076",
+      "slug": "castejon-de-las-armas",
+      "name": "Castejón de las Armas"
+    },
+    {
+      "ine": "50077",
+      "slug": "castejon-de-valdejasa",
+      "name": "Castejón de Valdejasa"
+    },
+    {
+      "ine": "50078",
+      "slug": "castiliscar",
+      "name": "Castiliscar"
+    },
+    {
+      "ine": "50079",
+      "slug": "cervera-de-la-canada",
+      "name": "Cervera de la Cañada"
+    },
+    {
+      "ine": "50080",
+      "slug": "cerveruela",
+      "name": "Cerveruela"
+    },
+    {
+      "ine": "50081",
+      "slug": "cetina",
+      "name": "Cetina"
+    },
+    {
+      "ine": "50092",
+      "slug": "chiprana",
+      "name": "Chiprana"
+    },
+    {
+      "ine": "50093",
+      "slug": "chodes",
+      "name": "Chodes"
+    },
+    {
+      "ine": "50082",
+      "slug": "cimballa",
+      "name": "Cimballa"
+    },
+    {
+      "ine": "50083",
+      "slug": "cinco-olivas",
+      "name": "Cinco Olivas"
+    },
+    {
+      "ine": "50084",
+      "slug": "clares-de-ribota",
+      "name": "Clarés de Ribota"
+    },
+    {
+      "ine": "50085",
+      "slug": "codo",
+      "name": "Codo"
+    },
+    {
+      "ine": "50086",
+      "slug": "codos",
+      "name": "Codos"
+    },
+    {
+      "ine": "50087",
+      "slug": "contamina",
+      "name": "Contamina"
+    },
+    {
+      "ine": "50088",
+      "slug": "cosuenda",
+      "name": "Cosuenda"
+    },
+    {
+      "ine": "50089",
+      "slug": "cuarte-de-huerva",
+      "name": "Cuarte de Huerva"
+    },
+    {
+      "ine": "50090",
+      "slug": "cubel",
+      "name": "Cubel"
+    },
+    {
+      "ine": "50091",
+      "slug": "cuerlas-las",
+      "name": "Cuerlas, Las"
+    },
+    {
+      "ine": "50094",
+      "slug": "daroca",
+      "name": "Daroca"
+    },
+    {
+      "ine": "50095",
+      "slug": "ejea-de-los-caballeros",
+      "name": "Ejea de los Caballeros"
+    },
+    {
+      "ine": "50096",
+      "slug": "embid-de-ariza",
+      "name": "Embid de Ariza"
+    },
+    {
+      "ine": "50098",
+      "slug": "encinacorba",
+      "name": "Encinacorba"
+    },
+    {
+      "ine": "50099",
+      "slug": "epila",
+      "name": "Épila"
+    },
+    {
+      "ine": "50100",
+      "slug": "erla",
+      "name": "Erla"
+    },
+    {
+      "ine": "50101",
+      "slug": "escatron",
+      "name": "Escatrón"
+    },
+    {
+      "ine": "50102",
+      "slug": "fabara",
+      "name": "Fabara"
+    },
+    {
+      "ine": "50104",
+      "slug": "farlete",
+      "name": "Farlete"
+    },
+    {
+      "ine": "50105",
+      "slug": "fayon",
+      "name": "Fayón"
+    },
+    {
+      "ine": "50106",
+      "slug": "fayos-los",
+      "name": "Fayos, Los"
+    },
+    {
+      "ine": "50107",
+      "slug": "figueruelas",
+      "name": "Figueruelas"
+    },
+    {
+      "ine": "50108",
+      "slug": "fombuena",
+      "name": "Fombuena"
+    },
+    {
+      "ine": "50109",
+      "slug": "frago-el",
+      "name": "Frago, El"
+    },
+    {
+      "ine": "50110",
+      "slug": "frasno-el",
+      "name": "Frasno, El"
+    },
+    {
+      "ine": "50111",
+      "slug": "frescano",
+      "name": "Fréscano"
+    },
+    {
+      "ine": "50113",
+      "slug": "fuendejalon",
+      "name": "Fuendejalón"
+    },
+    {
+      "ine": "50114",
+      "slug": "fuendetodos",
+      "name": "Fuendetodos"
+    },
+    {
+      "ine": "50115",
+      "slug": "fuentes-de-ebro",
+      "name": "Fuentes de Ebro"
+    },
+    {
+      "ine": "50116",
+      "slug": "fuentes-de-jiloca",
+      "name": "Fuentes de Jiloca"
+    },
+    {
+      "ine": "50117",
+      "slug": "gallocanta",
+      "name": "Gallocanta"
+    },
+    {
+      "ine": "50118",
+      "slug": "gallur",
+      "name": "Gallur"
+    },
+    {
+      "ine": "50119",
+      "slug": "gelsa",
+      "name": "Gelsa"
+    },
+    {
+      "ine": "50120",
+      "slug": "godojos",
+      "name": "Godojos"
+    },
+    {
+      "ine": "50121",
+      "slug": "gotor",
+      "name": "Gotor"
+    },
+    {
+      "ine": "50122",
+      "slug": "grisel",
+      "name": "Grisel"
+    },
+    {
+      "ine": "50123",
+      "slug": "grisen",
+      "name": "Grisén"
+    },
+    {
+      "ine": "50124",
+      "slug": "herrera-de-los-navarros",
+      "name": "Herrera de los Navarros"
+    },
+    {
+      "ine": "50125",
+      "slug": "ibdes",
+      "name": "Ibdes"
+    },
+    {
+      "ine": "50126",
+      "slug": "illueca",
+      "name": "Illueca"
+    },
+    {
+      "ine": "50128",
+      "slug": "isuerre",
+      "name": "Isuerre"
+    },
+    {
+      "ine": "50129",
+      "slug": "jaraba",
+      "name": "Jaraba"
+    },
+    {
+      "ine": "50130",
+      "slug": "jarque",
+      "name": "Jarque"
+    },
+    {
+      "ine": "50131",
+      "slug": "jaulin",
+      "name": "Jaulín"
+    },
+    {
+      "ine": "50132",
+      "slug": "joyosa-la",
+      "name": "Joyosa, La"
+    },
+    {
+      "ine": "50133",
+      "slug": "lagata",
+      "name": "Lagata"
+    },
+    {
+      "ine": "50134",
+      "slug": "langa-del-castillo",
+      "name": "Langa del Castillo"
+    },
+    {
+      "ine": "50135",
+      "slug": "layana",
+      "name": "Layana"
+    },
+    {
+      "ine": "50136",
+      "slug": "lecera",
+      "name": "Lécera"
+    },
+    {
+      "ine": "50138",
+      "slug": "lechon",
+      "name": "Lechón"
+    },
+    {
+      "ine": "50137",
+      "slug": "lecinena",
+      "name": "Leciñena"
+    },
+    {
+      "ine": "50139",
+      "slug": "letux",
+      "name": "Letux"
+    },
+    {
+      "ine": "50140",
+      "slug": "litago",
+      "name": "Litago"
+    },
+    {
+      "ine": "50141",
+      "slug": "lituenigo",
+      "name": "Lituénigo"
+    },
+    {
+      "ine": "50142",
+      "slug": "lobera-de-onsella",
+      "name": "Lobera de Onsella"
+    },
+    {
+      "ine": "50143",
+      "slug": "longares",
+      "name": "Longares"
+    },
+    {
+      "ine": "50144",
+      "slug": "longas",
+      "name": "Longás"
+    },
+    {
+      "ine": "50146",
+      "slug": "lucena-de-jalon",
+      "name": "Lucena de Jalón"
+    },
+    {
+      "ine": "50147",
+      "slug": "luceni",
+      "name": "Luceni"
+    },
+    {
+      "ine": "50148",
+      "slug": "luesia",
+      "name": "Luesia"
+    },
+    {
+      "ine": "50149",
+      "slug": "luesma",
+      "name": "Luesma"
+    },
+    {
+      "ine": "50150",
+      "slug": "lumpiaque",
+      "name": "Lumpiaque"
+    },
+    {
+      "ine": "50151",
+      "slug": "luna",
+      "name": "Luna"
+    },
+    {
+      "ine": "50152",
+      "slug": "maella",
+      "name": "Maella"
+    },
+    {
+      "ine": "50153",
+      "slug": "magallon",
+      "name": "Magallón"
+    },
+    {
+      "ine": "50154",
+      "slug": "mainar",
+      "name": "Mainar"
+    },
+    {
+      "ine": "50155",
+      "slug": "malanquilla",
+      "name": "Malanquilla"
+    },
+    {
+      "ine": "50156",
+      "slug": "malejan",
+      "name": "Maleján"
+    },
+    {
+      "ine": "50160",
+      "slug": "mallen",
+      "name": "Mallén"
+    },
+    {
+      "ine": "50157",
+      "slug": "malon",
+      "name": "Malón"
+    },
+    {
+      "ine": "50159",
+      "slug": "maluenda",
+      "name": "Maluenda"
+    },
+    {
+      "ine": "50161",
+      "slug": "manchones",
+      "name": "Manchones"
+    },
+    {
+      "ine": "50162",
+      "slug": "mara",
+      "name": "Mara"
+    },
+    {
+      "ine": "50163",
+      "slug": "maria-de-huerva",
+      "name": "María de Huerva"
+    },
+    {
+      "ine": "50902",
+      "slug": "marracos",
+      "name": "Marracos"
+    },
+    {
+      "ine": "50164",
+      "slug": "mediana-de-aragon",
+      "name": "Mediana de Aragón"
+    },
+    {
+      "ine": "50165",
+      "slug": "mequinenza",
+      "name": "Mequinenza"
+    },
+    {
+      "ine": "50166",
+      "slug": "mesones-de-isuela",
+      "name": "Mesones de Isuela"
+    },
+    {
+      "ine": "50167",
+      "slug": "mezalocha",
+      "name": "Mezalocha"
+    },
+    {
+      "ine": "50168",
+      "slug": "mianos",
+      "name": "Mianos"
+    },
+    {
+      "ine": "50169",
+      "slug": "miedes-de-aragon",
+      "name": "Miedes de Aragón"
+    },
+    {
+      "ine": "50170",
+      "slug": "monegrillo",
+      "name": "Monegrillo"
+    },
+    {
+      "ine": "50171",
+      "slug": "moneva",
+      "name": "Moneva"
+    },
+    {
+      "ine": "50172",
+      "slug": "monreal-de-ariza",
+      "name": "Monreal de Ariza"
+    },
+    {
+      "ine": "50173",
+      "slug": "monterde",
+      "name": "Monterde"
+    },
+    {
+      "ine": "50174",
+      "slug": "monton",
+      "name": "Montón"
+    },
+    {
+      "ine": "50175",
+      "slug": "morata-de-jalon",
+      "name": "Morata de Jalón"
+    },
+    {
+      "ine": "50176",
+      "slug": "morata-de-jiloca",
+      "name": "Morata de Jiloca"
+    },
+    {
+      "ine": "50177",
+      "slug": "mores",
+      "name": "Morés"
+    },
+    {
+      "ine": "50178",
+      "slug": "moros",
+      "name": "Moros"
+    },
+    {
+      "ine": "50179",
+      "slug": "moyuela",
+      "name": "Moyuela"
+    },
+    {
+      "ine": "50180",
+      "slug": "mozota",
+      "name": "Mozota"
+    },
+    {
+      "ine": "50181",
+      "slug": "muel",
+      "name": "Muel"
+    },
+    {
+      "ine": "50182",
+      "slug": "muela-la",
+      "name": "Muela, La"
+    },
+    {
+      "ine": "50183",
+      "slug": "munebrega",
+      "name": "Munébrega"
+    },
+    {
+      "ine": "50184",
+      "slug": "murero",
+      "name": "Murero"
+    },
+    {
+      "ine": "50185",
+      "slug": "murillo-de-gallego",
+      "name": "Murillo de Gállego"
+    },
+    {
+      "ine": "50186",
+      "slug": "navardun",
+      "name": "Navardún"
+    },
+    {
+      "ine": "50187",
+      "slug": "niguella",
+      "name": "Nigüella"
+    },
+    {
+      "ine": "50188",
+      "slug": "nombrevilla",
+      "name": "Nombrevilla"
+    },
+    {
+      "ine": "50189",
+      "slug": "nonaspe",
+      "name": "Nonaspe"
+    },
+    {
+      "ine": "50190",
+      "slug": "novallas",
+      "name": "Novallas"
+    },
+    {
+      "ine": "50191",
+      "slug": "novillas",
+      "name": "Novillas"
+    },
+    {
+      "ine": "50192",
+      "slug": "nuevalos",
+      "name": "Nuévalos"
+    },
+    {
+      "ine": "50193",
+      "slug": "nuez-de-ebro",
+      "name": "Nuez de Ebro"
+    },
+    {
+      "ine": "50194",
+      "slug": "olves",
+      "name": "Olvés"
+    },
+    {
+      "ine": "50195",
+      "slug": "orcajo",
+      "name": "Orcajo"
+    },
+    {
+      "ine": "50196",
+      "slug": "orera",
+      "name": "Orera"
+    },
+    {
+      "ine": "50197",
+      "slug": "ores",
+      "name": "Orés"
+    },
+    {
+      "ine": "50198",
+      "slug": "oseja",
+      "name": "Oseja"
+    },
+    {
+      "ine": "50199",
+      "slug": "osera-de-ebro",
+      "name": "Osera de Ebro"
+    },
+    {
+      "ine": "50200",
+      "slug": "paniza",
+      "name": "Paniza"
+    },
+    {
+      "ine": "50201",
+      "slug": "paracuellos-de-jiloca",
+      "name": "Paracuellos de Jiloca"
+    },
+    {
+      "ine": "50202",
+      "slug": "paracuellos-de-la-ribera",
+      "name": "Paracuellos de la Ribera"
+    },
+    {
+      "ine": "50203",
+      "slug": "pastriz",
+      "name": "Pastriz"
+    },
+    {
+      "ine": "50204",
+      "slug": "pedrola",
+      "name": "Pedrola"
+    },
+    {
+      "ine": "50205",
+      "slug": "pedrosas-las",
+      "name": "Pedrosas, Las"
+    },
+    {
+      "ine": "50206",
+      "slug": "perdiguera",
+      "name": "Perdiguera"
+    },
+    {
+      "ine": "50207",
+      "slug": "piedratajada",
+      "name": "Piedratajada"
+    },
+    {
+      "ine": "50208",
+      "slug": "pina-de-ebro",
+      "name": "Pina de Ebro"
+    },
+    {
+      "ine": "50209",
+      "slug": "pinseque",
+      "name": "Pinseque"
+    },
+    {
+      "ine": "50210",
+      "slug": "pintanos-los",
+      "name": "Pintanos, Los"
+    },
+    {
+      "ine": "50211",
+      "slug": "plasencia-de-jalon",
+      "name": "Plasencia de Jalón"
+    },
+    {
+      "ine": "50212",
+      "slug": "pleitas",
+      "name": "Pleitas"
+    },
+    {
+      "ine": "50213",
+      "slug": "plenas",
+      "name": "Plenas"
+    },
+    {
+      "ine": "50214",
+      "slug": "pomer",
+      "name": "Pomer"
+    },
+    {
+      "ine": "50215",
+      "slug": "pozuel-de-ariza",
+      "name": "Pozuel de Ariza"
+    },
+    {
+      "ine": "50216",
+      "slug": "pozuelo-de-aragon",
+      "name": "Pozuelo de Aragón"
+    },
+    {
+      "ine": "50217",
+      "slug": "pradilla-de-ebro",
+      "name": "Pradilla de Ebro"
+    },
+    {
+      "ine": "50218",
+      "slug": "puebla-de-alborton",
+      "name": "Puebla de Albortón"
+    },
+    {
+      "ine": "50219",
+      "slug": "puebla-de-alfinden-la",
+      "name": "Puebla de Alfindén, La"
+    },
+    {
+      "ine": "50220",
+      "slug": "puendeluna",
+      "name": "Puendeluna"
+    },
+    {
+      "ine": "50221",
+      "slug": "purujosa",
+      "name": "Purujosa"
+    },
+    {
+      "ine": "50222",
+      "slug": "quinto",
+      "name": "Quinto"
+    },
+    {
+      "ine": "50223",
+      "slug": "remolinos",
+      "name": "Remolinos"
+    },
+    {
+      "ine": "50224",
+      "slug": "retascon",
+      "name": "Retascón"
+    },
+    {
+      "ine": "50225",
+      "slug": "ricla",
+      "name": "Ricla"
+    },
+    {
+      "ine": "50227",
+      "slug": "romanos",
+      "name": "Romanos"
+    },
+    {
+      "ine": "50228",
+      "slug": "rueda-de-jalon",
+      "name": "Rueda de Jalón"
+    },
+    {
+      "ine": "50229",
+      "slug": "ruesca",
+      "name": "Ruesca"
+    },
+    {
+      "ine": "50241",
+      "slug": "sabinan",
+      "name": "Sabiñán"
+    },
+    {
+      "ine": "50230",
+      "slug": "sadaba",
+      "name": "Sádaba"
+    },
+    {
+      "ine": "50231",
+      "slug": "salillas-de-jalon",
+      "name": "Salillas de Jalón"
+    },
+    {
+      "ine": "50232",
+      "slug": "salvatierra-de-esca",
+      "name": "Salvatierra de Esca"
+    },
+    {
+      "ine": "50233",
+      "slug": "samper-del-salz",
+      "name": "Samper del Salz"
+    },
+    {
+      "ine": "50234",
+      "slug": "san-martin-de-la-virgen-de-moncayo",
+      "name": "San Martín de la Virgen de Moncayo"
+    },
+    {
+      "ine": "50235",
+      "slug": "san-mateo-de-gallego",
+      "name": "San Mateo de Gállego"
+    },
+    {
+      "ine": "50236",
+      "slug": "santa-cruz-de-grio",
+      "name": "Santa Cruz de Grío"
+    },
+    {
+      "ine": "50237",
+      "slug": "santa-cruz-de-moncayo",
+      "name": "Santa Cruz de Moncayo"
+    },
+    {
+      "ine": "50238",
+      "slug": "santa-eulalia-de-gallego",
+      "name": "Santa Eulalia de Gállego"
+    },
+    {
+      "ine": "50239",
+      "slug": "santed",
+      "name": "Santed"
+    },
+    {
+      "ine": "50240",
+      "slug": "sastago",
+      "name": "Sástago"
+    },
+    {
+      "ine": "50242",
+      "slug": "sediles",
+      "name": "Sediles"
+    },
+    {
+      "ine": "50243",
+      "slug": "sestrica",
+      "name": "Sestrica"
+    },
+    {
+      "ine": "50244",
+      "slug": "sierra-de-luna",
+      "name": "Sierra de Luna"
+    },
+    {
+      "ine": "50245",
+      "slug": "sigues",
+      "name": "Sigüés"
+    },
+    {
+      "ine": "50246",
+      "slug": "sisamon",
+      "name": "Sisamón"
+    },
+    {
+      "ine": "50247",
+      "slug": "sobradiel",
+      "name": "Sobradiel"
+    },
+    {
+      "ine": "50248",
+      "slug": "sos-del-rey-catolico",
+      "name": "Sos del Rey Católico"
+    },
+    {
+      "ine": "50249",
+      "slug": "tabuenca",
+      "name": "Tabuenca"
+    },
+    {
+      "ine": "50250",
+      "slug": "talamantes",
+      "name": "Talamantes"
+    },
+    {
+      "ine": "50251",
+      "slug": "tarazona",
+      "name": "Tarazona"
+    },
+    {
+      "ine": "50252",
+      "slug": "tauste",
+      "name": "Tauste"
+    },
+    {
+      "ine": "50253",
+      "slug": "terrer",
+      "name": "Terrer"
+    },
+    {
+      "ine": "50254",
+      "slug": "tierga",
+      "name": "Tierga"
+    },
+    {
+      "ine": "50255",
+      "slug": "tobed",
+      "name": "Tobed"
+    },
+    {
+      "ine": "50256",
+      "slug": "torralba-de-los-frailes",
+      "name": "Torralba de los Frailes"
+    },
+    {
+      "ine": "50257",
+      "slug": "torralba-de-ribota",
+      "name": "Torralba de Ribota"
+    },
+    {
+      "ine": "50258",
+      "slug": "torralbilla",
+      "name": "Torralbilla"
+    },
+    {
+      "ine": "50259",
+      "slug": "torrehermosa",
+      "name": "Torrehermosa"
+    },
+    {
+      "ine": "50260",
+      "slug": "torrelapaja",
+      "name": "Torrelapaja"
+    },
+    {
+      "ine": "50261",
+      "slug": "torrellas",
+      "name": "Torrellas"
+    },
+    {
+      "ine": "50262",
+      "slug": "torres-de-berrellen",
+      "name": "Torres de Berrellén"
+    },
+    {
+      "ine": "50263",
+      "slug": "torrijo-de-la-canada",
+      "name": "Torrijo de la Cañada"
+    },
+    {
+      "ine": "50264",
+      "slug": "tosos",
+      "name": "Tosos"
+    },
+    {
+      "ine": "50265",
+      "slug": "trasmoz",
+      "name": "Trasmoz"
+    },
+    {
+      "ine": "50266",
+      "slug": "trasobares",
+      "name": "Trasobares"
+    },
+    {
+      "ine": "50267",
+      "slug": "uncastillo",
+      "name": "Uncastillo"
+    },
+    {
+      "ine": "50268",
+      "slug": "undues-de-lerda",
+      "name": "Undués de Lerda"
+    },
+    {
+      "ine": "50269",
+      "slug": "urrea-de-jalon",
+      "name": "Urrea de Jalón"
+    },
+    {
+      "ine": "50270",
+      "slug": "urries",
+      "name": "Urriés"
+    },
+    {
+      "ine": "50271",
+      "slug": "used",
+      "name": "Used"
+    },
+    {
+      "ine": "50272",
+      "slug": "utebo",
+      "name": "Utebo"
+    },
+    {
+      "ine": "50274",
+      "slug": "val-de-san-martin",
+      "name": "Val de San Martín"
+    },
+    {
+      "ine": "50273",
+      "slug": "valdehorna",
+      "name": "Valdehorna"
+    },
+    {
+      "ine": "50275",
+      "slug": "valmadrid",
+      "name": "Valmadrid"
+    },
+    {
+      "ine": "50276",
+      "slug": "valpalmas",
+      "name": "Valpalmas"
+    },
+    {
+      "ine": "50277",
+      "slug": "valtorres",
+      "name": "Valtorres"
+    },
+    {
+      "ine": "50278",
+      "slug": "velilla-de-ebro",
+      "name": "Velilla de Ebro"
+    },
+    {
+      "ine": "50279",
+      "slug": "velilla-de-jiloca",
+      "name": "Velilla de Jiloca"
+    },
+    {
+      "ine": "50280",
+      "slug": "vera-de-moncayo",
+      "name": "Vera de Moncayo"
+    },
+    {
+      "ine": "50281",
+      "slug": "vierlas",
+      "name": "Vierlas"
+    },
+    {
+      "ine": "50283",
+      "slug": "villadoz",
+      "name": "Villadoz"
+    },
+    {
+      "ine": "50284",
+      "slug": "villafeliche",
+      "name": "Villafeliche"
+    },
+    {
+      "ine": "50285",
+      "slug": "villafranca-de-ebro",
+      "name": "Villafranca de Ebro"
+    },
+    {
+      "ine": "50286",
+      "slug": "villalba-de-perejil",
+      "name": "Villalba de Perejil"
+    },
+    {
+      "ine": "50287",
+      "slug": "villalengua",
+      "name": "Villalengua"
+    },
+    {
+      "ine": "50903",
+      "slug": "villamayor-de-gallego",
+      "name": "Villamayor de Gállego"
+    },
+    {
+      "ine": "50288",
+      "slug": "villanueva-de-gallego",
+      "name": "Villanueva de Gállego"
+    },
+    {
+      "ine": "50290",
+      "slug": "villanueva-de-huerva",
+      "name": "Villanueva de Huerva"
+    },
+    {
+      "ine": "50289",
+      "slug": "villanueva-de-jiloca",
+      "name": "Villanueva de Jiloca"
+    },
+    {
+      "ine": "50291",
+      "slug": "villar-de-los-navarros",
+      "name": "Villar de los Navarros"
+    },
+    {
+      "ine": "50292",
+      "slug": "villarreal-de-huerva",
+      "name": "Villarreal de Huerva"
+    },
+    {
+      "ine": "50293",
+      "slug": "villarroya-de-la-sierra",
+      "name": "Villarroya de la Sierra"
+    },
+    {
+      "ine": "50294",
+      "slug": "villarroya-del-campo",
+      "name": "Villarroya del Campo"
+    },
+    {
+      "ine": "50282",
+      "slug": "viluena-la",
+      "name": "Vilueña, La"
+    },
+    {
+      "ine": "50295",
+      "slug": "vistabella",
+      "name": "Vistabella"
+    },
+    {
+      "ine": "50296",
+      "slug": "zaida-la",
+      "name": "Zaida, La"
+    },
+    {
+      "ine": "50297",
+      "slug": "zaragoza",
+      "name": "Zaragoza"
+    },
+    {
+      "ine": "50298",
+      "slug": "zuera",
+      "name": "Zuera"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

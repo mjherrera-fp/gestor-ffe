@@ -1,0 +1,580 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "EUS",
+    "slug": "eus",
+    "name": "País Vasco"
+  },
+  "province": {
+    "code": "48",
+    "slug": "vizcaya",
+    "name": "Vizcaya"
+  },
+  "municipalities": [
+    {
+      "ine": "48001",
+      "slug": "abadino",
+      "name": "Abadiño"
+    },
+    {
+      "ine": "48002",
+      "slug": "abanto-y-ciervana-abanto-zierbena",
+      "name": "Abanto y Ciérvana-Abanto Zierbena"
+    },
+    {
+      "ine": "48911",
+      "slug": "ajangiz",
+      "name": "Ajangiz"
+    },
+    {
+      "ine": "48912",
+      "slug": "alonsotegi",
+      "name": "Alonsotegi"
+    },
+    {
+      "ine": "48003",
+      "slug": "amorebieta-etxano",
+      "name": "Amorebieta-Etxano"
+    },
+    {
+      "ine": "48004",
+      "slug": "amoroto",
+      "name": "Amoroto"
+    },
+    {
+      "ine": "48005",
+      "slug": "arakaldo",
+      "name": "Arakaldo"
+    },
+    {
+      "ine": "48006",
+      "slug": "arantzazu",
+      "name": "Arantzazu"
+    },
+    {
+      "ine": "48093",
+      "slug": "areatza",
+      "name": "Areatza"
+    },
+    {
+      "ine": "48009",
+      "slug": "arrankudiaga",
+      "name": "Arrankudiaga"
+    },
+    {
+      "ine": "48914",
+      "slug": "arratzu",
+      "name": "Arratzu"
+    },
+    {
+      "ine": "48010",
+      "slug": "arrieta",
+      "name": "Arrieta"
+    },
+    {
+      "ine": "48011",
+      "slug": "arrigorriaga",
+      "name": "Arrigorriaga"
+    },
+    {
+      "ine": "48023",
+      "slug": "artea",
+      "name": "Artea"
+    },
+    {
+      "ine": "48008",
+      "slug": "artzentales",
+      "name": "Artzentales"
+    },
+    {
+      "ine": "48091",
+      "slug": "atxondo",
+      "name": "Atxondo"
+    },
+    {
+      "ine": "48070",
+      "slug": "aulesti",
+      "name": "Aulesti"
+    },
+    {
+      "ine": "48012",
+      "slug": "bakio",
+      "name": "Bakio"
+    },
+    {
+      "ine": "48090",
+      "slug": "balmaseda",
+      "name": "Balmaseda"
+    },
+    {
+      "ine": "48013",
+      "slug": "barakaldo",
+      "name": "Barakaldo"
+    },
+    {
+      "ine": "48014",
+      "slug": "barrika",
+      "name": "Barrika"
+    },
+    {
+      "ine": "48015",
+      "slug": "basauri",
+      "name": "Basauri"
+    },
+    {
+      "ine": "48092",
+      "slug": "bedia",
+      "name": "Bedia"
+    },
+    {
+      "ine": "48016",
+      "slug": "berango",
+      "name": "Berango"
+    },
+    {
+      "ine": "48017",
+      "slug": "bermeo",
+      "name": "Bermeo"
+    },
+    {
+      "ine": "48018",
+      "slug": "berriatua",
+      "name": "Berriatua"
+    },
+    {
+      "ine": "48019",
+      "slug": "berriz",
+      "name": "Berriz"
+    },
+    {
+      "ine": "48020",
+      "slug": "bilbao",
+      "name": "Bilbao"
+    },
+    {
+      "ine": "48021",
+      "slug": "busturia",
+      "name": "Busturia"
+    },
+    {
+      "ine": "48901",
+      "slug": "derio",
+      "name": "Derio"
+    },
+    {
+      "ine": "48026",
+      "slug": "dima",
+      "name": "Dima"
+    },
+    {
+      "ine": "48027",
+      "slug": "durango",
+      "name": "Durango"
+    },
+    {
+      "ine": "48028",
+      "slug": "ea",
+      "name": "Ea"
+    },
+    {
+      "ine": "48031",
+      "slug": "elantxobe",
+      "name": "Elantxobe"
+    },
+    {
+      "ine": "48032",
+      "slug": "elorrio",
+      "name": "Elorrio"
+    },
+    {
+      "ine": "48902",
+      "slug": "erandio",
+      "name": "Erandio"
+    },
+    {
+      "ine": "48033",
+      "slug": "ereno",
+      "name": "Ereño"
+    },
+    {
+      "ine": "48034",
+      "slug": "ermua",
+      "name": "Ermua"
+    },
+    {
+      "ine": "48079",
+      "slug": "errigoiti",
+      "name": "Errigoiti"
+    },
+    {
+      "ine": "48029",
+      "slug": "etxebarri",
+      "name": "Etxebarri"
+    },
+    {
+      "ine": "48030",
+      "slug": "etxebarria",
+      "name": "Etxebarria"
+    },
+    {
+      "ine": "48906",
+      "slug": "forua",
+      "name": "Forua"
+    },
+    {
+      "ine": "48035",
+      "slug": "fruiz",
+      "name": "Fruiz"
+    },
+    {
+      "ine": "48036",
+      "slug": "galdakao",
+      "name": "Galdakao"
+    },
+    {
+      "ine": "48037",
+      "slug": "galdames",
+      "name": "Galdames"
+    },
+    {
+      "ine": "48038",
+      "slug": "gamiz-fika",
+      "name": "Gamiz-Fika"
+    },
+    {
+      "ine": "48039",
+      "slug": "garai",
+      "name": "Garai"
+    },
+    {
+      "ine": "48040",
+      "slug": "gatika",
+      "name": "Gatika"
+    },
+    {
+      "ine": "48041",
+      "slug": "gautegiz-arteaga",
+      "name": "Gautegiz Arteaga"
+    },
+    {
+      "ine": "48046",
+      "slug": "gernika-lumo",
+      "name": "Gernika-Lumo"
+    },
+    {
+      "ine": "48044",
+      "slug": "getxo",
+      "name": "Getxo"
+    },
+    {
+      "ine": "48047",
+      "slug": "gizaburuaga",
+      "name": "Gizaburuaga"
+    },
+    {
+      "ine": "48042",
+      "slug": "gordexola",
+      "name": "Gordexola"
+    },
+    {
+      "ine": "48043",
+      "slug": "gorliz",
+      "name": "Gorliz"
+    },
+    {
+      "ine": "48045",
+      "slug": "guenes",
+      "name": "Güeñes"
+    },
+    {
+      "ine": "48048",
+      "slug": "ibarrangelu",
+      "name": "Ibarrangelu"
+    },
+    {
+      "ine": "48094",
+      "slug": "igorre",
+      "name": "Igorre"
+    },
+    {
+      "ine": "48049",
+      "slug": "ispaster",
+      "name": "Ispaster"
+    },
+    {
+      "ine": "48910",
+      "slug": "iurreta",
+      "name": "Iurreta"
+    },
+    {
+      "ine": "48050",
+      "slug": "izurtza",
+      "name": "Izurtza"
+    },
+    {
+      "ine": "48022",
+      "slug": "karrantza-harana-valle-de-carranza",
+      "name": "Karrantza Harana/Valle de Carranza"
+    },
+    {
+      "ine": "48907",
+      "slug": "kortezubi",
+      "name": "Kortezubi"
+    },
+    {
+      "ine": "48051",
+      "slug": "lanestosa",
+      "name": "Lanestosa"
+    },
+    {
+      "ine": "48052",
+      "slug": "larrabetzu",
+      "name": "Larrabetzu"
+    },
+    {
+      "ine": "48053",
+      "slug": "laukiz",
+      "name": "Laukiz"
+    },
+    {
+      "ine": "48054",
+      "slug": "leioa",
+      "name": "Leioa"
+    },
+    {
+      "ine": "48057",
+      "slug": "lekeitio",
+      "name": "Lekeitio"
+    },
+    {
+      "ine": "48055",
+      "slug": "lemoa",
+      "name": "Lemoa"
+    },
+    {
+      "ine": "48056",
+      "slug": "lemoiz",
+      "name": "Lemoiz"
+    },
+    {
+      "ine": "48081",
+      "slug": "lezama",
+      "name": "Lezama"
+    },
+    {
+      "ine": "48903",
+      "slug": "loiu",
+      "name": "Loiu"
+    },
+    {
+      "ine": "48058",
+      "slug": "mallabia",
+      "name": "Mallabia"
+    },
+    {
+      "ine": "48059",
+      "slug": "manaria",
+      "name": "Mañaria"
+    },
+    {
+      "ine": "48060",
+      "slug": "markina-xemein",
+      "name": "Markina-Xemein"
+    },
+    {
+      "ine": "48061",
+      "slug": "maruri-jatabe",
+      "name": "Maruri-Jatabe"
+    },
+    {
+      "ine": "48062",
+      "slug": "mendata",
+      "name": "Mendata"
+    },
+    {
+      "ine": "48063",
+      "slug": "mendexa",
+      "name": "Mendexa"
+    },
+    {
+      "ine": "48064",
+      "slug": "menaka",
+      "name": "Meñaka"
+    },
+    {
+      "ine": "48066",
+      "slug": "morga",
+      "name": "Morga"
+    },
+    {
+      "ine": "48068",
+      "slug": "mundaka",
+      "name": "Mundaka"
+    },
+    {
+      "ine": "48069",
+      "slug": "mungia",
+      "name": "Mungia"
+    },
+    {
+      "ine": "48007",
+      "slug": "munitibar-arbatzegi-gerrikaitz",
+      "name": "Munitibar-Arbatzegi Gerrikaitz"
+    },
+    {
+      "ine": "48908",
+      "slug": "murueta",
+      "name": "Murueta"
+    },
+    {
+      "ine": "48071",
+      "slug": "muskiz",
+      "name": "Muskiz"
+    },
+    {
+      "ine": "48067",
+      "slug": "muxika",
+      "name": "Muxika"
+    },
+    {
+      "ine": "48909",
+      "slug": "nabarniz",
+      "name": "Nabarniz"
+    },
+    {
+      "ine": "48073",
+      "slug": "ondarroa",
+      "name": "Ondarroa"
+    },
+    {
+      "ine": "48075",
+      "slug": "orozko",
+      "name": "Orozko"
+    },
+    {
+      "ine": "48083",
+      "slug": "ortuella",
+      "name": "Ortuella"
+    },
+    {
+      "ine": "48072",
+      "slug": "otxandio",
+      "name": "Otxandio"
+    },
+    {
+      "ine": "48077",
+      "slug": "plentzia",
+      "name": "Plentzia"
+    },
+    {
+      "ine": "48078",
+      "slug": "portugalete",
+      "name": "Portugalete"
+    },
+    {
+      "ine": "48082",
+      "slug": "santurtzi",
+      "name": "Santurtzi"
+    },
+    {
+      "ine": "48084",
+      "slug": "sestao",
+      "name": "Sestao"
+    },
+    {
+      "ine": "48904",
+      "slug": "sondika",
+      "name": "Sondika"
+    },
+    {
+      "ine": "48085",
+      "slug": "sopela",
+      "name": "Sopela"
+    },
+    {
+      "ine": "48086",
+      "slug": "sopuerta",
+      "name": "Sopuerta"
+    },
+    {
+      "ine": "48076",
+      "slug": "sukarrieta",
+      "name": "Sukarrieta"
+    },
+    {
+      "ine": "48087",
+      "slug": "trucios-turtzioz",
+      "name": "Trucios-Turtzioz"
+    },
+    {
+      "ine": "48088",
+      "slug": "ubide",
+      "name": "Ubide"
+    },
+    {
+      "ine": "48065",
+      "slug": "ugao-miraballes",
+      "name": "Ugao-Miraballes"
+    },
+    {
+      "ine": "48089",
+      "slug": "urduliz",
+      "name": "Urduliz"
+    },
+    {
+      "ine": "48074",
+      "slug": "urduna-orduna",
+      "name": "Urduña/Orduña"
+    },
+    {
+      "ine": "48080",
+      "slug": "valle-de-trapaga-trapagaran",
+      "name": "Valle de Trápaga-Trapagaran"
+    },
+    {
+      "ine": "48095",
+      "slug": "zaldibar",
+      "name": "Zaldibar"
+    },
+    {
+      "ine": "48096",
+      "slug": "zalla",
+      "name": "Zalla"
+    },
+    {
+      "ine": "48905",
+      "slug": "zamudio",
+      "name": "Zamudio"
+    },
+    {
+      "ine": "48097",
+      "slug": "zaratamo",
+      "name": "Zaratamo"
+    },
+    {
+      "ine": "48024",
+      "slug": "zeanuri",
+      "name": "Zeanuri"
+    },
+    {
+      "ine": "48025",
+      "slug": "zeberio",
+      "name": "Zeberio"
+    },
+    {
+      "ine": "48913",
+      "slug": "zierbena",
+      "name": "Zierbena"
+    },
+    {
+      "ine": "48915",
+      "slug": "ziortza-bolibar",
+      "name": "Ziortza-Bolibar"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

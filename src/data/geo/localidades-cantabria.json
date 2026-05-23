@@ -1,0 +1,530 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "CNT",
+    "slug": "cnt",
+    "name": "Cantabria"
+  },
+  "province": {
+    "code": "39",
+    "slug": "cantabria",
+    "name": "Cantabria"
+  },
+  "municipalities": [
+    {
+      "ine": "39001",
+      "slug": "alfoz-de-lloredo",
+      "name": "Alfoz de Lloredo"
+    },
+    {
+      "ine": "39002",
+      "slug": "ampuero",
+      "name": "Ampuero"
+    },
+    {
+      "ine": "39003",
+      "slug": "anievas",
+      "name": "Anievas"
+    },
+    {
+      "ine": "39004",
+      "slug": "arenas-de-iguna",
+      "name": "Arenas de Iguña"
+    },
+    {
+      "ine": "39005",
+      "slug": "argonos",
+      "name": "Argoños"
+    },
+    {
+      "ine": "39006",
+      "slug": "arnuero",
+      "name": "Arnuero"
+    },
+    {
+      "ine": "39007",
+      "slug": "arredondo",
+      "name": "Arredondo"
+    },
+    {
+      "ine": "39008",
+      "slug": "astillero-el",
+      "name": "Astillero, El"
+    },
+    {
+      "ine": "39009",
+      "slug": "barcena-de-cicero",
+      "name": "Bárcena de Cicero"
+    },
+    {
+      "ine": "39010",
+      "slug": "barcena-de-pie-de-concha",
+      "name": "Bárcena de Pie de Concha"
+    },
+    {
+      "ine": "39011",
+      "slug": "bareyo",
+      "name": "Bareyo"
+    },
+    {
+      "ine": "39012",
+      "slug": "cabezon-de-la-sal",
+      "name": "Cabezón de la Sal"
+    },
+    {
+      "ine": "39013",
+      "slug": "cabezon-de-liebana",
+      "name": "Cabezón de Liébana"
+    },
+    {
+      "ine": "39014",
+      "slug": "cabuerniga",
+      "name": "Cabuérniga"
+    },
+    {
+      "ine": "39015",
+      "slug": "camaleno",
+      "name": "Camaleño"
+    },
+    {
+      "ine": "39016",
+      "slug": "camargo",
+      "name": "Camargo"
+    },
+    {
+      "ine": "39027",
+      "slug": "campoo-de-enmedio",
+      "name": "Campoo de Enmedio"
+    },
+    {
+      "ine": "39017",
+      "slug": "campoo-de-yuso",
+      "name": "Campoo de Yuso"
+    },
+    {
+      "ine": "39018",
+      "slug": "cartes",
+      "name": "Cartes"
+    },
+    {
+      "ine": "39019",
+      "slug": "castaneda",
+      "name": "Castañeda"
+    },
+    {
+      "ine": "39020",
+      "slug": "castro-urdiales",
+      "name": "Castro-Urdiales"
+    },
+    {
+      "ine": "39021",
+      "slug": "cieza",
+      "name": "Cieza"
+    },
+    {
+      "ine": "39022",
+      "slug": "cillorigo-de-liebana",
+      "name": "Cillorigo de Liébana"
+    },
+    {
+      "ine": "39023",
+      "slug": "colindres",
+      "name": "Colindres"
+    },
+    {
+      "ine": "39024",
+      "slug": "comillas",
+      "name": "Comillas"
+    },
+    {
+      "ine": "39025",
+      "slug": "corrales-de-buelna-los",
+      "name": "Corrales de Buelna, Los"
+    },
+    {
+      "ine": "39026",
+      "slug": "corvera-de-toranzo",
+      "name": "Corvera de Toranzo"
+    },
+    {
+      "ine": "39028",
+      "slug": "entrambasaguas",
+      "name": "Entrambasaguas"
+    },
+    {
+      "ine": "39029",
+      "slug": "escalante",
+      "name": "Escalante"
+    },
+    {
+      "ine": "39030",
+      "slug": "guriezo",
+      "name": "Guriezo"
+    },
+    {
+      "ine": "39031",
+      "slug": "hazas-de-cesto",
+      "name": "Hazas de Cesto"
+    },
+    {
+      "ine": "39032",
+      "slug": "hermandad-de-campoo-de-suso",
+      "name": "Hermandad de Campoo de Suso"
+    },
+    {
+      "ine": "39033",
+      "slug": "herrerias",
+      "name": "Herrerías"
+    },
+    {
+      "ine": "39034",
+      "slug": "lamason",
+      "name": "Lamasón"
+    },
+    {
+      "ine": "39035",
+      "slug": "laredo",
+      "name": "Laredo"
+    },
+    {
+      "ine": "39036",
+      "slug": "liendo",
+      "name": "Liendo"
+    },
+    {
+      "ine": "39037",
+      "slug": "lierganes",
+      "name": "Liérganes"
+    },
+    {
+      "ine": "39038",
+      "slug": "limpias",
+      "name": "Limpias"
+    },
+    {
+      "ine": "39039",
+      "slug": "luena",
+      "name": "Luena"
+    },
+    {
+      "ine": "39040",
+      "slug": "marina-de-cudeyo",
+      "name": "Marina de Cudeyo"
+    },
+    {
+      "ine": "39041",
+      "slug": "mazcuerras",
+      "name": "Mazcuerras"
+    },
+    {
+      "ine": "39042",
+      "slug": "medio-cudeyo",
+      "name": "Medio Cudeyo"
+    },
+    {
+      "ine": "39043",
+      "slug": "meruelo",
+      "name": "Meruelo"
+    },
+    {
+      "ine": "39044",
+      "slug": "miengo",
+      "name": "Miengo"
+    },
+    {
+      "ine": "39045",
+      "slug": "miera",
+      "name": "Miera"
+    },
+    {
+      "ine": "39046",
+      "slug": "molledo",
+      "name": "Molledo"
+    },
+    {
+      "ine": "39047",
+      "slug": "noja",
+      "name": "Noja"
+    },
+    {
+      "ine": "39048",
+      "slug": "penagos",
+      "name": "Penagos"
+    },
+    {
+      "ine": "39049",
+      "slug": "penarrubia",
+      "name": "Peñarrubia"
+    },
+    {
+      "ine": "39050",
+      "slug": "pesaguero",
+      "name": "Pesaguero"
+    },
+    {
+      "ine": "39051",
+      "slug": "pesquera",
+      "name": "Pesquera"
+    },
+    {
+      "ine": "39052",
+      "slug": "pielagos",
+      "name": "Piélagos"
+    },
+    {
+      "ine": "39053",
+      "slug": "polaciones",
+      "name": "Polaciones"
+    },
+    {
+      "ine": "39054",
+      "slug": "polanco",
+      "name": "Polanco"
+    },
+    {
+      "ine": "39055",
+      "slug": "potes",
+      "name": "Potes"
+    },
+    {
+      "ine": "39056",
+      "slug": "puente-viesgo",
+      "name": "Puente Viesgo"
+    },
+    {
+      "ine": "39057",
+      "slug": "ramales-de-la-victoria",
+      "name": "Ramales de la Victoria"
+    },
+    {
+      "ine": "39058",
+      "slug": "rasines",
+      "name": "Rasines"
+    },
+    {
+      "ine": "39059",
+      "slug": "reinosa",
+      "name": "Reinosa"
+    },
+    {
+      "ine": "39060",
+      "slug": "reocin",
+      "name": "Reocín"
+    },
+    {
+      "ine": "39061",
+      "slug": "ribamontan-al-mar",
+      "name": "Ribamontán al Mar"
+    },
+    {
+      "ine": "39062",
+      "slug": "ribamontan-al-monte",
+      "name": "Ribamontán al Monte"
+    },
+    {
+      "ine": "39063",
+      "slug": "rionansa",
+      "name": "Rionansa"
+    },
+    {
+      "ine": "39064",
+      "slug": "riotuerto",
+      "name": "Riotuerto"
+    },
+    {
+      "ine": "39065",
+      "slug": "rozas-de-valdearroyo-las",
+      "name": "Rozas de Valdearroyo, Las"
+    },
+    {
+      "ine": "39066",
+      "slug": "ruente",
+      "name": "Ruente"
+    },
+    {
+      "ine": "39067",
+      "slug": "ruesga",
+      "name": "Ruesga"
+    },
+    {
+      "ine": "39068",
+      "slug": "ruiloba",
+      "name": "Ruiloba"
+    },
+    {
+      "ine": "39069",
+      "slug": "san-felices-de-buelna",
+      "name": "San Felices de Buelna"
+    },
+    {
+      "ine": "39070",
+      "slug": "san-miguel-de-aguayo",
+      "name": "San Miguel de Aguayo"
+    },
+    {
+      "ine": "39071",
+      "slug": "san-pedro-del-romeral",
+      "name": "San Pedro del Romeral"
+    },
+    {
+      "ine": "39072",
+      "slug": "san-roque-de-riomiera",
+      "name": "San Roque de Riomiera"
+    },
+    {
+      "ine": "39080",
+      "slug": "san-vicente-de-la-barquera",
+      "name": "San Vicente de la Barquera"
+    },
+    {
+      "ine": "39073",
+      "slug": "santa-cruz-de-bezana",
+      "name": "Santa Cruz de Bezana"
+    },
+    {
+      "ine": "39074",
+      "slug": "santa-maria-de-cayon",
+      "name": "Santa María de Cayón"
+    },
+    {
+      "ine": "39075",
+      "slug": "santander",
+      "name": "Santander"
+    },
+    {
+      "ine": "39076",
+      "slug": "santillana-del-mar",
+      "name": "Santillana del Mar"
+    },
+    {
+      "ine": "39077",
+      "slug": "santiurde-de-reinosa",
+      "name": "Santiurde de Reinosa"
+    },
+    {
+      "ine": "39078",
+      "slug": "santiurde-de-toranzo",
+      "name": "Santiurde de Toranzo"
+    },
+    {
+      "ine": "39079",
+      "slug": "santona",
+      "name": "Santoña"
+    },
+    {
+      "ine": "39081",
+      "slug": "saro",
+      "name": "Saro"
+    },
+    {
+      "ine": "39082",
+      "slug": "selaya",
+      "name": "Selaya"
+    },
+    {
+      "ine": "39083",
+      "slug": "soba",
+      "name": "Soba"
+    },
+    {
+      "ine": "39084",
+      "slug": "solorzano",
+      "name": "Solórzano"
+    },
+    {
+      "ine": "39085",
+      "slug": "suances",
+      "name": "Suances"
+    },
+    {
+      "ine": "39086",
+      "slug": "tojos-los",
+      "name": "Tojos, Los"
+    },
+    {
+      "ine": "39087",
+      "slug": "torrelavega",
+      "name": "Torrelavega"
+    },
+    {
+      "ine": "39088",
+      "slug": "tresviso",
+      "name": "Tresviso"
+    },
+    {
+      "ine": "39089",
+      "slug": "tudanca",
+      "name": "Tudanca"
+    },
+    {
+      "ine": "39090",
+      "slug": "udias",
+      "name": "Udías"
+    },
+    {
+      "ine": "39095",
+      "slug": "val-de-san-vicente",
+      "name": "Val de San Vicente"
+    },
+    {
+      "ine": "39091",
+      "slug": "valdaliga",
+      "name": "Valdáliga"
+    },
+    {
+      "ine": "39092",
+      "slug": "valdeolea",
+      "name": "Valdeolea"
+    },
+    {
+      "ine": "39093",
+      "slug": "valdeprado-del-rio",
+      "name": "Valdeprado del Río"
+    },
+    {
+      "ine": "39094",
+      "slug": "valderredible",
+      "name": "Valderredible"
+    },
+    {
+      "ine": "39101",
+      "slug": "valle-de-villaverde",
+      "name": "Valle de Villaverde"
+    },
+    {
+      "ine": "39096",
+      "slug": "vega-de-liebana",
+      "name": "Vega de Liébana"
+    },
+    {
+      "ine": "39097",
+      "slug": "vega-de-pas",
+      "name": "Vega de Pas"
+    },
+    {
+      "ine": "39098",
+      "slug": "villacarriedo",
+      "name": "Villacarriedo"
+    },
+    {
+      "ine": "39099",
+      "slug": "villaescusa",
+      "name": "Villaescusa"
+    },
+    {
+      "ine": "39100",
+      "slug": "villafufre",
+      "name": "Villafufre"
+    },
+    {
+      "ine": "39102",
+      "slug": "voto",
+      "name": "Voto"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

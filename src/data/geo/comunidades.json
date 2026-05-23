@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "comunidades",
+  "communities": [
+    {
+      "code": "AND",
+      "slug": "and",
+      "name": "Andalucía",
+      "provinceCount": 9,
+      "municipalityCount": 785
+    },
+    {
+      "code": "ARA",
+      "slug": "ara",
+      "name": "Aragón",
+      "provinceCount": 3,
+      "municipalityCount": 731
+    },
+    {
+      "code": "AST",
+      "slug": "ast",
+      "name": "Asturias",
+      "provinceCount": 1,
+      "municipalityCount": 78
+    },
+    {
+      "code": "CAN",
+      "slug": "can",
+      "name": "Canarias",
+      "provinceCount": 2,
+      "municipalityCount": 88
+    },
+    {
+      "code": "CNT",
+      "slug": "cnt",
+      "name": "Cantabria",
+      "provinceCount": 1,
+      "municipalityCount": 102
+    },
+    {
+      "code": "CYL",
+      "slug": "cyl",
+      "name": "Castilla y León",
+      "provinceCount": 9,
+      "municipalityCount": 2248
+    },
+    {
+      "code": "CLM",
+      "slug": "clm",
+      "name": "Castilla-La Mancha",
+      "provinceCount": 5,
+      "municipalityCount": 919
+    },
+    {
+      "code": "CAT",
+      "slug": "cat",
+      "name": "Cataluña",
+      "provinceCount": 4,
+      "municipalityCount": 947
+    },
+    {
+      "code": "CEU",
+      "slug": "ceu",
+      "name": "Ceuta",
+      "provinceCount": 1,
+      "municipalityCount": 1
+    },
+    {
+      "code": "MAD",
+      "slug": "mad",
+      "name": "Comunidad de Madrid",
+      "provinceCount": 1,
+      "municipalityCount": 179
+    },
+    {
+      "code": "NAV",
+      "slug": "nav",
+      "name": "Comunidad Foral de Navarra",
+      "provinceCount": 1,
+      "municipalityCount": 272
+    },
+    {
+      "code": "VAL",
+      "slug": "val",
+      "name": "Comunitat Valenciana",
+      "provinceCount": 3,
+      "municipalityCount": 542
+    },
+    {
+      "code": "EXT",
+      "slug": "ext",
+      "name": "Extremadura",
+      "provinceCount": 2,
+      "municipalityCount": 388
+    },
+    {
+      "code": "GAL",
+      "slug": "gal",
+      "name": "Galicia",
+      "provinceCount": 4,
+      "municipalityCount": 313
+    },
+    {
+      "code": "BAL",
+      "slug": "bal",
+      "name": "Illes Balears",
+      "provinceCount": 1,
+      "municipalityCount": 67
+    },
+    {
+      "code": "RIO",
+      "slug": "rio",
+      "name": "La Rioja",
+      "provinceCount": 1,
+      "municipalityCount": 174
+    },
+    {
+      "code": "MEL",
+      "slug": "mel",
+      "name": "Melilla",
+      "provinceCount": 1,
+      "municipalityCount": 1
+    },
+    {
+      "code": "EUS",
+      "slug": "eus",
+      "name": "País Vasco",
+      "provinceCount": 3,
+      "municipalityCount": 251
+    },
+    {
+      "code": "MUR",
+      "slug": "mur",
+      "name": "Región de Murcia",
+      "provinceCount": 1,
+      "municipalityCount": 45
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

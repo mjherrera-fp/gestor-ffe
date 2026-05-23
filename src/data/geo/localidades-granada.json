@@ -1,0 +1,880 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "AND",
+    "slug": "and",
+    "name": "Andalucía"
+  },
+  "province": {
+    "code": "18",
+    "slug": "granada",
+    "name": "Granada"
+  },
+  "municipalities": [
+    {
+      "ine": "18001",
+      "slug": "agron",
+      "name": "Agrón"
+    },
+    {
+      "ine": "18002",
+      "slug": "alamedilla",
+      "name": "Alamedilla"
+    },
+    {
+      "ine": "18003",
+      "slug": "albolote",
+      "name": "Albolote"
+    },
+    {
+      "ine": "18004",
+      "slug": "albondon",
+      "name": "Albondón"
+    },
+    {
+      "ine": "18005",
+      "slug": "albunan",
+      "name": "Albuñán"
+    },
+    {
+      "ine": "18006",
+      "slug": "albunol",
+      "name": "Albuñol"
+    },
+    {
+      "ine": "18007",
+      "slug": "albunuelas",
+      "name": "Albuñuelas"
+    },
+    {
+      "ine": "18010",
+      "slug": "aldeire",
+      "name": "Aldeire"
+    },
+    {
+      "ine": "18011",
+      "slug": "alfacar",
+      "name": "Alfacar"
+    },
+    {
+      "ine": "18012",
+      "slug": "algarinejo",
+      "name": "Algarinejo"
+    },
+    {
+      "ine": "18013",
+      "slug": "alhama-de-granada",
+      "name": "Alhama de Granada"
+    },
+    {
+      "ine": "18014",
+      "slug": "alhendin",
+      "name": "Alhendín"
+    },
+    {
+      "ine": "18015",
+      "slug": "alicun-de-ortega",
+      "name": "Alicún de Ortega"
+    },
+    {
+      "ine": "18016",
+      "slug": "almegijar",
+      "name": "Almegíjar"
+    },
+    {
+      "ine": "18017",
+      "slug": "almunecar",
+      "name": "Almuñécar"
+    },
+    {
+      "ine": "18904",
+      "slug": "alpujarra-de-la-sierra",
+      "name": "Alpujarra de la Sierra"
+    },
+    {
+      "ine": "18018",
+      "slug": "alquife",
+      "name": "Alquife"
+    },
+    {
+      "ine": "18020",
+      "slug": "arenas-del-rey",
+      "name": "Arenas del Rey"
+    },
+    {
+      "ine": "18021",
+      "slug": "armilla",
+      "name": "Armilla"
+    },
+    {
+      "ine": "18022",
+      "slug": "atarfe",
+      "name": "Atarfe"
+    },
+    {
+      "ine": "18023",
+      "slug": "baza",
+      "name": "Baza"
+    },
+    {
+      "ine": "18024",
+      "slug": "beas-de-granada",
+      "name": "Beas de Granada"
+    },
+    {
+      "ine": "18025",
+      "slug": "beas-de-guadix",
+      "name": "Beas de Guadix"
+    },
+    {
+      "ine": "18027",
+      "slug": "benalua",
+      "name": "Benalúa"
+    },
+    {
+      "ine": "18028",
+      "slug": "benalua-de-las-villas",
+      "name": "Benalúa de las Villas"
+    },
+    {
+      "ine": "18029",
+      "slug": "benamaurel",
+      "name": "Benamaurel"
+    },
+    {
+      "ine": "18030",
+      "slug": "berchules",
+      "name": "Bérchules"
+    },
+    {
+      "ine": "18032",
+      "slug": "bubion",
+      "name": "Bubión"
+    },
+    {
+      "ine": "18033",
+      "slug": "busquistar",
+      "name": "Busquístar"
+    },
+    {
+      "ine": "18034",
+      "slug": "cacin",
+      "name": "Cacín"
+    },
+    {
+      "ine": "18035",
+      "slug": "cadiar",
+      "name": "Cádiar"
+    },
+    {
+      "ine": "18036",
+      "slug": "cajar",
+      "name": "Cájar"
+    },
+    {
+      "ine": "18114",
+      "slug": "calahorra-la",
+      "name": "Calahorra, La"
+    },
+    {
+      "ine": "18037",
+      "slug": "calicasas",
+      "name": "Calicasas"
+    },
+    {
+      "ine": "18038",
+      "slug": "campotejar",
+      "name": "Campotéjar"
+    },
+    {
+      "ine": "18039",
+      "slug": "caniles",
+      "name": "Caniles"
+    },
+    {
+      "ine": "18040",
+      "slug": "canar",
+      "name": "Cáñar"
+    },
+    {
+      "ine": "18042",
+      "slug": "capileira",
+      "name": "Capileira"
+    },
+    {
+      "ine": "18043",
+      "slug": "carataunas",
+      "name": "Carataunas"
+    },
+    {
+      "ine": "18044",
+      "slug": "castaras",
+      "name": "Cástaras"
+    },
+    {
+      "ine": "18045",
+      "slug": "castillejar",
+      "name": "Castilléjar"
+    },
+    {
+      "ine": "18046",
+      "slug": "castril",
+      "name": "Castril"
+    },
+    {
+      "ine": "18047",
+      "slug": "cenes-de-la-vega",
+      "name": "Cenes de la Vega"
+    },
+    {
+      "ine": "18059",
+      "slug": "chauchina",
+      "name": "Chauchina"
+    },
+    {
+      "ine": "18061",
+      "slug": "chimeneas",
+      "name": "Chimeneas"
+    },
+    {
+      "ine": "18062",
+      "slug": "churriana-de-la-vega",
+      "name": "Churriana de la Vega"
+    },
+    {
+      "ine": "18048",
+      "slug": "cijuela",
+      "name": "Cijuela"
+    },
+    {
+      "ine": "18049",
+      "slug": "cogollos-de-guadix",
+      "name": "Cogollos de Guadix"
+    },
+    {
+      "ine": "18050",
+      "slug": "cogollos-de-la-vega",
+      "name": "Cogollos de la Vega"
+    },
+    {
+      "ine": "18051",
+      "slug": "colomera",
+      "name": "Colomera"
+    },
+    {
+      "ine": "18053",
+      "slug": "cortes-de-baza",
+      "name": "Cortes de Baza"
+    },
+    {
+      "ine": "18054",
+      "slug": "cortes-y-graena",
+      "name": "Cortes y Graena"
+    },
+    {
+      "ine": "18912",
+      "slug": "cuevas-del-campo",
+      "name": "Cuevas del Campo"
+    },
+    {
+      "ine": "18056",
+      "slug": "cullar",
+      "name": "Cúllar"
+    },
+    {
+      "ine": "18057",
+      "slug": "cullar-vega",
+      "name": "Cúllar Vega"
+    },
+    {
+      "ine": "18063",
+      "slug": "darro",
+      "name": "Darro"
+    },
+    {
+      "ine": "18064",
+      "slug": "dehesas-de-guadix",
+      "name": "Dehesas de Guadix"
+    },
+    {
+      "ine": "18065",
+      "slug": "dehesas-viejas",
+      "name": "Dehesas Viejas"
+    },
+    {
+      "ine": "18066",
+      "slug": "deifontes",
+      "name": "Deifontes"
+    },
+    {
+      "ine": "18067",
+      "slug": "diezma",
+      "name": "Diezma"
+    },
+    {
+      "ine": "18068",
+      "slug": "dilar",
+      "name": "Dílar"
+    },
+    {
+      "ine": "18069",
+      "slug": "dolar",
+      "name": "Dólar"
+    },
+    {
+      "ine": "18915",
+      "slug": "domingo-perez-de-granada",
+      "name": "Domingo Pérez de Granada"
+    },
+    {
+      "ine": "18070",
+      "slug": "dudar",
+      "name": "Dúdar"
+    },
+    {
+      "ine": "18071",
+      "slug": "durcal",
+      "name": "Dúrcal"
+    },
+    {
+      "ine": "18072",
+      "slug": "escuzar",
+      "name": "Escúzar"
+    },
+    {
+      "ine": "18074",
+      "slug": "ferreira",
+      "name": "Ferreira"
+    },
+    {
+      "ine": "18076",
+      "slug": "fonelas",
+      "name": "Fonelas"
+    },
+    {
+      "ine": "18078",
+      "slug": "freila",
+      "name": "Freila"
+    },
+    {
+      "ine": "18079",
+      "slug": "fuente-vaqueros",
+      "name": "Fuente Vaqueros"
+    },
+    {
+      "ine": "18905",
+      "slug": "gabias-las",
+      "name": "Gabias, Las"
+    },
+    {
+      "ine": "18082",
+      "slug": "galera",
+      "name": "Galera"
+    },
+    {
+      "ine": "18083",
+      "slug": "gobernador",
+      "name": "Gobernador"
+    },
+    {
+      "ine": "18084",
+      "slug": "gojar",
+      "name": "Gójar"
+    },
+    {
+      "ine": "18085",
+      "slug": "gor",
+      "name": "Gor"
+    },
+    {
+      "ine": "18086",
+      "slug": "gorafe",
+      "name": "Gorafe"
+    },
+    {
+      "ine": "18087",
+      "slug": "granada",
+      "name": "Granada"
+    },
+    {
+      "ine": "18088",
+      "slug": "guadahortuna",
+      "name": "Guadahortuna"
+    },
+    {
+      "ine": "18089",
+      "slug": "guadix",
+      "name": "Guadix"
+    },
+    {
+      "ine": "18906",
+      "slug": "guajares-los",
+      "name": "Guájares, Los"
+    },
+    {
+      "ine": "18093",
+      "slug": "gualchos",
+      "name": "Gualchos"
+    },
+    {
+      "ine": "18094",
+      "slug": "guejar-sierra",
+      "name": "Güéjar Sierra"
+    },
+    {
+      "ine": "18095",
+      "slug": "guevejar",
+      "name": "Güevéjar"
+    },
+    {
+      "ine": "18096",
+      "slug": "huelago",
+      "name": "Huélago"
+    },
+    {
+      "ine": "18097",
+      "slug": "hueneja",
+      "name": "Huéneja"
+    },
+    {
+      "ine": "18098",
+      "slug": "huescar",
+      "name": "Huéscar"
+    },
+    {
+      "ine": "18099",
+      "slug": "huetor-de-santillan",
+      "name": "Huétor de Santillán"
+    },
+    {
+      "ine": "18100",
+      "slug": "huetor-tajar",
+      "name": "Huétor Tájar"
+    },
+    {
+      "ine": "18101",
+      "slug": "huetor-vega",
+      "name": "Huétor Vega"
+    },
+    {
+      "ine": "18102",
+      "slug": "illora",
+      "name": "Íllora"
+    },
+    {
+      "ine": "18103",
+      "slug": "itrabo",
+      "name": "Ítrabo"
+    },
+    {
+      "ine": "18105",
+      "slug": "iznalloz",
+      "name": "Iznalloz"
+    },
+    {
+      "ine": "18106",
+      "slug": "jatar",
+      "name": "Játar"
+    },
+    {
+      "ine": "18107",
+      "slug": "jayena",
+      "name": "Jayena"
+    },
+    {
+      "ine": "18108",
+      "slug": "jerez-del-marquesado",
+      "name": "Jerez del Marquesado"
+    },
+    {
+      "ine": "18109",
+      "slug": "jete",
+      "name": "Jete"
+    },
+    {
+      "ine": "18111",
+      "slug": "jun",
+      "name": "Jun"
+    },
+    {
+      "ine": "18112",
+      "slug": "juviles",
+      "name": "Juviles"
+    },
+    {
+      "ine": "18115",
+      "slug": "lachar",
+      "name": "Láchar"
+    },
+    {
+      "ine": "18116",
+      "slug": "lanjaron",
+      "name": "Lanjarón"
+    },
+    {
+      "ine": "18117",
+      "slug": "lanteira",
+      "name": "Lanteira"
+    },
+    {
+      "ine": "18119",
+      "slug": "lecrin",
+      "name": "Lecrín"
+    },
+    {
+      "ine": "18120",
+      "slug": "lentegi",
+      "name": "Lentegí"
+    },
+    {
+      "ine": "18121",
+      "slug": "lobras",
+      "name": "Lobras"
+    },
+    {
+      "ine": "18122",
+      "slug": "loja",
+      "name": "Loja"
+    },
+    {
+      "ine": "18123",
+      "slug": "lugros",
+      "name": "Lugros"
+    },
+    {
+      "ine": "18124",
+      "slug": "lujar",
+      "name": "Lújar"
+    },
+    {
+      "ine": "18126",
+      "slug": "malaha-la",
+      "name": "Malahá, La"
+    },
+    {
+      "ine": "18127",
+      "slug": "maracena",
+      "name": "Maracena"
+    },
+    {
+      "ine": "18128",
+      "slug": "marchal",
+      "name": "Marchal"
+    },
+    {
+      "ine": "18132",
+      "slug": "moclin",
+      "name": "Moclín"
+    },
+    {
+      "ine": "18133",
+      "slug": "molvizar",
+      "name": "Molvízar"
+    },
+    {
+      "ine": "18134",
+      "slug": "monachil",
+      "name": "Monachil"
+    },
+    {
+      "ine": "18135",
+      "slug": "montefrio",
+      "name": "Montefrío"
+    },
+    {
+      "ine": "18136",
+      "slug": "montejicar",
+      "name": "Montejícar"
+    },
+    {
+      "ine": "18137",
+      "slug": "montillana",
+      "name": "Montillana"
+    },
+    {
+      "ine": "18138",
+      "slug": "moraleda-de-zafayona",
+      "name": "Moraleda de Zafayona"
+    },
+    {
+      "ine": "18909",
+      "slug": "morelabor",
+      "name": "Morelábor"
+    },
+    {
+      "ine": "18140",
+      "slug": "motril",
+      "name": "Motril"
+    },
+    {
+      "ine": "18141",
+      "slug": "murtas",
+      "name": "Murtas"
+    },
+    {
+      "ine": "18903",
+      "slug": "nevada",
+      "name": "Nevada"
+    },
+    {
+      "ine": "18143",
+      "slug": "niguelas",
+      "name": "Nigüelas"
+    },
+    {
+      "ine": "18144",
+      "slug": "nivar",
+      "name": "Nívar"
+    },
+    {
+      "ine": "18145",
+      "slug": "ogijares",
+      "name": "Ogíjares"
+    },
+    {
+      "ine": "18146",
+      "slug": "orce",
+      "name": "Orce"
+    },
+    {
+      "ine": "18147",
+      "slug": "orgiva",
+      "name": "Órgiva"
+    },
+    {
+      "ine": "18148",
+      "slug": "otivar",
+      "name": "Otívar"
+    },
+    {
+      "ine": "18150",
+      "slug": "padul",
+      "name": "Padul"
+    },
+    {
+      "ine": "18151",
+      "slug": "pampaneira",
+      "name": "Pampaneira"
+    },
+    {
+      "ine": "18152",
+      "slug": "pedro-martinez",
+      "name": "Pedro Martínez"
+    },
+    {
+      "ine": "18153",
+      "slug": "peligros",
+      "name": "Peligros"
+    },
+    {
+      "ine": "18154",
+      "slug": "peza-la",
+      "name": "Peza, La"
+    },
+    {
+      "ine": "18910",
+      "slug": "pinar-el",
+      "name": "Pinar, El"
+    },
+    {
+      "ine": "18157",
+      "slug": "pinos-genil",
+      "name": "Pinos Genil"
+    },
+    {
+      "ine": "18158",
+      "slug": "pinos-puente",
+      "name": "Pinos Puente"
+    },
+    {
+      "ine": "18159",
+      "slug": "pinar",
+      "name": "Píñar"
+    },
+    {
+      "ine": "18161",
+      "slug": "policar",
+      "name": "Polícar"
+    },
+    {
+      "ine": "18162",
+      "slug": "polopos",
+      "name": "Polopos"
+    },
+    {
+      "ine": "18163",
+      "slug": "portugos",
+      "name": "Pórtugos"
+    },
+    {
+      "ine": "18164",
+      "slug": "puebla-de-don-fadrique",
+      "name": "Puebla de Don Fadrique"
+    },
+    {
+      "ine": "18165",
+      "slug": "pulianas",
+      "name": "Pulianas"
+    },
+    {
+      "ine": "18167",
+      "slug": "purullena",
+      "name": "Purullena"
+    },
+    {
+      "ine": "18168",
+      "slug": "quentar",
+      "name": "Quéntar"
+    },
+    {
+      "ine": "18170",
+      "slug": "rubite",
+      "name": "Rubite"
+    },
+    {
+      "ine": "18171",
+      "slug": "salar",
+      "name": "Salar"
+    },
+    {
+      "ine": "18173",
+      "slug": "salobrena",
+      "name": "Salobreña"
+    },
+    {
+      "ine": "18174",
+      "slug": "santa-cruz-del-comercio",
+      "name": "Santa Cruz del Comercio"
+    },
+    {
+      "ine": "18175",
+      "slug": "santa-fe",
+      "name": "Santa Fe"
+    },
+    {
+      "ine": "18176",
+      "slug": "soportujar",
+      "name": "Soportújar"
+    },
+    {
+      "ine": "18177",
+      "slug": "sorvilan",
+      "name": "Sorvilán"
+    },
+    {
+      "ine": "18901",
+      "slug": "taha-la",
+      "name": "Taha, La"
+    },
+    {
+      "ine": "18178",
+      "slug": "torre-cardela",
+      "name": "Torre-Cardela"
+    },
+    {
+      "ine": "18179",
+      "slug": "torvizcon",
+      "name": "Torvizcón"
+    },
+    {
+      "ine": "18180",
+      "slug": "trevelez",
+      "name": "Trevélez"
+    },
+    {
+      "ine": "18181",
+      "slug": "turon",
+      "name": "Turón"
+    },
+    {
+      "ine": "18182",
+      "slug": "ugijar",
+      "name": "Ugíjar"
+    },
+    {
+      "ine": "18914",
+      "slug": "valderrubio",
+      "name": "Valderrubio"
+    },
+    {
+      "ine": "18907",
+      "slug": "valle-del-zalabi",
+      "name": "Valle del Zalabí"
+    },
+    {
+      "ine": "18902",
+      "slug": "valle-el",
+      "name": "Valle, El"
+    },
+    {
+      "ine": "18183",
+      "slug": "valor",
+      "name": "Válor"
+    },
+    {
+      "ine": "18911",
+      "slug": "vegas-del-genil",
+      "name": "Vegas del Genil"
+    },
+    {
+      "ine": "18184",
+      "slug": "velez-de-benaudalla",
+      "name": "Vélez de Benaudalla"
+    },
+    {
+      "ine": "18185",
+      "slug": "ventas-de-huelma",
+      "name": "Ventas de Huelma"
+    },
+    {
+      "ine": "18149",
+      "slug": "villa-de-otura",
+      "name": "Villa de Otura"
+    },
+    {
+      "ine": "18908",
+      "slug": "villamena",
+      "name": "Villamena"
+    },
+    {
+      "ine": "18187",
+      "slug": "villanueva-de-las-torres",
+      "name": "Villanueva de las Torres"
+    },
+    {
+      "ine": "18188",
+      "slug": "villanueva-mesia",
+      "name": "Villanueva Mesía"
+    },
+    {
+      "ine": "18189",
+      "slug": "viznar",
+      "name": "Víznar"
+    },
+    {
+      "ine": "18192",
+      "slug": "zafarraya",
+      "name": "Zafarraya"
+    },
+    {
+      "ine": "18913",
+      "slug": "zagra",
+      "name": "Zagra"
+    },
+    {
+      "ine": "18193",
+      "slug": "zubia-la",
+      "name": "Zubia, La"
+    },
+    {
+      "ine": "18194",
+      "slug": "zujar",
+      "name": "Zújar"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

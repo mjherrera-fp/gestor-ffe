@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "GAL",
+    "slug": "gal",
+    "name": "Galicia"
+  },
+  "province": {
+    "code": "27",
+    "slug": "lugo",
+    "name": "Lugo"
+  },
+  "municipalities": [
+    {
+      "ine": "27001",
+      "slug": "abadin",
+      "name": "Abadín"
+    },
+    {
+      "ine": "27002",
+      "slug": "alfoz",
+      "name": "Alfoz"
+    },
+    {
+      "ine": "27003",
+      "slug": "antas-de-ulla",
+      "name": "Antas de Ulla"
+    },
+    {
+      "ine": "27004",
+      "slug": "baleira",
+      "name": "Baleira"
+    },
+    {
+      "ine": "27901",
+      "slug": "baralla",
+      "name": "Baralla"
+    },
+    {
+      "ine": "27005",
+      "slug": "barreiros",
+      "name": "Barreiros"
+    },
+    {
+      "ine": "27006",
+      "slug": "becerrea",
+      "name": "Becerreá"
+    },
+    {
+      "ine": "27007",
+      "slug": "begonte",
+      "name": "Begonte"
+    },
+    {
+      "ine": "27008",
+      "slug": "boveda",
+      "name": "Bóveda"
+    },
+    {
+      "ine": "27902",
+      "slug": "burela",
+      "name": "Burela"
+    },
+    {
+      "ine": "27009",
+      "slug": "carballedo",
+      "name": "Carballedo"
+    },
+    {
+      "ine": "27010",
+      "slug": "castro-de-rei",
+      "name": "Castro de Rei"
+    },
+    {
+      "ine": "27011",
+      "slug": "castroverde",
+      "name": "Castroverde"
+    },
+    {
+      "ine": "27012",
+      "slug": "cervantes",
+      "name": "Cervantes"
+    },
+    {
+      "ine": "27013",
+      "slug": "cervo",
+      "name": "Cervo"
+    },
+    {
+      "ine": "27016",
+      "slug": "chantada",
+      "name": "Chantada"
+    },
+    {
+      "ine": "27014",
+      "slug": "corgo-o",
+      "name": "Corgo, O"
+    },
+    {
+      "ine": "27015",
+      "slug": "cospeito",
+      "name": "Cospeito"
+    },
+    {
+      "ine": "27017",
+      "slug": "folgoso-do-courel",
+      "name": "Folgoso do Courel"
+    },
+    {
+      "ine": "27018",
+      "slug": "fonsagrada-a",
+      "name": "Fonsagrada, A"
+    },
+    {
+      "ine": "27019",
+      "slug": "foz",
+      "name": "Foz"
+    },
+    {
+      "ine": "27020",
+      "slug": "friol",
+      "name": "Friol"
+    },
+    {
+      "ine": "27022",
+      "slug": "guitiriz",
+      "name": "Guitiriz"
+    },
+    {
+      "ine": "27023",
+      "slug": "guntin",
+      "name": "Guntín"
+    },
+    {
+      "ine": "27024",
+      "slug": "incio-o",
+      "name": "Incio, O"
+    },
+    {
+      "ine": "27026",
+      "slug": "lancara",
+      "name": "Láncara"
+    },
+    {
+      "ine": "27027",
+      "slug": "lourenza",
+      "name": "Lourenzá"
+    },
+    {
+      "ine": "27028",
+      "slug": "lugo",
+      "name": "Lugo"
+    },
+    {
+      "ine": "27029",
+      "slug": "meira",
+      "name": "Meira"
+    },
+    {
+      "ine": "27030",
+      "slug": "mondonedo",
+      "name": "Mondoñedo"
+    },
+    {
+      "ine": "27031",
+      "slug": "monforte-de-lemos",
+      "name": "Monforte de Lemos"
+    },
+    {
+      "ine": "27032",
+      "slug": "monterroso",
+      "name": "Monterroso"
+    },
+    {
+      "ine": "27033",
+      "slug": "muras",
+      "name": "Muras"
+    },
+    {
+      "ine": "27034",
+      "slug": "navia-de-suarna",
+      "name": "Navia de Suarna"
+    },
+    {
+      "ine": "27035",
+      "slug": "negueira-de-muniz",
+      "name": "Negueira de Muñiz"
+    },
+    {
+      "ine": "27037",
+      "slug": "nogais-as",
+      "name": "Nogais, As"
+    },
+    {
+      "ine": "27038",
+      "slug": "ourol",
+      "name": "Ourol"
+    },
+    {
+      "ine": "27039",
+      "slug": "outeiro-de-rei",
+      "name": "Outeiro de Rei"
+    },
+    {
+      "ine": "27040",
+      "slug": "palas-de-rei",
+      "name": "Palas de Rei"
+    },
+    {
+      "ine": "27041",
+      "slug": "panton",
+      "name": "Pantón"
+    },
+    {
+      "ine": "27042",
+      "slug": "paradela",
+      "name": "Paradela"
+    },
+    {
+      "ine": "27043",
+      "slug": "paramo-o",
+      "name": "Páramo, O"
+    },
+    {
+      "ine": "27044",
+      "slug": "pastoriza-a",
+      "name": "Pastoriza, A"
+    },
+    {
+      "ine": "27045",
+      "slug": "pedrafita-do-cebreiro",
+      "name": "Pedrafita do Cebreiro"
+    },
+    {
+      "ine": "27047",
+      "slug": "pobra-do-brollon-a",
+      "name": "Pobra do Brollón, A"
+    },
+    {
+      "ine": "27046",
+      "slug": "pol",
+      "name": "Pol"
+    },
+    {
+      "ine": "27048",
+      "slug": "pontenova-a",
+      "name": "Pontenova, A"
+    },
+    {
+      "ine": "27049",
+      "slug": "portomarin",
+      "name": "Portomarín"
+    },
+    {
+      "ine": "27050",
+      "slug": "quiroga",
+      "name": "Quiroga"
+    },
+    {
+      "ine": "27056",
+      "slug": "rabade",
+      "name": "Rábade"
+    },
+    {
+      "ine": "27051",
+      "slug": "ribadeo",
+      "name": "Ribadeo"
+    },
+    {
+      "ine": "27052",
+      "slug": "ribas-de-sil",
+      "name": "Ribas de Sil"
+    },
+    {
+      "ine": "27053",
+      "slug": "ribeira-de-piquin",
+      "name": "Ribeira de Piquín"
+    },
+    {
+      "ine": "27054",
+      "slug": "riotorto",
+      "name": "Riotorto"
+    },
+    {
+      "ine": "27055",
+      "slug": "samos",
+      "name": "Samos"
+    },
+    {
+      "ine": "27057",
+      "slug": "sarria",
+      "name": "Sarria"
+    },
+    {
+      "ine": "27058",
+      "slug": "savinao-o",
+      "name": "Saviñao, O"
+    },
+    {
+      "ine": "27059",
+      "slug": "sober",
+      "name": "Sober"
+    },
+    {
+      "ine": "27060",
+      "slug": "taboada",
+      "name": "Taboada"
+    },
+    {
+      "ine": "27061",
+      "slug": "trabada",
+      "name": "Trabada"
+    },
+    {
+      "ine": "27062",
+      "slug": "triacastela",
+      "name": "Triacastela"
+    },
+    {
+      "ine": "27063",
+      "slug": "valadouro-o",
+      "name": "Valadouro, O"
+    },
+    {
+      "ine": "27064",
+      "slug": "vicedo-o",
+      "name": "Vicedo, O"
+    },
+    {
+      "ine": "27065",
+      "slug": "vilalba",
+      "name": "Vilalba"
+    },
+    {
+      "ine": "27066",
+      "slug": "viveiro",
+      "name": "Viveiro"
+    },
+    {
+      "ine": "27021",
+      "slug": "xermade",
+      "name": "Xermade"
+    },
+    {
+      "ine": "27025",
+      "slug": "xove",
+      "name": "Xove"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

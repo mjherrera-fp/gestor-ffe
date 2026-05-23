@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "AND",
+    "slug": "and",
+    "name": "Andalucía"
+  },
+  "province": {
+    "code": "AD",
+    "slug": "andorra",
+    "name": "Andorra"
+  },
+  "municipalities": [
+    {
+      "ine": "00500",
+      "slug": "andorra-la-vella",
+      "name": "Andorra la Vella"
+    },
+    {
+      "ine": "00100",
+      "slug": "canillo",
+      "name": "Canillo"
+    },
+    {
+      "ine": "00200",
+      "slug": "encamp",
+      "name": "Encamp"
+    },
+    {
+      "ine": "00700",
+      "slug": "escaldes-engordany",
+      "name": "Escaldes-Engordany"
+    },
+    {
+      "ine": "00400",
+      "slug": "la-massana",
+      "name": "La Massana"
+    },
+    {
+      "ine": "00300",
+      "slug": "ordino",
+      "name": "Ordino"
+    },
+    {
+      "ine": "00600",
+      "slug": "sant-julia-de-loria",
+      "name": "Sant Julia de Loria"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

@@ -1,0 +1,460 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "EUS",
+    "slug": "eus",
+    "name": "País Vasco"
+  },
+  "province": {
+    "code": "20",
+    "slug": "guipuzcoa",
+    "name": "Guipúzcoa"
+  },
+  "municipalities": [
+    {
+      "ine": "20001",
+      "slug": "abaltzisketa",
+      "name": "Abaltzisketa"
+    },
+    {
+      "ine": "20002",
+      "slug": "aduna",
+      "name": "Aduna"
+    },
+    {
+      "ine": "20016",
+      "slug": "aia",
+      "name": "Aia"
+    },
+    {
+      "ine": "20003",
+      "slug": "aizarnazabal",
+      "name": "Aizarnazabal"
+    },
+    {
+      "ine": "20004",
+      "slug": "albiztur",
+      "name": "Albiztur"
+    },
+    {
+      "ine": "20005",
+      "slug": "alegia",
+      "name": "Alegia"
+    },
+    {
+      "ine": "20006",
+      "slug": "alkiza",
+      "name": "Alkiza"
+    },
+    {
+      "ine": "20906",
+      "slug": "altzaga",
+      "name": "Altzaga"
+    },
+    {
+      "ine": "20007",
+      "slug": "altzo",
+      "name": "Altzo"
+    },
+    {
+      "ine": "20008",
+      "slug": "amezketa",
+      "name": "Amezketa"
+    },
+    {
+      "ine": "20009",
+      "slug": "andoain",
+      "name": "Andoain"
+    },
+    {
+      "ine": "20010",
+      "slug": "anoeta",
+      "name": "Anoeta"
+    },
+    {
+      "ine": "20011",
+      "slug": "antzuola",
+      "name": "Antzuola"
+    },
+    {
+      "ine": "20012",
+      "slug": "arama",
+      "name": "Arama"
+    },
+    {
+      "ine": "20013",
+      "slug": "aretxabaleta",
+      "name": "Aretxabaleta"
+    },
+    {
+      "ine": "20055",
+      "slug": "arrasate-mondragon",
+      "name": "Arrasate/Mondragón"
+    },
+    {
+      "ine": "20014",
+      "slug": "asteasu",
+      "name": "Asteasu"
+    },
+    {
+      "ine": "20903",
+      "slug": "astigarraga",
+      "name": "Astigarraga"
+    },
+    {
+      "ine": "20015",
+      "slug": "ataun",
+      "name": "Ataun"
+    },
+    {
+      "ine": "20017",
+      "slug": "azkoitia",
+      "name": "Azkoitia"
+    },
+    {
+      "ine": "20018",
+      "slug": "azpeitia",
+      "name": "Azpeitia"
+    },
+    {
+      "ine": "20904",
+      "slug": "baliarrain",
+      "name": "Baliarrain"
+    },
+    {
+      "ine": "20019",
+      "slug": "beasain",
+      "name": "Beasain"
+    },
+    {
+      "ine": "20020",
+      "slug": "beizama",
+      "name": "Beizama"
+    },
+    {
+      "ine": "20021",
+      "slug": "belauntza",
+      "name": "Belauntza"
+    },
+    {
+      "ine": "20022",
+      "slug": "berastegi",
+      "name": "Berastegi"
+    },
+    {
+      "ine": "20074",
+      "slug": "bergara",
+      "name": "Bergara"
+    },
+    {
+      "ine": "20023",
+      "slug": "berrobi",
+      "name": "Berrobi"
+    },
+    {
+      "ine": "20024",
+      "slug": "bidania-goiatz",
+      "name": "Bidania-Goiatz"
+    },
+    {
+      "ine": "20029",
+      "slug": "deba",
+      "name": "Deba"
+    },
+    {
+      "ine": "20069",
+      "slug": "donostia-san-sebastian",
+      "name": "Donostia/San Sebastián"
+    },
+    {
+      "ine": "20030",
+      "slug": "eibar",
+      "name": "Eibar"
+    },
+    {
+      "ine": "20031",
+      "slug": "elduain",
+      "name": "Elduain"
+    },
+    {
+      "ine": "20033",
+      "slug": "elgeta",
+      "name": "Elgeta"
+    },
+    {
+      "ine": "20032",
+      "slug": "elgoibar",
+      "name": "Elgoibar"
+    },
+    {
+      "ine": "20067",
+      "slug": "errenteria",
+      "name": "Errenteria"
+    },
+    {
+      "ine": "20066",
+      "slug": "errezil",
+      "name": "Errezil"
+    },
+    {
+      "ine": "20034",
+      "slug": "eskoriatza",
+      "name": "Eskoriatza"
+    },
+    {
+      "ine": "20035",
+      "slug": "ezkio-itsaso",
+      "name": "Ezkio-Itsaso"
+    },
+    {
+      "ine": "20038",
+      "slug": "gabiria",
+      "name": "Gabiria"
+    },
+    {
+      "ine": "20037",
+      "slug": "gaintza",
+      "name": "Gaintza"
+    },
+    {
+      "ine": "20907",
+      "slug": "gaztelu",
+      "name": "Gaztelu"
+    },
+    {
+      "ine": "20039",
+      "slug": "getaria",
+      "name": "Getaria"
+    },
+    {
+      "ine": "20040",
+      "slug": "hernani",
+      "name": "Hernani"
+    },
+    {
+      "ine": "20041",
+      "slug": "hernialde",
+      "name": "Hernialde"
+    },
+    {
+      "ine": "20036",
+      "slug": "hondarribia",
+      "name": "Hondarribia"
+    },
+    {
+      "ine": "20042",
+      "slug": "ibarra",
+      "name": "Ibarra"
+    },
+    {
+      "ine": "20043",
+      "slug": "idiazabal",
+      "name": "Idiazabal"
+    },
+    {
+      "ine": "20044",
+      "slug": "ikaztegieta",
+      "name": "Ikaztegieta"
+    },
+    {
+      "ine": "20045",
+      "slug": "irun",
+      "name": "Irun"
+    },
+    {
+      "ine": "20046",
+      "slug": "irura",
+      "name": "Irura"
+    },
+    {
+      "ine": "20047",
+      "slug": "itsasondo",
+      "name": "Itsasondo"
+    },
+    {
+      "ine": "20048",
+      "slug": "larraul",
+      "name": "Larraul"
+    },
+    {
+      "ine": "20902",
+      "slug": "lasarte-oria",
+      "name": "Lasarte-Oria"
+    },
+    {
+      "ine": "20049",
+      "slug": "lazkao",
+      "name": "Lazkao"
+    },
+    {
+      "ine": "20050",
+      "slug": "leaburu",
+      "name": "Leaburu"
+    },
+    {
+      "ine": "20051",
+      "slug": "legazpi",
+      "name": "Legazpi"
+    },
+    {
+      "ine": "20052",
+      "slug": "legorreta",
+      "name": "Legorreta"
+    },
+    {
+      "ine": "20068",
+      "slug": "leintz-gatzaga",
+      "name": "Leintz-Gatzaga"
+    },
+    {
+      "ine": "20053",
+      "slug": "lezo",
+      "name": "Lezo"
+    },
+    {
+      "ine": "20054",
+      "slug": "lizartza",
+      "name": "Lizartza"
+    },
+    {
+      "ine": "20901",
+      "slug": "mendaro",
+      "name": "Mendaro"
+    },
+    {
+      "ine": "20057",
+      "slug": "mutiloa",
+      "name": "Mutiloa"
+    },
+    {
+      "ine": "20056",
+      "slug": "mutriku",
+      "name": "Mutriku"
+    },
+    {
+      "ine": "20063",
+      "slug": "oiartzun",
+      "name": "Oiartzun"
+    },
+    {
+      "ine": "20058",
+      "slug": "olaberria",
+      "name": "Olaberria"
+    },
+    {
+      "ine": "20059",
+      "slug": "onati",
+      "name": "Oñati"
+    },
+    {
+      "ine": "20076",
+      "slug": "ordizia",
+      "name": "Ordizia"
+    },
+    {
+      "ine": "20905",
+      "slug": "orendain",
+      "name": "Orendain"
+    },
+    {
+      "ine": "20060",
+      "slug": "orexa",
+      "name": "Orexa"
+    },
+    {
+      "ine": "20061",
+      "slug": "orio",
+      "name": "Orio"
+    },
+    {
+      "ine": "20062",
+      "slug": "ormaiztegi",
+      "name": "Ormaiztegi"
+    },
+    {
+      "ine": "20064",
+      "slug": "pasaia",
+      "name": "Pasaia"
+    },
+    {
+      "ine": "20070",
+      "slug": "segura",
+      "name": "Segura"
+    },
+    {
+      "ine": "20065",
+      "slug": "soraluze-placencia-de-las-armas",
+      "name": "Soraluze-Placencia de las Armas"
+    },
+    {
+      "ine": "20071",
+      "slug": "tolosa",
+      "name": "Tolosa"
+    },
+    {
+      "ine": "20072",
+      "slug": "urnieta",
+      "name": "Urnieta"
+    },
+    {
+      "ine": "20077",
+      "slug": "urretxu",
+      "name": "Urretxu"
+    },
+    {
+      "ine": "20073",
+      "slug": "usurbil",
+      "name": "Usurbil"
+    },
+    {
+      "ine": "20075",
+      "slug": "villabona",
+      "name": "Villabona"
+    },
+    {
+      "ine": "20078",
+      "slug": "zaldibia",
+      "name": "Zaldibia"
+    },
+    {
+      "ine": "20079",
+      "slug": "zarautz",
+      "name": "Zarautz"
+    },
+    {
+      "ine": "20025",
+      "slug": "zegama",
+      "name": "Zegama"
+    },
+    {
+      "ine": "20026",
+      "slug": "zerain",
+      "name": "Zerain"
+    },
+    {
+      "ine": "20027",
+      "slug": "zestoa",
+      "name": "Zestoa"
+    },
+    {
+      "ine": "20028",
+      "slug": "zizurkil",
+      "name": "Zizurkil"
+    },
+    {
+      "ine": "20081",
+      "slug": "zumaia",
+      "name": "Zumaia"
+    },
+    {
+      "ine": "20080",
+      "slug": "zumarraga",
+      "name": "Zumarraga"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}
