@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { db } from './src/lib/db.ts';
-import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
+import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, EmpresaFestivosDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
@@ -224,9 +224,19 @@ async function startServer() {
   app.post('/api/profesor/config/:tipo', (req, res) => {
     const existing = ProfesorDAO.get();
     if (!existing) return res.status(400).json({ error: 'No hay profesor' });
-    ConfiguracionDAO.setConfig(existing.id!, req.params.tipo, req.body);
 
-    // Si cambia usar_festivos, recalcular fechas de todos los alumnos
+    // Extraer empresa_festivos antes de guardar el resto de la config
+    const { empresa_festivos, ...configData } = req.body;
+    ConfiguracionDAO.setConfig(existing.id!, req.params.tipo, configData);
+
+    // Guardar empresa festivos por localidad si se enviaron
+    if (req.params.tipo === 'festivos' && empresa_festivos) {
+      for (const [localidad, festivos] of Object.entries(empresa_festivos)) {
+        EmpresaFestivosDAO.setByCiudad(existing.id!, localidad, festivos as string[]);
+      }
+    }
+
+    // Recalcular fechas de todos los alumnos
     let recalculadas = -1;
     if (req.params.tipo === 'festivos') {
       try {
@@ -570,6 +580,37 @@ async function startServer() {
   });
 
   app.get('/api/empresas/con-convenio', (req, res) => res.json(ConvenioDAO.getEmpresaIdsConConvenio()));
+
+  app.get('/api/empresas/localidades-con-relaciones', (req, res) => {
+    res.json(EmpresaDAO.getLocalidadesConRelaciones());
+  });
+
+  app.get('/api/empresas/festivos', (req, res) => {
+    const existing = ProfesorDAO.get();
+    if (!existing) return res.status(400).json({ error: 'No hay profesor' });
+    res.json(EmpresaFestivosDAO.getAll(existing.id!));
+  });
+
+  app.post('/api/empresas/festivos', (req, res) => {
+    const existing = ProfesorDAO.get();
+    if (!existing) return res.status(400).json({ error: 'No hay profesor' });
+    const { localidad, festivos } = req.body;
+    if (!localidad) return res.status(400).json({ error: 'localidad es requerida' });
+    EmpresaFestivosDAO.setByCiudad(existing.id!, localidad, festivos || []);
+
+    // Recalcular fechas si la opción está habilitada
+    let recalculadas = -1;
+    const config = ConfiguracionDAO.getConfig(existing.id!, 'festivos');
+    if (config.usar_festivos_empresa === '1') {
+      try {
+        recalculadas = recalcularFechasAlumnos(existing.id!);
+      } catch (e) {
+        console.error('Error al recalcular fechas:', e);
+      }
+    }
+
+    res.json({ success: true, recalculadas });
+  });
 
   // Tutores Empresa
   app.get('/api/empresas/:empresaId/tutores', (req, res) => res.json(TutorEmpresaDAO.getAllByEmpresa(Number(req.params.empresaId))));
@@ -1318,11 +1359,23 @@ async function startServer() {
       // Leer config para saber si se descuentan festivos
       const profesor = ProfesorDAO.get();
       let usarFestivos = true;
+      let usarFestivosEmpresa = false;
       if (profesor?.id) {
         const cfg = ConfiguracionDAO.getConfig(profesor.id, 'festivos');
         usarFestivos = cfg.usar_festivos !== '0';
+        usarFestivosEmpresa = cfg.usar_festivos_empresa === '1';
       }
-      const festivos = usarFestivos ? (centro?.festivos || []) : [];
+      const festivosCentro = usarFestivos ? (centro?.festivos || []) : [];
+
+      // Obtener festivos de empresa
+      let festivosEmpresa: string[] = [];
+      if (usarFestivosEmpresa && profesor?.id) {
+        const empresa = EmpresaDAO.getById(convenio.empresaId);
+        if (empresa?.ciudad) {
+          festivosEmpresa = EmpresaFestivosDAO.getByCiudad(profesor.id, empresa.ciudad);
+        }
+      }
+      const festivos = [...new Set([...festivosCentro, ...festivosEmpresa])];
 
       // --- LÓGICA DE GENERACIÓN DE MESES PARA EL CALENDARIO ---
       const mesesData = [];

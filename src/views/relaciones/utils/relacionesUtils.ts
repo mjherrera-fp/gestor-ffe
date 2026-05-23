@@ -53,26 +53,35 @@ export const getDayName = (day: string): string => {
 //  CÁLCULO DE FECHAS POR HORAS
 // ─────────────────────────────────────────
 
+const festivosSet = (festivos: string[], empresaFestivos: string[], usarFestivos: boolean, usarFestivosEmpresa: boolean): Set<string> => {
+  const set = new Set<string>();
+  if (usarFestivos) festivos.forEach(f => set.add(f));
+  if (usarFestivosEmpresa) empresaFestivos.forEach(f => set.add(f));
+  return set;
+};
+
 export const calculateEndDateForHours = (
   startDate: string,
   totalHours: number,
   horario: HorarioSemanal | undefined,
   festivos: string[],
-  usarFestivos: boolean = true
+  usarFestivos: boolean = true,
+  empresaFestivos: string[] = [],
+  usarFestivosEmpresa: boolean = false
 ): string | null => {
   if (!startDate || !totalHours || !horario) return null;
 
   const startParts = startDate.split('-').map(Number);
   let remainingHoras = totalHours;
   let current = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+  const saltar = festivosSet(festivos, empresaFestivos, usarFestivos, usarFestivosEmpresa);
   let iterations = 0;
 
   while (remainingHoras > 0 && iterations < 365) {
     const dateStr = formatDateLocal(current);
     const dayOfWeek = current.getDay();
-    const saltarFestivo = usarFestivos && festivos.includes(dateStr);
 
-    if (!saltarFestivo) {
+    if (!saltar.has(dateStr)) {
       let dailyHoras = 0;
       switch (dayOfWeek) {
         case 1: dailyHoras = horario.lunes.horas; break;
@@ -98,21 +107,23 @@ export const calculateStartDateFromEnd = (
   totalHours: number,
   horario: HorarioSemanal | undefined,
   festivos: string[],
-  usarFestivos: boolean = true
+  usarFestivos: boolean = true,
+  empresaFestivos: string[] = [],
+  usarFestivosEmpresa: boolean = false
 ): string | null => {
   if (!targetEndDate || !totalHours || !horario) return null;
 
   const [year, month, day] = targetEndDate.split('-').map(Number);
   let remainingHoras = totalHours;
   let current = new Date(year, month - 1, day);
+  const saltar = festivosSet(festivos, empresaFestivos, usarFestivos, usarFestivosEmpresa);
   let iterations = 0;
 
   while (remainingHoras > 0 && iterations < 365) {
     const dateStr = formatDateLocal(current);
     const dayOfWeek = current.getDay();
-    const saltarFestivo = usarFestivos && festivos.includes(dateStr);
 
-    if (!saltarFestivo) {
+    if (!saltar.has(dateStr)) {
       let dailyHoras = 0;
       switch (dayOfWeek) {
         case 1: dailyHoras = horario.lunes.horas; break;

@@ -48,6 +48,9 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
     const [curso, setCurso] = useState<Curso | null>(null);
     const [centroFestivos, setCentroFestivos] = useState<string[]>([]);
     const [usarFestivos, setUsarFestivos] = useState(true);
+    const [usarFestivosEmpresa, setUsarFestivosEmpresa] = useState(false);
+    const [empresaFestivosMap, setEmpresaFestivosMap] = useState<Record<string, string[]>>({});
+    const [empresaFestivosActuales, setEmpresaFestivosActuales] = useState<string[]>([]);
 
     // ── UI de listado ──
     const [selectedRelacion, setSelectedRelacion] = useState<RelacionAlumno | null>(null);
@@ -153,12 +156,13 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         const convParams = new URLSearchParams({ cursoId: String(cursoId) });
         const alumParams = new URLSearchParams({ cursoId: String(cursoId) });
         if (detalleAcademicoId) alumParams.set('detalleAcademicoId', String(detalleAcademicoId));
-        const [relRes, convRes, cursoRes, alumRes, configRes] = await Promise.all([
+        const [relRes, convRes, cursoRes, alumRes, configRes, empFestRes] = await Promise.all([
             fetch(`/api/relaciones-alumnos?${relParams}`),
             fetch(`/api/convenios?${convParams}`),
             fetch(`/api/cursos`),
             fetch(`/api/alumnos?${alumParams}`),
             fetch('/api/profesor/config/festivos'),
+            fetch('/api/empresas/festivos'),
         ]);
 
         const allRelaciones: RelacionAlumno[] = await relRes.json();
@@ -174,6 +178,12 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         if (configRes.ok) {
             const configData = await configRes.json();
             setUsarFestivos(configData.usar_festivos !== '0');
+            setUsarFestivosEmpresa(configData.usar_festivos_empresa === '1');
+        }
+
+        if (empFestRes.ok) {
+            const data = await empFestRes.json();
+            setEmpresaFestivosMap(data);
         }
 
         if (selectedRelacion) {
@@ -197,9 +207,20 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
                     .then(res => res.json())
                     .then(centro => setCentroFestivos(centro.festivos || []))
                     .catch(() => setCentroFestivos([]));
+                // Cargar empresa para obtener su ciudad y luego los festivos de empresa
+                fetch(`/api/empresas/${conv.empresaId}`)
+                    .then(res => res.json())
+                    .then(empresa => {
+                        if (empresa?.ciudad && empresaFestivosMap[empresa.ciudad]) {
+                            setEmpresaFestivosActuales(empresaFestivosMap[empresa.ciudad]);
+                        } else {
+                            setEmpresaFestivosActuales([]);
+                        }
+                    })
+                    .catch(() => setEmpresaFestivosActuales([]));
             }
         }
-    }, [formData.convenioId, convenios]);
+    }, [formData.convenioId, convenios, empresaFestivosMap]);
 
     // Cargar tutores cuando se selecciona una relación existente
     useEffect(() => {
@@ -216,12 +237,12 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             setFormData(prev => ({
                 ...prev,
                 alumnos: (prev.alumnos || []).map(ar => {
-                    const endDate = calculateEndDateForHours(ar.fechaInicio || '', ar.totalHorasFFE, prev.horario, centroFestivos, usarFestivos);
+                    const endDate = calculateEndDateForHours(ar.fechaInicio || '', ar.totalHorasFFE, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
                     return endDate ? { ...ar, fechaFin: endDate } : ar;
                 }),
             }));
         }
-    }, [formData.horario, usarFestivos]);
+    }, [formData.horario, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa]);
 
     // ─────────────────────────────────────────
     //  LÓGICA DEL FORMULARIO
@@ -328,7 +349,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = calculateEndDateForHours(a.fechaInicio || '', hours, prev.horario, centroFestivos, usarFestivos);
+                const newEndDate = calculateEndDateForHours(a.fechaInicio || '', hours, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
                 return { ...a, totalHorasFFE: hours, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -339,7 +360,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = calculateEndDateForHours(date, a.totalHorasFFE || 0, prev.horario, centroFestivos, usarFestivos);
+                const newEndDate = calculateEndDateForHours(date, a.totalHorasFFE || 0, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
                 return { ...a, fechaInicio: date, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -351,7 +372,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             ...prev,
             alumnos: (prev.alumnos || []).map(a => ({
                 ...a,
-                fechaInicio: calculateStartDateFromEnd(targetEndDate, a.totalHorasFFE, prev.horario, centroFestivos, usarFestivos) || a.fechaInicio,
+                fechaInicio: calculateStartDateFromEnd(targetEndDate, a.totalHorasFFE, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa) || a.fechaInicio,
                 fechaFin: targetEndDate,
             })),
         }));
@@ -362,7 +383,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
-                const endDate = calculateEndDateForHours(targetStartDate, a.totalHorasFFE || 0, prev.horario, centroFestivos, usarFestivos);
+                const endDate = calculateEndDateForHours(targetStartDate, a.totalHorasFFE || 0, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
                 return { ...a, fechaInicio: targetStartDate, fechaFin: endDate || a.fechaFin };
             }),
         }));

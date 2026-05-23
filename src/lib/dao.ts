@@ -471,7 +471,44 @@ export const EmpresaDAO = {
     const stmt = db.prepare('UPDATE empresas SET nombre = ?, direccion = ?, ciudad = ?, cif = ?, email = ?, tlfn = ?, comentarios = ?, personaContacto = ?, comunidad = ?, provincia = ? WHERE id = ?');
     stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, empresa.comentarios ?? null, empresa.personaContacto ?? null, empresa.comunidad ?? null, empresa.provincia ?? null, id);
   },
-  delete: (id: number) => db.prepare('DELETE FROM empresas WHERE id = ?').run(id)
+  delete: (id: number) => db.prepare('DELETE FROM empresas WHERE id = ?').run(id),
+  getLocalidadesConRelaciones: (): string[] => {
+    const rows = db.prepare(`
+      SELECT DISTINCT e.ciudad FROM empresas e
+      JOIN convenios c ON e.id = c.empresaId
+      JOIN relaciones r ON c.id = r.convenioId
+      JOIN alumnos a ON a.relacionId = r.id
+      WHERE e.ciudad IS NOT NULL AND e.ciudad != ''
+      ORDER BY e.ciudad
+    `).all() as { ciudad: string }[];
+    return rows.map(r => r.ciudad);
+  }
+};
+
+export const EmpresaFestivosDAO = {
+  getAll: (profesorId: number): Record<string, string[]> => {
+    const rows = db.prepare('SELECT clave, valor FROM configuracion WHERE profesorId = ? AND tipo = ?').all(profesorId, 'festivos_empresa') as { clave: string; valor: string }[];
+    const result: Record<string, string[]> = {};
+    for (const row of rows) {
+      result[row.clave] = safeParse(row.valor, []);
+    }
+    return result;
+  },
+  getByCiudad: (profesorId: number, ciudad: string): string[] => {
+    const row = db.prepare('SELECT valor FROM configuracion WHERE profesorId = ? AND tipo = ? AND clave = ?').get(profesorId, 'festivos_empresa', ciudad) as { valor: string } | undefined;
+    return row ? safeParse(row.valor, []) : [];
+  },
+  setByCiudad: (profesorId: number, ciudad: string, festivos: string[]) => {
+    const existing = db.prepare('SELECT id FROM configuracion WHERE profesorId = ? AND tipo = ? AND clave = ?').get(profesorId, 'festivos_empresa', ciudad) as any;
+    if (existing) {
+      db.prepare('UPDATE configuracion SET valor = ? WHERE id = ?').run(JSON.stringify(festivos), existing.id);
+    } else {
+      db.prepare('INSERT INTO configuracion (profesorId, tipo, clave, valor) VALUES (?, ?, ?, ?)').run(profesorId, 'festivos_empresa', ciudad, JSON.stringify(festivos));
+    }
+  },
+  deleteByCiudad: (profesorId: number, ciudad: string) => {
+    db.prepare('DELETE FROM configuracion WHERE profesorId = ? AND tipo = ? AND clave = ?').run(profesorId, 'festivos_empresa', ciudad);
+  },
 };
 
 export const TutorEmpresaDAO = {
@@ -786,12 +823,14 @@ export const PanelDAO = {
     const filtroAlumno = detalleAcademicoId ? 'AND a.detalleAcademicoId = ?' : '';
     const paramsAlumno: any[] = detalleAcademicoId ? [cursoId, detalleAcademicoId] : [cursoId];
 
-    // Leer configuración de usar_festivos
+    // Leer configuración de festivos
     const profesor = ProfesorDAO.get();
     let usarFestivos = true;
+    let usarFestivosEmpresa = false;
     if (profesor?.id) {
       const config = ConfiguracionDAO.getConfig(profesor.id, 'festivos');
       usarFestivos = config.usar_festivos !== '0';
+      usarFestivosEmpresa = config.usar_festivos_empresa === '1';
     }
 
     const alumnos = db.prepare(
@@ -836,6 +875,24 @@ export const PanelDAO = {
       if (conv) relCentroMap[r.id] = conv.centroId;
     }
 
+    // Build empresa festivos map (por ciudad)
+    const empresaFestivosByCiudad: Record<string, Set<string>> = {};
+    if (usarFestivosEmpresa && profesor?.id) {
+      const empresaFestivosRaw = EmpresaFestivosDAO.getAll(profesor.id);
+      for (const [ciudad, fechas] of Object.entries(empresaFestivosRaw)) {
+        empresaFestivosByCiudad[ciudad] = new Set(fechas);
+      }
+    }
+    // Map relacionId → empresa ciudad
+    const relEmpresaCiudadMap: Record<number, string> = {};
+    for (const r of relaciones) {
+      const conv = db.prepare('SELECT empresaId FROM convenios WHERE id = ?').get(r.convenioId) as any;
+      if (conv) {
+        const empresa = db.prepare('SELECT ciudad FROM empresas WHERE id = ?').get(conv.empresaId) as any;
+        if (empresa?.ciudad) relEmpresaCiudadMap[r.id] = empresa.ciudad;
+      }
+    }
+
     let minDate: Date | null = null;
     let maxDate: Date | null = null;
     for (const rel of relaciones) {
@@ -870,7 +927,12 @@ export const PanelDAO = {
       const diasSet = new Set(diasSemana.map(d => diaMap[d]));
 
       const centroId = relCentroMap[rel.id];
-      const festivosSet = centroFestivosMap[centroId] || new Set<string>();
+      const festivosSkip = new Set(centroFestivosMap[centroId] || []);
+      const empCiudad = relEmpresaCiudadMap[rel.id];
+      const empFestivosSet = empCiudad ? empresaFestivosByCiudad[empCiudad] : undefined;
+      if (empFestivosSet) {
+        for (const f of empFestivosSet) festivosSkip.add(f);
+      }
 
       const aluInicio = toLocalDate(rel.aluInicio) || minDate;
       const aluFin = toLocalDate(rel.aluFin) || maxDate;
@@ -886,8 +948,10 @@ export const PanelDAO = {
         let dias = 0;
         const d = new Date(start);
         while (d <= end) {
-          const esFestivo = festivosSet.has(toLocalDateStr(d));
-          if (diasSet.has(d.getDay()) && (!esFestivo || !usarFestivos)) dias++;
+          const esFestivo = festivosSkip.has(toLocalDateStr(d));
+          const skipCentro = usarFestivos && centroFestivosMap[centroId]?.has(toLocalDateStr(d));
+          const skipEmpresa = usarFestivosEmpresa && empFestivosSet?.has(toLocalDateStr(d));
+          if (diasSet.has(d.getDay()) && !skipCentro && !skipEmpresa) dias++;
           d.setDate(d.getDate() + 1);
         }
 
@@ -1025,6 +1089,7 @@ export const AvisosDAO = {
 export function recalcularFechasAlumnos(profesorId: number): number {
   const config = ConfiguracionDAO.getConfig(profesorId, 'festivos');
   const usarFestivos = config.usar_festivos !== '0';
+  const usarFestivosEmpresa = config.usar_festivos_empresa === '1';
 
   const alumnos = db.prepare(`
     SELECT a.id as alumnoId, a.fechaInicio, a.totalHorasFFE, a.relacionId,
@@ -1044,6 +1109,26 @@ export function recalcularFechasAlumnos(profesorId: number): number {
     }
   }
 
+  // Build empresa festivos map by ciudad
+  const empresaFestivosByCiudad: Record<string, string[]> = {};
+  if (usarFestivosEmpresa) {
+    const raw = EmpresaFestivosDAO.getAll(profesorId);
+    for (const [ciudad, fechas] of Object.entries(raw)) {
+      empresaFestivosByCiudad[ciudad] = fechas;
+    }
+  }
+
+  // Map convenioId → empresa ciudad
+  const empresaCiudadByConvenio: Record<number, string> = {};
+  for (const alumno of alumnos) {
+    if (empresaCiudadByConvenio[alumno.convenioId] !== undefined) continue;
+    const conv = db.prepare('SELECT empresaId FROM convenios WHERE id = ?').get(alumno.convenioId) as any;
+    if (conv) {
+      const empresa = db.prepare('SELECT ciudad FROM empresas WHERE id = ?').get(conv.empresaId) as any;
+      if (empresa?.ciudad) empresaCiudadByConvenio[alumno.convenioId] = empresa.ciudad;
+    }
+  }
+
   const formatDateLocal = (date: Date): string => {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -1060,7 +1145,13 @@ export function recalcularFechasAlumnos(profesorId: number): number {
       if (!horario || Object.keys(horario).length === 0) continue;
 
       const conv = db.prepare('SELECT centroId FROM convenios WHERE id = ?').get(alumno.convenioId) as any;
-      const festivos = conv?.centroId ? (centroFestivosMap[conv.centroId] || []) : [];
+      const centroFestivos: string[] = conv?.centroId ? (centroFestivosMap[conv.centroId] || []) : [];
+      const empCiudad = empresaCiudadByConvenio[alumno.convenioId];
+      const empFestivos: string[] = empCiudad ? (empresaFestivosByCiudad[empCiudad] || []) : [];
+
+      const saltar = new Set<string>();
+      if (usarFestivos) centroFestivos.forEach(f => saltar.add(f));
+      if (usarFestivosEmpresa) empFestivos.forEach(f => saltar.add(f));
 
       const startParts = alumno.fechaInicio.split('-').map(Number);
       let current = new Date(startParts[0], startParts[1] - 1, startParts[2]);
@@ -1070,9 +1161,8 @@ export function recalcularFechasAlumnos(profesorId: number): number {
       while (remainingHoras > 0 && iterations < 365) {
         const dateStr = formatDateLocal(current);
         const dayOfWeek = current.getDay();
-        const saltarFestivo = usarFestivos && festivos.includes(dateStr);
 
-        if (!saltarFestivo) {
+        if (!saltar.has(dateStr)) {
           let dailyHoras = 0;
           switch (dayOfWeek) {
             case 1: dailyHoras = horario.lunes?.horas || 0; break;

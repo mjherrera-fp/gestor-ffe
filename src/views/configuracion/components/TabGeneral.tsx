@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Bell, Settings, Loader2, CalendarDays } from 'lucide-react';
+import { Bell, Settings, Loader2, CalendarDays, Building2, Plus } from 'lucide-react';
+import { EmpresaFestivosModal } from './EmpresaFestivosModal.tsx';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
@@ -22,12 +23,18 @@ export function TabGeneral() {
   const [successAvisos, setSuccessAvisos] = useState('');
   const [errorAvisos, setErrorAvisos] = useState('');
 
-  // ── Estado festivos ──
+  // ── Estado festivos centro ──
   const [usarFestivos, setUsarFestivos] = useState(true);
   const [loadingFestivos, setLoadingFestivos] = useState(true);
   const [savingFestivos, setSavingFestivos] = useState(false);
   const [successFestivos, setSuccessFestivos] = useState('');
   const [errorFestivos, setErrorFestivos] = useState('');
+
+  // ── Estado festivos empresa ──
+  const [usarFestivosEmpresa, setUsarFestivosEmpresa] = useState(false);
+  const [localidades, setLocalidades] = useState<string[]>([]);
+  const [empresaFestivos, setEmpresaFestivos] = useState<Record<string, string[]>>({});
+  const [festivosModalLocalidad, setFestivosModalLocalidad] = useState<string | null>(null);
 
   // ── Cargar configuraciones ──
   useEffect(() => {
@@ -47,9 +54,20 @@ export function TabGeneral() {
       .then(r => r.json())
       .then(data => {
         setUsarFestivos(data.usar_festivos !== '0');
+        setUsarFestivosEmpresa(data.usar_festivos_empresa === '1');
       })
       .catch(() => setErrorFestivos('Error al cargar configuración de festivos'))
       .finally(() => setLoadingFestivos(false));
+
+    fetch('/api/empresas/localidades-con-relaciones')
+      .then(r => r.json())
+      .then(setLocalidades)
+      .catch(() => {});
+
+    fetch('/api/empresas/festivos')
+      .then(r => r.json())
+      .then(data => setEmpresaFestivos(data))
+      .catch(() => {});
   }, []);
 
   // ── Handlers avisos ──
@@ -91,7 +109,11 @@ export function TabGeneral() {
       const res = await fetch('/api/profesor/config/festivos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usar_festivos: usarFestivos ? '1' : '0' }),
+        body: JSON.stringify({
+          usar_festivos: usarFestivos ? '1' : '0',
+          usar_festivos_empresa: usarFestivosEmpresa ? '1' : '0',
+          empresa_festivos: empresaFestivos,
+        }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -108,6 +130,12 @@ export function TabGeneral() {
     } finally {
       setSavingFestivos(false);
     }
+  };
+
+  // ── Handlers festivos empresa ──
+  const handleSaveEmpresaFestivos = (localidad: string, festivos: string[]) => {
+    setEmpresaFestivos(prev => ({ ...prev, [localidad]: festivos }));
+    setFestivosModalLocalidad(null);
   };
 
   const loading = loadingAvisos || loadingFestivos;
@@ -220,7 +248,7 @@ export function TabGeneral() {
             <div>
               <h3 className="text-lg font-bold text-slate-800">Configuración de Festivos</h3>
               <p className="text-sm text-slate-500">
-                Controla cómo afectan los días festivos del centro a los cálculos de la FFE.
+                Controla cómo afectan los días festivos a los cálculos de la FFE.
               </p>
             </div>
           </div>
@@ -235,6 +263,7 @@ export function TabGeneral() {
             </div>
           )}
           <form onSubmit={handleSubmitFestivos} className="space-y-6">
+            {/* Toggle festivos centro */}
             <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
@@ -261,6 +290,78 @@ export function TabGeneral() {
                 </div>
               </div>
             </div>
+
+            {/* Toggle festivos empresa */}
+            <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-semibold text-slate-800">
+                      Descontar días festivos de la empresa
+                    </label>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {usarFestivosEmpresa
+                        ? 'Los días festivos de la localidad de la empresa los estudiantes no irán a las prácticas y no contabilizarán para el cálculo de la fecha fin de la FFE ni de los días de cotización de la Seguridad Social.'
+                        : 'Los días festivos de la localidad de la empresa los estudiantes irán a las prácticas y contabilizarán para el cálculo de la fecha fin de la FFE y de los días de cotización de la Seguridad Social.'
+                      }
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer ml-4 flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={usarFestivosEmpresa}
+                      onChange={e => setUsarFestivosEmpresa(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Lista de localidades con relaciones */}
+            {usarFestivosEmpresa && (
+              <div className="pt-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 block">
+                  Localidades con relaciones activas
+                </label>
+                {localidades.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic py-3">No hay localidades con relaciones activas.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {localidades.map(loc => {
+                      const festivosLoc = empresaFestivos[loc] || [];
+                      return (
+                        <div key={loc} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="p-1.5 rounded-lg bg-white text-slate-500 border border-slate-200">
+                              <Building2 className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-slate-700 truncate">{loc}</p>
+                              <p className="text-[10px] text-slate-400">
+                                {festivosLoc.length > 0
+                                  ? `${festivosLoc.length} día(s) festivo(s) configurado(s)`
+                                  : 'Sin festivos configurados'}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setFestivosModalLocalidad(loc)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0 ml-3"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                            Festivos
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
               <button type="submit" disabled={savingFestivos} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-indigo-600 disabled:opacity-50 transition-colors">
                 <span className="flex items-center justify-center gap-2">
@@ -272,6 +373,16 @@ export function TabGeneral() {
           </form>
         </div>
       </div>
+
+      {/* ─── MODAL FESTIVOS EMPRESA ─── */}
+      {festivosModalLocalidad && (
+        <EmpresaFestivosModal
+          localidad={festivosModalLocalidad}
+          festivos={empresaFestivos[festivosModalLocalidad] || []}
+          onSave={(festivos) => handleSaveEmpresaFestivos(festivosModalLocalidad, festivos)}
+          onClose={() => setFestivosModalLocalidad(null)}
+        />
+      )}
 
     </div>
   );
