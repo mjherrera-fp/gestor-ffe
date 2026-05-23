@@ -1,0 +1,485 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "GAL",
+    "slug": "gal",
+    "name": "Galicia"
+  },
+  "province": {
+    "code": "15",
+    "slug": "a-coruna",
+    "name": "A Coruña"
+  },
+  "municipalities": [
+    {
+      "ine": "15001",
+      "slug": "abegondo",
+      "name": "Abegondo"
+    },
+    {
+      "ine": "15002",
+      "slug": "ames",
+      "name": "Ames"
+    },
+    {
+      "ine": "15003",
+      "slug": "aranga",
+      "name": "Aranga"
+    },
+    {
+      "ine": "15004",
+      "slug": "ares",
+      "name": "Ares"
+    },
+    {
+      "ine": "15005",
+      "slug": "arteixo",
+      "name": "Arteixo"
+    },
+    {
+      "ine": "15006",
+      "slug": "arzua",
+      "name": "Arzúa"
+    },
+    {
+      "ine": "15007",
+      "slug": "bana-a",
+      "name": "Baña, A"
+    },
+    {
+      "ine": "15008",
+      "slug": "bergondo",
+      "name": "Bergondo"
+    },
+    {
+      "ine": "15009",
+      "slug": "betanzos",
+      "name": "Betanzos"
+    },
+    {
+      "ine": "15010",
+      "slug": "boimorto",
+      "name": "Boimorto"
+    },
+    {
+      "ine": "15011",
+      "slug": "boiro",
+      "name": "Boiro"
+    },
+    {
+      "ine": "15012",
+      "slug": "boqueixon",
+      "name": "Boqueixón"
+    },
+    {
+      "ine": "15013",
+      "slug": "brion",
+      "name": "Brión"
+    },
+    {
+      "ine": "15014",
+      "slug": "cabana-de-bergantinos",
+      "name": "Cabana de Bergantiños"
+    },
+    {
+      "ine": "15015",
+      "slug": "cabanas",
+      "name": "Cabanas"
+    },
+    {
+      "ine": "15016",
+      "slug": "camarinas",
+      "name": "Camariñas"
+    },
+    {
+      "ine": "15017",
+      "slug": "cambre",
+      "name": "Cambre"
+    },
+    {
+      "ine": "15018",
+      "slug": "capela-a",
+      "name": "Capela, A"
+    },
+    {
+      "ine": "15019",
+      "slug": "carballo",
+      "name": "Carballo"
+    },
+    {
+      "ine": "15901",
+      "slug": "carino",
+      "name": "Cariño"
+    },
+    {
+      "ine": "15020",
+      "slug": "carnota",
+      "name": "Carnota"
+    },
+    {
+      "ine": "15021",
+      "slug": "carral",
+      "name": "Carral"
+    },
+    {
+      "ine": "15022",
+      "slug": "cedeira",
+      "name": "Cedeira"
+    },
+    {
+      "ine": "15023",
+      "slug": "cee",
+      "name": "Cee"
+    },
+    {
+      "ine": "15024",
+      "slug": "cerceda",
+      "name": "Cerceda"
+    },
+    {
+      "ine": "15025",
+      "slug": "cerdido",
+      "name": "Cerdido"
+    },
+    {
+      "ine": "15027",
+      "slug": "coiros",
+      "name": "Coirós"
+    },
+    {
+      "ine": "15028",
+      "slug": "corcubion",
+      "name": "Corcubión"
+    },
+    {
+      "ine": "15029",
+      "slug": "coristanco",
+      "name": "Coristanco"
+    },
+    {
+      "ine": "15030",
+      "slug": "coruna-a",
+      "name": "Coruña, A"
+    },
+    {
+      "ine": "15031",
+      "slug": "culleredo",
+      "name": "Culleredo"
+    },
+    {
+      "ine": "15032",
+      "slug": "curtis",
+      "name": "Curtis"
+    },
+    {
+      "ine": "15033",
+      "slug": "dodro",
+      "name": "Dodro"
+    },
+    {
+      "ine": "15034",
+      "slug": "dumbria",
+      "name": "Dumbría"
+    },
+    {
+      "ine": "15035",
+      "slug": "fene",
+      "name": "Fene"
+    },
+    {
+      "ine": "15036",
+      "slug": "ferrol",
+      "name": "Ferrol"
+    },
+    {
+      "ine": "15037",
+      "slug": "fisterra",
+      "name": "Fisterra"
+    },
+    {
+      "ine": "15038",
+      "slug": "frades",
+      "name": "Frades"
+    },
+    {
+      "ine": "15039",
+      "slug": "irixoa",
+      "name": "Irixoa"
+    },
+    {
+      "ine": "15041",
+      "slug": "laracha-a",
+      "name": "Laracha, A"
+    },
+    {
+      "ine": "15040",
+      "slug": "laxe",
+      "name": "Laxe"
+    },
+    {
+      "ine": "15042",
+      "slug": "lousame",
+      "name": "Lousame"
+    },
+    {
+      "ine": "15043",
+      "slug": "malpica-de-bergantinos",
+      "name": "Malpica de Bergantiños"
+    },
+    {
+      "ine": "15044",
+      "slug": "manon",
+      "name": "Mañón"
+    },
+    {
+      "ine": "15045",
+      "slug": "mazaricos",
+      "name": "Mazaricos"
+    },
+    {
+      "ine": "15046",
+      "slug": "melide",
+      "name": "Melide"
+    },
+    {
+      "ine": "15047",
+      "slug": "mesia",
+      "name": "Mesía"
+    },
+    {
+      "ine": "15048",
+      "slug": "mino",
+      "name": "Miño"
+    },
+    {
+      "ine": "15049",
+      "slug": "moeche",
+      "name": "Moeche"
+    },
+    {
+      "ine": "15050",
+      "slug": "monfero",
+      "name": "Monfero"
+    },
+    {
+      "ine": "15051",
+      "slug": "mugardos",
+      "name": "Mugardos"
+    },
+    {
+      "ine": "15053",
+      "slug": "muros",
+      "name": "Muros"
+    },
+    {
+      "ine": "15052",
+      "slug": "muxia",
+      "name": "Muxía"
+    },
+    {
+      "ine": "15054",
+      "slug": "naron",
+      "name": "Narón"
+    },
+    {
+      "ine": "15055",
+      "slug": "neda",
+      "name": "Neda"
+    },
+    {
+      "ine": "15056",
+      "slug": "negreira",
+      "name": "Negreira"
+    },
+    {
+      "ine": "15057",
+      "slug": "noia",
+      "name": "Noia"
+    },
+    {
+      "ine": "15058",
+      "slug": "oleiros",
+      "name": "Oleiros"
+    },
+    {
+      "ine": "15059",
+      "slug": "ordes",
+      "name": "Ordes"
+    },
+    {
+      "ine": "15060",
+      "slug": "oroso",
+      "name": "Oroso"
+    },
+    {
+      "ine": "15061",
+      "slug": "ortigueira",
+      "name": "Ortigueira"
+    },
+    {
+      "ine": "15062",
+      "slug": "outes",
+      "name": "Outes"
+    },
+    {
+      "ine": "15902",
+      "slug": "oza-cesuras",
+      "name": "Oza-Cesuras"
+    },
+    {
+      "ine": "15064",
+      "slug": "paderne",
+      "name": "Paderne"
+    },
+    {
+      "ine": "15065",
+      "slug": "padron",
+      "name": "Padrón"
+    },
+    {
+      "ine": "15066",
+      "slug": "pino-o",
+      "name": "Pino, O"
+    },
+    {
+      "ine": "15067",
+      "slug": "pobra-do-caraminal-a",
+      "name": "Pobra do Caramiñal, A"
+    },
+    {
+      "ine": "15068",
+      "slug": "ponteceso",
+      "name": "Ponteceso"
+    },
+    {
+      "ine": "15069",
+      "slug": "pontedeume",
+      "name": "Pontedeume"
+    },
+    {
+      "ine": "15070",
+      "slug": "pontes-de-garcia-rodriguez-as",
+      "name": "Pontes de García Rodríguez, As"
+    },
+    {
+      "ine": "15071",
+      "slug": "porto-do-son",
+      "name": "Porto do Son"
+    },
+    {
+      "ine": "15072",
+      "slug": "rianxo",
+      "name": "Rianxo"
+    },
+    {
+      "ine": "15073",
+      "slug": "ribeira",
+      "name": "Ribeira"
+    },
+    {
+      "ine": "15074",
+      "slug": "rois",
+      "name": "Rois"
+    },
+    {
+      "ine": "15075",
+      "slug": "sada",
+      "name": "Sada"
+    },
+    {
+      "ine": "15076",
+      "slug": "san-sadurnino",
+      "name": "San Sadurniño"
+    },
+    {
+      "ine": "15077",
+      "slug": "santa-comba",
+      "name": "Santa Comba"
+    },
+    {
+      "ine": "15078",
+      "slug": "santiago-de-compostela",
+      "name": "Santiago de Compostela"
+    },
+    {
+      "ine": "15079",
+      "slug": "santiso",
+      "name": "Santiso"
+    },
+    {
+      "ine": "15080",
+      "slug": "sobrado",
+      "name": "Sobrado"
+    },
+    {
+      "ine": "15081",
+      "slug": "somozas-as",
+      "name": "Somozas, As"
+    },
+    {
+      "ine": "15082",
+      "slug": "teo",
+      "name": "Teo"
+    },
+    {
+      "ine": "15083",
+      "slug": "toques",
+      "name": "Toques"
+    },
+    {
+      "ine": "15084",
+      "slug": "tordoia",
+      "name": "Tordoia"
+    },
+    {
+      "ine": "15085",
+      "slug": "touro",
+      "name": "Touro"
+    },
+    {
+      "ine": "15086",
+      "slug": "trazo",
+      "name": "Trazo"
+    },
+    {
+      "ine": "15088",
+      "slug": "val-do-dubra",
+      "name": "Val do Dubra"
+    },
+    {
+      "ine": "15087",
+      "slug": "valdovino",
+      "name": "Valdoviño"
+    },
+    {
+      "ine": "15089",
+      "slug": "vedra",
+      "name": "Vedra"
+    },
+    {
+      "ine": "15091",
+      "slug": "vilarmaior",
+      "name": "Vilarmaior"
+    },
+    {
+      "ine": "15090",
+      "slug": "vilasantar",
+      "name": "Vilasantar"
+    },
+    {
+      "ine": "15092",
+      "slug": "vimianzo",
+      "name": "Vimianzo"
+    },
+    {
+      "ine": "15093",
+      "slug": "zas",
+      "name": "Zas"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

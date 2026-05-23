@@ -1,0 +1,695 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "VAL",
+    "slug": "val",
+    "name": "Comunitat Valenciana"
+  },
+  "province": {
+    "code": "12",
+    "slug": "castellon",
+    "name": "Castellón"
+  },
+  "municipalities": [
+    {
+      "ine": "12002",
+      "slug": "ain",
+      "name": "Aín"
+    },
+    {
+      "ine": "12003",
+      "slug": "albocasser",
+      "name": "Albocàsser"
+    },
+    {
+      "ine": "12004",
+      "slug": "alcala-de-xivert",
+      "name": "Alcalà de Xivert"
+    },
+    {
+      "ine": "12005",
+      "slug": "alcora-l",
+      "name": "Alcora, l'"
+    },
+    {
+      "ine": "12006",
+      "slug": "alcudia-de-veo",
+      "name": "Alcudia de Veo"
+    },
+    {
+      "ine": "12007",
+      "slug": "alfondeguilla",
+      "name": "Alfondeguilla"
+    },
+    {
+      "ine": "12008",
+      "slug": "algimia-de-almonacid",
+      "name": "Algimia de Almonacid"
+    },
+    {
+      "ine": "12009",
+      "slug": "almazora-almassora",
+      "name": "Almazora/Almassora"
+    },
+    {
+      "ine": "12010",
+      "slug": "almedijar",
+      "name": "Almedíjar"
+    },
+    {
+      "ine": "12011",
+      "slug": "almenara",
+      "name": "Almenara"
+    },
+    {
+      "ine": "12901",
+      "slug": "alqueries-les-alquerias-del-nino-perdido",
+      "name": "Alqueries, les/Alquerías del Niño Perdido"
+    },
+    {
+      "ine": "12012",
+      "slug": "altura",
+      "name": "Altura"
+    },
+    {
+      "ine": "12013",
+      "slug": "aranuel",
+      "name": "Arañuel"
+    },
+    {
+      "ine": "12014",
+      "slug": "ares-del-maestrat",
+      "name": "Ares del Maestrat"
+    },
+    {
+      "ine": "12015",
+      "slug": "argelita",
+      "name": "Argelita"
+    },
+    {
+      "ine": "12016",
+      "slug": "artana",
+      "name": "Artana"
+    },
+    {
+      "ine": "12001",
+      "slug": "atzeneta-del-maestrat",
+      "name": "Atzeneta del Maestrat"
+    },
+    {
+      "ine": "12017",
+      "slug": "ayodar",
+      "name": "Ayódar"
+    },
+    {
+      "ine": "12018",
+      "slug": "azuebar",
+      "name": "Azuébar"
+    },
+    {
+      "ine": "12020",
+      "slug": "barracas",
+      "name": "Barracas"
+    },
+    {
+      "ine": "12022",
+      "slug": "bejis",
+      "name": "Bejís"
+    },
+    {
+      "ine": "12024",
+      "slug": "benafer",
+      "name": "Benafer"
+    },
+    {
+      "ine": "12025",
+      "slug": "benafigos",
+      "name": "Benafigos"
+    },
+    {
+      "ine": "12026",
+      "slug": "benassal",
+      "name": "Benassal"
+    },
+    {
+      "ine": "12027",
+      "slug": "benicarlo",
+      "name": "Benicarló"
+    },
+    {
+      "ine": "12028",
+      "slug": "benicasim-benicassim",
+      "name": "Benicasim/Benicàssim"
+    },
+    {
+      "ine": "12029",
+      "slug": "benlloch",
+      "name": "Benlloch"
+    },
+    {
+      "ine": "12021",
+      "slug": "betxi",
+      "name": "Betxí"
+    },
+    {
+      "ine": "12032",
+      "slug": "borriana-burriana",
+      "name": "Borriana/Burriana"
+    },
+    {
+      "ine": "12031",
+      "slug": "borriol",
+      "name": "Borriol"
+    },
+    {
+      "ine": "12033",
+      "slug": "cabanes",
+      "name": "Cabanes"
+    },
+    {
+      "ine": "12034",
+      "slug": "calig",
+      "name": "Càlig"
+    },
+    {
+      "ine": "12036",
+      "slug": "canet-lo-roig",
+      "name": "Canet lo Roig"
+    },
+    {
+      "ine": "12037",
+      "slug": "castell-de-cabres",
+      "name": "Castell de Cabres"
+    },
+    {
+      "ine": "12038",
+      "slug": "castellfort",
+      "name": "Castellfort"
+    },
+    {
+      "ine": "12039",
+      "slug": "castellnovo",
+      "name": "Castellnovo"
+    },
+    {
+      "ine": "12040",
+      "slug": "castellon-de-la-plana-castello-de-la-plana",
+      "name": "Castellón de la Plana/Castelló de la Plana"
+    },
+    {
+      "ine": "12041",
+      "slug": "castillo-de-villamalefa",
+      "name": "Castillo de Villamalefa"
+    },
+    {
+      "ine": "12042",
+      "slug": "cati",
+      "name": "Catí"
+    },
+    {
+      "ine": "12043",
+      "slug": "caudiel",
+      "name": "Caudiel"
+    },
+    {
+      "ine": "12044",
+      "slug": "cervera-del-maestre",
+      "name": "Cervera del Maestre"
+    },
+    {
+      "ine": "12053",
+      "slug": "chilches-xilxes",
+      "name": "Chilches/Xilxes"
+    },
+    {
+      "ine": "12055",
+      "slug": "chodos-xodos",
+      "name": "Chodos/Xodos"
+    },
+    {
+      "ine": "12056",
+      "slug": "chovar",
+      "name": "Chóvar"
+    },
+    {
+      "ine": "12045",
+      "slug": "cinctorres",
+      "name": "Cinctorres"
+    },
+    {
+      "ine": "12046",
+      "slug": "cirat",
+      "name": "Cirat"
+    },
+    {
+      "ine": "12048",
+      "slug": "cortes-de-arenoso",
+      "name": "Cortes de Arenoso"
+    },
+    {
+      "ine": "12049",
+      "slug": "costur",
+      "name": "Costur"
+    },
+    {
+      "ine": "12050",
+      "slug": "coves-de-vinroma-les",
+      "name": "Coves de Vinromà, les"
+    },
+    {
+      "ine": "12051",
+      "slug": "culla",
+      "name": "Culla"
+    },
+    {
+      "ine": "12057",
+      "slug": "eslida",
+      "name": "Eslida"
+    },
+    {
+      "ine": "12058",
+      "slug": "espadilla",
+      "name": "Espadilla"
+    },
+    {
+      "ine": "12059",
+      "slug": "fanzara",
+      "name": "Fanzara"
+    },
+    {
+      "ine": "12060",
+      "slug": "figueroles",
+      "name": "Figueroles"
+    },
+    {
+      "ine": "12061",
+      "slug": "forcall",
+      "name": "Forcall"
+    },
+    {
+      "ine": "12063",
+      "slug": "fuente-la-reina",
+      "name": "Fuente la Reina"
+    },
+    {
+      "ine": "12064",
+      "slug": "fuentes-de-ayodar",
+      "name": "Fuentes de Ayódar"
+    },
+    {
+      "ine": "12065",
+      "slug": "gaibiel",
+      "name": "Gaibiel"
+    },
+    {
+      "ine": "12067",
+      "slug": "geldo",
+      "name": "Geldo"
+    },
+    {
+      "ine": "12068",
+      "slug": "herbes",
+      "name": "Herbés"
+    },
+    {
+      "ine": "12069",
+      "slug": "higueras",
+      "name": "Higueras"
+    },
+    {
+      "ine": "12070",
+      "slug": "jana-la",
+      "name": "Jana, la"
+    },
+    {
+      "ine": "12071",
+      "slug": "jerica",
+      "name": "Jérica"
+    },
+    {
+      "ine": "12074",
+      "slug": "llosa-la",
+      "name": "Llosa, la"
+    },
+    {
+      "ine": "12072",
+      "slug": "llucena-lucena-del-cid",
+      "name": "Llucena/Lucena del Cid"
+    },
+    {
+      "ine": "12073",
+      "slug": "ludiente",
+      "name": "Ludiente"
+    },
+    {
+      "ine": "12075",
+      "slug": "mata-de-morella-la",
+      "name": "Mata de Morella, la"
+    },
+    {
+      "ine": "12076",
+      "slug": "matet",
+      "name": "Matet"
+    },
+    {
+      "ine": "12077",
+      "slug": "moncofa",
+      "name": "Moncofa"
+    },
+    {
+      "ine": "12078",
+      "slug": "montan",
+      "name": "Montán"
+    },
+    {
+      "ine": "12079",
+      "slug": "montanejos",
+      "name": "Montanejos"
+    },
+    {
+      "ine": "12080",
+      "slug": "morella",
+      "name": "Morella"
+    },
+    {
+      "ine": "12081",
+      "slug": "navajas",
+      "name": "Navajas"
+    },
+    {
+      "ine": "12082",
+      "slug": "nules",
+      "name": "Nules"
+    },
+    {
+      "ine": "12083",
+      "slug": "olocau-del-rey",
+      "name": "Olocau del Rey"
+    },
+    {
+      "ine": "12084",
+      "slug": "onda",
+      "name": "Onda"
+    },
+    {
+      "ine": "12085",
+      "slug": "oropesa-del-mar-orpesa",
+      "name": "Oropesa del Mar/Orpesa"
+    },
+    {
+      "ine": "12087",
+      "slug": "palanques",
+      "name": "Palanques"
+    },
+    {
+      "ine": "12088",
+      "slug": "pavias",
+      "name": "Pavías"
+    },
+    {
+      "ine": "12089",
+      "slug": "peniscola-peniscola",
+      "name": "Peníscola/Peñíscola"
+    },
+    {
+      "ine": "12090",
+      "slug": "pina-de-montalgrao",
+      "name": "Pina de Montalgrao"
+    },
+    {
+      "ine": "12093",
+      "slug": "pobla-de-benifassa-la",
+      "name": "Pobla de Benifassà, la"
+    },
+    {
+      "ine": "12094",
+      "slug": "pobla-tornesa-la",
+      "name": "Pobla Tornesa, la"
+    },
+    {
+      "ine": "12091",
+      "slug": "portell-de-morella",
+      "name": "Portell de Morella"
+    },
+    {
+      "ine": "12092",
+      "slug": "puebla-de-arenoso",
+      "name": "Puebla de Arenoso"
+    },
+    {
+      "ine": "12095",
+      "slug": "ribesalbes",
+      "name": "Ribesalbes"
+    },
+    {
+      "ine": "12096",
+      "slug": "rossell",
+      "name": "Rossell"
+    },
+    {
+      "ine": "12097",
+      "slug": "sacanet",
+      "name": "Sacañet"
+    },
+    {
+      "ine": "12098",
+      "slug": "salzadella-la",
+      "name": "Salzadella, la"
+    },
+    {
+      "ine": "12101",
+      "slug": "san-rafael-del-rio",
+      "name": "San Rafael del Río"
+    },
+    {
+      "ine": "12902",
+      "slug": "sant-joan-de-moro",
+      "name": "Sant Joan de Moró"
+    },
+    {
+      "ine": "12099",
+      "slug": "sant-jordi-san-jorge",
+      "name": "Sant Jordi/San Jorge"
+    },
+    {
+      "ine": "12100",
+      "slug": "sant-mateu",
+      "name": "Sant Mateu"
+    },
+    {
+      "ine": "12102",
+      "slug": "santa-magdalena-de-pulpis",
+      "name": "Santa Magdalena de Pulpis"
+    },
+    {
+      "ine": "12104",
+      "slug": "segorbe",
+      "name": "Segorbe"
+    },
+    {
+      "ine": "12103",
+      "slug": "serratella-la",
+      "name": "Serratella, la"
+    },
+    {
+      "ine": "12105",
+      "slug": "sierra-engarceran",
+      "name": "Sierra Engarcerán"
+    },
+    {
+      "ine": "12106",
+      "slug": "soneja",
+      "name": "Soneja"
+    },
+    {
+      "ine": "12107",
+      "slug": "sot-de-ferrer",
+      "name": "Sot de Ferrer"
+    },
+    {
+      "ine": "12108",
+      "slug": "sueras-suera",
+      "name": "Sueras/Suera"
+    },
+    {
+      "ine": "12109",
+      "slug": "tales",
+      "name": "Tales"
+    },
+    {
+      "ine": "12110",
+      "slug": "teresa",
+      "name": "Teresa"
+    },
+    {
+      "ine": "12111",
+      "slug": "tirig",
+      "name": "Tírig"
+    },
+    {
+      "ine": "12112",
+      "slug": "todolella",
+      "name": "Todolella"
+    },
+    {
+      "ine": "12113",
+      "slug": "toga",
+      "name": "Toga"
+    },
+    {
+      "ine": "12114",
+      "slug": "toras",
+      "name": "Torás"
+    },
+    {
+      "ine": "12115",
+      "slug": "toro-el",
+      "name": "Toro, El"
+    },
+    {
+      "ine": "12116",
+      "slug": "torralba-del-pinar",
+      "name": "Torralba del Pinar"
+    },
+    {
+      "ine": "12119",
+      "slug": "torre-d-en-besora-la",
+      "name": "Torre d'En Besora, la"
+    },
+    {
+      "ine": "12120",
+      "slug": "torre-d-en-domenec-la",
+      "name": "Torre d'en Doménec, la"
+    },
+    {
+      "ine": "12117",
+      "slug": "torreblanca",
+      "name": "Torreblanca"
+    },
+    {
+      "ine": "12118",
+      "slug": "torrechiva",
+      "name": "Torrechiva"
+    },
+    {
+      "ine": "12121",
+      "slug": "traiguera",
+      "name": "Traiguera"
+    },
+    {
+      "ine": "12122",
+      "slug": "useras-useres-les",
+      "name": "Useras/Useres, les"
+    },
+    {
+      "ine": "12124",
+      "slug": "vall-d-alba",
+      "name": "Vall d'Alba"
+    },
+    {
+      "ine": "12126",
+      "slug": "vall-d-uixo-la",
+      "name": "Vall d'Uixó, la"
+    },
+    {
+      "ine": "12125",
+      "slug": "vall-de-almonacid",
+      "name": "Vall de Almonacid"
+    },
+    {
+      "ine": "12123",
+      "slug": "vallat",
+      "name": "Vallat"
+    },
+    {
+      "ine": "12127",
+      "slug": "vallibona",
+      "name": "Vallibona"
+    },
+    {
+      "ine": "12135",
+      "slug": "vila-real",
+      "name": "Vila-real"
+    },
+    {
+      "ine": "12128",
+      "slug": "vilafames",
+      "name": "Vilafamés"
+    },
+    {
+      "ine": "12132",
+      "slug": "vilanova-d-alcolea",
+      "name": "Vilanova d'Alcolea"
+    },
+    {
+      "ine": "12134",
+      "slug": "vilar-de-canes",
+      "name": "Vilar de Canes"
+    },
+    {
+      "ine": "12136",
+      "slug": "vilavella-la",
+      "name": "Vilavella, la"
+    },
+    {
+      "ine": "12129",
+      "slug": "villafranca-del-cid-vilafranca",
+      "name": "Villafranca del Cid/Vilafranca"
+    },
+    {
+      "ine": "12130",
+      "slug": "villahermosa-del-rio",
+      "name": "Villahermosa del Río"
+    },
+    {
+      "ine": "12131",
+      "slug": "villamalur",
+      "name": "Villamalur"
+    },
+    {
+      "ine": "12133",
+      "slug": "villanueva-de-viver",
+      "name": "Villanueva de Viver"
+    },
+    {
+      "ine": "12137",
+      "slug": "villores",
+      "name": "Villores"
+    },
+    {
+      "ine": "12138",
+      "slug": "vinaros",
+      "name": "Vinaròs"
+    },
+    {
+      "ine": "12139",
+      "slug": "vistabella-del-maestrat",
+      "name": "Vistabella del Maestrat"
+    },
+    {
+      "ine": "12140",
+      "slug": "viver",
+      "name": "Viver"
+    },
+    {
+      "ine": "12052",
+      "slug": "xert",
+      "name": "Xert"
+    },
+    {
+      "ine": "12141",
+      "slug": "zorita-del-maestrazgo",
+      "name": "Zorita del Maestrazgo"
+    },
+    {
+      "ine": "12142",
+      "slug": "zucaina",
+      "name": "Zucaina"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

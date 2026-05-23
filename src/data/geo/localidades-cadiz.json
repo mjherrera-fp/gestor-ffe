@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "AND",
+    "slug": "and",
+    "name": "Andalucía"
+  },
+  "province": {
+    "code": "11",
+    "slug": "cadiz",
+    "name": "Cádiz"
+  },
+  "municipalities": [
+    {
+      "ine": "11001",
+      "slug": "alcala-de-los-gazules",
+      "name": "Alcalá de los Gazules"
+    },
+    {
+      "ine": "11002",
+      "slug": "alcala-del-valle",
+      "name": "Alcalá del Valle"
+    },
+    {
+      "ine": "11003",
+      "slug": "algar",
+      "name": "Algar"
+    },
+    {
+      "ine": "11004",
+      "slug": "algeciras",
+      "name": "Algeciras"
+    },
+    {
+      "ine": "11005",
+      "slug": "algodonales",
+      "name": "Algodonales"
+    },
+    {
+      "ine": "11006",
+      "slug": "arcos-de-la-frontera",
+      "name": "Arcos de la Frontera"
+    },
+    {
+      "ine": "11007",
+      "slug": "barbate",
+      "name": "Barbate"
+    },
+    {
+      "ine": "11008",
+      "slug": "barrios-los",
+      "name": "Barrios, Los"
+    },
+    {
+      "ine": "11901",
+      "slug": "benalup-casas-viejas",
+      "name": "Benalup-Casas Viejas"
+    },
+    {
+      "ine": "11009",
+      "slug": "benaocaz",
+      "name": "Benaocaz"
+    },
+    {
+      "ine": "11010",
+      "slug": "bornos",
+      "name": "Bornos"
+    },
+    {
+      "ine": "11011",
+      "slug": "bosque-el",
+      "name": "Bosque, El"
+    },
+    {
+      "ine": "11012",
+      "slug": "cadiz",
+      "name": "Cádiz"
+    },
+    {
+      "ine": "11013",
+      "slug": "castellar-de-la-frontera",
+      "name": "Castellar de la Frontera"
+    },
+    {
+      "ine": "11015",
+      "slug": "chiclana-de-la-frontera",
+      "name": "Chiclana de la Frontera"
+    },
+    {
+      "ine": "11016",
+      "slug": "chipiona",
+      "name": "Chipiona"
+    },
+    {
+      "ine": "11014",
+      "slug": "conil-de-la-frontera",
+      "name": "Conil de la Frontera"
+    },
+    {
+      "ine": "11017",
+      "slug": "espera",
+      "name": "Espera"
+    },
+    {
+      "ine": "11018",
+      "slug": "gastor-el",
+      "name": "Gastor, El"
+    },
+    {
+      "ine": "11019",
+      "slug": "grazalema",
+      "name": "Grazalema"
+    },
+    {
+      "ine": "11020",
+      "slug": "jerez-de-la-frontera",
+      "name": "Jerez de la Frontera"
+    },
+    {
+      "ine": "11021",
+      "slug": "jimena-de-la-frontera",
+      "name": "Jimena de la Frontera"
+    },
+    {
+      "ine": "11022",
+      "slug": "linea-de-la-concepcion-la",
+      "name": "Línea de la Concepción, La"
+    },
+    {
+      "ine": "11023",
+      "slug": "medina-sidonia",
+      "name": "Medina-Sidonia"
+    },
+    {
+      "ine": "11024",
+      "slug": "olvera",
+      "name": "Olvera"
+    },
+    {
+      "ine": "11025",
+      "slug": "paterna-de-rivera",
+      "name": "Paterna de Rivera"
+    },
+    {
+      "ine": "11026",
+      "slug": "prado-del-rey",
+      "name": "Prado del Rey"
+    },
+    {
+      "ine": "11027",
+      "slug": "puerto-de-santa-maria-el",
+      "name": "Puerto de Santa María, El"
+    },
+    {
+      "ine": "11028",
+      "slug": "puerto-real",
+      "name": "Puerto Real"
+    },
+    {
+      "ine": "11029",
+      "slug": "puerto-serrano",
+      "name": "Puerto Serrano"
+    },
+    {
+      "ine": "11030",
+      "slug": "rota",
+      "name": "Rota"
+    },
+    {
+      "ine": "11031",
+      "slug": "san-fernando",
+      "name": "San Fernando"
+    },
+    {
+      "ine": "11902",
+      "slug": "san-jose-del-valle",
+      "name": "San José del Valle"
+    },
+    {
+      "ine": "11033",
+      "slug": "san-roque",
+      "name": "San Roque"
+    },
+    {
+      "ine": "11032",
+      "slug": "sanlucar-de-barrameda",
+      "name": "Sanlúcar de Barrameda"
+    },
+    {
+      "ine": "11034",
+      "slug": "setenil-de-las-bodegas",
+      "name": "Setenil de las Bodegas"
+    },
+    {
+      "ine": "11035",
+      "slug": "tarifa",
+      "name": "Tarifa"
+    },
+    {
+      "ine": "11036",
+      "slug": "torre-alhaquime",
+      "name": "Torre Alháquime"
+    },
+    {
+      "ine": "11037",
+      "slug": "trebujena",
+      "name": "Trebujena"
+    },
+    {
+      "ine": "11038",
+      "slug": "ubrique",
+      "name": "Ubrique"
+    },
+    {
+      "ine": "11039",
+      "slug": "vejer-de-la-frontera",
+      "name": "Vejer de la Frontera"
+    },
+    {
+      "ine": "11040",
+      "slug": "villaluenga-del-rosario",
+      "name": "Villaluenga del Rosario"
+    },
+    {
+      "ine": "11041",
+      "slug": "villamartin",
+      "name": "Villamartín"
+    },
+    {
+      "ine": "11042",
+      "slug": "zahara",
+      "name": "Zahara"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

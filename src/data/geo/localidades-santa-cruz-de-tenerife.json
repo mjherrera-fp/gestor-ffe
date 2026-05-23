@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "CAN",
+    "slug": "can",
+    "name": "Canarias"
+  },
+  "province": {
+    "code": "38",
+    "slug": "santa-cruz-de-tenerife",
+    "name": "Santa Cruz de Tenerife"
+  },
+  "municipalities": [
+    {
+      "ine": "38001",
+      "slug": "adeje",
+      "name": "Adeje"
+    },
+    {
+      "ine": "38002",
+      "slug": "agulo",
+      "name": "Agulo"
+    },
+    {
+      "ine": "38003",
+      "slug": "alajero",
+      "name": "Alajeró"
+    },
+    {
+      "ine": "38004",
+      "slug": "arafo",
+      "name": "Arafo"
+    },
+    {
+      "ine": "38005",
+      "slug": "arico",
+      "name": "Arico"
+    },
+    {
+      "ine": "38006",
+      "slug": "arona",
+      "name": "Arona"
+    },
+    {
+      "ine": "38007",
+      "slug": "barlovento",
+      "name": "Barlovento"
+    },
+    {
+      "ine": "38008",
+      "slug": "brena-alta",
+      "name": "Breña Alta"
+    },
+    {
+      "ine": "38009",
+      "slug": "brena-baja",
+      "name": "Breña Baja"
+    },
+    {
+      "ine": "38010",
+      "slug": "buenavista-del-norte",
+      "name": "Buenavista del Norte"
+    },
+    {
+      "ine": "38011",
+      "slug": "candelaria",
+      "name": "Candelaria"
+    },
+    {
+      "ine": "38012",
+      "slug": "fasnia",
+      "name": "Fasnia"
+    },
+    {
+      "ine": "38013",
+      "slug": "frontera",
+      "name": "Frontera"
+    },
+    {
+      "ine": "38014",
+      "slug": "fuencaliente-de-la-palma",
+      "name": "Fuencaliente de la Palma"
+    },
+    {
+      "ine": "38015",
+      "slug": "garachico",
+      "name": "Garachico"
+    },
+    {
+      "ine": "38016",
+      "slug": "garafia",
+      "name": "Garafía"
+    },
+    {
+      "ine": "38017",
+      "slug": "granadilla-de-abona",
+      "name": "Granadilla de Abona"
+    },
+    {
+      "ine": "38018",
+      "slug": "guancha-la",
+      "name": "Guancha, La"
+    },
+    {
+      "ine": "38019",
+      "slug": "guia-de-isora",
+      "name": "Guía de Isora"
+    },
+    {
+      "ine": "38020",
+      "slug": "guimar",
+      "name": "Güímar"
+    },
+    {
+      "ine": "38021",
+      "slug": "hermigua",
+      "name": "Hermigua"
+    },
+    {
+      "ine": "38022",
+      "slug": "icod-de-los-vinos",
+      "name": "Icod de los Vinos"
+    },
+    {
+      "ine": "38024",
+      "slug": "llanos-de-aridane-los",
+      "name": "Llanos de Aridane, Los"
+    },
+    {
+      "ine": "38025",
+      "slug": "matanza-de-acentejo-la",
+      "name": "Matanza de Acentejo, La"
+    },
+    {
+      "ine": "38026",
+      "slug": "orotava-la",
+      "name": "Orotava, La"
+    },
+    {
+      "ine": "38027",
+      "slug": "paso-el",
+      "name": "Paso, El"
+    },
+    {
+      "ine": "38901",
+      "slug": "pinar-de-el-hierro-el",
+      "name": "Pinar de El Hierro, El"
+    },
+    {
+      "ine": "38028",
+      "slug": "puerto-de-la-cruz",
+      "name": "Puerto de la Cruz"
+    },
+    {
+      "ine": "38029",
+      "slug": "puntagorda",
+      "name": "Puntagorda"
+    },
+    {
+      "ine": "38030",
+      "slug": "puntallana",
+      "name": "Puntallana"
+    },
+    {
+      "ine": "38031",
+      "slug": "realejos-los",
+      "name": "Realejos, Los"
+    },
+    {
+      "ine": "38032",
+      "slug": "rosario-el",
+      "name": "Rosario, El"
+    },
+    {
+      "ine": "38033",
+      "slug": "san-andres-y-sauces",
+      "name": "San Andrés y Sauces"
+    },
+    {
+      "ine": "38023",
+      "slug": "san-cristobal-de-la-laguna",
+      "name": "San Cristóbal de La Laguna"
+    },
+    {
+      "ine": "38034",
+      "slug": "san-juan-de-la-rambla",
+      "name": "San Juan de la Rambla"
+    },
+    {
+      "ine": "38035",
+      "slug": "san-miguel-de-abona",
+      "name": "San Miguel de Abona"
+    },
+    {
+      "ine": "38036",
+      "slug": "san-sebastian-de-la-gomera",
+      "name": "San Sebastián de la Gomera"
+    },
+    {
+      "ine": "38037",
+      "slug": "santa-cruz-de-la-palma",
+      "name": "Santa Cruz de la Palma"
+    },
+    {
+      "ine": "38038",
+      "slug": "santa-cruz-de-tenerife",
+      "name": "Santa Cruz de Tenerife"
+    },
+    {
+      "ine": "38039",
+      "slug": "santa-ursula",
+      "name": "Santa Úrsula"
+    },
+    {
+      "ine": "38040",
+      "slug": "santiago-del-teide",
+      "name": "Santiago del Teide"
+    },
+    {
+      "ine": "38041",
+      "slug": "sauzal-el",
+      "name": "Sauzal, El"
+    },
+    {
+      "ine": "38042",
+      "slug": "silos-los",
+      "name": "Silos, Los"
+    },
+    {
+      "ine": "38043",
+      "slug": "tacoronte",
+      "name": "Tacoronte"
+    },
+    {
+      "ine": "38044",
+      "slug": "tanque-el",
+      "name": "Tanque, El"
+    },
+    {
+      "ine": "38045",
+      "slug": "tazacorte",
+      "name": "Tazacorte"
+    },
+    {
+      "ine": "38046",
+      "slug": "tegueste",
+      "name": "Tegueste"
+    },
+    {
+      "ine": "38047",
+      "slug": "tijarafe",
+      "name": "Tijarafe"
+    },
+    {
+      "ine": "38049",
+      "slug": "valle-gran-rey",
+      "name": "Valle Gran Rey"
+    },
+    {
+      "ine": "38050",
+      "slug": "vallehermoso",
+      "name": "Vallehermoso"
+    },
+    {
+      "ine": "38048",
+      "slug": "valverde",
+      "name": "Valverde"
+    },
+    {
+      "ine": "38051",
+      "slug": "victoria-de-acentejo-la",
+      "name": "Victoria de Acentejo, La"
+    },
+    {
+      "ine": "38052",
+      "slug": "vilaflor-de-chasna",
+      "name": "Vilaflor de Chasna"
+    },
+    {
+      "ine": "38053",
+      "slug": "villa-de-mazo",
+      "name": "Villa de Mazo"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

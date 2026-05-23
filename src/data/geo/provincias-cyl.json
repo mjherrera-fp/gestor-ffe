@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "provincias",
+  "region": {
+    "code": "CYL",
+    "slug": "cyl",
+    "name": "Castilla y León"
+  },
+  "provinces": [
+    {
+      "code": "05",
+      "slug": "avila",
+      "name": "Ávila",
+      "municipalityCount": 248
+    },
+    {
+      "code": "09",
+      "slug": "burgos",
+      "name": "Burgos",
+      "municipalityCount": 371
+    },
+    {
+      "code": "24",
+      "slug": "leon",
+      "name": "León",
+      "municipalityCount": 211
+    },
+    {
+      "code": "34",
+      "slug": "palencia",
+      "name": "Palencia",
+      "municipalityCount": 191
+    },
+    {
+      "code": "37",
+      "slug": "salamanca",
+      "name": "Salamanca",
+      "municipalityCount": 362
+    },
+    {
+      "code": "40",
+      "slug": "segovia",
+      "name": "Segovia",
+      "municipalityCount": 209
+    },
+    {
+      "code": "42",
+      "slug": "soria",
+      "name": "Soria",
+      "municipalityCount": 183
+    },
+    {
+      "code": "47",
+      "slug": "valladolid",
+      "name": "Valladolid",
+      "municipalityCount": 225
+    },
+    {
+      "code": "49",
+      "slug": "zamora",
+      "name": "Zamora",
+      "municipalityCount": 248
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

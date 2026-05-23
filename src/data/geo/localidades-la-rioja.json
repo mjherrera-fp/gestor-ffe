@@ -1,0 +1,890 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "RIO",
+    "slug": "rio",
+    "name": "La Rioja"
+  },
+  "province": {
+    "code": "26",
+    "slug": "la-rioja",
+    "name": "La Rioja"
+  },
+  "municipalities": [
+    {
+      "ine": "26001",
+      "slug": "abalos",
+      "name": "Ábalos"
+    },
+    {
+      "ine": "26002",
+      "slug": "agoncillo",
+      "name": "Agoncillo"
+    },
+    {
+      "ine": "26003",
+      "slug": "aguilar-del-rio-alhama",
+      "name": "Aguilar del Río Alhama"
+    },
+    {
+      "ine": "26004",
+      "slug": "ajamil-de-cameros",
+      "name": "Ajamil de Cameros"
+    },
+    {
+      "ine": "26005",
+      "slug": "albelda-de-iregua",
+      "name": "Albelda de Iregua"
+    },
+    {
+      "ine": "26006",
+      "slug": "alberite",
+      "name": "Alberite"
+    },
+    {
+      "ine": "26007",
+      "slug": "alcanadre",
+      "name": "Alcanadre"
+    },
+    {
+      "ine": "26008",
+      "slug": "aldeanueva-de-ebro",
+      "name": "Aldeanueva de Ebro"
+    },
+    {
+      "ine": "26009",
+      "slug": "alesanco",
+      "name": "Alesanco"
+    },
+    {
+      "ine": "26010",
+      "slug": "aleson",
+      "name": "Alesón"
+    },
+    {
+      "ine": "26011",
+      "slug": "alfaro",
+      "name": "Alfaro"
+    },
+    {
+      "ine": "26012",
+      "slug": "almarza-de-cameros",
+      "name": "Almarza de Cameros"
+    },
+    {
+      "ine": "26013",
+      "slug": "anguciana",
+      "name": "Anguciana"
+    },
+    {
+      "ine": "26014",
+      "slug": "anguiano",
+      "name": "Anguiano"
+    },
+    {
+      "ine": "26015",
+      "slug": "arenzana-de-abajo",
+      "name": "Arenzana de Abajo"
+    },
+    {
+      "ine": "26016",
+      "slug": "arenzana-de-arriba",
+      "name": "Arenzana de Arriba"
+    },
+    {
+      "ine": "26017",
+      "slug": "arnedillo",
+      "name": "Arnedillo"
+    },
+    {
+      "ine": "26018",
+      "slug": "arnedo",
+      "name": "Arnedo"
+    },
+    {
+      "ine": "26019",
+      "slug": "arrubal",
+      "name": "Arrúbal"
+    },
+    {
+      "ine": "26020",
+      "slug": "ausejo",
+      "name": "Ausejo"
+    },
+    {
+      "ine": "26021",
+      "slug": "autol",
+      "name": "Autol"
+    },
+    {
+      "ine": "26022",
+      "slug": "azofra",
+      "name": "Azofra"
+    },
+    {
+      "ine": "26023",
+      "slug": "badaran",
+      "name": "Badarán"
+    },
+    {
+      "ine": "26024",
+      "slug": "banares",
+      "name": "Bañares"
+    },
+    {
+      "ine": "26026",
+      "slug": "banos-de-rio-tobia",
+      "name": "Baños de Río Tobía"
+    },
+    {
+      "ine": "26025",
+      "slug": "banos-de-rioja",
+      "name": "Baños de Rioja"
+    },
+    {
+      "ine": "26027",
+      "slug": "berceo",
+      "name": "Berceo"
+    },
+    {
+      "ine": "26028",
+      "slug": "bergasa",
+      "name": "Bergasa"
+    },
+    {
+      "ine": "26029",
+      "slug": "bergasillas-bajera",
+      "name": "Bergasillas Bajera"
+    },
+    {
+      "ine": "26030",
+      "slug": "bezares",
+      "name": "Bezares"
+    },
+    {
+      "ine": "26031",
+      "slug": "bobadilla",
+      "name": "Bobadilla"
+    },
+    {
+      "ine": "26032",
+      "slug": "brieva-de-cameros",
+      "name": "Brieva de Cameros"
+    },
+    {
+      "ine": "26033",
+      "slug": "brinas",
+      "name": "Briñas"
+    },
+    {
+      "ine": "26034",
+      "slug": "briones",
+      "name": "Briones"
+    },
+    {
+      "ine": "26035",
+      "slug": "cabezon-de-cameros",
+      "name": "Cabezón de Cameros"
+    },
+    {
+      "ine": "26036",
+      "slug": "calahorra",
+      "name": "Calahorra"
+    },
+    {
+      "ine": "26037",
+      "slug": "camprovin",
+      "name": "Camprovín"
+    },
+    {
+      "ine": "26038",
+      "slug": "canales-de-la-sierra",
+      "name": "Canales de la Sierra"
+    },
+    {
+      "ine": "26039",
+      "slug": "canillas-de-rio-tuerto",
+      "name": "Canillas de Río Tuerto"
+    },
+    {
+      "ine": "26040",
+      "slug": "canas",
+      "name": "Cañas"
+    },
+    {
+      "ine": "26041",
+      "slug": "cardenas",
+      "name": "Cárdenas"
+    },
+    {
+      "ine": "26042",
+      "slug": "casalarreina",
+      "name": "Casalarreina"
+    },
+    {
+      "ine": "26043",
+      "slug": "castanares-de-rioja",
+      "name": "Castañares de Rioja"
+    },
+    {
+      "ine": "26044",
+      "slug": "castroviejo",
+      "name": "Castroviejo"
+    },
+    {
+      "ine": "26045",
+      "slug": "cellorigo",
+      "name": "Cellorigo"
+    },
+    {
+      "ine": "26046",
+      "slug": "cenicero",
+      "name": "Cenicero"
+    },
+    {
+      "ine": "26047",
+      "slug": "cervera-del-rio-alhama",
+      "name": "Cervera del Río Alhama"
+    },
+    {
+      "ine": "26048",
+      "slug": "cidamon",
+      "name": "Cidamón"
+    },
+    {
+      "ine": "26049",
+      "slug": "cihuri",
+      "name": "Cihuri"
+    },
+    {
+      "ine": "26050",
+      "slug": "ciruena",
+      "name": "Cirueña"
+    },
+    {
+      "ine": "26051",
+      "slug": "clavijo",
+      "name": "Clavijo"
+    },
+    {
+      "ine": "26052",
+      "slug": "cordovin",
+      "name": "Cordovín"
+    },
+    {
+      "ine": "26053",
+      "slug": "corera",
+      "name": "Corera"
+    },
+    {
+      "ine": "26054",
+      "slug": "cornago",
+      "name": "Cornago"
+    },
+    {
+      "ine": "26055",
+      "slug": "corporales",
+      "name": "Corporales"
+    },
+    {
+      "ine": "26056",
+      "slug": "cuzcurrita-de-rio-tiron",
+      "name": "Cuzcurrita de Río Tirón"
+    },
+    {
+      "ine": "26057",
+      "slug": "daroca-de-rioja",
+      "name": "Daroca de Rioja"
+    },
+    {
+      "ine": "26058",
+      "slug": "enciso",
+      "name": "Enciso"
+    },
+    {
+      "ine": "26059",
+      "slug": "entrena",
+      "name": "Entrena"
+    },
+    {
+      "ine": "26060",
+      "slug": "estollo",
+      "name": "Estollo"
+    },
+    {
+      "ine": "26061",
+      "slug": "ezcaray",
+      "name": "Ezcaray"
+    },
+    {
+      "ine": "26062",
+      "slug": "foncea",
+      "name": "Foncea"
+    },
+    {
+      "ine": "26063",
+      "slug": "fonzaleche",
+      "name": "Fonzaleche"
+    },
+    {
+      "ine": "26064",
+      "slug": "fuenmayor",
+      "name": "Fuenmayor"
+    },
+    {
+      "ine": "26065",
+      "slug": "galbarruli",
+      "name": "Galbárruli"
+    },
+    {
+      "ine": "26066",
+      "slug": "galilea",
+      "name": "Galilea"
+    },
+    {
+      "ine": "26067",
+      "slug": "gallinero-de-cameros",
+      "name": "Gallinero de Cameros"
+    },
+    {
+      "ine": "26068",
+      "slug": "gimileo",
+      "name": "Gimileo"
+    },
+    {
+      "ine": "26069",
+      "slug": "granon",
+      "name": "Grañón"
+    },
+    {
+      "ine": "26070",
+      "slug": "gravalos",
+      "name": "Grávalos"
+    },
+    {
+      "ine": "26071",
+      "slug": "haro",
+      "name": "Haro"
+    },
+    {
+      "ine": "26072",
+      "slug": "herce",
+      "name": "Herce"
+    },
+    {
+      "ine": "26073",
+      "slug": "herramelluri",
+      "name": "Herramélluri"
+    },
+    {
+      "ine": "26074",
+      "slug": "hervias",
+      "name": "Hervías"
+    },
+    {
+      "ine": "26075",
+      "slug": "hormilla",
+      "name": "Hormilla"
+    },
+    {
+      "ine": "26076",
+      "slug": "hormilleja",
+      "name": "Hormilleja"
+    },
+    {
+      "ine": "26077",
+      "slug": "hornillos-de-cameros",
+      "name": "Hornillos de Cameros"
+    },
+    {
+      "ine": "26078",
+      "slug": "hornos-de-moncalvillo",
+      "name": "Hornos de Moncalvillo"
+    },
+    {
+      "ine": "26079",
+      "slug": "huercanos",
+      "name": "Huércanos"
+    },
+    {
+      "ine": "26080",
+      "slug": "igea",
+      "name": "Igea"
+    },
+    {
+      "ine": "26081",
+      "slug": "jalon-de-cameros",
+      "name": "Jalón de Cameros"
+    },
+    {
+      "ine": "26082",
+      "slug": "laguna-de-cameros",
+      "name": "Laguna de Cameros"
+    },
+    {
+      "ine": "26083",
+      "slug": "lagunilla-del-jubera",
+      "name": "Lagunilla del Jubera"
+    },
+    {
+      "ine": "26084",
+      "slug": "lardero",
+      "name": "Lardero"
+    },
+    {
+      "ine": "26086",
+      "slug": "ledesma-de-la-cogolla",
+      "name": "Ledesma de la Cogolla"
+    },
+    {
+      "ine": "26087",
+      "slug": "leiva",
+      "name": "Leiva"
+    },
+    {
+      "ine": "26088",
+      "slug": "leza-de-rio-leza",
+      "name": "Leza de Río Leza"
+    },
+    {
+      "ine": "26089",
+      "slug": "logrono",
+      "name": "Logroño"
+    },
+    {
+      "ine": "26091",
+      "slug": "lumbreras",
+      "name": "Lumbreras"
+    },
+    {
+      "ine": "26092",
+      "slug": "manjarres",
+      "name": "Manjarrés"
+    },
+    {
+      "ine": "26093",
+      "slug": "mansilla-de-la-sierra",
+      "name": "Mansilla de la Sierra"
+    },
+    {
+      "ine": "26094",
+      "slug": "manzanares-de-rioja",
+      "name": "Manzanares de Rioja"
+    },
+    {
+      "ine": "26095",
+      "slug": "matute",
+      "name": "Matute"
+    },
+    {
+      "ine": "26096",
+      "slug": "medrano",
+      "name": "Medrano"
+    },
+    {
+      "ine": "26098",
+      "slug": "munilla",
+      "name": "Munilla"
+    },
+    {
+      "ine": "26099",
+      "slug": "murillo-de-rio-leza",
+      "name": "Murillo de Río Leza"
+    },
+    {
+      "ine": "26100",
+      "slug": "muro-de-aguas",
+      "name": "Muro de Aguas"
+    },
+    {
+      "ine": "26101",
+      "slug": "muro-en-cameros",
+      "name": "Muro en Cameros"
+    },
+    {
+      "ine": "26102",
+      "slug": "najera",
+      "name": "Nájera"
+    },
+    {
+      "ine": "26103",
+      "slug": "nalda",
+      "name": "Nalda"
+    },
+    {
+      "ine": "26104",
+      "slug": "navajun",
+      "name": "Navajún"
+    },
+    {
+      "ine": "26105",
+      "slug": "navarrete",
+      "name": "Navarrete"
+    },
+    {
+      "ine": "26106",
+      "slug": "nestares",
+      "name": "Nestares"
+    },
+    {
+      "ine": "26107",
+      "slug": "nieva-de-cameros",
+      "name": "Nieva de Cameros"
+    },
+    {
+      "ine": "26109",
+      "slug": "ochanduri",
+      "name": "Ochánduri"
+    },
+    {
+      "ine": "26108",
+      "slug": "ocon",
+      "name": "Ocón"
+    },
+    {
+      "ine": "26110",
+      "slug": "ojacastro",
+      "name": "Ojacastro"
+    },
+    {
+      "ine": "26111",
+      "slug": "ollauri",
+      "name": "Ollauri"
+    },
+    {
+      "ine": "26112",
+      "slug": "ortigosa-de-cameros",
+      "name": "Ortigosa de Cameros"
+    },
+    {
+      "ine": "26113",
+      "slug": "pazuengos",
+      "name": "Pazuengos"
+    },
+    {
+      "ine": "26114",
+      "slug": "pedroso",
+      "name": "Pedroso"
+    },
+    {
+      "ine": "26115",
+      "slug": "pinillos",
+      "name": "Pinillos"
+    },
+    {
+      "ine": "26117",
+      "slug": "pradejon",
+      "name": "Pradejón"
+    },
+    {
+      "ine": "26118",
+      "slug": "pradillo",
+      "name": "Pradillo"
+    },
+    {
+      "ine": "26119",
+      "slug": "prejano",
+      "name": "Préjano"
+    },
+    {
+      "ine": "26120",
+      "slug": "quel",
+      "name": "Quel"
+    },
+    {
+      "ine": "26121",
+      "slug": "rabanera",
+      "name": "Rabanera"
+    },
+    {
+      "ine": "26122",
+      "slug": "rasillo-de-cameros-el",
+      "name": "Rasillo de Cameros, El"
+    },
+    {
+      "ine": "26123",
+      "slug": "redal-el",
+      "name": "Redal, El"
+    },
+    {
+      "ine": "26124",
+      "slug": "ribafrecha",
+      "name": "Ribafrecha"
+    },
+    {
+      "ine": "26125",
+      "slug": "rincon-de-soto",
+      "name": "Rincón de Soto"
+    },
+    {
+      "ine": "26126",
+      "slug": "robres-del-castillo",
+      "name": "Robres del Castillo"
+    },
+    {
+      "ine": "26127",
+      "slug": "rodezno",
+      "name": "Rodezno"
+    },
+    {
+      "ine": "26128",
+      "slug": "sajazarra",
+      "name": "Sajazarra"
+    },
+    {
+      "ine": "26129",
+      "slug": "san-asensio",
+      "name": "San Asensio"
+    },
+    {
+      "ine": "26130",
+      "slug": "san-millan-de-la-cogolla",
+      "name": "San Millán de la Cogolla"
+    },
+    {
+      "ine": "26131",
+      "slug": "san-millan-de-yecora",
+      "name": "San Millán de Yécora"
+    },
+    {
+      "ine": "26132",
+      "slug": "san-roman-de-cameros",
+      "name": "San Román de Cameros"
+    },
+    {
+      "ine": "26139",
+      "slug": "san-torcuato",
+      "name": "San Torcuato"
+    },
+    {
+      "ine": "26142",
+      "slug": "san-vicente-de-la-sonsierra",
+      "name": "San Vicente de la Sonsierra"
+    },
+    {
+      "ine": "26134",
+      "slug": "santa-coloma",
+      "name": "Santa Coloma"
+    },
+    {
+      "ine": "26135",
+      "slug": "santa-engracia-del-jubera",
+      "name": "Santa Engracia del Jubera"
+    },
+    {
+      "ine": "26136",
+      "slug": "santa-eulalia-bajera",
+      "name": "Santa Eulalia Bajera"
+    },
+    {
+      "ine": "26138",
+      "slug": "santo-domingo-de-la-calzada",
+      "name": "Santo Domingo de la Calzada"
+    },
+    {
+      "ine": "26140",
+      "slug": "santurde-de-rioja",
+      "name": "Santurde de Rioja"
+    },
+    {
+      "ine": "26141",
+      "slug": "santurdejo",
+      "name": "Santurdejo"
+    },
+    {
+      "ine": "26143",
+      "slug": "sojuela",
+      "name": "Sojuela"
+    },
+    {
+      "ine": "26144",
+      "slug": "sorzano",
+      "name": "Sorzano"
+    },
+    {
+      "ine": "26145",
+      "slug": "sotes",
+      "name": "Sotés"
+    },
+    {
+      "ine": "26146",
+      "slug": "soto-en-cameros",
+      "name": "Soto en Cameros"
+    },
+    {
+      "ine": "26147",
+      "slug": "terroba",
+      "name": "Terroba"
+    },
+    {
+      "ine": "26148",
+      "slug": "tirgo",
+      "name": "Tirgo"
+    },
+    {
+      "ine": "26149",
+      "slug": "tobia",
+      "name": "Tobía"
+    },
+    {
+      "ine": "26150",
+      "slug": "tormantos",
+      "name": "Tormantos"
+    },
+    {
+      "ine": "26153",
+      "slug": "torre-en-cameros",
+      "name": "Torre en Cameros"
+    },
+    {
+      "ine": "26151",
+      "slug": "torrecilla-en-cameros",
+      "name": "Torrecilla en Cameros"
+    },
+    {
+      "ine": "26152",
+      "slug": "torrecilla-sobre-alesanco",
+      "name": "Torrecilla sobre Alesanco"
+    },
+    {
+      "ine": "26154",
+      "slug": "torremontalbo",
+      "name": "Torremontalbo"
+    },
+    {
+      "ine": "26155",
+      "slug": "treviana",
+      "name": "Treviana"
+    },
+    {
+      "ine": "26157",
+      "slug": "tricio",
+      "name": "Tricio"
+    },
+    {
+      "ine": "26158",
+      "slug": "tudelilla",
+      "name": "Tudelilla"
+    },
+    {
+      "ine": "26160",
+      "slug": "urunuela",
+      "name": "Uruñuela"
+    },
+    {
+      "ine": "26161",
+      "slug": "valdemadera",
+      "name": "Valdemadera"
+    },
+    {
+      "ine": "26162",
+      "slug": "valganon",
+      "name": "Valgañón"
+    },
+    {
+      "ine": "26163",
+      "slug": "ventosa",
+      "name": "Ventosa"
+    },
+    {
+      "ine": "26164",
+      "slug": "ventrosa",
+      "name": "Ventrosa"
+    },
+    {
+      "ine": "26165",
+      "slug": "viguera",
+      "name": "Viguera"
+    },
+    {
+      "ine": "26166",
+      "slug": "villalba-de-rioja",
+      "name": "Villalba de Rioja"
+    },
+    {
+      "ine": "26167",
+      "slug": "villalobar-de-rioja",
+      "name": "Villalobar de Rioja"
+    },
+    {
+      "ine": "26168",
+      "slug": "villamediana-de-iregua",
+      "name": "Villamediana de Iregua"
+    },
+    {
+      "ine": "26169",
+      "slug": "villanueva-de-cameros",
+      "name": "Villanueva de Cameros"
+    },
+    {
+      "ine": "26170",
+      "slug": "villar-de-arnedo-el",
+      "name": "Villar de Arnedo, El"
+    },
+    {
+      "ine": "26171",
+      "slug": "villar-de-torre",
+      "name": "Villar de Torre"
+    },
+    {
+      "ine": "26172",
+      "slug": "villarejo",
+      "name": "Villarejo"
+    },
+    {
+      "ine": "26173",
+      "slug": "villarroya",
+      "name": "Villarroya"
+    },
+    {
+      "ine": "26174",
+      "slug": "villarta-quintana",
+      "name": "Villarta-Quintana"
+    },
+    {
+      "ine": "26175",
+      "slug": "villavelayo",
+      "name": "Villavelayo"
+    },
+    {
+      "ine": "26176",
+      "slug": "villaverde-de-rioja",
+      "name": "Villaverde de Rioja"
+    },
+    {
+      "ine": "26177",
+      "slug": "villoslada-de-cameros",
+      "name": "Villoslada de Cameros"
+    },
+    {
+      "ine": "26178",
+      "slug": "viniegra-de-abajo",
+      "name": "Viniegra de Abajo"
+    },
+    {
+      "ine": "26179",
+      "slug": "viniegra-de-arriba",
+      "name": "Viniegra de Arriba"
+    },
+    {
+      "ine": "26180",
+      "slug": "zarraton",
+      "name": "Zarratón"
+    },
+    {
+      "ine": "26181",
+      "slug": "zarzosa",
+      "name": "Zarzosa"
+    },
+    {
+      "ine": "26183",
+      "slug": "zorraquin",
+      "name": "Zorraquín"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

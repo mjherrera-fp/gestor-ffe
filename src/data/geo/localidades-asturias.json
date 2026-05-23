@@ -1,0 +1,410 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "AST",
+    "slug": "ast",
+    "name": "Asturias"
+  },
+  "province": {
+    "code": "33",
+    "slug": "asturias",
+    "name": "Asturias"
+  },
+  "municipalities": [
+    {
+      "ine": "33001",
+      "slug": "allande",
+      "name": "Allande"
+    },
+    {
+      "ine": "33002",
+      "slug": "aller",
+      "name": "Aller"
+    },
+    {
+      "ine": "33003",
+      "slug": "amieva",
+      "name": "Amieva"
+    },
+    {
+      "ine": "33004",
+      "slug": "aviles",
+      "name": "Avilés"
+    },
+    {
+      "ine": "33005",
+      "slug": "belmonte-de-miranda",
+      "name": "Belmonte de Miranda"
+    },
+    {
+      "ine": "33006",
+      "slug": "bimenes",
+      "name": "Bimenes"
+    },
+    {
+      "ine": "33007",
+      "slug": "boal",
+      "name": "Boal"
+    },
+    {
+      "ine": "33008",
+      "slug": "cabrales",
+      "name": "Cabrales"
+    },
+    {
+      "ine": "33009",
+      "slug": "cabranes",
+      "name": "Cabranes"
+    },
+    {
+      "ine": "33010",
+      "slug": "candamo",
+      "name": "Candamo"
+    },
+    {
+      "ine": "33012",
+      "slug": "cangas-de-onis",
+      "name": "Cangas de Onís"
+    },
+    {
+      "ine": "33011",
+      "slug": "cangas-del-narcea",
+      "name": "Cangas del Narcea"
+    },
+    {
+      "ine": "33013",
+      "slug": "caravia",
+      "name": "Caravia"
+    },
+    {
+      "ine": "33014",
+      "slug": "carreno",
+      "name": "Carreño"
+    },
+    {
+      "ine": "33015",
+      "slug": "caso",
+      "name": "Caso"
+    },
+    {
+      "ine": "33016",
+      "slug": "castrillon",
+      "name": "Castrillón"
+    },
+    {
+      "ine": "33017",
+      "slug": "castropol",
+      "name": "Castropol"
+    },
+    {
+      "ine": "33018",
+      "slug": "coana",
+      "name": "Coaña"
+    },
+    {
+      "ine": "33019",
+      "slug": "colunga",
+      "name": "Colunga"
+    },
+    {
+      "ine": "33020",
+      "slug": "corvera-de-asturias",
+      "name": "Corvera de Asturias"
+    },
+    {
+      "ine": "33021",
+      "slug": "cudillero",
+      "name": "Cudillero"
+    },
+    {
+      "ine": "33022",
+      "slug": "degana",
+      "name": "Degaña"
+    },
+    {
+      "ine": "33023",
+      "slug": "franco-el",
+      "name": "Franco, El"
+    },
+    {
+      "ine": "33024",
+      "slug": "gijon",
+      "name": "Gijón"
+    },
+    {
+      "ine": "33025",
+      "slug": "gozon",
+      "name": "Gozón"
+    },
+    {
+      "ine": "33026",
+      "slug": "grado",
+      "name": "Grado"
+    },
+    {
+      "ine": "33027",
+      "slug": "grandas-de-salime",
+      "name": "Grandas de Salime"
+    },
+    {
+      "ine": "33028",
+      "slug": "ibias",
+      "name": "Ibias"
+    },
+    {
+      "ine": "33029",
+      "slug": "illano",
+      "name": "Illano"
+    },
+    {
+      "ine": "33030",
+      "slug": "illas",
+      "name": "Illas"
+    },
+    {
+      "ine": "33031",
+      "slug": "langreo",
+      "name": "Langreo"
+    },
+    {
+      "ine": "33032",
+      "slug": "laviana",
+      "name": "Laviana"
+    },
+    {
+      "ine": "33033",
+      "slug": "lena",
+      "name": "Lena"
+    },
+    {
+      "ine": "33035",
+      "slug": "llanera",
+      "name": "Llanera"
+    },
+    {
+      "ine": "33036",
+      "slug": "llanes",
+      "name": "Llanes"
+    },
+    {
+      "ine": "33037",
+      "slug": "mieres",
+      "name": "Mieres"
+    },
+    {
+      "ine": "33038",
+      "slug": "morcin",
+      "name": "Morcín"
+    },
+    {
+      "ine": "33039",
+      "slug": "muros-de-nalon",
+      "name": "Muros de Nalón"
+    },
+    {
+      "ine": "33040",
+      "slug": "nava",
+      "name": "Nava"
+    },
+    {
+      "ine": "33041",
+      "slug": "navia",
+      "name": "Navia"
+    },
+    {
+      "ine": "33042",
+      "slug": "norena",
+      "name": "Noreña"
+    },
+    {
+      "ine": "33043",
+      "slug": "onis",
+      "name": "Onís"
+    },
+    {
+      "ine": "33044",
+      "slug": "oviedo",
+      "name": "Oviedo"
+    },
+    {
+      "ine": "33045",
+      "slug": "parres",
+      "name": "Parres"
+    },
+    {
+      "ine": "33046",
+      "slug": "penamellera-alta",
+      "name": "Peñamellera Alta"
+    },
+    {
+      "ine": "33047",
+      "slug": "penamellera-baja",
+      "name": "Peñamellera Baja"
+    },
+    {
+      "ine": "33048",
+      "slug": "pesoz",
+      "name": "Pesoz"
+    },
+    {
+      "ine": "33049",
+      "slug": "pilona",
+      "name": "Piloña"
+    },
+    {
+      "ine": "33050",
+      "slug": "ponga",
+      "name": "Ponga"
+    },
+    {
+      "ine": "33051",
+      "slug": "pravia",
+      "name": "Pravia"
+    },
+    {
+      "ine": "33052",
+      "slug": "proaza",
+      "name": "Proaza"
+    },
+    {
+      "ine": "33053",
+      "slug": "quiros",
+      "name": "Quirós"
+    },
+    {
+      "ine": "33054",
+      "slug": "regueras-las",
+      "name": "Regueras, Las"
+    },
+    {
+      "ine": "33055",
+      "slug": "ribadedeva",
+      "name": "Ribadedeva"
+    },
+    {
+      "ine": "33056",
+      "slug": "ribadesella",
+      "name": "Ribadesella"
+    },
+    {
+      "ine": "33057",
+      "slug": "ribera-de-arriba",
+      "name": "Ribera de Arriba"
+    },
+    {
+      "ine": "33058",
+      "slug": "riosa",
+      "name": "Riosa"
+    },
+    {
+      "ine": "33059",
+      "slug": "salas",
+      "name": "Salas"
+    },
+    {
+      "ine": "33061",
+      "slug": "san-martin-de-oscos",
+      "name": "San Martín de Oscos"
+    },
+    {
+      "ine": "33060",
+      "slug": "san-martin-del-rey-aurelio",
+      "name": "San Martín del Rey Aurelio"
+    },
+    {
+      "ine": "33063",
+      "slug": "san-tirso-de-abres",
+      "name": "San Tirso de Abres"
+    },
+    {
+      "ine": "33062",
+      "slug": "santa-eulalia-de-oscos",
+      "name": "Santa Eulalia de Oscos"
+    },
+    {
+      "ine": "33064",
+      "slug": "santo-adriano",
+      "name": "Santo Adriano"
+    },
+    {
+      "ine": "33065",
+      "slug": "sariego",
+      "name": "Sariego"
+    },
+    {
+      "ine": "33066",
+      "slug": "siero",
+      "name": "Siero"
+    },
+    {
+      "ine": "33067",
+      "slug": "sobrescobio",
+      "name": "Sobrescobio"
+    },
+    {
+      "ine": "33068",
+      "slug": "somiedo",
+      "name": "Somiedo"
+    },
+    {
+      "ine": "33069",
+      "slug": "soto-del-barco",
+      "name": "Soto del Barco"
+    },
+    {
+      "ine": "33070",
+      "slug": "tapia-de-casariego",
+      "name": "Tapia de Casariego"
+    },
+    {
+      "ine": "33071",
+      "slug": "taramundi",
+      "name": "Taramundi"
+    },
+    {
+      "ine": "33072",
+      "slug": "teverga",
+      "name": "Teverga"
+    },
+    {
+      "ine": "33073",
+      "slug": "tineo",
+      "name": "Tineo"
+    },
+    {
+      "ine": "33034",
+      "slug": "valdes",
+      "name": "Valdés"
+    },
+    {
+      "ine": "33074",
+      "slug": "vegadeo",
+      "name": "Vegadeo"
+    },
+    {
+      "ine": "33075",
+      "slug": "villanueva-de-oscos",
+      "name": "Villanueva de Oscos"
+    },
+    {
+      "ine": "33076",
+      "slug": "villaviciosa",
+      "name": "Villaviciosa"
+    },
+    {
+      "ine": "33077",
+      "slug": "villayon",
+      "name": "Villayón"
+    },
+    {
+      "ine": "33078",
+      "slug": "yernes-y-tameza",
+      "name": "Yernes y Tameza"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

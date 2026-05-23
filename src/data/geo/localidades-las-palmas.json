@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "CAN",
+    "slug": "can",
+    "name": "Canarias"
+  },
+  "province": {
+    "code": "35",
+    "slug": "las-palmas",
+    "name": "Las Palmas"
+  },
+  "municipalities": [
+    {
+      "ine": "35001",
+      "slug": "agaete",
+      "name": "Agaete"
+    },
+    {
+      "ine": "35002",
+      "slug": "aguimes",
+      "name": "Agüimes"
+    },
+    {
+      "ine": "35020",
+      "slug": "aldea-de-san-nicolas-la",
+      "name": "Aldea de San Nicolás, La"
+    },
+    {
+      "ine": "35003",
+      "slug": "antigua",
+      "name": "Antigua"
+    },
+    {
+      "ine": "35004",
+      "slug": "arrecife",
+      "name": "Arrecife"
+    },
+    {
+      "ine": "35005",
+      "slug": "artenara",
+      "name": "Artenara"
+    },
+    {
+      "ine": "35006",
+      "slug": "arucas",
+      "name": "Arucas"
+    },
+    {
+      "ine": "35007",
+      "slug": "betancuria",
+      "name": "Betancuria"
+    },
+    {
+      "ine": "35008",
+      "slug": "firgas",
+      "name": "Firgas"
+    },
+    {
+      "ine": "35009",
+      "slug": "galdar",
+      "name": "Gáldar"
+    },
+    {
+      "ine": "35010",
+      "slug": "haria",
+      "name": "Haría"
+    },
+    {
+      "ine": "35011",
+      "slug": "ingenio",
+      "name": "Ingenio"
+    },
+    {
+      "ine": "35012",
+      "slug": "mogan",
+      "name": "Mogán"
+    },
+    {
+      "ine": "35013",
+      "slug": "moya",
+      "name": "Moya"
+    },
+    {
+      "ine": "35014",
+      "slug": "oliva-la",
+      "name": "Oliva, La"
+    },
+    {
+      "ine": "35015",
+      "slug": "pajara",
+      "name": "Pájara"
+    },
+    {
+      "ine": "35016",
+      "slug": "palmas-de-gran-canaria-las",
+      "name": "Palmas de Gran Canaria, Las"
+    },
+    {
+      "ine": "35017",
+      "slug": "puerto-del-rosario",
+      "name": "Puerto del Rosario"
+    },
+    {
+      "ine": "35018",
+      "slug": "san-bartolome",
+      "name": "San Bartolomé"
+    },
+    {
+      "ine": "35019",
+      "slug": "san-bartolome-de-tirajana",
+      "name": "San Bartolomé de Tirajana"
+    },
+    {
+      "ine": "35021",
+      "slug": "santa-brigida",
+      "name": "Santa Brígida"
+    },
+    {
+      "ine": "35022",
+      "slug": "santa-lucia-de-tirajana",
+      "name": "Santa Lucía de Tirajana"
+    },
+    {
+      "ine": "35023",
+      "slug": "santa-maria-de-guia-de-gran-canaria",
+      "name": "Santa María de Guía de Gran Canaria"
+    },
+    {
+      "ine": "35024",
+      "slug": "teguise",
+      "name": "Teguise"
+    },
+    {
+      "ine": "35025",
+      "slug": "tejeda",
+      "name": "Tejeda"
+    },
+    {
+      "ine": "35026",
+      "slug": "telde",
+      "name": "Telde"
+    },
+    {
+      "ine": "35027",
+      "slug": "teror",
+      "name": "Teror"
+    },
+    {
+      "ine": "35028",
+      "slug": "tias",
+      "name": "Tías"
+    },
+    {
+      "ine": "35029",
+      "slug": "tinajo",
+      "name": "Tinajo"
+    },
+    {
+      "ine": "35030",
+      "slug": "tuineje",
+      "name": "Tuineje"
+    },
+    {
+      "ine": "35032",
+      "slug": "valleseco",
+      "name": "Valleseco"
+    },
+    {
+      "ine": "35031",
+      "slug": "valsequillo-de-gran-canaria",
+      "name": "Valsequillo de Gran Canaria"
+    },
+    {
+      "ine": "35033",
+      "slug": "vega-de-san-mateo",
+      "name": "Vega de San Mateo"
+    },
+    {
+      "ine": "35034",
+      "slug": "yaiza",
+      "name": "Yaiza"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

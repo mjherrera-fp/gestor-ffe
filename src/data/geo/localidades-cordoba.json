@@ -1,0 +1,395 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "AND",
+    "slug": "and",
+    "name": "Andalucía"
+  },
+  "province": {
+    "code": "14",
+    "slug": "cordoba",
+    "name": "Córdoba"
+  },
+  "municipalities": [
+    {
+      "ine": "14001",
+      "slug": "adamuz",
+      "name": "Adamuz"
+    },
+    {
+      "ine": "14002",
+      "slug": "aguilar-de-la-frontera",
+      "name": "Aguilar de la Frontera"
+    },
+    {
+      "ine": "14003",
+      "slug": "alcaracejos",
+      "name": "Alcaracejos"
+    },
+    {
+      "ine": "14004",
+      "slug": "almedinilla",
+      "name": "Almedinilla"
+    },
+    {
+      "ine": "14005",
+      "slug": "almodovar-del-rio",
+      "name": "Almodóvar del Río"
+    },
+    {
+      "ine": "14006",
+      "slug": "anora",
+      "name": "Añora"
+    },
+    {
+      "ine": "14007",
+      "slug": "baena",
+      "name": "Baena"
+    },
+    {
+      "ine": "14008",
+      "slug": "belalcazar",
+      "name": "Belalcázar"
+    },
+    {
+      "ine": "14009",
+      "slug": "belmez",
+      "name": "Belmez"
+    },
+    {
+      "ine": "14010",
+      "slug": "benameji",
+      "name": "Benamejí"
+    },
+    {
+      "ine": "14011",
+      "slug": "blazquez-los",
+      "name": "Blázquez, Los"
+    },
+    {
+      "ine": "14012",
+      "slug": "bujalance",
+      "name": "Bujalance"
+    },
+    {
+      "ine": "14013",
+      "slug": "cabra",
+      "name": "Cabra"
+    },
+    {
+      "ine": "14014",
+      "slug": "canete-de-las-torres",
+      "name": "Cañete de las Torres"
+    },
+    {
+      "ine": "14015",
+      "slug": "carcabuey",
+      "name": "Carcabuey"
+    },
+    {
+      "ine": "14016",
+      "slug": "cardena",
+      "name": "Cardeña"
+    },
+    {
+      "ine": "14017",
+      "slug": "carlota-la",
+      "name": "Carlota, La"
+    },
+    {
+      "ine": "14018",
+      "slug": "carpio-el",
+      "name": "Carpio, El"
+    },
+    {
+      "ine": "14019",
+      "slug": "castro-del-rio",
+      "name": "Castro del Río"
+    },
+    {
+      "ine": "14020",
+      "slug": "conquista",
+      "name": "Conquista"
+    },
+    {
+      "ine": "14021",
+      "slug": "cordoba",
+      "name": "Córdoba"
+    },
+    {
+      "ine": "14022",
+      "slug": "dona-mencia",
+      "name": "Doña Mencía"
+    },
+    {
+      "ine": "14023",
+      "slug": "dos-torres",
+      "name": "Dos Torres"
+    },
+    {
+      "ine": "14024",
+      "slug": "encinas-reales",
+      "name": "Encinas Reales"
+    },
+    {
+      "ine": "14025",
+      "slug": "espejo",
+      "name": "Espejo"
+    },
+    {
+      "ine": "14026",
+      "slug": "espiel",
+      "name": "Espiel"
+    },
+    {
+      "ine": "14027",
+      "slug": "fernan-nunez",
+      "name": "Fernán-Núñez"
+    },
+    {
+      "ine": "14028",
+      "slug": "fuente-la-lancha",
+      "name": "Fuente la Lancha"
+    },
+    {
+      "ine": "14029",
+      "slug": "fuente-obejuna",
+      "name": "Fuente Obejuna"
+    },
+    {
+      "ine": "14030",
+      "slug": "fuente-palmera",
+      "name": "Fuente Palmera"
+    },
+    {
+      "ine": "14031",
+      "slug": "fuente-tojar",
+      "name": "Fuente-Tójar"
+    },
+    {
+      "ine": "14032",
+      "slug": "granjuela-la",
+      "name": "Granjuela, La"
+    },
+    {
+      "ine": "14033",
+      "slug": "guadalcazar",
+      "name": "Guadalcázar"
+    },
+    {
+      "ine": "14034",
+      "slug": "guijo-el",
+      "name": "Guijo, El"
+    },
+    {
+      "ine": "14035",
+      "slug": "hinojosa-del-duque",
+      "name": "Hinojosa del Duque"
+    },
+    {
+      "ine": "14036",
+      "slug": "hornachuelos",
+      "name": "Hornachuelos"
+    },
+    {
+      "ine": "14037",
+      "slug": "iznajar",
+      "name": "Iznájar"
+    },
+    {
+      "ine": "14038",
+      "slug": "lucena",
+      "name": "Lucena"
+    },
+    {
+      "ine": "14039",
+      "slug": "luque",
+      "name": "Luque"
+    },
+    {
+      "ine": "14040",
+      "slug": "montalban-de-cordoba",
+      "name": "Montalbán de Córdoba"
+    },
+    {
+      "ine": "14041",
+      "slug": "montemayor",
+      "name": "Montemayor"
+    },
+    {
+      "ine": "14042",
+      "slug": "montilla",
+      "name": "Montilla"
+    },
+    {
+      "ine": "14043",
+      "slug": "montoro",
+      "name": "Montoro"
+    },
+    {
+      "ine": "14044",
+      "slug": "monturque",
+      "name": "Monturque"
+    },
+    {
+      "ine": "14045",
+      "slug": "moriles",
+      "name": "Moriles"
+    },
+    {
+      "ine": "14046",
+      "slug": "nueva-carteya",
+      "name": "Nueva Carteya"
+    },
+    {
+      "ine": "14047",
+      "slug": "obejo",
+      "name": "Obejo"
+    },
+    {
+      "ine": "14048",
+      "slug": "palenciana",
+      "name": "Palenciana"
+    },
+    {
+      "ine": "14049",
+      "slug": "palma-del-rio",
+      "name": "Palma del Río"
+    },
+    {
+      "ine": "14050",
+      "slug": "pedro-abad",
+      "name": "Pedro Abad"
+    },
+    {
+      "ine": "14051",
+      "slug": "pedroche",
+      "name": "Pedroche"
+    },
+    {
+      "ine": "14052",
+      "slug": "penarroya-pueblonuevo",
+      "name": "Peñarroya-Pueblonuevo"
+    },
+    {
+      "ine": "14053",
+      "slug": "posadas",
+      "name": "Posadas"
+    },
+    {
+      "ine": "14054",
+      "slug": "pozoblanco",
+      "name": "Pozoblanco"
+    },
+    {
+      "ine": "14055",
+      "slug": "priego-de-cordoba",
+      "name": "Priego de Córdoba"
+    },
+    {
+      "ine": "14056",
+      "slug": "puente-genil",
+      "name": "Puente Genil"
+    },
+    {
+      "ine": "14057",
+      "slug": "rambla-la",
+      "name": "Rambla, La"
+    },
+    {
+      "ine": "14058",
+      "slug": "rute",
+      "name": "Rute"
+    },
+    {
+      "ine": "14059",
+      "slug": "san-sebastian-de-los-ballesteros",
+      "name": "San Sebastián de los Ballesteros"
+    },
+    {
+      "ine": "14061",
+      "slug": "santa-eufemia",
+      "name": "Santa Eufemia"
+    },
+    {
+      "ine": "14060",
+      "slug": "santaella",
+      "name": "Santaella"
+    },
+    {
+      "ine": "14062",
+      "slug": "torrecampo",
+      "name": "Torrecampo"
+    },
+    {
+      "ine": "14063",
+      "slug": "valenzuela",
+      "name": "Valenzuela"
+    },
+    {
+      "ine": "14064",
+      "slug": "valsequillo",
+      "name": "Valsequillo"
+    },
+    {
+      "ine": "14065",
+      "slug": "victoria-la",
+      "name": "Victoria, La"
+    },
+    {
+      "ine": "14066",
+      "slug": "villa-del-rio",
+      "name": "Villa del Río"
+    },
+    {
+      "ine": "14067",
+      "slug": "villafranca-de-cordoba",
+      "name": "Villafranca de Córdoba"
+    },
+    {
+      "ine": "14068",
+      "slug": "villaharta",
+      "name": "Villaharta"
+    },
+    {
+      "ine": "14069",
+      "slug": "villanueva-de-cordoba",
+      "name": "Villanueva de Córdoba"
+    },
+    {
+      "ine": "14070",
+      "slug": "villanueva-del-duque",
+      "name": "Villanueva del Duque"
+    },
+    {
+      "ine": "14071",
+      "slug": "villanueva-del-rey",
+      "name": "Villanueva del Rey"
+    },
+    {
+      "ine": "14072",
+      "slug": "villaralto",
+      "name": "Villaralto"
+    },
+    {
+      "ine": "14073",
+      "slug": "villaviciosa-de-cordoba",
+      "name": "Villaviciosa de Córdoba"
+    },
+    {
+      "ine": "14074",
+      "slug": "viso-el",
+      "name": "Viso, El"
+    },
+    {
+      "ine": "14075",
+      "slug": "zuheros",
+      "name": "Zuheros"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "CLM",
+    "slug": "clm",
+    "name": "Castilla-La Mancha"
+  },
+  "province": {
+    "code": "02",
+    "slug": "albacete",
+    "name": "Albacete"
+  },
+  "municipalities": [
+    {
+      "ine": "02001",
+      "slug": "abengibre",
+      "name": "Abengibre"
+    },
+    {
+      "ine": "02002",
+      "slug": "alatoz",
+      "name": "Alatoz"
+    },
+    {
+      "ine": "02003",
+      "slug": "albacete",
+      "name": "Albacete"
+    },
+    {
+      "ine": "02004",
+      "slug": "albatana",
+      "name": "Albatana"
+    },
+    {
+      "ine": "02005",
+      "slug": "alborea",
+      "name": "Alborea"
+    },
+    {
+      "ine": "02006",
+      "slug": "alcadozo",
+      "name": "Alcadozo"
+    },
+    {
+      "ine": "02007",
+      "slug": "alcala-del-jucar",
+      "name": "Alcalá del Júcar"
+    },
+    {
+      "ine": "02008",
+      "slug": "alcaraz",
+      "name": "Alcaraz"
+    },
+    {
+      "ine": "02009",
+      "slug": "almansa",
+      "name": "Almansa"
+    },
+    {
+      "ine": "02010",
+      "slug": "alpera",
+      "name": "Alpera"
+    },
+    {
+      "ine": "02011",
+      "slug": "ayna",
+      "name": "Ayna"
+    },
+    {
+      "ine": "02012",
+      "slug": "balazote",
+      "name": "Balazote"
+    },
+    {
+      "ine": "02014",
+      "slug": "ballestero-el",
+      "name": "Ballestero, El"
+    },
+    {
+      "ine": "02013",
+      "slug": "balsa-de-ves",
+      "name": "Balsa de Ves"
+    },
+    {
+      "ine": "02015",
+      "slug": "barrax",
+      "name": "Barrax"
+    },
+    {
+      "ine": "02016",
+      "slug": "bienservida",
+      "name": "Bienservida"
+    },
+    {
+      "ine": "02017",
+      "slug": "bogarra",
+      "name": "Bogarra"
+    },
+    {
+      "ine": "02018",
+      "slug": "bonete",
+      "name": "Bonete"
+    },
+    {
+      "ine": "02019",
+      "slug": "bonillo-el",
+      "name": "Bonillo, El"
+    },
+    {
+      "ine": "02020",
+      "slug": "carcelen",
+      "name": "Carcelén"
+    },
+    {
+      "ine": "02021",
+      "slug": "casas-de-juan-nunez",
+      "name": "Casas de Juan Núñez"
+    },
+    {
+      "ine": "02022",
+      "slug": "casas-de-lazaro",
+      "name": "Casas de Lázaro"
+    },
+    {
+      "ine": "02023",
+      "slug": "casas-de-ves",
+      "name": "Casas de Ves"
+    },
+    {
+      "ine": "02024",
+      "slug": "casas-ibanez",
+      "name": "Casas-Ibáñez"
+    },
+    {
+      "ine": "02025",
+      "slug": "caudete",
+      "name": "Caudete"
+    },
+    {
+      "ine": "02026",
+      "slug": "cenizate",
+      "name": "Cenizate"
+    },
+    {
+      "ine": "02029",
+      "slug": "chinchilla-de-monte-aragon",
+      "name": "Chinchilla de Monte-Aragón"
+    },
+    {
+      "ine": "02027",
+      "slug": "corral-rubio",
+      "name": "Corral-Rubio"
+    },
+    {
+      "ine": "02028",
+      "slug": "cotillas",
+      "name": "Cotillas"
+    },
+    {
+      "ine": "02030",
+      "slug": "elche-de-la-sierra",
+      "name": "Elche de la Sierra"
+    },
+    {
+      "ine": "02031",
+      "slug": "ferez",
+      "name": "Férez"
+    },
+    {
+      "ine": "02032",
+      "slug": "fuensanta",
+      "name": "Fuensanta"
+    },
+    {
+      "ine": "02033",
+      "slug": "fuente-alamo",
+      "name": "Fuente-Álamo"
+    },
+    {
+      "ine": "02034",
+      "slug": "fuentealbilla",
+      "name": "Fuentealbilla"
+    },
+    {
+      "ine": "02035",
+      "slug": "gineta-la",
+      "name": "Gineta, La"
+    },
+    {
+      "ine": "02036",
+      "slug": "golosalvo",
+      "name": "Golosalvo"
+    },
+    {
+      "ine": "02037",
+      "slug": "hellin",
+      "name": "Hellín"
+    },
+    {
+      "ine": "02038",
+      "slug": "herrera-la",
+      "name": "Herrera, La"
+    },
+    {
+      "ine": "02039",
+      "slug": "higueruela",
+      "name": "Higueruela"
+    },
+    {
+      "ine": "02040",
+      "slug": "hoya-gonzalo",
+      "name": "Hoya-Gonzalo"
+    },
+    {
+      "ine": "02041",
+      "slug": "jorquera",
+      "name": "Jorquera"
+    },
+    {
+      "ine": "02042",
+      "slug": "letur",
+      "name": "Letur"
+    },
+    {
+      "ine": "02043",
+      "slug": "lezuza",
+      "name": "Lezuza"
+    },
+    {
+      "ine": "02044",
+      "slug": "lietor",
+      "name": "Liétor"
+    },
+    {
+      "ine": "02045",
+      "slug": "madrigueras",
+      "name": "Madrigueras"
+    },
+    {
+      "ine": "02046",
+      "slug": "mahora",
+      "name": "Mahora"
+    },
+    {
+      "ine": "02047",
+      "slug": "masegoso",
+      "name": "Masegoso"
+    },
+    {
+      "ine": "02048",
+      "slug": "minaya",
+      "name": "Minaya"
+    },
+    {
+      "ine": "02049",
+      "slug": "molinicos",
+      "name": "Molinicos"
+    },
+    {
+      "ine": "02050",
+      "slug": "montalvos",
+      "name": "Montalvos"
+    },
+    {
+      "ine": "02051",
+      "slug": "montealegre-del-castillo",
+      "name": "Montealegre del Castillo"
+    },
+    {
+      "ine": "02052",
+      "slug": "motilleja",
+      "name": "Motilleja"
+    },
+    {
+      "ine": "02053",
+      "slug": "munera",
+      "name": "Munera"
+    },
+    {
+      "ine": "02054",
+      "slug": "navas-de-jorquera",
+      "name": "Navas de Jorquera"
+    },
+    {
+      "ine": "02055",
+      "slug": "nerpio",
+      "name": "Nerpio"
+    },
+    {
+      "ine": "02056",
+      "slug": "ontur",
+      "name": "Ontur"
+    },
+    {
+      "ine": "02057",
+      "slug": "ossa-de-montiel",
+      "name": "Ossa de Montiel"
+    },
+    {
+      "ine": "02058",
+      "slug": "paterna-del-madera",
+      "name": "Paterna del Madera"
+    },
+    {
+      "ine": "02060",
+      "slug": "penas-de-san-pedro",
+      "name": "Peñas de San Pedro"
+    },
+    {
+      "ine": "02059",
+      "slug": "penascosa",
+      "name": "Peñascosa"
+    },
+    {
+      "ine": "02061",
+      "slug": "petrola",
+      "name": "Pétrola"
+    },
+    {
+      "ine": "02062",
+      "slug": "povedilla",
+      "name": "Povedilla"
+    },
+    {
+      "ine": "02901",
+      "slug": "pozo-canada",
+      "name": "Pozo Cañada"
+    },
+    {
+      "ine": "02064",
+      "slug": "pozo-lorente",
+      "name": "Pozo-Lorente"
+    },
+    {
+      "ine": "02063",
+      "slug": "pozohondo",
+      "name": "Pozohondo"
+    },
+    {
+      "ine": "02065",
+      "slug": "pozuelo",
+      "name": "Pozuelo"
+    },
+    {
+      "ine": "02066",
+      "slug": "recueja-la",
+      "name": "Recueja, La"
+    },
+    {
+      "ine": "02067",
+      "slug": "riopar",
+      "name": "Riópar"
+    },
+    {
+      "ine": "02068",
+      "slug": "robledo",
+      "name": "Robledo"
+    },
+    {
+      "ine": "02069",
+      "slug": "roda-la",
+      "name": "Roda, La"
+    },
+    {
+      "ine": "02070",
+      "slug": "salobre",
+      "name": "Salobre"
+    },
+    {
+      "ine": "02071",
+      "slug": "san-pedro",
+      "name": "San Pedro"
+    },
+    {
+      "ine": "02072",
+      "slug": "socovos",
+      "name": "Socovos"
+    },
+    {
+      "ine": "02073",
+      "slug": "tarazona-de-la-mancha",
+      "name": "Tarazona de la Mancha"
+    },
+    {
+      "ine": "02074",
+      "slug": "tobarra",
+      "name": "Tobarra"
+    },
+    {
+      "ine": "02075",
+      "slug": "valdeganga",
+      "name": "Valdeganga"
+    },
+    {
+      "ine": "02076",
+      "slug": "vianos",
+      "name": "Vianos"
+    },
+    {
+      "ine": "02077",
+      "slug": "villa-de-ves",
+      "name": "Villa de Ves"
+    },
+    {
+      "ine": "02078",
+      "slug": "villalgordo-del-jucar",
+      "name": "Villalgordo del Júcar"
+    },
+    {
+      "ine": "02079",
+      "slug": "villamalea",
+      "name": "Villamalea"
+    },
+    {
+      "ine": "02080",
+      "slug": "villapalacios",
+      "name": "Villapalacios"
+    },
+    {
+      "ine": "02081",
+      "slug": "villarrobledo",
+      "name": "Villarrobledo"
+    },
+    {
+      "ine": "02082",
+      "slug": "villatoya",
+      "name": "Villatoya"
+    },
+    {
+      "ine": "02083",
+      "slug": "villavaliente",
+      "name": "Villavaliente"
+    },
+    {
+      "ine": "02084",
+      "slug": "villaverde-de-guadalimar",
+      "name": "Villaverde de Guadalimar"
+    },
+    {
+      "ine": "02085",
+      "slug": "viveros",
+      "name": "Viveros"
+    },
+    {
+      "ine": "02086",
+      "slug": "yeste",
+      "name": "Yeste"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

@@ -1,0 +1,415 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "AND",
+    "slug": "and",
+    "name": "Andalucía"
+  },
+  "province": {
+    "code": "21",
+    "slug": "huelva",
+    "name": "Huelva"
+  },
+  "municipalities": [
+    {
+      "ine": "21001",
+      "slug": "alajar",
+      "name": "Alájar"
+    },
+    {
+      "ine": "21002",
+      "slug": "aljaraque",
+      "name": "Aljaraque"
+    },
+    {
+      "ine": "21003",
+      "slug": "almendro-el",
+      "name": "Almendro, El"
+    },
+    {
+      "ine": "21004",
+      "slug": "almonaster-la-real",
+      "name": "Almonaster la Real"
+    },
+    {
+      "ine": "21005",
+      "slug": "almonte",
+      "name": "Almonte"
+    },
+    {
+      "ine": "21006",
+      "slug": "alosno",
+      "name": "Alosno"
+    },
+    {
+      "ine": "21007",
+      "slug": "aracena",
+      "name": "Aracena"
+    },
+    {
+      "ine": "21008",
+      "slug": "aroche",
+      "name": "Aroche"
+    },
+    {
+      "ine": "21009",
+      "slug": "arroyomolinos-de-leon",
+      "name": "Arroyomolinos de León"
+    },
+    {
+      "ine": "21010",
+      "slug": "ayamonte",
+      "name": "Ayamonte"
+    },
+    {
+      "ine": "21011",
+      "slug": "beas",
+      "name": "Beas"
+    },
+    {
+      "ine": "21012",
+      "slug": "berrocal",
+      "name": "Berrocal"
+    },
+    {
+      "ine": "21013",
+      "slug": "bollullos-par-del-condado",
+      "name": "Bollullos Par del Condado"
+    },
+    {
+      "ine": "21014",
+      "slug": "bonares",
+      "name": "Bonares"
+    },
+    {
+      "ine": "21015",
+      "slug": "cabezas-rubias",
+      "name": "Cabezas Rubias"
+    },
+    {
+      "ine": "21016",
+      "slug": "cala",
+      "name": "Cala"
+    },
+    {
+      "ine": "21017",
+      "slug": "calanas",
+      "name": "Calañas"
+    },
+    {
+      "ine": "21018",
+      "slug": "campillo-el",
+      "name": "Campillo, El"
+    },
+    {
+      "ine": "21019",
+      "slug": "campofrio",
+      "name": "Campofrío"
+    },
+    {
+      "ine": "21020",
+      "slug": "canaveral-de-leon",
+      "name": "Cañaveral de León"
+    },
+    {
+      "ine": "21021",
+      "slug": "cartaya",
+      "name": "Cartaya"
+    },
+    {
+      "ine": "21022",
+      "slug": "castano-del-robledo",
+      "name": "Castaño del Robledo"
+    },
+    {
+      "ine": "21023",
+      "slug": "cerro-de-andevalo-el",
+      "name": "Cerro de Andévalo, El"
+    },
+    {
+      "ine": "21030",
+      "slug": "chucena",
+      "name": "Chucena"
+    },
+    {
+      "ine": "21024",
+      "slug": "corteconcepcion",
+      "name": "Corteconcepción"
+    },
+    {
+      "ine": "21025",
+      "slug": "cortegana",
+      "name": "Cortegana"
+    },
+    {
+      "ine": "21026",
+      "slug": "cortelazor",
+      "name": "Cortelazor"
+    },
+    {
+      "ine": "21027",
+      "slug": "cumbres-de-enmedio",
+      "name": "Cumbres de Enmedio"
+    },
+    {
+      "ine": "21028",
+      "slug": "cumbres-de-san-bartolome",
+      "name": "Cumbres de San Bartolomé"
+    },
+    {
+      "ine": "21029",
+      "slug": "cumbres-mayores",
+      "name": "Cumbres Mayores"
+    },
+    {
+      "ine": "21031",
+      "slug": "encinasola",
+      "name": "Encinasola"
+    },
+    {
+      "ine": "21032",
+      "slug": "escacena-del-campo",
+      "name": "Escacena del Campo"
+    },
+    {
+      "ine": "21033",
+      "slug": "fuenteheridos",
+      "name": "Fuenteheridos"
+    },
+    {
+      "ine": "21034",
+      "slug": "galaroza",
+      "name": "Galaroza"
+    },
+    {
+      "ine": "21035",
+      "slug": "gibraleon",
+      "name": "Gibraleón"
+    },
+    {
+      "ine": "21036",
+      "slug": "granada-de-rio-tinto-la",
+      "name": "Granada de Río-Tinto, La"
+    },
+    {
+      "ine": "21037",
+      "slug": "granado-el",
+      "name": "Granado, El"
+    },
+    {
+      "ine": "21038",
+      "slug": "higuera-de-la-sierra",
+      "name": "Higuera de la Sierra"
+    },
+    {
+      "ine": "21039",
+      "slug": "hinojales",
+      "name": "Hinojales"
+    },
+    {
+      "ine": "21040",
+      "slug": "hinojos",
+      "name": "Hinojos"
+    },
+    {
+      "ine": "21041",
+      "slug": "huelva",
+      "name": "Huelva"
+    },
+    {
+      "ine": "21042",
+      "slug": "isla-cristina",
+      "name": "Isla Cristina"
+    },
+    {
+      "ine": "21043",
+      "slug": "jabugo",
+      "name": "Jabugo"
+    },
+    {
+      "ine": "21044",
+      "slug": "lepe",
+      "name": "Lepe"
+    },
+    {
+      "ine": "21045",
+      "slug": "linares-de-la-sierra",
+      "name": "Linares de la Sierra"
+    },
+    {
+      "ine": "21046",
+      "slug": "lucena-del-puerto",
+      "name": "Lucena del Puerto"
+    },
+    {
+      "ine": "21047",
+      "slug": "manzanilla",
+      "name": "Manzanilla"
+    },
+    {
+      "ine": "21048",
+      "slug": "marines-los",
+      "name": "Marines, Los"
+    },
+    {
+      "ine": "21049",
+      "slug": "minas-de-riotinto",
+      "name": "Minas de Riotinto"
+    },
+    {
+      "ine": "21050",
+      "slug": "moguer",
+      "name": "Moguer"
+    },
+    {
+      "ine": "21051",
+      "slug": "nava-la",
+      "name": "Nava, La"
+    },
+    {
+      "ine": "21052",
+      "slug": "nerva",
+      "name": "Nerva"
+    },
+    {
+      "ine": "21053",
+      "slug": "niebla",
+      "name": "Niebla"
+    },
+    {
+      "ine": "21054",
+      "slug": "palma-del-condado-la",
+      "name": "Palma del Condado, La"
+    },
+    {
+      "ine": "21055",
+      "slug": "palos-de-la-frontera",
+      "name": "Palos de la Frontera"
+    },
+    {
+      "ine": "21056",
+      "slug": "paterna-del-campo",
+      "name": "Paterna del Campo"
+    },
+    {
+      "ine": "21057",
+      "slug": "paymogo",
+      "name": "Paymogo"
+    },
+    {
+      "ine": "21058",
+      "slug": "puebla-de-guzman",
+      "name": "Puebla de Guzmán"
+    },
+    {
+      "ine": "21059",
+      "slug": "puerto-moral",
+      "name": "Puerto Moral"
+    },
+    {
+      "ine": "21060",
+      "slug": "punta-umbria",
+      "name": "Punta Umbría"
+    },
+    {
+      "ine": "21061",
+      "slug": "rociana-del-condado",
+      "name": "Rociana del Condado"
+    },
+    {
+      "ine": "21062",
+      "slug": "rosal-de-la-frontera",
+      "name": "Rosal de la Frontera"
+    },
+    {
+      "ine": "21063",
+      "slug": "san-bartolome-de-la-torre",
+      "name": "San Bartolomé de la Torre"
+    },
+    {
+      "ine": "21064",
+      "slug": "san-juan-del-puerto",
+      "name": "San Juan del Puerto"
+    },
+    {
+      "ine": "21066",
+      "slug": "san-silvestre-de-guzman",
+      "name": "San Silvestre de Guzmán"
+    },
+    {
+      "ine": "21065",
+      "slug": "sanlucar-de-guadiana",
+      "name": "Sanlúcar de Guadiana"
+    },
+    {
+      "ine": "21067",
+      "slug": "santa-ana-la-real",
+      "name": "Santa Ana la Real"
+    },
+    {
+      "ine": "21068",
+      "slug": "santa-barbara-de-casa",
+      "name": "Santa Bárbara de Casa"
+    },
+    {
+      "ine": "21069",
+      "slug": "santa-olalla-del-cala",
+      "name": "Santa Olalla del Cala"
+    },
+    {
+      "ine": "21070",
+      "slug": "trigueros",
+      "name": "Trigueros"
+    },
+    {
+      "ine": "21071",
+      "slug": "valdelarco",
+      "name": "Valdelarco"
+    },
+    {
+      "ine": "21072",
+      "slug": "valverde-del-camino",
+      "name": "Valverde del Camino"
+    },
+    {
+      "ine": "21073",
+      "slug": "villablanca",
+      "name": "Villablanca"
+    },
+    {
+      "ine": "21074",
+      "slug": "villalba-del-alcor",
+      "name": "Villalba del Alcor"
+    },
+    {
+      "ine": "21075",
+      "slug": "villanueva-de-las-cruces",
+      "name": "Villanueva de las Cruces"
+    },
+    {
+      "ine": "21076",
+      "slug": "villanueva-de-los-castillejos",
+      "name": "Villanueva de los Castillejos"
+    },
+    {
+      "ine": "21077",
+      "slug": "villarrasa",
+      "name": "Villarrasa"
+    },
+    {
+      "ine": "21078",
+      "slug": "zalamea-la-real",
+      "name": "Zalamea la Real"
+    },
+    {
+      "ine": "21079",
+      "slug": "zufre",
+      "name": "Zufre"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

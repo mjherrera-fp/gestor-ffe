@@ -1,0 +1,940 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "CAT",
+    "slug": "cat",
+    "name": "Cataluña"
+  },
+  "province": {
+    "code": "43",
+    "slug": "tarragona",
+    "name": "Tarragona"
+  },
+  "municipalities": [
+    {
+      "ine": "43001",
+      "slug": "aiguamurcia",
+      "name": "Aiguamúrcia"
+    },
+    {
+      "ine": "43002",
+      "slug": "albinyana",
+      "name": "Albinyana"
+    },
+    {
+      "ine": "43003",
+      "slug": "albiol-l",
+      "name": "Albiol, L'"
+    },
+    {
+      "ine": "43004",
+      "slug": "alcanar",
+      "name": "Alcanar"
+    },
+    {
+      "ine": "43005",
+      "slug": "alcover",
+      "name": "Alcover"
+    },
+    {
+      "ine": "43904",
+      "slug": "aldea-l",
+      "name": "Aldea, L'"
+    },
+    {
+      "ine": "43006",
+      "slug": "aldover",
+      "name": "Aldover"
+    },
+    {
+      "ine": "43007",
+      "slug": "aleixar-l",
+      "name": "Aleixar, L'"
+    },
+    {
+      "ine": "43008",
+      "slug": "alfara-de-carles",
+      "name": "Alfara de Carles"
+    },
+    {
+      "ine": "43009",
+      "slug": "alforja",
+      "name": "Alforja"
+    },
+    {
+      "ine": "43010",
+      "slug": "alio",
+      "name": "Alió"
+    },
+    {
+      "ine": "43011",
+      "slug": "almoster",
+      "name": "Almoster"
+    },
+    {
+      "ine": "43012",
+      "slug": "altafulla",
+      "name": "Altafulla"
+    },
+    {
+      "ine": "43013",
+      "slug": "ametlla-de-mar-l",
+      "name": "Ametlla de Mar, L'"
+    },
+    {
+      "ine": "43906",
+      "slug": "ampolla-l",
+      "name": "Ampolla, L'"
+    },
+    {
+      "ine": "43014",
+      "slug": "amposta",
+      "name": "Amposta"
+    },
+    {
+      "ine": "43016",
+      "slug": "arboc-l",
+      "name": "Arboç, L'"
+    },
+    {
+      "ine": "43015",
+      "slug": "arboli",
+      "name": "Arbolí"
+    },
+    {
+      "ine": "43017",
+      "slug": "argentera-l",
+      "name": "Argentera, L'"
+    },
+    {
+      "ine": "43018",
+      "slug": "arnes",
+      "name": "Arnes"
+    },
+    {
+      "ine": "43019",
+      "slug": "asco",
+      "name": "Ascó"
+    },
+    {
+      "ine": "43020",
+      "slug": "banyeres-del-penedes",
+      "name": "Banyeres del Penedès"
+    },
+    {
+      "ine": "43021",
+      "slug": "barbera-de-la-conca",
+      "name": "Barberà de la Conca"
+    },
+    {
+      "ine": "43022",
+      "slug": "batea",
+      "name": "Batea"
+    },
+    {
+      "ine": "43023",
+      "slug": "bellmunt-del-priorat",
+      "name": "Bellmunt del Priorat"
+    },
+    {
+      "ine": "43024",
+      "slug": "bellvei",
+      "name": "Bellvei"
+    },
+    {
+      "ine": "43025",
+      "slug": "benifallet",
+      "name": "Benifallet"
+    },
+    {
+      "ine": "43026",
+      "slug": "benissanet",
+      "name": "Benissanet"
+    },
+    {
+      "ine": "43027",
+      "slug": "bisbal-de-falset-la",
+      "name": "Bisbal de Falset, La"
+    },
+    {
+      "ine": "43028",
+      "slug": "bisbal-del-penedes-la",
+      "name": "Bisbal del Penedès, La"
+    },
+    {
+      "ine": "43029",
+      "slug": "blancafort",
+      "name": "Blancafort"
+    },
+    {
+      "ine": "43030",
+      "slug": "bonastre",
+      "name": "Bonastre"
+    },
+    {
+      "ine": "43031",
+      "slug": "borges-del-camp-les",
+      "name": "Borges del Camp, Les"
+    },
+    {
+      "ine": "43032",
+      "slug": "bot",
+      "name": "Bot"
+    },
+    {
+      "ine": "43033",
+      "slug": "botarell",
+      "name": "Botarell"
+    },
+    {
+      "ine": "43034",
+      "slug": "brafim",
+      "name": "Bràfim"
+    },
+    {
+      "ine": "43035",
+      "slug": "cabaces",
+      "name": "Cabacés"
+    },
+    {
+      "ine": "43036",
+      "slug": "cabra-del-camp",
+      "name": "Cabra del Camp"
+    },
+    {
+      "ine": "43037",
+      "slug": "calafell",
+      "name": "Calafell"
+    },
+    {
+      "ine": "43903",
+      "slug": "camarles",
+      "name": "Camarles"
+    },
+    {
+      "ine": "43038",
+      "slug": "cambrils",
+      "name": "Cambrils"
+    },
+    {
+      "ine": "43907",
+      "slug": "canonja-la",
+      "name": "Canonja, La"
+    },
+    {
+      "ine": "43039",
+      "slug": "capafonts",
+      "name": "Capafonts"
+    },
+    {
+      "ine": "43040",
+      "slug": "capcanes",
+      "name": "Capçanes"
+    },
+    {
+      "ine": "43041",
+      "slug": "caseres",
+      "name": "Caseres"
+    },
+    {
+      "ine": "43042",
+      "slug": "castellvell-del-camp",
+      "name": "Castellvell del Camp"
+    },
+    {
+      "ine": "43043",
+      "slug": "catllar-el",
+      "name": "Catllar, El"
+    },
+    {
+      "ine": "43045",
+      "slug": "colldejou",
+      "name": "Colldejou"
+    },
+    {
+      "ine": "43046",
+      "slug": "conesa",
+      "name": "Conesa"
+    },
+    {
+      "ine": "43047",
+      "slug": "constanti",
+      "name": "Constantí"
+    },
+    {
+      "ine": "43048",
+      "slug": "corbera-d-ebre",
+      "name": "Corbera d'Ebre"
+    },
+    {
+      "ine": "43049",
+      "slug": "cornudella-de-montsant",
+      "name": "Cornudella de Montsant"
+    },
+    {
+      "ine": "43050",
+      "slug": "creixell",
+      "name": "Creixell"
+    },
+    {
+      "ine": "43051",
+      "slug": "cunit",
+      "name": "Cunit"
+    },
+    {
+      "ine": "43901",
+      "slug": "deltebre",
+      "name": "Deltebre"
+    },
+    {
+      "ine": "43053",
+      "slug": "duesaigues",
+      "name": "Duesaigües"
+    },
+    {
+      "ine": "43054",
+      "slug": "espluga-de-francoli-l",
+      "name": "Espluga de Francolí, L'"
+    },
+    {
+      "ine": "43055",
+      "slug": "falset",
+      "name": "Falset"
+    },
+    {
+      "ine": "43056",
+      "slug": "fatarella-la",
+      "name": "Fatarella, La"
+    },
+    {
+      "ine": "43057",
+      "slug": "febro-la",
+      "name": "Febró, La"
+    },
+    {
+      "ine": "43058",
+      "slug": "figuera-la",
+      "name": "Figuera, La"
+    },
+    {
+      "ine": "43059",
+      "slug": "figuerola-del-camp",
+      "name": "Figuerola del Camp"
+    },
+    {
+      "ine": "43060",
+      "slug": "flix",
+      "name": "Flix"
+    },
+    {
+      "ine": "43061",
+      "slug": "fores",
+      "name": "Forès"
+    },
+    {
+      "ine": "43062",
+      "slug": "freginals",
+      "name": "Freginals"
+    },
+    {
+      "ine": "43063",
+      "slug": "galera-la",
+      "name": "Galera, La"
+    },
+    {
+      "ine": "43064",
+      "slug": "gandesa",
+      "name": "Gandesa"
+    },
+    {
+      "ine": "43065",
+      "slug": "garcia",
+      "name": "Garcia"
+    },
+    {
+      "ine": "43066",
+      "slug": "garidells-els",
+      "name": "Garidells, Els"
+    },
+    {
+      "ine": "43067",
+      "slug": "ginestar",
+      "name": "Ginestar"
+    },
+    {
+      "ine": "43068",
+      "slug": "godall",
+      "name": "Godall"
+    },
+    {
+      "ine": "43069",
+      "slug": "gratallops",
+      "name": "Gratallops"
+    },
+    {
+      "ine": "43070",
+      "slug": "guiamets-els",
+      "name": "Guiamets, Els"
+    },
+    {
+      "ine": "43071",
+      "slug": "horta-de-sant-joan",
+      "name": "Horta de Sant Joan"
+    },
+    {
+      "ine": "43072",
+      "slug": "lloar-el",
+      "name": "Lloar, El"
+    },
+    {
+      "ine": "43073",
+      "slug": "llorac",
+      "name": "Llorac"
+    },
+    {
+      "ine": "43074",
+      "slug": "llorenc-del-penedes",
+      "name": "Llorenç del Penedès"
+    },
+    {
+      "ine": "43076",
+      "slug": "marca",
+      "name": "Marçà"
+    },
+    {
+      "ine": "43075",
+      "slug": "margalef",
+      "name": "Margalef"
+    },
+    {
+      "ine": "43077",
+      "slug": "mas-de-barberans",
+      "name": "Mas de Barberans"
+    },
+    {
+      "ine": "43078",
+      "slug": "masdenverge",
+      "name": "Masdenverge"
+    },
+    {
+      "ine": "43079",
+      "slug": "masllorenc",
+      "name": "Masllorenç"
+    },
+    {
+      "ine": "43080",
+      "slug": "maso-la",
+      "name": "Masó, La"
+    },
+    {
+      "ine": "43081",
+      "slug": "maspujols",
+      "name": "Maspujols"
+    },
+    {
+      "ine": "43082",
+      "slug": "masroig-el",
+      "name": "Masroig, El"
+    },
+    {
+      "ine": "43083",
+      "slug": "mila-el",
+      "name": "Milà, El"
+    },
+    {
+      "ine": "43084",
+      "slug": "miravet",
+      "name": "Miravet"
+    },
+    {
+      "ine": "43085",
+      "slug": "molar-el",
+      "name": "Molar, El"
+    },
+    {
+      "ine": "43091",
+      "slug": "mont-ral",
+      "name": "Mont-ral"
+    },
+    {
+      "ine": "43092",
+      "slug": "mont-roig-del-camp",
+      "name": "Mont-roig del Camp"
+    },
+    {
+      "ine": "43086",
+      "slug": "montblanc",
+      "name": "Montblanc"
+    },
+    {
+      "ine": "43088",
+      "slug": "montbrio-del-camp",
+      "name": "Montbrió del Camp"
+    },
+    {
+      "ine": "43089",
+      "slug": "montferri",
+      "name": "Montferri"
+    },
+    {
+      "ine": "43090",
+      "slug": "montmell-el",
+      "name": "Montmell, El"
+    },
+    {
+      "ine": "43093",
+      "slug": "mora-d-ebre",
+      "name": "Móra d'Ebre"
+    },
+    {
+      "ine": "43094",
+      "slug": "mora-la-nova",
+      "name": "Móra la Nova"
+    },
+    {
+      "ine": "43095",
+      "slug": "morell-el",
+      "name": "Morell, El"
+    },
+    {
+      "ine": "43096",
+      "slug": "morera-de-montsant-la",
+      "name": "Morera de Montsant, La"
+    },
+    {
+      "ine": "43097",
+      "slug": "nou-de-gaia-la",
+      "name": "Nou de Gaià, La"
+    },
+    {
+      "ine": "43098",
+      "slug": "nulles",
+      "name": "Nulles"
+    },
+    {
+      "ine": "43100",
+      "slug": "pallaresos-els",
+      "name": "Pallaresos, Els"
+    },
+    {
+      "ine": "43099",
+      "slug": "palma-d-ebre-la",
+      "name": "Palma d'Ebre, La"
+    },
+    {
+      "ine": "43101",
+      "slug": "passanant-i-belltall",
+      "name": "Passanant i Belltall"
+    },
+    {
+      "ine": "43102",
+      "slug": "pauls",
+      "name": "Paüls"
+    },
+    {
+      "ine": "43103",
+      "slug": "perafort",
+      "name": "Perafort"
+    },
+    {
+      "ine": "43104",
+      "slug": "perello-el",
+      "name": "Perelló, El"
+    },
+    {
+      "ine": "43105",
+      "slug": "piles-les",
+      "name": "Piles, Les"
+    },
+    {
+      "ine": "43106",
+      "slug": "pinell-de-brai-el",
+      "name": "Pinell de Brai, El"
+    },
+    {
+      "ine": "43107",
+      "slug": "pira",
+      "name": "Pira"
+    },
+    {
+      "ine": "43108",
+      "slug": "pla-de-santa-maria-el",
+      "name": "Pla de Santa Maria, El"
+    },
+    {
+      "ine": "43109",
+      "slug": "pobla-de-mafumet-la",
+      "name": "Pobla de Mafumet, La"
+    },
+    {
+      "ine": "43110",
+      "slug": "pobla-de-massaluca-la",
+      "name": "Pobla de Massaluca, La"
+    },
+    {
+      "ine": "43111",
+      "slug": "pobla-de-montornes-la",
+      "name": "Pobla de Montornès, La"
+    },
+    {
+      "ine": "43112",
+      "slug": "poboleda",
+      "name": "Poboleda"
+    },
+    {
+      "ine": "43113",
+      "slug": "pont-d-armentera-el",
+      "name": "Pont d'Armentera, El"
+    },
+    {
+      "ine": "43141",
+      "slug": "pontils",
+      "name": "Pontils"
+    },
+    {
+      "ine": "43114",
+      "slug": "porrera",
+      "name": "Porrera"
+    },
+    {
+      "ine": "43115",
+      "slug": "pradell-de-la-teixeta",
+      "name": "Pradell de la Teixeta"
+    },
+    {
+      "ine": "43116",
+      "slug": "prades",
+      "name": "Prades"
+    },
+    {
+      "ine": "43117",
+      "slug": "prat-de-comte",
+      "name": "Prat de Comte"
+    },
+    {
+      "ine": "43118",
+      "slug": "pratdip",
+      "name": "Pratdip"
+    },
+    {
+      "ine": "43119",
+      "slug": "puigpelat",
+      "name": "Puigpelat"
+    },
+    {
+      "ine": "43120",
+      "slug": "querol",
+      "name": "Querol"
+    },
+    {
+      "ine": "43121",
+      "slug": "rasquera",
+      "name": "Rasquera"
+    },
+    {
+      "ine": "43122",
+      "slug": "renau",
+      "name": "Renau"
+    },
+    {
+      "ine": "43123",
+      "slug": "reus",
+      "name": "Reus"
+    },
+    {
+      "ine": "43125",
+      "slug": "riba-roja-d-ebre",
+      "name": "Riba-roja d'Ebre"
+    },
+    {
+      "ine": "43124",
+      "slug": "riba-la",
+      "name": "Riba, La"
+    },
+    {
+      "ine": "43126",
+      "slug": "riera-de-gaia-la",
+      "name": "Riera de Gaià, La"
+    },
+    {
+      "ine": "43127",
+      "slug": "riudecanyes",
+      "name": "Riudecanyes"
+    },
+    {
+      "ine": "43128",
+      "slug": "riudecols",
+      "name": "Riudecols"
+    },
+    {
+      "ine": "43129",
+      "slug": "riudoms",
+      "name": "Riudoms"
+    },
+    {
+      "ine": "43130",
+      "slug": "rocafort-de-queralt",
+      "name": "Rocafort de Queralt"
+    },
+    {
+      "ine": "43131",
+      "slug": "roda-de-bera",
+      "name": "Roda de Berà"
+    },
+    {
+      "ine": "43132",
+      "slug": "rodonya",
+      "name": "Rodonyà"
+    },
+    {
+      "ine": "43133",
+      "slug": "roquetes",
+      "name": "Roquetes"
+    },
+    {
+      "ine": "43134",
+      "slug": "rourell-el",
+      "name": "Rourell, El"
+    },
+    {
+      "ine": "43135",
+      "slug": "salomo",
+      "name": "Salomó"
+    },
+    {
+      "ine": "43905",
+      "slug": "salou",
+      "name": "Salou"
+    },
+    {
+      "ine": "43136",
+      "slug": "sant-carles-de-la-rapita",
+      "name": "Sant Carles de la Ràpita"
+    },
+    {
+      "ine": "43902",
+      "slug": "sant-jaume-d-enveja",
+      "name": "Sant Jaume d'Enveja"
+    },
+    {
+      "ine": "43137",
+      "slug": "sant-jaume-dels-domenys",
+      "name": "Sant Jaume dels Domenys"
+    },
+    {
+      "ine": "43138",
+      "slug": "santa-barbara",
+      "name": "Santa Bàrbara"
+    },
+    {
+      "ine": "43139",
+      "slug": "santa-coloma-de-queralt",
+      "name": "Santa Coloma de Queralt"
+    },
+    {
+      "ine": "43140",
+      "slug": "santa-oliva",
+      "name": "Santa Oliva"
+    },
+    {
+      "ine": "43142",
+      "slug": "sarral",
+      "name": "Sarral"
+    },
+    {
+      "ine": "43143",
+      "slug": "savalla-del-comtat",
+      "name": "Savallà del Comtat"
+    },
+    {
+      "ine": "43144",
+      "slug": "secuita-la",
+      "name": "Secuita, La"
+    },
+    {
+      "ine": "43145",
+      "slug": "selva-del-camp-la",
+      "name": "Selva del Camp, La"
+    },
+    {
+      "ine": "43146",
+      "slug": "senan",
+      "name": "Senan"
+    },
+    {
+      "ine": "43044",
+      "slug": "senia-la",
+      "name": "Sénia, La"
+    },
+    {
+      "ine": "43147",
+      "slug": "solivella",
+      "name": "Solivella"
+    },
+    {
+      "ine": "43148",
+      "slug": "tarragona",
+      "name": "Tarragona"
+    },
+    {
+      "ine": "43149",
+      "slug": "tivenys",
+      "name": "Tivenys"
+    },
+    {
+      "ine": "43150",
+      "slug": "tivissa",
+      "name": "Tivissa"
+    },
+    {
+      "ine": "43151",
+      "slug": "torre-de-fontaubella-la",
+      "name": "Torre de Fontaubella, La"
+    },
+    {
+      "ine": "43152",
+      "slug": "torre-de-l-espanyol-la",
+      "name": "Torre de l'Espanyol, La"
+    },
+    {
+      "ine": "43153",
+      "slug": "torredembarra",
+      "name": "Torredembarra"
+    },
+    {
+      "ine": "43154",
+      "slug": "torroja-del-priorat",
+      "name": "Torroja del Priorat"
+    },
+    {
+      "ine": "43155",
+      "slug": "tortosa",
+      "name": "Tortosa"
+    },
+    {
+      "ine": "43156",
+      "slug": "ulldecona",
+      "name": "Ulldecona"
+    },
+    {
+      "ine": "43157",
+      "slug": "ulldemolins",
+      "name": "Ulldemolins"
+    },
+    {
+      "ine": "43158",
+      "slug": "vallclara",
+      "name": "Vallclara"
+    },
+    {
+      "ine": "43159",
+      "slug": "vallfogona-de-riucorb",
+      "name": "Vallfogona de Riucorb"
+    },
+    {
+      "ine": "43160",
+      "slug": "vallmoll",
+      "name": "Vallmoll"
+    },
+    {
+      "ine": "43161",
+      "slug": "valls",
+      "name": "Valls"
+    },
+    {
+      "ine": "43162",
+      "slug": "vandellos-i-l-hospitalet-de-l-infant",
+      "name": "Vandellòs i l'Hospitalet de l'Infant"
+    },
+    {
+      "ine": "43163",
+      "slug": "vendrell-el",
+      "name": "Vendrell, El"
+    },
+    {
+      "ine": "43164",
+      "slug": "vespella-de-gaia",
+      "name": "Vespella de Gaià"
+    },
+    {
+      "ine": "43170",
+      "slug": "vila-rodona",
+      "name": "Vila-rodona"
+    },
+    {
+      "ine": "43171",
+      "slug": "vila-seca",
+      "name": "Vila-seca"
+    },
+    {
+      "ine": "43165",
+      "slug": "vilabella",
+      "name": "Vilabella"
+    },
+    {
+      "ine": "43175",
+      "slug": "vilalba-dels-arcs",
+      "name": "Vilalba dels Arcs"
+    },
+    {
+      "ine": "43166",
+      "slug": "vilallonga-del-camp",
+      "name": "Vilallonga del Camp"
+    },
+    {
+      "ine": "43167",
+      "slug": "vilanova-d-escornalbou",
+      "name": "Vilanova d'Escornalbou"
+    },
+    {
+      "ine": "43168",
+      "slug": "vilanova-de-prades",
+      "name": "Vilanova de Prades"
+    },
+    {
+      "ine": "43169",
+      "slug": "vilaplana",
+      "name": "Vilaplana"
+    },
+    {
+      "ine": "43172",
+      "slug": "vilaverd",
+      "name": "Vilaverd"
+    },
+    {
+      "ine": "43173",
+      "slug": "vilella-alta-la",
+      "name": "Vilella Alta, La"
+    },
+    {
+      "ine": "43174",
+      "slug": "vilella-baixa-la",
+      "name": "Vilella Baixa, La"
+    },
+    {
+      "ine": "43176",
+      "slug": "vimbodi-i-poblet",
+      "name": "Vimbodí i Poblet"
+    },
+    {
+      "ine": "43177",
+      "slug": "vinebre",
+      "name": "Vinebre"
+    },
+    {
+      "ine": "43178",
+      "slug": "vinyols-i-els-arcs",
+      "name": "Vinyols i els Arcs"
+    },
+    {
+      "ine": "43052",
+      "slug": "xerta",
+      "name": "Xerta"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

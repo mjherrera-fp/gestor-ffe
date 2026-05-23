@@ -1,0 +1,1135 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "EXT",
+    "slug": "ext",
+    "name": "Extremadura"
+  },
+  "province": {
+    "code": "10",
+    "slug": "caceres",
+    "name": "Cáceres"
+  },
+  "municipalities": [
+    {
+      "ine": "10001",
+      "slug": "abadia",
+      "name": "Abadía"
+    },
+    {
+      "ine": "10002",
+      "slug": "abertura",
+      "name": "Abertura"
+    },
+    {
+      "ine": "10003",
+      "slug": "acebo",
+      "name": "Acebo"
+    },
+    {
+      "ine": "10004",
+      "slug": "acehuche",
+      "name": "Acehúche"
+    },
+    {
+      "ine": "10005",
+      "slug": "aceituna",
+      "name": "Aceituna"
+    },
+    {
+      "ine": "10006",
+      "slug": "ahigal",
+      "name": "Ahigal"
+    },
+    {
+      "ine": "10903",
+      "slug": "alagon-del-rio",
+      "name": "Alagón del Río"
+    },
+    {
+      "ine": "10007",
+      "slug": "albala",
+      "name": "Albalá"
+    },
+    {
+      "ine": "10008",
+      "slug": "alcantara",
+      "name": "Alcántara"
+    },
+    {
+      "ine": "10009",
+      "slug": "alcollarin",
+      "name": "Alcollarín"
+    },
+    {
+      "ine": "10010",
+      "slug": "alcuescar",
+      "name": "Alcuéscar"
+    },
+    {
+      "ine": "10012",
+      "slug": "aldea-del-cano",
+      "name": "Aldea del Cano"
+    },
+    {
+      "ine": "10013",
+      "slug": "aldea-del-obispo-la",
+      "name": "Aldea del Obispo, La"
+    },
+    {
+      "ine": "10011",
+      "slug": "aldeacentenera",
+      "name": "Aldeacentenera"
+    },
+    {
+      "ine": "10014",
+      "slug": "aldeanueva-de-la-vera",
+      "name": "Aldeanueva de la Vera"
+    },
+    {
+      "ine": "10015",
+      "slug": "aldeanueva-del-camino",
+      "name": "Aldeanueva del Camino"
+    },
+    {
+      "ine": "10016",
+      "slug": "aldehuela-de-jerte",
+      "name": "Aldehuela de Jerte"
+    },
+    {
+      "ine": "10017",
+      "slug": "alia",
+      "name": "Alía"
+    },
+    {
+      "ine": "10018",
+      "slug": "aliseda",
+      "name": "Aliseda"
+    },
+    {
+      "ine": "10019",
+      "slug": "almaraz",
+      "name": "Almaraz"
+    },
+    {
+      "ine": "10020",
+      "slug": "almoharin",
+      "name": "Almoharín"
+    },
+    {
+      "ine": "10021",
+      "slug": "arroyo-de-la-luz",
+      "name": "Arroyo de la Luz"
+    },
+    {
+      "ine": "10023",
+      "slug": "arroyomolinos",
+      "name": "Arroyomolinos"
+    },
+    {
+      "ine": "10022",
+      "slug": "arroyomolinos-de-la-vera",
+      "name": "Arroyomolinos de la Vera"
+    },
+    {
+      "ine": "10024",
+      "slug": "banos-de-montemayor",
+      "name": "Baños de Montemayor"
+    },
+    {
+      "ine": "10025",
+      "slug": "barrado",
+      "name": "Barrado"
+    },
+    {
+      "ine": "10026",
+      "slug": "belvis-de-monroy",
+      "name": "Belvís de Monroy"
+    },
+    {
+      "ine": "10027",
+      "slug": "benquerencia",
+      "name": "Benquerencia"
+    },
+    {
+      "ine": "10028",
+      "slug": "berrocalejo",
+      "name": "Berrocalejo"
+    },
+    {
+      "ine": "10029",
+      "slug": "berzocana",
+      "name": "Berzocana"
+    },
+    {
+      "ine": "10030",
+      "slug": "bohonal-de-ibor",
+      "name": "Bohonal de Ibor"
+    },
+    {
+      "ine": "10031",
+      "slug": "botija",
+      "name": "Botija"
+    },
+    {
+      "ine": "10032",
+      "slug": "brozas",
+      "name": "Brozas"
+    },
+    {
+      "ine": "10033",
+      "slug": "cabanas-del-castillo",
+      "name": "Cabañas del Castillo"
+    },
+    {
+      "ine": "10034",
+      "slug": "cabezabellosa",
+      "name": "Cabezabellosa"
+    },
+    {
+      "ine": "10035",
+      "slug": "cabezuela-del-valle",
+      "name": "Cabezuela del Valle"
+    },
+    {
+      "ine": "10036",
+      "slug": "cabrero",
+      "name": "Cabrero"
+    },
+    {
+      "ine": "10037",
+      "slug": "caceres",
+      "name": "Cáceres"
+    },
+    {
+      "ine": "10038",
+      "slug": "cachorrilla",
+      "name": "Cachorrilla"
+    },
+    {
+      "ine": "10039",
+      "slug": "cadalso",
+      "name": "Cadalso"
+    },
+    {
+      "ine": "10040",
+      "slug": "calzadilla",
+      "name": "Calzadilla"
+    },
+    {
+      "ine": "10041",
+      "slug": "caminomorisco",
+      "name": "Caminomorisco"
+    },
+    {
+      "ine": "10042",
+      "slug": "campillo-de-deleitosa",
+      "name": "Campillo de Deleitosa"
+    },
+    {
+      "ine": "10043",
+      "slug": "campo-lugar",
+      "name": "Campo Lugar"
+    },
+    {
+      "ine": "10044",
+      "slug": "canamero",
+      "name": "Cañamero"
+    },
+    {
+      "ine": "10045",
+      "slug": "canaveral",
+      "name": "Cañaveral"
+    },
+    {
+      "ine": "10046",
+      "slug": "carbajo",
+      "name": "Carbajo"
+    },
+    {
+      "ine": "10047",
+      "slug": "carcaboso",
+      "name": "Carcaboso"
+    },
+    {
+      "ine": "10048",
+      "slug": "carrascalejo",
+      "name": "Carrascalejo"
+    },
+    {
+      "ine": "10049",
+      "slug": "casar-de-caceres",
+      "name": "Casar de Cáceres"
+    },
+    {
+      "ine": "10050",
+      "slug": "casar-de-palomero",
+      "name": "Casar de Palomero"
+    },
+    {
+      "ine": "10051",
+      "slug": "casares-de-las-hurdes",
+      "name": "Casares de las Hurdes"
+    },
+    {
+      "ine": "10052",
+      "slug": "casas-de-don-antonio",
+      "name": "Casas de Don Antonio"
+    },
+    {
+      "ine": "10053",
+      "slug": "casas-de-don-gomez",
+      "name": "Casas de Don Gómez"
+    },
+    {
+      "ine": "10056",
+      "slug": "casas-de-millan",
+      "name": "Casas de Millán"
+    },
+    {
+      "ine": "10057",
+      "slug": "casas-de-miravete",
+      "name": "Casas de Miravete"
+    },
+    {
+      "ine": "10054",
+      "slug": "casas-del-castanar",
+      "name": "Casas del Castañar"
+    },
+    {
+      "ine": "10055",
+      "slug": "casas-del-monte",
+      "name": "Casas del Monte"
+    },
+    {
+      "ine": "10058",
+      "slug": "casatejada",
+      "name": "Casatejada"
+    },
+    {
+      "ine": "10059",
+      "slug": "casillas-de-coria",
+      "name": "Casillas de Coria"
+    },
+    {
+      "ine": "10060",
+      "slug": "castanar-de-ibor",
+      "name": "Castañar de Ibor"
+    },
+    {
+      "ine": "10061",
+      "slug": "ceclavin",
+      "name": "Ceclavín"
+    },
+    {
+      "ine": "10062",
+      "slug": "cedillo",
+      "name": "Cedillo"
+    },
+    {
+      "ine": "10063",
+      "slug": "cerezo",
+      "name": "Cerezo"
+    },
+    {
+      "ine": "10064",
+      "slug": "cilleros",
+      "name": "Cilleros"
+    },
+    {
+      "ine": "10065",
+      "slug": "collado-de-la-vera",
+      "name": "Collado de la Vera"
+    },
+    {
+      "ine": "10066",
+      "slug": "conquista-de-la-sierra",
+      "name": "Conquista de la Sierra"
+    },
+    {
+      "ine": "10067",
+      "slug": "coria",
+      "name": "Coria"
+    },
+    {
+      "ine": "10068",
+      "slug": "cuacos-de-yuste",
+      "name": "Cuacos de Yuste"
+    },
+    {
+      "ine": "10069",
+      "slug": "cumbre-la",
+      "name": "Cumbre, La"
+    },
+    {
+      "ine": "10070",
+      "slug": "deleitosa",
+      "name": "Deleitosa"
+    },
+    {
+      "ine": "10071",
+      "slug": "descargamaria",
+      "name": "Descargamaría"
+    },
+    {
+      "ine": "10072",
+      "slug": "eljas",
+      "name": "Eljas"
+    },
+    {
+      "ine": "10073",
+      "slug": "escurial",
+      "name": "Escurial"
+    },
+    {
+      "ine": "10075",
+      "slug": "fresnedoso-de-ibor",
+      "name": "Fresnedoso de Ibor"
+    },
+    {
+      "ine": "10076",
+      "slug": "galisteo",
+      "name": "Galisteo"
+    },
+    {
+      "ine": "10077",
+      "slug": "garciaz",
+      "name": "Garciaz"
+    },
+    {
+      "ine": "10079",
+      "slug": "garganta-la-olla",
+      "name": "Garganta la Olla"
+    },
+    {
+      "ine": "10078",
+      "slug": "garganta-la",
+      "name": "Garganta, La"
+    },
+    {
+      "ine": "10080",
+      "slug": "gargantilla",
+      "name": "Gargantilla"
+    },
+    {
+      "ine": "10081",
+      "slug": "garguera",
+      "name": "Gargüera"
+    },
+    {
+      "ine": "10082",
+      "slug": "garrovillas-de-alconetar",
+      "name": "Garrovillas de Alconétar"
+    },
+    {
+      "ine": "10083",
+      "slug": "garvin",
+      "name": "Garvín"
+    },
+    {
+      "ine": "10084",
+      "slug": "gata",
+      "name": "Gata"
+    },
+    {
+      "ine": "10085",
+      "slug": "gordo-el",
+      "name": "Gordo, El"
+    },
+    {
+      "ine": "10086",
+      "slug": "granja-la",
+      "name": "Granja, La"
+    },
+    {
+      "ine": "10087",
+      "slug": "guadalupe",
+      "name": "Guadalupe"
+    },
+    {
+      "ine": "10088",
+      "slug": "guijo-de-coria",
+      "name": "Guijo de Coria"
+    },
+    {
+      "ine": "10089",
+      "slug": "guijo-de-galisteo",
+      "name": "Guijo de Galisteo"
+    },
+    {
+      "ine": "10090",
+      "slug": "guijo-de-granadilla",
+      "name": "Guijo de Granadilla"
+    },
+    {
+      "ine": "10091",
+      "slug": "guijo-de-santa-barbara",
+      "name": "Guijo de Santa Bárbara"
+    },
+    {
+      "ine": "10092",
+      "slug": "herguijuela",
+      "name": "Herguijuela"
+    },
+    {
+      "ine": "10093",
+      "slug": "hernan-perez",
+      "name": "Hernán-Pérez"
+    },
+    {
+      "ine": "10094",
+      "slug": "herrera-de-alcantara",
+      "name": "Herrera de Alcántara"
+    },
+    {
+      "ine": "10095",
+      "slug": "herreruela",
+      "name": "Herreruela"
+    },
+    {
+      "ine": "10096",
+      "slug": "hervas",
+      "name": "Hervás"
+    },
+    {
+      "ine": "10097",
+      "slug": "higuera",
+      "name": "Higuera"
+    },
+    {
+      "ine": "10098",
+      "slug": "hinojal",
+      "name": "Hinojal"
+    },
+    {
+      "ine": "10099",
+      "slug": "holguera",
+      "name": "Holguera"
+    },
+    {
+      "ine": "10100",
+      "slug": "hoyos",
+      "name": "Hoyos"
+    },
+    {
+      "ine": "10101",
+      "slug": "huelaga",
+      "name": "Huélaga"
+    },
+    {
+      "ine": "10102",
+      "slug": "ibahernando",
+      "name": "Ibahernando"
+    },
+    {
+      "ine": "10103",
+      "slug": "jaraicejo",
+      "name": "Jaraicejo"
+    },
+    {
+      "ine": "10104",
+      "slug": "jaraiz-de-la-vera",
+      "name": "Jaraíz de la Vera"
+    },
+    {
+      "ine": "10105",
+      "slug": "jarandilla-de-la-vera",
+      "name": "Jarandilla de la Vera"
+    },
+    {
+      "ine": "10106",
+      "slug": "jarilla",
+      "name": "Jarilla"
+    },
+    {
+      "ine": "10107",
+      "slug": "jerte",
+      "name": "Jerte"
+    },
+    {
+      "ine": "10108",
+      "slug": "ladrillar",
+      "name": "Ladrillar"
+    },
+    {
+      "ine": "10109",
+      "slug": "logrosan",
+      "name": "Logrosán"
+    },
+    {
+      "ine": "10110",
+      "slug": "losar-de-la-vera",
+      "name": "Losar de la Vera"
+    },
+    {
+      "ine": "10111",
+      "slug": "madrigal-de-la-vera",
+      "name": "Madrigal de la Vera"
+    },
+    {
+      "ine": "10112",
+      "slug": "madrigalejo",
+      "name": "Madrigalejo"
+    },
+    {
+      "ine": "10113",
+      "slug": "madronera",
+      "name": "Madroñera"
+    },
+    {
+      "ine": "10114",
+      "slug": "majadas",
+      "name": "Majadas"
+    },
+    {
+      "ine": "10115",
+      "slug": "malpartida-de-caceres",
+      "name": "Malpartida de Cáceres"
+    },
+    {
+      "ine": "10116",
+      "slug": "malpartida-de-plasencia",
+      "name": "Malpartida de Plasencia"
+    },
+    {
+      "ine": "10117",
+      "slug": "marchagaz",
+      "name": "Marchagaz"
+    },
+    {
+      "ine": "10118",
+      "slug": "mata-de-alcantara",
+      "name": "Mata de Alcántara"
+    },
+    {
+      "ine": "10119",
+      "slug": "membrio",
+      "name": "Membrío"
+    },
+    {
+      "ine": "10120",
+      "slug": "mesas-de-ibor",
+      "name": "Mesas de Ibor"
+    },
+    {
+      "ine": "10121",
+      "slug": "miajadas",
+      "name": "Miajadas"
+    },
+    {
+      "ine": "10122",
+      "slug": "millanes",
+      "name": "Millanes"
+    },
+    {
+      "ine": "10123",
+      "slug": "mirabel",
+      "name": "Mirabel"
+    },
+    {
+      "ine": "10124",
+      "slug": "mohedas-de-granadilla",
+      "name": "Mohedas de Granadilla"
+    },
+    {
+      "ine": "10125",
+      "slug": "monroy",
+      "name": "Monroy"
+    },
+    {
+      "ine": "10126",
+      "slug": "montanchez",
+      "name": "Montánchez"
+    },
+    {
+      "ine": "10127",
+      "slug": "montehermoso",
+      "name": "Montehermoso"
+    },
+    {
+      "ine": "10128",
+      "slug": "moraleja",
+      "name": "Moraleja"
+    },
+    {
+      "ine": "10129",
+      "slug": "morcillo",
+      "name": "Morcillo"
+    },
+    {
+      "ine": "10130",
+      "slug": "navaconcejo",
+      "name": "Navaconcejo"
+    },
+    {
+      "ine": "10131",
+      "slug": "navalmoral-de-la-mata",
+      "name": "Navalmoral de la Mata"
+    },
+    {
+      "ine": "10132",
+      "slug": "navalvillar-de-ibor",
+      "name": "Navalvillar de Ibor"
+    },
+    {
+      "ine": "10133",
+      "slug": "navas-del-madrono",
+      "name": "Navas del Madroño"
+    },
+    {
+      "ine": "10134",
+      "slug": "navezuelas",
+      "name": "Navezuelas"
+    },
+    {
+      "ine": "10135",
+      "slug": "nunomoral",
+      "name": "Nuñomoral"
+    },
+    {
+      "ine": "10136",
+      "slug": "oliva-de-plasencia",
+      "name": "Oliva de Plasencia"
+    },
+    {
+      "ine": "10137",
+      "slug": "palomero",
+      "name": "Palomero"
+    },
+    {
+      "ine": "10138",
+      "slug": "pasaron-de-la-vera",
+      "name": "Pasarón de la Vera"
+    },
+    {
+      "ine": "10139",
+      "slug": "pedroso-de-acim",
+      "name": "Pedroso de Acim"
+    },
+    {
+      "ine": "10140",
+      "slug": "peraleda-de-la-mata",
+      "name": "Peraleda de la Mata"
+    },
+    {
+      "ine": "10141",
+      "slug": "peraleda-de-san-roman",
+      "name": "Peraleda de San Román"
+    },
+    {
+      "ine": "10142",
+      "slug": "perales-del-puerto",
+      "name": "Perales del Puerto"
+    },
+    {
+      "ine": "10143",
+      "slug": "pescueza",
+      "name": "Pescueza"
+    },
+    {
+      "ine": "10144",
+      "slug": "pesga-la",
+      "name": "Pesga, La"
+    },
+    {
+      "ine": "10145",
+      "slug": "piedras-albas",
+      "name": "Piedras Albas"
+    },
+    {
+      "ine": "10146",
+      "slug": "pinofranqueado",
+      "name": "Pinofranqueado"
+    },
+    {
+      "ine": "10147",
+      "slug": "piornal",
+      "name": "Piornal"
+    },
+    {
+      "ine": "10148",
+      "slug": "plasencia",
+      "name": "Plasencia"
+    },
+    {
+      "ine": "10149",
+      "slug": "plasenzuela",
+      "name": "Plasenzuela"
+    },
+    {
+      "ine": "10150",
+      "slug": "portaje",
+      "name": "Portaje"
+    },
+    {
+      "ine": "10151",
+      "slug": "portezuelo",
+      "name": "Portezuelo"
+    },
+    {
+      "ine": "10152",
+      "slug": "pozuelo-de-zarzon",
+      "name": "Pozuelo de Zarzón"
+    },
+    {
+      "ine": "10905",
+      "slug": "pueblonuevo-de-miramontes",
+      "name": "Pueblonuevo de Miramontes"
+    },
+    {
+      "ine": "10153",
+      "slug": "puerto-de-santa-cruz",
+      "name": "Puerto de Santa Cruz"
+    },
+    {
+      "ine": "10154",
+      "slug": "rebollar",
+      "name": "Rebollar"
+    },
+    {
+      "ine": "10155",
+      "slug": "riolobos",
+      "name": "Riolobos"
+    },
+    {
+      "ine": "10156",
+      "slug": "robledillo-de-gata",
+      "name": "Robledillo de Gata"
+    },
+    {
+      "ine": "10157",
+      "slug": "robledillo-de-la-vera",
+      "name": "Robledillo de la Vera"
+    },
+    {
+      "ine": "10158",
+      "slug": "robledillo-de-trujillo",
+      "name": "Robledillo de Trujillo"
+    },
+    {
+      "ine": "10159",
+      "slug": "robledollano",
+      "name": "Robledollano"
+    },
+    {
+      "ine": "10160",
+      "slug": "romangordo",
+      "name": "Romangordo"
+    },
+    {
+      "ine": "10901",
+      "slug": "rosalejo",
+      "name": "Rosalejo"
+    },
+    {
+      "ine": "10161",
+      "slug": "ruanes",
+      "name": "Ruanes"
+    },
+    {
+      "ine": "10162",
+      "slug": "salorino",
+      "name": "Salorino"
+    },
+    {
+      "ine": "10163",
+      "slug": "salvatierra-de-santiago",
+      "name": "Salvatierra de Santiago"
+    },
+    {
+      "ine": "10164",
+      "slug": "san-martin-de-trevejo",
+      "name": "San Martín de Trevejo"
+    },
+    {
+      "ine": "10165",
+      "slug": "santa-ana",
+      "name": "Santa Ana"
+    },
+    {
+      "ine": "10166",
+      "slug": "santa-cruz-de-la-sierra",
+      "name": "Santa Cruz de la Sierra"
+    },
+    {
+      "ine": "10167",
+      "slug": "santa-cruz-de-paniagua",
+      "name": "Santa Cruz de Paniagua"
+    },
+    {
+      "ine": "10168",
+      "slug": "santa-marta-de-magasca",
+      "name": "Santa Marta de Magasca"
+    },
+    {
+      "ine": "10169",
+      "slug": "santiago-de-alcantara",
+      "name": "Santiago de Alcántara"
+    },
+    {
+      "ine": "10170",
+      "slug": "santiago-del-campo",
+      "name": "Santiago del Campo"
+    },
+    {
+      "ine": "10171",
+      "slug": "santibanez-el-alto",
+      "name": "Santibáñez el Alto"
+    },
+    {
+      "ine": "10172",
+      "slug": "santibanez-el-bajo",
+      "name": "Santibáñez el Bajo"
+    },
+    {
+      "ine": "10173",
+      "slug": "saucedilla",
+      "name": "Saucedilla"
+    },
+    {
+      "ine": "10174",
+      "slug": "segura-de-toro",
+      "name": "Segura de Toro"
+    },
+    {
+      "ine": "10175",
+      "slug": "serradilla",
+      "name": "Serradilla"
+    },
+    {
+      "ine": "10176",
+      "slug": "serrejon",
+      "name": "Serrejón"
+    },
+    {
+      "ine": "10177",
+      "slug": "sierra-de-fuentes",
+      "name": "Sierra de Fuentes"
+    },
+    {
+      "ine": "10178",
+      "slug": "talavan",
+      "name": "Talaván"
+    },
+    {
+      "ine": "10179",
+      "slug": "talaveruela-de-la-vera",
+      "name": "Talaveruela de la Vera"
+    },
+    {
+      "ine": "10180",
+      "slug": "talayuela",
+      "name": "Talayuela"
+    },
+    {
+      "ine": "10181",
+      "slug": "tejeda-de-tietar",
+      "name": "Tejeda de Tiétar"
+    },
+    {
+      "ine": "10904",
+      "slug": "tietar",
+      "name": "Tiétar"
+    },
+    {
+      "ine": "10182",
+      "slug": "toril",
+      "name": "Toril"
+    },
+    {
+      "ine": "10183",
+      "slug": "tornavacas",
+      "name": "Tornavacas"
+    },
+    {
+      "ine": "10184",
+      "slug": "torno-el",
+      "name": "Torno, El"
+    },
+    {
+      "ine": "10187",
+      "slug": "torre-de-don-miguel",
+      "name": "Torre de Don Miguel"
+    },
+    {
+      "ine": "10188",
+      "slug": "torre-de-santa-maria",
+      "name": "Torre de Santa María"
+    },
+    {
+      "ine": "10185",
+      "slug": "torrecilla-de-los-angeles",
+      "name": "Torrecilla de los Ángeles"
+    },
+    {
+      "ine": "10186",
+      "slug": "torrecillas-de-la-tiesa",
+      "name": "Torrecillas de la Tiesa"
+    },
+    {
+      "ine": "10190",
+      "slug": "torrejon-el-rubio",
+      "name": "Torrejón el Rubio"
+    },
+    {
+      "ine": "10189",
+      "slug": "torrejoncillo",
+      "name": "Torrejoncillo"
+    },
+    {
+      "ine": "10191",
+      "slug": "torremenga",
+      "name": "Torremenga"
+    },
+    {
+      "ine": "10192",
+      "slug": "torremocha",
+      "name": "Torremocha"
+    },
+    {
+      "ine": "10193",
+      "slug": "torreorgaz",
+      "name": "Torreorgaz"
+    },
+    {
+      "ine": "10194",
+      "slug": "torrequemada",
+      "name": "Torrequemada"
+    },
+    {
+      "ine": "10195",
+      "slug": "trujillo",
+      "name": "Trujillo"
+    },
+    {
+      "ine": "10196",
+      "slug": "valdastillas",
+      "name": "Valdastillas"
+    },
+    {
+      "ine": "10197",
+      "slug": "valdecanas-de-tajo",
+      "name": "Valdecañas de Tajo"
+    },
+    {
+      "ine": "10198",
+      "slug": "valdefuentes",
+      "name": "Valdefuentes"
+    },
+    {
+      "ine": "10199",
+      "slug": "valdehuncar",
+      "name": "Valdehúncar"
+    },
+    {
+      "ine": "10200",
+      "slug": "valdelacasa-de-tajo",
+      "name": "Valdelacasa de Tajo"
+    },
+    {
+      "ine": "10201",
+      "slug": "valdemorales",
+      "name": "Valdemorales"
+    },
+    {
+      "ine": "10202",
+      "slug": "valdeobispo",
+      "name": "Valdeobispo"
+    },
+    {
+      "ine": "10203",
+      "slug": "valencia-de-alcantara",
+      "name": "Valencia de Alcántara"
+    },
+    {
+      "ine": "10204",
+      "slug": "valverde-de-la-vera",
+      "name": "Valverde de la Vera"
+    },
+    {
+      "ine": "10205",
+      "slug": "valverde-del-fresno",
+      "name": "Valverde del Fresno"
+    },
+    {
+      "ine": "10902",
+      "slug": "vegaviana",
+      "name": "Vegaviana"
+    },
+    {
+      "ine": "10206",
+      "slug": "viandar-de-la-vera",
+      "name": "Viandar de la Vera"
+    },
+    {
+      "ine": "10207",
+      "slug": "villa-del-campo",
+      "name": "Villa del Campo"
+    },
+    {
+      "ine": "10208",
+      "slug": "villa-del-rey",
+      "name": "Villa del Rey"
+    },
+    {
+      "ine": "10209",
+      "slug": "villamesias",
+      "name": "Villamesías"
+    },
+    {
+      "ine": "10210",
+      "slug": "villamiel",
+      "name": "Villamiel"
+    },
+    {
+      "ine": "10211",
+      "slug": "villanueva-de-la-sierra",
+      "name": "Villanueva de la Sierra"
+    },
+    {
+      "ine": "10212",
+      "slug": "villanueva-de-la-vera",
+      "name": "Villanueva de la Vera"
+    },
+    {
+      "ine": "10214",
+      "slug": "villar-de-plasencia",
+      "name": "Villar de Plasencia"
+    },
+    {
+      "ine": "10213",
+      "slug": "villar-del-pedroso",
+      "name": "Villar del Pedroso"
+    },
+    {
+      "ine": "10215",
+      "slug": "villasbuenas-de-gata",
+      "name": "Villasbuenas de Gata"
+    },
+    {
+      "ine": "10216",
+      "slug": "zarza-de-granadilla",
+      "name": "Zarza de Granadilla"
+    },
+    {
+      "ine": "10217",
+      "slug": "zarza-de-montanchez",
+      "name": "Zarza de Montánchez"
+    },
+    {
+      "ine": "10218",
+      "slug": "zarza-la-mayor",
+      "name": "Zarza la Mayor"
+    },
+    {
+      "ine": "10219",
+      "slug": "zorita",
+      "name": "Zorita"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

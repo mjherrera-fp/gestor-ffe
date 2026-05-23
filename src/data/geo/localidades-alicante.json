@@ -1,0 +1,725 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "VAL",
+    "slug": "val",
+    "name": "Comunitat Valenciana"
+  },
+  "province": {
+    "code": "03",
+    "slug": "alicante",
+    "name": "Alicante"
+  },
+  "municipalities": [
+    {
+      "ine": "03002",
+      "slug": "agost",
+      "name": "Agost"
+    },
+    {
+      "ine": "03003",
+      "slug": "agres",
+      "name": "Agres"
+    },
+    {
+      "ine": "03004",
+      "slug": "aigues",
+      "name": "Aigües"
+    },
+    {
+      "ine": "03005",
+      "slug": "albatera",
+      "name": "Albatera"
+    },
+    {
+      "ine": "03006",
+      "slug": "alcalali",
+      "name": "Alcalalí"
+    },
+    {
+      "ine": "03007",
+      "slug": "alcocer-de-planes",
+      "name": "Alcocer de Planes"
+    },
+    {
+      "ine": "03008",
+      "slug": "alcoleja",
+      "name": "Alcoleja"
+    },
+    {
+      "ine": "03009",
+      "slug": "alcoy-alcoi",
+      "name": "Alcoy/Alcoi"
+    },
+    {
+      "ine": "03010",
+      "slug": "alfafara",
+      "name": "Alfafara"
+    },
+    {
+      "ine": "03011",
+      "slug": "alfas-del-pi-l",
+      "name": "Alfàs del Pi, l'"
+    },
+    {
+      "ine": "03012",
+      "slug": "algorfa",
+      "name": "Algorfa"
+    },
+    {
+      "ine": "03013",
+      "slug": "alguena",
+      "name": "Algueña"
+    },
+    {
+      "ine": "03014",
+      "slug": "alicante-alacant",
+      "name": "Alicante/Alacant"
+    },
+    {
+      "ine": "03015",
+      "slug": "almoradi",
+      "name": "Almoradí"
+    },
+    {
+      "ine": "03016",
+      "slug": "almudaina",
+      "name": "Almudaina"
+    },
+    {
+      "ine": "03017",
+      "slug": "alqueria-d-asnar-l",
+      "name": "Alqueria d'Asnar, l'"
+    },
+    {
+      "ine": "03018",
+      "slug": "altea",
+      "name": "Altea"
+    },
+    {
+      "ine": "03019",
+      "slug": "aspe",
+      "name": "Aspe"
+    },
+    {
+      "ine": "03001",
+      "slug": "atzubia-l",
+      "name": "Atzúbia, l'"
+    },
+    {
+      "ine": "03020",
+      "slug": "balones",
+      "name": "Balones"
+    },
+    {
+      "ine": "03021",
+      "slug": "banyeres-de-mariola",
+      "name": "Banyeres de Mariola"
+    },
+    {
+      "ine": "03022",
+      "slug": "benasau",
+      "name": "Benasau"
+    },
+    {
+      "ine": "03023",
+      "slug": "beneixama",
+      "name": "Beneixama"
+    },
+    {
+      "ine": "03024",
+      "slug": "benejuzar",
+      "name": "Benejúzar"
+    },
+    {
+      "ine": "03025",
+      "slug": "benferri",
+      "name": "Benferri"
+    },
+    {
+      "ine": "03026",
+      "slug": "beniarbeig",
+      "name": "Beniarbeig"
+    },
+    {
+      "ine": "03027",
+      "slug": "beniarda",
+      "name": "Beniardá"
+    },
+    {
+      "ine": "03028",
+      "slug": "beniarres",
+      "name": "Beniarrés"
+    },
+    {
+      "ine": "03030",
+      "slug": "benidoleig",
+      "name": "Benidoleig"
+    },
+    {
+      "ine": "03031",
+      "slug": "benidorm",
+      "name": "Benidorm"
+    },
+    {
+      "ine": "03032",
+      "slug": "benifallim",
+      "name": "Benifallim"
+    },
+    {
+      "ine": "03033",
+      "slug": "benifato",
+      "name": "Benifato"
+    },
+    {
+      "ine": "03029",
+      "slug": "benigembla",
+      "name": "Benigembla"
+    },
+    {
+      "ine": "03034",
+      "slug": "benijofar",
+      "name": "Benijófar"
+    },
+    {
+      "ine": "03035",
+      "slug": "benilloba",
+      "name": "Benilloba"
+    },
+    {
+      "ine": "03036",
+      "slug": "benillup",
+      "name": "Benillup"
+    },
+    {
+      "ine": "03037",
+      "slug": "benimantell",
+      "name": "Benimantell"
+    },
+    {
+      "ine": "03038",
+      "slug": "benimarfull",
+      "name": "Benimarfull"
+    },
+    {
+      "ine": "03039",
+      "slug": "benimassot",
+      "name": "Benimassot"
+    },
+    {
+      "ine": "03040",
+      "slug": "benimeli",
+      "name": "Benimeli"
+    },
+    {
+      "ine": "03041",
+      "slug": "benissa",
+      "name": "Benissa"
+    },
+    {
+      "ine": "03042",
+      "slug": "benitachell-poble-nou-de-benitatxell-el",
+      "name": "Benitachell/Poble Nou de Benitatxell, el"
+    },
+    {
+      "ine": "03043",
+      "slug": "biar",
+      "name": "Biar"
+    },
+    {
+      "ine": "03044",
+      "slug": "bigastro",
+      "name": "Bigastro"
+    },
+    {
+      "ine": "03045",
+      "slug": "bolulla",
+      "name": "Bolulla"
+    },
+    {
+      "ine": "03046",
+      "slug": "busot",
+      "name": "Busot"
+    },
+    {
+      "ine": "03048",
+      "slug": "callosa-d-en-sarria",
+      "name": "Callosa d'en Sarrià"
+    },
+    {
+      "ine": "03049",
+      "slug": "callosa-de-segura",
+      "name": "Callosa de Segura"
+    },
+    {
+      "ine": "03047",
+      "slug": "calp",
+      "name": "Calp"
+    },
+    {
+      "ine": "03050",
+      "slug": "campello-el",
+      "name": "Campello, el"
+    },
+    {
+      "ine": "03051",
+      "slug": "campo-de-mirra-camp-de-mirra-el",
+      "name": "Campo de Mirra/Camp de Mirra, el"
+    },
+    {
+      "ine": "03052",
+      "slug": "canada",
+      "name": "Cañada"
+    },
+    {
+      "ine": "03053",
+      "slug": "castalla",
+      "name": "Castalla"
+    },
+    {
+      "ine": "03054",
+      "slug": "castell-de-castells",
+      "name": "Castell de Castells"
+    },
+    {
+      "ine": "03075",
+      "slug": "castell-de-guadalest-el",
+      "name": "Castell de Guadalest, el"
+    },
+    {
+      "ine": "03055",
+      "slug": "catral",
+      "name": "Catral"
+    },
+    {
+      "ine": "03056",
+      "slug": "cocentaina",
+      "name": "Cocentaina"
+    },
+    {
+      "ine": "03057",
+      "slug": "confrides",
+      "name": "Confrides"
+    },
+    {
+      "ine": "03058",
+      "slug": "cox",
+      "name": "Cox"
+    },
+    {
+      "ine": "03059",
+      "slug": "crevillent",
+      "name": "Crevillent"
+    },
+    {
+      "ine": "03061",
+      "slug": "daya-nueva",
+      "name": "Daya Nueva"
+    },
+    {
+      "ine": "03062",
+      "slug": "daya-vieja",
+      "name": "Daya Vieja"
+    },
+    {
+      "ine": "03063",
+      "slug": "denia",
+      "name": "Dénia"
+    },
+    {
+      "ine": "03064",
+      "slug": "dolores",
+      "name": "Dolores"
+    },
+    {
+      "ine": "03065",
+      "slug": "elche-elx",
+      "name": "Elche/Elx"
+    },
+    {
+      "ine": "03066",
+      "slug": "elda",
+      "name": "Elda"
+    },
+    {
+      "ine": "03067",
+      "slug": "facheca",
+      "name": "Facheca"
+    },
+    {
+      "ine": "03068",
+      "slug": "famorca",
+      "name": "Famorca"
+    },
+    {
+      "ine": "03069",
+      "slug": "finestrat",
+      "name": "Finestrat"
+    },
+    {
+      "ine": "03077",
+      "slug": "fondo-de-les-neus-el-hondon-de-las-nieves",
+      "name": "Fondó de les Neus, el/Hondón de las Nieves"
+    },
+    {
+      "ine": "03070",
+      "slug": "formentera-del-segura",
+      "name": "Formentera del Segura"
+    },
+    {
+      "ine": "03072",
+      "slug": "gaianes",
+      "name": "Gaianes"
+    },
+    {
+      "ine": "03071",
+      "slug": "gata-de-gorgos",
+      "name": "Gata de Gorgos"
+    },
+    {
+      "ine": "03073",
+      "slug": "gorga",
+      "name": "Gorga"
+    },
+    {
+      "ine": "03074",
+      "slug": "granja-de-rocamora",
+      "name": "Granja de Rocamora"
+    },
+    {
+      "ine": "03076",
+      "slug": "guardamar-del-segura",
+      "name": "Guardamar del Segura"
+    },
+    {
+      "ine": "03078",
+      "slug": "hondon-de-los-frailes",
+      "name": "Hondón de los Frailes"
+    },
+    {
+      "ine": "03079",
+      "slug": "ibi",
+      "name": "Ibi"
+    },
+    {
+      "ine": "03080",
+      "slug": "jacarilla",
+      "name": "Jacarilla"
+    },
+    {
+      "ine": "03082",
+      "slug": "javea-xabia",
+      "name": "Jávea/Xàbia"
+    },
+    {
+      "ine": "03083",
+      "slug": "jijona-xixona",
+      "name": "Jijona/Xixona"
+    },
+    {
+      "ine": "03085",
+      "slug": "lliber",
+      "name": "Llíber"
+    },
+    {
+      "ine": "03084",
+      "slug": "lorcha-orxa-l",
+      "name": "Lorcha/Orxa, l'"
+    },
+    {
+      "ine": "03086",
+      "slug": "millena",
+      "name": "Millena"
+    },
+    {
+      "ine": "03088",
+      "slug": "monforte-del-cid",
+      "name": "Monforte del Cid"
+    },
+    {
+      "ine": "03089",
+      "slug": "monovar-monover",
+      "name": "Monóvar/Monòver"
+    },
+    {
+      "ine": "03903",
+      "slug": "montesinos-los",
+      "name": "Montesinos, Los"
+    },
+    {
+      "ine": "03091",
+      "slug": "murla",
+      "name": "Murla"
+    },
+    {
+      "ine": "03092",
+      "slug": "muro-de-alcoy",
+      "name": "Muro de Alcoy"
+    },
+    {
+      "ine": "03090",
+      "slug": "mutxamel",
+      "name": "Mutxamel"
+    },
+    {
+      "ine": "03093",
+      "slug": "novelda",
+      "name": "Novelda"
+    },
+    {
+      "ine": "03094",
+      "slug": "nucia-la",
+      "name": "Nucia, la"
+    },
+    {
+      "ine": "03095",
+      "slug": "ondara",
+      "name": "Ondara"
+    },
+    {
+      "ine": "03096",
+      "slug": "onil",
+      "name": "Onil"
+    },
+    {
+      "ine": "03097",
+      "slug": "orba",
+      "name": "Orba"
+    },
+    {
+      "ine": "03099",
+      "slug": "orihuela",
+      "name": "Orihuela"
+    },
+    {
+      "ine": "03098",
+      "slug": "orxeta",
+      "name": "Orxeta"
+    },
+    {
+      "ine": "03100",
+      "slug": "parcent",
+      "name": "Parcent"
+    },
+    {
+      "ine": "03101",
+      "slug": "pedreguer",
+      "name": "Pedreguer"
+    },
+    {
+      "ine": "03102",
+      "slug": "pego",
+      "name": "Pego"
+    },
+    {
+      "ine": "03103",
+      "slug": "penaguila",
+      "name": "Penàguila"
+    },
+    {
+      "ine": "03104",
+      "slug": "petrer",
+      "name": "Petrer"
+    },
+    {
+      "ine": "03902",
+      "slug": "pilar-de-la-horadada",
+      "name": "Pilar de la Horadada"
+    },
+    {
+      "ine": "03105",
+      "slug": "pinos-el-pinoso",
+      "name": "Pinós, el/Pinoso"
+    },
+    {
+      "ine": "03106",
+      "slug": "planes",
+      "name": "Planes"
+    },
+    {
+      "ine": "03901",
+      "slug": "poblets-els",
+      "name": "Poblets, els"
+    },
+    {
+      "ine": "03107",
+      "slug": "polop",
+      "name": "Polop"
+    },
+    {
+      "ine": "03060",
+      "slug": "quatretondeta",
+      "name": "Quatretondeta"
+    },
+    {
+      "ine": "03109",
+      "slug": "rafal",
+      "name": "Rafal"
+    },
+    {
+      "ine": "03110",
+      "slug": "rafol-d-almunia-el",
+      "name": "Ràfol d'Almúnia, el"
+    },
+    {
+      "ine": "03111",
+      "slug": "redovan",
+      "name": "Redován"
+    },
+    {
+      "ine": "03112",
+      "slug": "relleu",
+      "name": "Relleu"
+    },
+    {
+      "ine": "03113",
+      "slug": "rojales",
+      "name": "Rojales"
+    },
+    {
+      "ine": "03114",
+      "slug": "romana-la",
+      "name": "Romana, la"
+    },
+    {
+      "ine": "03115",
+      "slug": "sagra",
+      "name": "Sagra"
+    },
+    {
+      "ine": "03116",
+      "slug": "salinas",
+      "name": "Salinas"
+    },
+    {
+      "ine": "03118",
+      "slug": "san-fulgencio",
+      "name": "San Fulgencio"
+    },
+    {
+      "ine": "03904",
+      "slug": "san-isidro",
+      "name": "San Isidro"
+    },
+    {
+      "ine": "03120",
+      "slug": "san-miguel-de-salinas",
+      "name": "San Miguel de Salinas"
+    },
+    {
+      "ine": "03122",
+      "slug": "san-vicente-del-raspeig-sant-vicent-del-raspeig",
+      "name": "San Vicente del Raspeig/Sant Vicent del Raspeig"
+    },
+    {
+      "ine": "03117",
+      "slug": "sanet-y-negrals",
+      "name": "Sanet y Negrals"
+    },
+    {
+      "ine": "03119",
+      "slug": "sant-joan-d-alacant",
+      "name": "Sant Joan d'Alacant"
+    },
+    {
+      "ine": "03121",
+      "slug": "santa-pola",
+      "name": "Santa Pola"
+    },
+    {
+      "ine": "03123",
+      "slug": "sax",
+      "name": "Sax"
+    },
+    {
+      "ine": "03124",
+      "slug": "sella",
+      "name": "Sella"
+    },
+    {
+      "ine": "03125",
+      "slug": "senija",
+      "name": "Senija"
+    },
+    {
+      "ine": "03127",
+      "slug": "tarbena",
+      "name": "Tàrbena"
+    },
+    {
+      "ine": "03128",
+      "slug": "teulada",
+      "name": "Teulada"
+    },
+    {
+      "ine": "03129",
+      "slug": "tibi",
+      "name": "Tibi"
+    },
+    {
+      "ine": "03130",
+      "slug": "tollos",
+      "name": "Tollos"
+    },
+    {
+      "ine": "03131",
+      "slug": "tormos",
+      "name": "Tormos"
+    },
+    {
+      "ine": "03132",
+      "slug": "torremanzanas-torre-de-les-macanes-la",
+      "name": "Torremanzanas/Torre de les Maçanes, la"
+    },
+    {
+      "ine": "03133",
+      "slug": "torrevieja",
+      "name": "Torrevieja"
+    },
+    {
+      "ine": "03134",
+      "slug": "vall-d-alcala-la",
+      "name": "Vall d'Alcalà, la"
+    },
+    {
+      "ine": "03135",
+      "slug": "vall-d-ebo-la",
+      "name": "Vall d'Ebo, la"
+    },
+    {
+      "ine": "03136",
+      "slug": "vall-de-gallinera",
+      "name": "Vall de Gallinera"
+    },
+    {
+      "ine": "03137",
+      "slug": "vall-de-laguar-la",
+      "name": "Vall de Laguar, la"
+    },
+    {
+      "ine": "03138",
+      "slug": "verger-el",
+      "name": "Verger, el"
+    },
+    {
+      "ine": "03139",
+      "slug": "villajoyosa-vila-joiosa-la",
+      "name": "Villajoyosa/Vila Joiosa, la"
+    },
+    {
+      "ine": "03140",
+      "slug": "villena",
+      "name": "Villena"
+    },
+    {
+      "ine": "03081",
+      "slug": "xalo",
+      "name": "Xaló"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

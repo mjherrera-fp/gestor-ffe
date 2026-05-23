@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "provincias",
+  "region": {
+    "code": "EUS",
+    "slug": "eus",
+    "name": "País Vasco"
+  },
+  "provinces": [
+    {
+      "code": "01",
+      "slug": "alava",
+      "name": "Álava",
+      "municipalityCount": 51
+    },
+    {
+      "code": "20",
+      "slug": "guipuzcoa",
+      "name": "Guipúzcoa",
+      "municipalityCount": 88
+    },
+    {
+      "code": "48",
+      "slug": "vizcaya",
+      "name": "Vizcaya",
+      "municipalityCount": 112
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

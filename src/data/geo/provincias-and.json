@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "provincias",
+  "region": {
+    "code": "AND",
+    "slug": "and",
+    "name": "Andalucía"
+  },
+  "provinces": [
+    {
+      "code": "04",
+      "slug": "almeria",
+      "name": "Almería",
+      "municipalityCount": 103
+    },
+    {
+      "code": "AD",
+      "slug": "andorra",
+      "name": "Andorra",
+      "municipalityCount": 7
+    },
+    {
+      "code": "11",
+      "slug": "cadiz",
+      "name": "Cádiz",
+      "municipalityCount": 44
+    },
+    {
+      "code": "14",
+      "slug": "cordoba",
+      "name": "Córdoba",
+      "municipalityCount": 75
+    },
+    {
+      "code": "18",
+      "slug": "granada",
+      "name": "Granada",
+      "municipalityCount": 172
+    },
+    {
+      "code": "21",
+      "slug": "huelva",
+      "name": "Huelva",
+      "municipalityCount": 79
+    },
+    {
+      "code": "23",
+      "slug": "jaen",
+      "name": "Jaén",
+      "municipalityCount": 97
+    },
+    {
+      "code": "29",
+      "slug": "malaga",
+      "name": "Málaga",
+      "municipalityCount": 103
+    },
+    {
+      "code": "41",
+      "slug": "sevilla",
+      "name": "Sevilla",
+      "municipalityCount": 105
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

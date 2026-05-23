@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "BAL",
+    "slug": "bal",
+    "name": "Illes Balears"
+  },
+  "province": {
+    "code": "07",
+    "slug": "baleares",
+    "name": "Baleares"
+  },
+  "municipalities": [
+    {
+      "ine": "07002",
+      "slug": "alaior",
+      "name": "Alaior"
+    },
+    {
+      "ine": "07001",
+      "slug": "alaro",
+      "name": "Alaró"
+    },
+    {
+      "ine": "07003",
+      "slug": "alcudia",
+      "name": "Alcúdia"
+    },
+    {
+      "ine": "07004",
+      "slug": "algaida",
+      "name": "Algaida"
+    },
+    {
+      "ine": "07005",
+      "slug": "andratx",
+      "name": "Andratx"
+    },
+    {
+      "ine": "07901",
+      "slug": "ariany",
+      "name": "Ariany"
+    },
+    {
+      "ine": "07006",
+      "slug": "arta",
+      "name": "Artà"
+    },
+    {
+      "ine": "07007",
+      "slug": "banyalbufar",
+      "name": "Banyalbufar"
+    },
+    {
+      "ine": "07008",
+      "slug": "binissalem",
+      "name": "Binissalem"
+    },
+    {
+      "ine": "07009",
+      "slug": "buger",
+      "name": "Búger"
+    },
+    {
+      "ine": "07010",
+      "slug": "bunyola",
+      "name": "Bunyola"
+    },
+    {
+      "ine": "07011",
+      "slug": "calvia",
+      "name": "Calvià"
+    },
+    {
+      "ine": "07012",
+      "slug": "campanet",
+      "name": "Campanet"
+    },
+    {
+      "ine": "07013",
+      "slug": "campos",
+      "name": "Campos"
+    },
+    {
+      "ine": "07014",
+      "slug": "capdepera",
+      "name": "Capdepera"
+    },
+    {
+      "ine": "07064",
+      "slug": "castell-es",
+      "name": "Castell, Es"
+    },
+    {
+      "ine": "07015",
+      "slug": "ciutadella-de-menorca",
+      "name": "Ciutadella de Menorca"
+    },
+    {
+      "ine": "07016",
+      "slug": "consell",
+      "name": "Consell"
+    },
+    {
+      "ine": "07017",
+      "slug": "costitx",
+      "name": "Costitx"
+    },
+    {
+      "ine": "07018",
+      "slug": "deia",
+      "name": "Deià"
+    },
+    {
+      "ine": "07026",
+      "slug": "eivissa",
+      "name": "Eivissa"
+    },
+    {
+      "ine": "07019",
+      "slug": "escorca",
+      "name": "Escorca"
+    },
+    {
+      "ine": "07020",
+      "slug": "esporles",
+      "name": "Esporles"
+    },
+    {
+      "ine": "07021",
+      "slug": "estellencs",
+      "name": "Estellencs"
+    },
+    {
+      "ine": "07022",
+      "slug": "felanitx",
+      "name": "Felanitx"
+    },
+    {
+      "ine": "07023",
+      "slug": "ferreries",
+      "name": "Ferreries"
+    },
+    {
+      "ine": "07024",
+      "slug": "formentera",
+      "name": "Formentera"
+    },
+    {
+      "ine": "07025",
+      "slug": "fornalutx",
+      "name": "Fornalutx"
+    },
+    {
+      "ine": "07027",
+      "slug": "inca",
+      "name": "Inca"
+    },
+    {
+      "ine": "07028",
+      "slug": "lloret-de-vistalegre",
+      "name": "Lloret de Vistalegre"
+    },
+    {
+      "ine": "07029",
+      "slug": "lloseta",
+      "name": "Lloseta"
+    },
+    {
+      "ine": "07030",
+      "slug": "llubi",
+      "name": "Llubí"
+    },
+    {
+      "ine": "07031",
+      "slug": "llucmajor",
+      "name": "Llucmajor"
+    },
+    {
+      "ine": "07033",
+      "slug": "manacor",
+      "name": "Manacor"
+    },
+    {
+      "ine": "07034",
+      "slug": "mancor-de-la-vall",
+      "name": "Mancor de la Vall"
+    },
+    {
+      "ine": "07032",
+      "slug": "mao-mahon",
+      "name": "Maó-Mahón"
+    },
+    {
+      "ine": "07035",
+      "slug": "maria-de-la-salut",
+      "name": "Maria de la Salut"
+    },
+    {
+      "ine": "07036",
+      "slug": "marratxi",
+      "name": "Marratxí"
+    },
+    {
+      "ine": "07037",
+      "slug": "mercadal-es",
+      "name": "Mercadal, Es"
+    },
+    {
+      "ine": "07902",
+      "slug": "migjorn-gran-es",
+      "name": "Migjorn Gran, Es"
+    },
+    {
+      "ine": "07038",
+      "slug": "montuiri",
+      "name": "Montuïri"
+    },
+    {
+      "ine": "07039",
+      "slug": "muro",
+      "name": "Muro"
+    },
+    {
+      "ine": "07040",
+      "slug": "palma-de-mallorca",
+      "name": "Palma de Mallorca"
+    },
+    {
+      "ine": "07041",
+      "slug": "petra",
+      "name": "Petra"
+    },
+    {
+      "ine": "07044",
+      "slug": "pobla-sa",
+      "name": "Pobla, Sa"
+    },
+    {
+      "ine": "07042",
+      "slug": "pollenca",
+      "name": "Pollença"
+    },
+    {
+      "ine": "07043",
+      "slug": "porreres",
+      "name": "Porreres"
+    },
+    {
+      "ine": "07045",
+      "slug": "puigpunyent",
+      "name": "Puigpunyent"
+    },
+    {
+      "ine": "07059",
+      "slug": "salines-ses",
+      "name": "Salines, Ses"
+    },
+    {
+      "ine": "07046",
+      "slug": "sant-antoni-de-portmany",
+      "name": "Sant Antoni de Portmany"
+    },
+    {
+      "ine": "07049",
+      "slug": "sant-joan",
+      "name": "Sant Joan"
+    },
+    {
+      "ine": "07050",
+      "slug": "sant-joan-de-labritja",
+      "name": "Sant Joan de Labritja"
+    },
+    {
+      "ine": "07048",
+      "slug": "sant-josep-de-sa-talaia",
+      "name": "Sant Josep de sa Talaia"
+    },
+    {
+      "ine": "07051",
+      "slug": "sant-llorenc-des-cardassar",
+      "name": "Sant Llorenç des Cardassar"
+    },
+    {
+      "ine": "07052",
+      "slug": "sant-lluis",
+      "name": "Sant Lluís"
+    },
+    {
+      "ine": "07053",
+      "slug": "santa-eugenia",
+      "name": "Santa Eugènia"
+    },
+    {
+      "ine": "07054",
+      "slug": "santa-eularia-des-riu",
+      "name": "Santa Eulària des Riu"
+    },
+    {
+      "ine": "07055",
+      "slug": "santa-margalida",
+      "name": "Santa Margalida"
+    },
+    {
+      "ine": "07056",
+      "slug": "santa-maria-del-cami",
+      "name": "Santa María del Camí"
+    },
+    {
+      "ine": "07057",
+      "slug": "santanyi",
+      "name": "Santanyí"
+    },
+    {
+      "ine": "07058",
+      "slug": "selva",
+      "name": "Selva"
+    },
+    {
+      "ine": "07047",
+      "slug": "sencelles",
+      "name": "Sencelles"
+    },
+    {
+      "ine": "07060",
+      "slug": "sineu",
+      "name": "Sineu"
+    },
+    {
+      "ine": "07061",
+      "slug": "soller",
+      "name": "Sóller"
+    },
+    {
+      "ine": "07062",
+      "slug": "son-servera",
+      "name": "Son Servera"
+    },
+    {
+      "ine": "07063",
+      "slug": "valldemossa",
+      "name": "Valldemossa"
+    },
+    {
+      "ine": "07065",
+      "slug": "vilafranca-de-bonany",
+      "name": "Vilafranca de Bonany"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

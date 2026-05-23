@@ -1,0 +1,1065 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "CYL",
+    "slug": "cyl",
+    "name": "Castilla y León"
+  },
+  "province": {
+    "code": "40",
+    "slug": "segovia",
+    "name": "Segovia"
+  },
+  "municipalities": [
+    {
+      "ine": "40001",
+      "slug": "abades",
+      "name": "Abades"
+    },
+    {
+      "ine": "40002",
+      "slug": "adrada-de-piron",
+      "name": "Adrada de Pirón"
+    },
+    {
+      "ine": "40003",
+      "slug": "adrados",
+      "name": "Adrados"
+    },
+    {
+      "ine": "40004",
+      "slug": "aguilafuente",
+      "name": "Aguilafuente"
+    },
+    {
+      "ine": "40005",
+      "slug": "alconada-de-maderuelo",
+      "name": "Alconada de Maderuelo"
+    },
+    {
+      "ine": "40012",
+      "slug": "aldea-real",
+      "name": "Aldea Real"
+    },
+    {
+      "ine": "40006",
+      "slug": "aldealcorvo",
+      "name": "Aldealcorvo"
+    },
+    {
+      "ine": "40007",
+      "slug": "aldealengua-de-pedraza",
+      "name": "Aldealengua de Pedraza"
+    },
+    {
+      "ine": "40008",
+      "slug": "aldealengua-de-santa-maria",
+      "name": "Aldealengua de Santa María"
+    },
+    {
+      "ine": "40009",
+      "slug": "aldeanueva-de-la-serrezuela",
+      "name": "Aldeanueva de la Serrezuela"
+    },
+    {
+      "ine": "40010",
+      "slug": "aldeanueva-del-codonal",
+      "name": "Aldeanueva del Codonal"
+    },
+    {
+      "ine": "40013",
+      "slug": "aldeasona",
+      "name": "Aldeasoña"
+    },
+    {
+      "ine": "40014",
+      "slug": "aldehorno",
+      "name": "Aldehorno"
+    },
+    {
+      "ine": "40015",
+      "slug": "aldehuela-del-codonal",
+      "name": "Aldehuela del Codonal"
+    },
+    {
+      "ine": "40016",
+      "slug": "aldeonte",
+      "name": "Aldeonte"
+    },
+    {
+      "ine": "40017",
+      "slug": "anaya",
+      "name": "Anaya"
+    },
+    {
+      "ine": "40018",
+      "slug": "ane",
+      "name": "Añe"
+    },
+    {
+      "ine": "40019",
+      "slug": "arahuetes",
+      "name": "Arahuetes"
+    },
+    {
+      "ine": "40020",
+      "slug": "arcones",
+      "name": "Arcones"
+    },
+    {
+      "ine": "40021",
+      "slug": "arevalillo-de-cega",
+      "name": "Arevalillo de Cega"
+    },
+    {
+      "ine": "40022",
+      "slug": "armuna",
+      "name": "Armuña"
+    },
+    {
+      "ine": "40024",
+      "slug": "ayllon",
+      "name": "Ayllón"
+    },
+    {
+      "ine": "40025",
+      "slug": "barbolla",
+      "name": "Barbolla"
+    },
+    {
+      "ine": "40026",
+      "slug": "basardilla",
+      "name": "Basardilla"
+    },
+    {
+      "ine": "40028",
+      "slug": "bercial",
+      "name": "Bercial"
+    },
+    {
+      "ine": "40029",
+      "slug": "bercimuel",
+      "name": "Bercimuel"
+    },
+    {
+      "ine": "40030",
+      "slug": "bernardos",
+      "name": "Bernardos"
+    },
+    {
+      "ine": "40031",
+      "slug": "bernuy-de-porreros",
+      "name": "Bernuy de Porreros"
+    },
+    {
+      "ine": "40032",
+      "slug": "boceguillas",
+      "name": "Boceguillas"
+    },
+    {
+      "ine": "40033",
+      "slug": "brieva",
+      "name": "Brieva"
+    },
+    {
+      "ine": "40034",
+      "slug": "caballar",
+      "name": "Caballar"
+    },
+    {
+      "ine": "40035",
+      "slug": "cabanas-de-polendos",
+      "name": "Cabañas de Polendos"
+    },
+    {
+      "ine": "40036",
+      "slug": "cabezuela",
+      "name": "Cabezuela"
+    },
+    {
+      "ine": "40037",
+      "slug": "calabazas-de-fuentiduena",
+      "name": "Calabazas de Fuentidueña"
+    },
+    {
+      "ine": "40039",
+      "slug": "campo-de-san-pedro",
+      "name": "Campo de San Pedro"
+    },
+    {
+      "ine": "40040",
+      "slug": "cantalejo",
+      "name": "Cantalejo"
+    },
+    {
+      "ine": "40041",
+      "slug": "cantimpalos",
+      "name": "Cantimpalos"
+    },
+    {
+      "ine": "40043",
+      "slug": "carbonero-el-mayor",
+      "name": "Carbonero el Mayor"
+    },
+    {
+      "ine": "40044",
+      "slug": "carrascal-del-rio",
+      "name": "Carrascal del Río"
+    },
+    {
+      "ine": "40045",
+      "slug": "casla",
+      "name": "Casla"
+    },
+    {
+      "ine": "40046",
+      "slug": "castillejo-de-mesleon",
+      "name": "Castillejo de Mesleón"
+    },
+    {
+      "ine": "40047",
+      "slug": "castro-de-fuentiduena",
+      "name": "Castro de Fuentidueña"
+    },
+    {
+      "ine": "40048",
+      "slug": "castrojimeno",
+      "name": "Castrojimeno"
+    },
+    {
+      "ine": "40049",
+      "slug": "castroserna-de-abajo",
+      "name": "Castroserna de Abajo"
+    },
+    {
+      "ine": "40051",
+      "slug": "castroserracin",
+      "name": "Castroserracín"
+    },
+    {
+      "ine": "40052",
+      "slug": "cedillo-de-la-torre",
+      "name": "Cedillo de la Torre"
+    },
+    {
+      "ine": "40053",
+      "slug": "cerezo-de-abajo",
+      "name": "Cerezo de Abajo"
+    },
+    {
+      "ine": "40054",
+      "slug": "cerezo-de-arriba",
+      "name": "Cerezo de Arriba"
+    },
+    {
+      "ine": "40065",
+      "slug": "chane",
+      "name": "Chañe"
+    },
+    {
+      "ine": "40055",
+      "slug": "cilleruelo-de-san-mames",
+      "name": "Cilleruelo de San Mamés"
+    },
+    {
+      "ine": "40056",
+      "slug": "cobos-de-fuentiduena",
+      "name": "Cobos de Fuentidueña"
+    },
+    {
+      "ine": "40057",
+      "slug": "coca",
+      "name": "Coca"
+    },
+    {
+      "ine": "40058",
+      "slug": "codorniz",
+      "name": "Codorniz"
+    },
+    {
+      "ine": "40059",
+      "slug": "collado-hermoso",
+      "name": "Collado Hermoso"
+    },
+    {
+      "ine": "40060",
+      "slug": "condado-de-castilnovo",
+      "name": "Condado de Castilnovo"
+    },
+    {
+      "ine": "40061",
+      "slug": "corral-de-ayllon",
+      "name": "Corral de Ayllón"
+    },
+    {
+      "ine": "40902",
+      "slug": "cozuelos-de-fuentiduena",
+      "name": "Cozuelos de Fuentidueña"
+    },
+    {
+      "ine": "40062",
+      "slug": "cubillo",
+      "name": "Cubillo"
+    },
+    {
+      "ine": "40063",
+      "slug": "cuellar",
+      "name": "Cuéllar"
+    },
+    {
+      "ine": "40905",
+      "slug": "cuevas-de-provanco",
+      "name": "Cuevas de Provanco"
+    },
+    {
+      "ine": "40068",
+      "slug": "domingo-garcia",
+      "name": "Domingo García"
+    },
+    {
+      "ine": "40069",
+      "slug": "donhierro",
+      "name": "Donhierro"
+    },
+    {
+      "ine": "40070",
+      "slug": "duruelo",
+      "name": "Duruelo"
+    },
+    {
+      "ine": "40071",
+      "slug": "encinas",
+      "name": "Encinas"
+    },
+    {
+      "ine": "40072",
+      "slug": "encinillas",
+      "name": "Encinillas"
+    },
+    {
+      "ine": "40073",
+      "slug": "escalona-del-prado",
+      "name": "Escalona del Prado"
+    },
+    {
+      "ine": "40074",
+      "slug": "escarabajosa-de-cabezas",
+      "name": "Escarabajosa de Cabezas"
+    },
+    {
+      "ine": "40075",
+      "slug": "escobar-de-polendos",
+      "name": "Escobar de Polendos"
+    },
+    {
+      "ine": "40076",
+      "slug": "espinar-el",
+      "name": "Espinar, El"
+    },
+    {
+      "ine": "40077",
+      "slug": "espirdo",
+      "name": "Espirdo"
+    },
+    {
+      "ine": "40078",
+      "slug": "fresneda-de-cuellar",
+      "name": "Fresneda de Cuéllar"
+    },
+    {
+      "ine": "40079",
+      "slug": "fresno-de-cantespino",
+      "name": "Fresno de Cantespino"
+    },
+    {
+      "ine": "40080",
+      "slug": "fresno-de-la-fuente",
+      "name": "Fresno de la Fuente"
+    },
+    {
+      "ine": "40081",
+      "slug": "frumales",
+      "name": "Frumales"
+    },
+    {
+      "ine": "40082",
+      "slug": "fuente-de-santa-cruz",
+      "name": "Fuente de Santa Cruz"
+    },
+    {
+      "ine": "40083",
+      "slug": "fuente-el-olmo-de-fuentiduena",
+      "name": "Fuente el Olmo de Fuentidueña"
+    },
+    {
+      "ine": "40084",
+      "slug": "fuente-el-olmo-de-iscar",
+      "name": "Fuente el Olmo de Íscar"
+    },
+    {
+      "ine": "40086",
+      "slug": "fuentepelayo",
+      "name": "Fuentepelayo"
+    },
+    {
+      "ine": "40087",
+      "slug": "fuentepinel",
+      "name": "Fuentepiñel"
+    },
+    {
+      "ine": "40088",
+      "slug": "fuenterrebollo",
+      "name": "Fuenterrebollo"
+    },
+    {
+      "ine": "40089",
+      "slug": "fuentesauco-de-fuentiduena",
+      "name": "Fuentesaúco de Fuentidueña"
+    },
+    {
+      "ine": "40091",
+      "slug": "fuentesoto",
+      "name": "Fuentesoto"
+    },
+    {
+      "ine": "40092",
+      "slug": "fuentiduena",
+      "name": "Fuentidueña"
+    },
+    {
+      "ine": "40093",
+      "slug": "gallegos",
+      "name": "Gallegos"
+    },
+    {
+      "ine": "40094",
+      "slug": "garcillan",
+      "name": "Garcillán"
+    },
+    {
+      "ine": "40095",
+      "slug": "gomezserracin",
+      "name": "Gomezserracín"
+    },
+    {
+      "ine": "40097",
+      "slug": "grajera",
+      "name": "Grajera"
+    },
+    {
+      "ine": "40099",
+      "slug": "honrubia-de-la-cuesta",
+      "name": "Honrubia de la Cuesta"
+    },
+    {
+      "ine": "40100",
+      "slug": "hontalbilla",
+      "name": "Hontalbilla"
+    },
+    {
+      "ine": "40101",
+      "slug": "hontanares-de-eresma",
+      "name": "Hontanares de Eresma"
+    },
+    {
+      "ine": "40103",
+      "slug": "huertos-los",
+      "name": "Huertos, Los"
+    },
+    {
+      "ine": "40104",
+      "slug": "ituero-y-lama",
+      "name": "Ituero y Lama"
+    },
+    {
+      "ine": "40105",
+      "slug": "juarros-de-riomoros",
+      "name": "Juarros de Riomoros"
+    },
+    {
+      "ine": "40106",
+      "slug": "juarros-de-voltoya",
+      "name": "Juarros de Voltoya"
+    },
+    {
+      "ine": "40107",
+      "slug": "labajos",
+      "name": "Labajos"
+    },
+    {
+      "ine": "40108",
+      "slug": "laguna-de-contreras",
+      "name": "Laguna de Contreras"
+    },
+    {
+      "ine": "40109",
+      "slug": "languilla",
+      "name": "Languilla"
+    },
+    {
+      "ine": "40110",
+      "slug": "lastras-de-cuellar",
+      "name": "Lastras de Cuéllar"
+    },
+    {
+      "ine": "40111",
+      "slug": "lastras-del-pozo",
+      "name": "Lastras del Pozo"
+    },
+    {
+      "ine": "40112",
+      "slug": "lastrilla-la",
+      "name": "Lastrilla, La"
+    },
+    {
+      "ine": "40113",
+      "slug": "losa-la",
+      "name": "Losa, La"
+    },
+    {
+      "ine": "40115",
+      "slug": "maderuelo",
+      "name": "Maderuelo"
+    },
+    {
+      "ine": "40903",
+      "slug": "marazoleja",
+      "name": "Marazoleja"
+    },
+    {
+      "ine": "40118",
+      "slug": "marazuela",
+      "name": "Marazuela"
+    },
+    {
+      "ine": "40119",
+      "slug": "martin-miguel",
+      "name": "Martín Miguel"
+    },
+    {
+      "ine": "40120",
+      "slug": "martin-munoz-de-la-dehesa",
+      "name": "Martín Muñoz de la Dehesa"
+    },
+    {
+      "ine": "40121",
+      "slug": "martin-munoz-de-las-posadas",
+      "name": "Martín Muñoz de las Posadas"
+    },
+    {
+      "ine": "40122",
+      "slug": "marugan",
+      "name": "Marugán"
+    },
+    {
+      "ine": "40124",
+      "slug": "mata-de-cuellar",
+      "name": "Mata de Cuéllar"
+    },
+    {
+      "ine": "40123",
+      "slug": "matabuena",
+      "name": "Matabuena"
+    },
+    {
+      "ine": "40125",
+      "slug": "matilla-la",
+      "name": "Matilla, La"
+    },
+    {
+      "ine": "40126",
+      "slug": "melque-de-cercos",
+      "name": "Melque de Cercos"
+    },
+    {
+      "ine": "40127",
+      "slug": "membibre-de-la-hoz",
+      "name": "Membibre de la Hoz"
+    },
+    {
+      "ine": "40128",
+      "slug": "miguelanez",
+      "name": "Migueláñez"
+    },
+    {
+      "ine": "40129",
+      "slug": "montejo-de-arevalo",
+      "name": "Montejo de Arévalo"
+    },
+    {
+      "ine": "40130",
+      "slug": "montejo-de-la-vega-de-la-serrezuela",
+      "name": "Montejo de la Vega de la Serrezuela"
+    },
+    {
+      "ine": "40131",
+      "slug": "monterrubio",
+      "name": "Monterrubio"
+    },
+    {
+      "ine": "40132",
+      "slug": "moral-de-hornuez",
+      "name": "Moral de Hornuez"
+    },
+    {
+      "ine": "40134",
+      "slug": "mozoncillo",
+      "name": "Mozoncillo"
+    },
+    {
+      "ine": "40135",
+      "slug": "munopedro",
+      "name": "Muñopedro"
+    },
+    {
+      "ine": "40136",
+      "slug": "munoveros",
+      "name": "Muñoveros"
+    },
+    {
+      "ine": "40138",
+      "slug": "nava-de-la-asuncion",
+      "name": "Nava de la Asunción"
+    },
+    {
+      "ine": "40139",
+      "slug": "navafria",
+      "name": "Navafría"
+    },
+    {
+      "ine": "40140",
+      "slug": "navalilla",
+      "name": "Navalilla"
+    },
+    {
+      "ine": "40141",
+      "slug": "navalmanzano",
+      "name": "Navalmanzano"
+    },
+    {
+      "ine": "40142",
+      "slug": "navares-de-ayuso",
+      "name": "Navares de Ayuso"
+    },
+    {
+      "ine": "40143",
+      "slug": "navares-de-enmedio",
+      "name": "Navares de Enmedio"
+    },
+    {
+      "ine": "40144",
+      "slug": "navares-de-las-cuevas",
+      "name": "Navares de las Cuevas"
+    },
+    {
+      "ine": "40145",
+      "slug": "navas-de-oro",
+      "name": "Navas de Oro"
+    },
+    {
+      "ine": "40904",
+      "slug": "navas-de-riofrio",
+      "name": "Navas de Riofrío"
+    },
+    {
+      "ine": "40146",
+      "slug": "navas-de-san-antonio",
+      "name": "Navas de San Antonio"
+    },
+    {
+      "ine": "40148",
+      "slug": "nieva",
+      "name": "Nieva"
+    },
+    {
+      "ine": "40149",
+      "slug": "olombrada",
+      "name": "Olombrada"
+    },
+    {
+      "ine": "40150",
+      "slug": "orejana",
+      "name": "Orejana"
+    },
+    {
+      "ine": "40151",
+      "slug": "ortigosa-de-pestano",
+      "name": "Ortigosa de Pestaño"
+    },
+    {
+      "ine": "40901",
+      "slug": "ortigosa-del-monte",
+      "name": "Ortigosa del Monte"
+    },
+    {
+      "ine": "40152",
+      "slug": "otero-de-herreros",
+      "name": "Otero de Herreros"
+    },
+    {
+      "ine": "40154",
+      "slug": "pajarejos",
+      "name": "Pajarejos"
+    },
+    {
+      "ine": "40155",
+      "slug": "palazuelos-de-eresma",
+      "name": "Palazuelos de Eresma"
+    },
+    {
+      "ine": "40156",
+      "slug": "pedraza",
+      "name": "Pedraza"
+    },
+    {
+      "ine": "40157",
+      "slug": "pelayos-del-arroyo",
+      "name": "Pelayos del Arroyo"
+    },
+    {
+      "ine": "40158",
+      "slug": "perosillo",
+      "name": "Perosillo"
+    },
+    {
+      "ine": "40159",
+      "slug": "pinarejos",
+      "name": "Pinarejos"
+    },
+    {
+      "ine": "40160",
+      "slug": "pinarnegrillo",
+      "name": "Pinarnegrillo"
+    },
+    {
+      "ine": "40161",
+      "slug": "pradales",
+      "name": "Pradales"
+    },
+    {
+      "ine": "40162",
+      "slug": "pradena",
+      "name": "Prádena"
+    },
+    {
+      "ine": "40163",
+      "slug": "puebla-de-pedraza",
+      "name": "Puebla de Pedraza"
+    },
+    {
+      "ine": "40164",
+      "slug": "rapariegos",
+      "name": "Rapariegos"
+    },
+    {
+      "ine": "40181",
+      "slug": "real-sitio-de-san-ildefonso",
+      "name": "Real Sitio de San Ildefonso"
+    },
+    {
+      "ine": "40165",
+      "slug": "rebollo",
+      "name": "Rebollo"
+    },
+    {
+      "ine": "40166",
+      "slug": "remondo",
+      "name": "Remondo"
+    },
+    {
+      "ine": "40168",
+      "slug": "riaguas-de-san-bartolome",
+      "name": "Riaguas de San Bartolomé"
+    },
+    {
+      "ine": "40170",
+      "slug": "riaza",
+      "name": "Riaza"
+    },
+    {
+      "ine": "40171",
+      "slug": "ribota",
+      "name": "Ribota"
+    },
+    {
+      "ine": "40172",
+      "slug": "riofrio-de-riaza",
+      "name": "Riofrío de Riaza"
+    },
+    {
+      "ine": "40173",
+      "slug": "roda-de-eresma",
+      "name": "Roda de Eresma"
+    },
+    {
+      "ine": "40174",
+      "slug": "sacramenia",
+      "name": "Sacramenia"
+    },
+    {
+      "ine": "40176",
+      "slug": "samboal",
+      "name": "Samboal"
+    },
+    {
+      "ine": "40177",
+      "slug": "san-cristobal-de-cuellar",
+      "name": "San Cristóbal de Cuéllar"
+    },
+    {
+      "ine": "40178",
+      "slug": "san-cristobal-de-la-vega",
+      "name": "San Cristóbal de la Vega"
+    },
+    {
+      "ine": "40906",
+      "slug": "san-cristobal-de-segovia",
+      "name": "San Cristóbal de Segovia"
+    },
+    {
+      "ine": "40182",
+      "slug": "san-martin-y-mudrian",
+      "name": "San Martín y Mudrián"
+    },
+    {
+      "ine": "40183",
+      "slug": "san-miguel-de-bernuy",
+      "name": "San Miguel de Bernuy"
+    },
+    {
+      "ine": "40184",
+      "slug": "san-pedro-de-gaillos",
+      "name": "San Pedro de Gaíllos"
+    },
+    {
+      "ine": "40179",
+      "slug": "sanchonuno",
+      "name": "Sanchonuño"
+    },
+    {
+      "ine": "40180",
+      "slug": "sangarcia",
+      "name": "Sangarcía"
+    },
+    {
+      "ine": "40185",
+      "slug": "santa-maria-la-real-de-nieva",
+      "name": "Santa María la Real de Nieva"
+    },
+    {
+      "ine": "40186",
+      "slug": "santa-marta-del-cerro",
+      "name": "Santa Marta del Cerro"
+    },
+    {
+      "ine": "40188",
+      "slug": "santiuste-de-pedraza",
+      "name": "Santiuste de Pedraza"
+    },
+    {
+      "ine": "40189",
+      "slug": "santiuste-de-san-juan-bautista",
+      "name": "Santiuste de San Juan Bautista"
+    },
+    {
+      "ine": "40190",
+      "slug": "santo-domingo-de-piron",
+      "name": "Santo Domingo de Pirón"
+    },
+    {
+      "ine": "40191",
+      "slug": "santo-tome-del-puerto",
+      "name": "Santo Tomé del Puerto"
+    },
+    {
+      "ine": "40192",
+      "slug": "sauquillo-de-cabezas",
+      "name": "Sauquillo de Cabezas"
+    },
+    {
+      "ine": "40193",
+      "slug": "sebulcor",
+      "name": "Sebúlcor"
+    },
+    {
+      "ine": "40194",
+      "slug": "segovia",
+      "name": "Segovia"
+    },
+    {
+      "ine": "40195",
+      "slug": "sepulveda",
+      "name": "Sepúlveda"
+    },
+    {
+      "ine": "40196",
+      "slug": "sequera-de-fresno",
+      "name": "Sequera de Fresno"
+    },
+    {
+      "ine": "40198",
+      "slug": "sotillo",
+      "name": "Sotillo"
+    },
+    {
+      "ine": "40199",
+      "slug": "sotosalbos",
+      "name": "Sotosalbos"
+    },
+    {
+      "ine": "40200",
+      "slug": "tabanera-la-luenga",
+      "name": "Tabanera la Luenga"
+    },
+    {
+      "ine": "40201",
+      "slug": "tolocirio",
+      "name": "Tolocirio"
+    },
+    {
+      "ine": "40206",
+      "slug": "torre-val-de-san-pedro",
+      "name": "Torre Val de San Pedro"
+    },
+    {
+      "ine": "40202",
+      "slug": "torreadrada",
+      "name": "Torreadrada"
+    },
+    {
+      "ine": "40203",
+      "slug": "torrecaballeros",
+      "name": "Torrecaballeros"
+    },
+    {
+      "ine": "40204",
+      "slug": "torrecilla-del-pinar",
+      "name": "Torrecilla del Pinar"
+    },
+    {
+      "ine": "40205",
+      "slug": "torreiglesias",
+      "name": "Torreiglesias"
+    },
+    {
+      "ine": "40207",
+      "slug": "trescasas",
+      "name": "Trescasas"
+    },
+    {
+      "ine": "40208",
+      "slug": "turegano",
+      "name": "Turégano"
+    },
+    {
+      "ine": "40210",
+      "slug": "uruenas",
+      "name": "Urueñas"
+    },
+    {
+      "ine": "40211",
+      "slug": "valdeprados",
+      "name": "Valdeprados"
+    },
+    {
+      "ine": "40212",
+      "slug": "valdevacas-de-montejo",
+      "name": "Valdevacas de Montejo"
+    },
+    {
+      "ine": "40213",
+      "slug": "valdevacas-y-guijar",
+      "name": "Valdevacas y Guijar"
+    },
+    {
+      "ine": "40218",
+      "slug": "valle-de-tabladillo",
+      "name": "Valle de Tabladillo"
+    },
+    {
+      "ine": "40219",
+      "slug": "vallelado",
+      "name": "Vallelado"
+    },
+    {
+      "ine": "40220",
+      "slug": "valleruela-de-pedraza",
+      "name": "Valleruela de Pedraza"
+    },
+    {
+      "ine": "40221",
+      "slug": "valleruela-de-sepulveda",
+      "name": "Valleruela de Sepúlveda"
+    },
+    {
+      "ine": "40214",
+      "slug": "valseca",
+      "name": "Valseca"
+    },
+    {
+      "ine": "40215",
+      "slug": "valtiendas",
+      "name": "Valtiendas"
+    },
+    {
+      "ine": "40216",
+      "slug": "valverde-del-majano",
+      "name": "Valverde del Majano"
+    },
+    {
+      "ine": "40222",
+      "slug": "veganzones",
+      "name": "Veganzones"
+    },
+    {
+      "ine": "40223",
+      "slug": "vegas-de-matute",
+      "name": "Vegas de Matute"
+    },
+    {
+      "ine": "40224",
+      "slug": "ventosilla-y-tejadilla",
+      "name": "Ventosilla y Tejadilla"
+    },
+    {
+      "ine": "40225",
+      "slug": "villacastin",
+      "name": "Villacastín"
+    },
+    {
+      "ine": "40228",
+      "slug": "villaverde-de-iscar",
+      "name": "Villaverde de Íscar"
+    },
+    {
+      "ine": "40229",
+      "slug": "villaverde-de-montejo",
+      "name": "Villaverde de Montejo"
+    },
+    {
+      "ine": "40230",
+      "slug": "villeguillo",
+      "name": "Villeguillo"
+    },
+    {
+      "ine": "40231",
+      "slug": "yanguas-de-eresma",
+      "name": "Yanguas de Eresma"
+    },
+    {
+      "ine": "40233",
+      "slug": "zarzuela-del-monte",
+      "name": "Zarzuela del Monte"
+    },
+    {
+      "ine": "40234",
+      "slug": "zarzuela-del-pinar",
+      "name": "Zarzuela del Pinar"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

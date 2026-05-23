@@ -1,0 +1,505 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "AND",
+    "slug": "and",
+    "name": "Andalucía"
+  },
+  "province": {
+    "code": "23",
+    "slug": "jaen",
+    "name": "Jaén"
+  },
+  "municipalities": [
+    {
+      "ine": "23001",
+      "slug": "albanchez-de-magina",
+      "name": "Albanchez de Mágina"
+    },
+    {
+      "ine": "23002",
+      "slug": "alcala-la-real",
+      "name": "Alcalá la Real"
+    },
+    {
+      "ine": "23003",
+      "slug": "alcaudete",
+      "name": "Alcaudete"
+    },
+    {
+      "ine": "23004",
+      "slug": "aldeaquemada",
+      "name": "Aldeaquemada"
+    },
+    {
+      "ine": "23005",
+      "slug": "andujar",
+      "name": "Andújar"
+    },
+    {
+      "ine": "23006",
+      "slug": "arjona",
+      "name": "Arjona"
+    },
+    {
+      "ine": "23007",
+      "slug": "arjonilla",
+      "name": "Arjonilla"
+    },
+    {
+      "ine": "23008",
+      "slug": "arquillos",
+      "name": "Arquillos"
+    },
+    {
+      "ine": "23905",
+      "slug": "arroyo-del-ojanco",
+      "name": "Arroyo del Ojanco"
+    },
+    {
+      "ine": "23009",
+      "slug": "baeza",
+      "name": "Baeza"
+    },
+    {
+      "ine": "23010",
+      "slug": "bailen",
+      "name": "Bailén"
+    },
+    {
+      "ine": "23011",
+      "slug": "banos-de-la-encina",
+      "name": "Baños de la Encina"
+    },
+    {
+      "ine": "23012",
+      "slug": "beas-de-segura",
+      "name": "Beas de Segura"
+    },
+    {
+      "ine": "23902",
+      "slug": "bedmar-y-garciez",
+      "name": "Bedmar y Garcíez"
+    },
+    {
+      "ine": "23014",
+      "slug": "begijar",
+      "name": "Begíjar"
+    },
+    {
+      "ine": "23015",
+      "slug": "belmez-de-la-moraleda",
+      "name": "Bélmez de la Moraleda"
+    },
+    {
+      "ine": "23016",
+      "slug": "benatae",
+      "name": "Benatae"
+    },
+    {
+      "ine": "23017",
+      "slug": "cabra-del-santo-cristo",
+      "name": "Cabra del Santo Cristo"
+    },
+    {
+      "ine": "23018",
+      "slug": "cambil",
+      "name": "Cambil"
+    },
+    {
+      "ine": "23019",
+      "slug": "campillo-de-arenas",
+      "name": "Campillo de Arenas"
+    },
+    {
+      "ine": "23020",
+      "slug": "canena",
+      "name": "Canena"
+    },
+    {
+      "ine": "23021",
+      "slug": "carboneros",
+      "name": "Carboneros"
+    },
+    {
+      "ine": "23901",
+      "slug": "carcheles",
+      "name": "Cárcheles"
+    },
+    {
+      "ine": "23024",
+      "slug": "carolina-la",
+      "name": "Carolina, La"
+    },
+    {
+      "ine": "23025",
+      "slug": "castellar",
+      "name": "Castellar"
+    },
+    {
+      "ine": "23026",
+      "slug": "castillo-de-locubin",
+      "name": "Castillo de Locubín"
+    },
+    {
+      "ine": "23027",
+      "slug": "cazalilla",
+      "name": "Cazalilla"
+    },
+    {
+      "ine": "23028",
+      "slug": "cazorla",
+      "name": "Cazorla"
+    },
+    {
+      "ine": "23029",
+      "slug": "chiclana-de-segura",
+      "name": "Chiclana de Segura"
+    },
+    {
+      "ine": "23030",
+      "slug": "chilluevar",
+      "name": "Chilluévar"
+    },
+    {
+      "ine": "23031",
+      "slug": "escanuela",
+      "name": "Escañuela"
+    },
+    {
+      "ine": "23032",
+      "slug": "espeluy",
+      "name": "Espeluy"
+    },
+    {
+      "ine": "23033",
+      "slug": "frailes",
+      "name": "Frailes"
+    },
+    {
+      "ine": "23034",
+      "slug": "fuensanta-de-martos",
+      "name": "Fuensanta de Martos"
+    },
+    {
+      "ine": "23035",
+      "slug": "fuerte-del-rey",
+      "name": "Fuerte del Rey"
+    },
+    {
+      "ine": "23037",
+      "slug": "genave",
+      "name": "Génave"
+    },
+    {
+      "ine": "23038",
+      "slug": "guardia-de-jaen-la",
+      "name": "Guardia de Jaén, La"
+    },
+    {
+      "ine": "23039",
+      "slug": "guarroman",
+      "name": "Guarromán"
+    },
+    {
+      "ine": "23041",
+      "slug": "higuera-de-calatrava",
+      "name": "Higuera de Calatrava"
+    },
+    {
+      "ine": "23042",
+      "slug": "hinojares",
+      "name": "Hinojares"
+    },
+    {
+      "ine": "23043",
+      "slug": "hornos",
+      "name": "Hornos"
+    },
+    {
+      "ine": "23044",
+      "slug": "huelma",
+      "name": "Huelma"
+    },
+    {
+      "ine": "23045",
+      "slug": "huesa",
+      "name": "Huesa"
+    },
+    {
+      "ine": "23046",
+      "slug": "ibros",
+      "name": "Ibros"
+    },
+    {
+      "ine": "23047",
+      "slug": "iruela-la",
+      "name": "Iruela, La"
+    },
+    {
+      "ine": "23048",
+      "slug": "iznatoraf",
+      "name": "Iznatoraf"
+    },
+    {
+      "ine": "23049",
+      "slug": "jabalquinto",
+      "name": "Jabalquinto"
+    },
+    {
+      "ine": "23050",
+      "slug": "jaen",
+      "name": "Jaén"
+    },
+    {
+      "ine": "23051",
+      "slug": "jamilena",
+      "name": "Jamilena"
+    },
+    {
+      "ine": "23052",
+      "slug": "jimena",
+      "name": "Jimena"
+    },
+    {
+      "ine": "23053",
+      "slug": "jodar",
+      "name": "Jódar"
+    },
+    {
+      "ine": "23040",
+      "slug": "lahiguera",
+      "name": "Lahiguera"
+    },
+    {
+      "ine": "23054",
+      "slug": "larva",
+      "name": "Larva"
+    },
+    {
+      "ine": "23055",
+      "slug": "linares",
+      "name": "Linares"
+    },
+    {
+      "ine": "23056",
+      "slug": "lopera",
+      "name": "Lopera"
+    },
+    {
+      "ine": "23057",
+      "slug": "lupion",
+      "name": "Lupión"
+    },
+    {
+      "ine": "23058",
+      "slug": "mancha-real",
+      "name": "Mancha Real"
+    },
+    {
+      "ine": "23059",
+      "slug": "marmolejo",
+      "name": "Marmolejo"
+    },
+    {
+      "ine": "23060",
+      "slug": "martos",
+      "name": "Martos"
+    },
+    {
+      "ine": "23061",
+      "slug": "mengibar",
+      "name": "Mengíbar"
+    },
+    {
+      "ine": "23062",
+      "slug": "montizon",
+      "name": "Montizón"
+    },
+    {
+      "ine": "23063",
+      "slug": "navas-de-san-juan",
+      "name": "Navas de San Juan"
+    },
+    {
+      "ine": "23064",
+      "slug": "noalejo",
+      "name": "Noalejo"
+    },
+    {
+      "ine": "23065",
+      "slug": "orcera",
+      "name": "Orcera"
+    },
+    {
+      "ine": "23066",
+      "slug": "peal-de-becerro",
+      "name": "Peal de Becerro"
+    },
+    {
+      "ine": "23067",
+      "slug": "pegalajar",
+      "name": "Pegalajar"
+    },
+    {
+      "ine": "23069",
+      "slug": "porcuna",
+      "name": "Porcuna"
+    },
+    {
+      "ine": "23070",
+      "slug": "pozo-alcon",
+      "name": "Pozo Alcón"
+    },
+    {
+      "ine": "23071",
+      "slug": "puente-de-genave",
+      "name": "Puente de Génave"
+    },
+    {
+      "ine": "23072",
+      "slug": "puerta-de-segura-la",
+      "name": "Puerta de Segura, La"
+    },
+    {
+      "ine": "23073",
+      "slug": "quesada",
+      "name": "Quesada"
+    },
+    {
+      "ine": "23074",
+      "slug": "rus",
+      "name": "Rus"
+    },
+    {
+      "ine": "23075",
+      "slug": "sabiote",
+      "name": "Sabiote"
+    },
+    {
+      "ine": "23076",
+      "slug": "santa-elena",
+      "name": "Santa Elena"
+    },
+    {
+      "ine": "23077",
+      "slug": "santiago-de-calatrava",
+      "name": "Santiago de Calatrava"
+    },
+    {
+      "ine": "23904",
+      "slug": "santiago-pontones",
+      "name": "Santiago-Pontones"
+    },
+    {
+      "ine": "23079",
+      "slug": "santisteban-del-puerto",
+      "name": "Santisteban del Puerto"
+    },
+    {
+      "ine": "23080",
+      "slug": "santo-tome",
+      "name": "Santo Tomé"
+    },
+    {
+      "ine": "23081",
+      "slug": "segura-de-la-sierra",
+      "name": "Segura de la Sierra"
+    },
+    {
+      "ine": "23082",
+      "slug": "siles",
+      "name": "Siles"
+    },
+    {
+      "ine": "23084",
+      "slug": "sorihuela-del-guadalimar",
+      "name": "Sorihuela del Guadalimar"
+    },
+    {
+      "ine": "23085",
+      "slug": "torreblascopedro",
+      "name": "Torreblascopedro"
+    },
+    {
+      "ine": "23086",
+      "slug": "torredelcampo",
+      "name": "Torredelcampo"
+    },
+    {
+      "ine": "23087",
+      "slug": "torredonjimeno",
+      "name": "Torredonjimeno"
+    },
+    {
+      "ine": "23088",
+      "slug": "torreperogil",
+      "name": "Torreperogil"
+    },
+    {
+      "ine": "23090",
+      "slug": "torres",
+      "name": "Torres"
+    },
+    {
+      "ine": "23091",
+      "slug": "torres-de-albanchez",
+      "name": "Torres de Albánchez"
+    },
+    {
+      "ine": "23092",
+      "slug": "ubeda",
+      "name": "Úbeda"
+    },
+    {
+      "ine": "23093",
+      "slug": "valdepenas-de-jaen",
+      "name": "Valdepeñas de Jaén"
+    },
+    {
+      "ine": "23094",
+      "slug": "vilches",
+      "name": "Vilches"
+    },
+    {
+      "ine": "23095",
+      "slug": "villacarrillo",
+      "name": "Villacarrillo"
+    },
+    {
+      "ine": "23096",
+      "slug": "villanueva-de-la-reina",
+      "name": "Villanueva de la Reina"
+    },
+    {
+      "ine": "23097",
+      "slug": "villanueva-del-arzobispo",
+      "name": "Villanueva del Arzobispo"
+    },
+    {
+      "ine": "23098",
+      "slug": "villardompardo",
+      "name": "Villardompardo"
+    },
+    {
+      "ine": "23099",
+      "slug": "villares-los",
+      "name": "Villares, Los"
+    },
+    {
+      "ine": "23101",
+      "slug": "villarrodrigo",
+      "name": "Villarrodrigo"
+    },
+    {
+      "ine": "23903",
+      "slug": "villatorres",
+      "name": "Villatorres"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

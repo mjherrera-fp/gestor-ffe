@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Loader2, MapPin, ExternalLink, X } from 'lucide-react';
 import { CentroEducativo } from '../../../types/index.ts';
 import { DateList } from '../../../components/ui/DateList.tsx';
-import localidades from '../../../data/localidades-madrid.json';
+import localidades from '../../../data/geo/localidades-madrid.json';
 
 const labelClass = 'block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';

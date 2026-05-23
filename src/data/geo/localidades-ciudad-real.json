@@ -1,0 +1,530 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "CLM",
+    "slug": "clm",
+    "name": "Castilla-La Mancha"
+  },
+  "province": {
+    "code": "13",
+    "slug": "ciudad-real",
+    "name": "Ciudad Real"
+  },
+  "municipalities": [
+    {
+      "ine": "13001",
+      "slug": "abenojar",
+      "name": "Abenójar"
+    },
+    {
+      "ine": "13002",
+      "slug": "agudo",
+      "name": "Agudo"
+    },
+    {
+      "ine": "13003",
+      "slug": "alamillo",
+      "name": "Alamillo"
+    },
+    {
+      "ine": "13004",
+      "slug": "albaladejo",
+      "name": "Albaladejo"
+    },
+    {
+      "ine": "13005",
+      "slug": "alcazar-de-san-juan",
+      "name": "Alcázar de San Juan"
+    },
+    {
+      "ine": "13006",
+      "slug": "alcoba",
+      "name": "Alcoba"
+    },
+    {
+      "ine": "13007",
+      "slug": "alcolea-de-calatrava",
+      "name": "Alcolea de Calatrava"
+    },
+    {
+      "ine": "13008",
+      "slug": "alcubillas",
+      "name": "Alcubillas"
+    },
+    {
+      "ine": "13009",
+      "slug": "aldea-del-rey",
+      "name": "Aldea del Rey"
+    },
+    {
+      "ine": "13010",
+      "slug": "alhambra",
+      "name": "Alhambra"
+    },
+    {
+      "ine": "13011",
+      "slug": "almaden",
+      "name": "Almadén"
+    },
+    {
+      "ine": "13012",
+      "slug": "almadenejos",
+      "name": "Almadenejos"
+    },
+    {
+      "ine": "13013",
+      "slug": "almagro",
+      "name": "Almagro"
+    },
+    {
+      "ine": "13014",
+      "slug": "almedina",
+      "name": "Almedina"
+    },
+    {
+      "ine": "13015",
+      "slug": "almodovar-del-campo",
+      "name": "Almodóvar del Campo"
+    },
+    {
+      "ine": "13016",
+      "slug": "almuradiel",
+      "name": "Almuradiel"
+    },
+    {
+      "ine": "13017",
+      "slug": "anchuras",
+      "name": "Anchuras"
+    },
+    {
+      "ine": "13903",
+      "slug": "arenales-de-san-gregorio",
+      "name": "Arenales de San Gregorio"
+    },
+    {
+      "ine": "13018",
+      "slug": "arenas-de-san-juan",
+      "name": "Arenas de San Juan"
+    },
+    {
+      "ine": "13019",
+      "slug": "argamasilla-de-alba",
+      "name": "Argamasilla de Alba"
+    },
+    {
+      "ine": "13020",
+      "slug": "argamasilla-de-calatrava",
+      "name": "Argamasilla de Calatrava"
+    },
+    {
+      "ine": "13021",
+      "slug": "arroba-de-los-montes",
+      "name": "Arroba de los Montes"
+    },
+    {
+      "ine": "13022",
+      "slug": "ballesteros-de-calatrava",
+      "name": "Ballesteros de Calatrava"
+    },
+    {
+      "ine": "13023",
+      "slug": "bolanos-de-calatrava",
+      "name": "Bolaños de Calatrava"
+    },
+    {
+      "ine": "13024",
+      "slug": "brazatortas",
+      "name": "Brazatortas"
+    },
+    {
+      "ine": "13025",
+      "slug": "cabezarados",
+      "name": "Cabezarados"
+    },
+    {
+      "ine": "13026",
+      "slug": "cabezarrubias-del-puerto",
+      "name": "Cabezarrubias del Puerto"
+    },
+    {
+      "ine": "13027",
+      "slug": "calzada-de-calatrava",
+      "name": "Calzada de Calatrava"
+    },
+    {
+      "ine": "13028",
+      "slug": "campo-de-criptana",
+      "name": "Campo de Criptana"
+    },
+    {
+      "ine": "13029",
+      "slug": "canada-de-calatrava",
+      "name": "Cañada de Calatrava"
+    },
+    {
+      "ine": "13030",
+      "slug": "caracuel-de-calatrava",
+      "name": "Caracuel de Calatrava"
+    },
+    {
+      "ine": "13031",
+      "slug": "carrion-de-calatrava",
+      "name": "Carrión de Calatrava"
+    },
+    {
+      "ine": "13032",
+      "slug": "carrizosa",
+      "name": "Carrizosa"
+    },
+    {
+      "ine": "13033",
+      "slug": "castellar-de-santiago",
+      "name": "Castellar de Santiago"
+    },
+    {
+      "ine": "13038",
+      "slug": "chillon",
+      "name": "Chillón"
+    },
+    {
+      "ine": "13034",
+      "slug": "ciudad-real",
+      "name": "Ciudad Real"
+    },
+    {
+      "ine": "13035",
+      "slug": "corral-de-calatrava",
+      "name": "Corral de Calatrava"
+    },
+    {
+      "ine": "13036",
+      "slug": "cortijos-los",
+      "name": "Cortijos, Los"
+    },
+    {
+      "ine": "13037",
+      "slug": "cozar",
+      "name": "Cózar"
+    },
+    {
+      "ine": "13039",
+      "slug": "daimiel",
+      "name": "Daimiel"
+    },
+    {
+      "ine": "13040",
+      "slug": "fernan-caballero",
+      "name": "Fernán Caballero"
+    },
+    {
+      "ine": "13041",
+      "slug": "fontanarejo",
+      "name": "Fontanarejo"
+    },
+    {
+      "ine": "13042",
+      "slug": "fuencaliente",
+      "name": "Fuencaliente"
+    },
+    {
+      "ine": "13043",
+      "slug": "fuenllana",
+      "name": "Fuenllana"
+    },
+    {
+      "ine": "13044",
+      "slug": "fuente-el-fresno",
+      "name": "Fuente el Fresno"
+    },
+    {
+      "ine": "13045",
+      "slug": "granatula-de-calatrava",
+      "name": "Granátula de Calatrava"
+    },
+    {
+      "ine": "13046",
+      "slug": "guadalmez",
+      "name": "Guadalmez"
+    },
+    {
+      "ine": "13047",
+      "slug": "herencia",
+      "name": "Herencia"
+    },
+    {
+      "ine": "13048",
+      "slug": "hinojosas-de-calatrava",
+      "name": "Hinojosas de Calatrava"
+    },
+    {
+      "ine": "13049",
+      "slug": "horcajo-de-los-montes",
+      "name": "Horcajo de los Montes"
+    },
+    {
+      "ine": "13050",
+      "slug": "labores-las",
+      "name": "Labores, Las"
+    },
+    {
+      "ine": "13904",
+      "slug": "llanos-del-caudillo",
+      "name": "Llanos del Caudillo"
+    },
+    {
+      "ine": "13051",
+      "slug": "luciana",
+      "name": "Luciana"
+    },
+    {
+      "ine": "13052",
+      "slug": "malagon",
+      "name": "Malagón"
+    },
+    {
+      "ine": "13053",
+      "slug": "manzanares",
+      "name": "Manzanares"
+    },
+    {
+      "ine": "13054",
+      "slug": "membrilla",
+      "name": "Membrilla"
+    },
+    {
+      "ine": "13055",
+      "slug": "mestanza",
+      "name": "Mestanza"
+    },
+    {
+      "ine": "13056",
+      "slug": "miguelturra",
+      "name": "Miguelturra"
+    },
+    {
+      "ine": "13057",
+      "slug": "montiel",
+      "name": "Montiel"
+    },
+    {
+      "ine": "13058",
+      "slug": "moral-de-calatrava",
+      "name": "Moral de Calatrava"
+    },
+    {
+      "ine": "13059",
+      "slug": "navalpino",
+      "name": "Navalpino"
+    },
+    {
+      "ine": "13060",
+      "slug": "navas-de-estena",
+      "name": "Navas de Estena"
+    },
+    {
+      "ine": "13061",
+      "slug": "pedro-munoz",
+      "name": "Pedro Muñoz"
+    },
+    {
+      "ine": "13062",
+      "slug": "picon",
+      "name": "Picón"
+    },
+    {
+      "ine": "13063",
+      "slug": "piedrabuena",
+      "name": "Piedrabuena"
+    },
+    {
+      "ine": "13064",
+      "slug": "poblete",
+      "name": "Poblete"
+    },
+    {
+      "ine": "13065",
+      "slug": "porzuna",
+      "name": "Porzuna"
+    },
+    {
+      "ine": "13066",
+      "slug": "pozuelo-de-calatrava",
+      "name": "Pozuelo de Calatrava"
+    },
+    {
+      "ine": "13067",
+      "slug": "pozuelos-de-calatrava-los",
+      "name": "Pozuelos de Calatrava, Los"
+    },
+    {
+      "ine": "13068",
+      "slug": "puebla-de-don-rodrigo",
+      "name": "Puebla de Don Rodrigo"
+    },
+    {
+      "ine": "13069",
+      "slug": "puebla-del-principe",
+      "name": "Puebla del Príncipe"
+    },
+    {
+      "ine": "13070",
+      "slug": "puerto-lapice",
+      "name": "Puerto Lápice"
+    },
+    {
+      "ine": "13071",
+      "slug": "puertollano",
+      "name": "Puertollano"
+    },
+    {
+      "ine": "13072",
+      "slug": "retuerta-del-bullaque",
+      "name": "Retuerta del Bullaque"
+    },
+    {
+      "ine": "13901",
+      "slug": "robledo-el",
+      "name": "Robledo, El"
+    },
+    {
+      "ine": "13902",
+      "slug": "ruidera",
+      "name": "Ruidera"
+    },
+    {
+      "ine": "13073",
+      "slug": "saceruela",
+      "name": "Saceruela"
+    },
+    {
+      "ine": "13074",
+      "slug": "san-carlos-del-valle",
+      "name": "San Carlos del Valle"
+    },
+    {
+      "ine": "13075",
+      "slug": "san-lorenzo-de-calatrava",
+      "name": "San Lorenzo de Calatrava"
+    },
+    {
+      "ine": "13076",
+      "slug": "santa-cruz-de-los-canamos",
+      "name": "Santa Cruz de los Cáñamos"
+    },
+    {
+      "ine": "13077",
+      "slug": "santa-cruz-de-mudela",
+      "name": "Santa Cruz de Mudela"
+    },
+    {
+      "ine": "13078",
+      "slug": "socuellamos",
+      "name": "Socuéllamos"
+    },
+    {
+      "ine": "13080",
+      "slug": "solana-del-pino",
+      "name": "Solana del Pino"
+    },
+    {
+      "ine": "13079",
+      "slug": "solana-la",
+      "name": "Solana, La"
+    },
+    {
+      "ine": "13081",
+      "slug": "terrinches",
+      "name": "Terrinches"
+    },
+    {
+      "ine": "13082",
+      "slug": "tomelloso",
+      "name": "Tomelloso"
+    },
+    {
+      "ine": "13083",
+      "slug": "torralba-de-calatrava",
+      "name": "Torralba de Calatrava"
+    },
+    {
+      "ine": "13084",
+      "slug": "torre-de-juan-abad",
+      "name": "Torre de Juan Abad"
+    },
+    {
+      "ine": "13085",
+      "slug": "torrenueva",
+      "name": "Torrenueva"
+    },
+    {
+      "ine": "13086",
+      "slug": "valdemanco-del-esteras",
+      "name": "Valdemanco del Esteras"
+    },
+    {
+      "ine": "13087",
+      "slug": "valdepenas",
+      "name": "Valdepeñas"
+    },
+    {
+      "ine": "13088",
+      "slug": "valenzuela-de-calatrava",
+      "name": "Valenzuela de Calatrava"
+    },
+    {
+      "ine": "13089",
+      "slug": "villahermosa",
+      "name": "Villahermosa"
+    },
+    {
+      "ine": "13090",
+      "slug": "villamanrique",
+      "name": "Villamanrique"
+    },
+    {
+      "ine": "13091",
+      "slug": "villamayor-de-calatrava",
+      "name": "Villamayor de Calatrava"
+    },
+    {
+      "ine": "13092",
+      "slug": "villanueva-de-la-fuente",
+      "name": "Villanueva de la Fuente"
+    },
+    {
+      "ine": "13093",
+      "slug": "villanueva-de-los-infantes",
+      "name": "Villanueva de los Infantes"
+    },
+    {
+      "ine": "13094",
+      "slug": "villanueva-de-san-carlos",
+      "name": "Villanueva de San Carlos"
+    },
+    {
+      "ine": "13095",
+      "slug": "villar-del-pozo",
+      "name": "Villar del Pozo"
+    },
+    {
+      "ine": "13096",
+      "slug": "villarrubia-de-los-ojos",
+      "name": "Villarrubia de los Ojos"
+    },
+    {
+      "ine": "13097",
+      "slug": "villarta-de-san-juan",
+      "name": "Villarta de San Juan"
+    },
+    {
+      "ine": "13098",
+      "slug": "viso-del-marques",
+      "name": "Viso del Marqués"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

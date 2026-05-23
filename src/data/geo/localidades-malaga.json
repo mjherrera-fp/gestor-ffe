@@ -1,0 +1,535 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "AND",
+    "slug": "and",
+    "name": "Andalucía"
+  },
+  "province": {
+    "code": "29",
+    "slug": "malaga",
+    "name": "Málaga"
+  },
+  "municipalities": [
+    {
+      "ine": "29001",
+      "slug": "alameda",
+      "name": "Alameda"
+    },
+    {
+      "ine": "29002",
+      "slug": "alcaucin",
+      "name": "Alcaucín"
+    },
+    {
+      "ine": "29003",
+      "slug": "alfarnate",
+      "name": "Alfarnate"
+    },
+    {
+      "ine": "29004",
+      "slug": "alfarnatejo",
+      "name": "Alfarnatejo"
+    },
+    {
+      "ine": "29005",
+      "slug": "algarrobo",
+      "name": "Algarrobo"
+    },
+    {
+      "ine": "29006",
+      "slug": "algatocin",
+      "name": "Algatocín"
+    },
+    {
+      "ine": "29007",
+      "slug": "alhaurin-de-la-torre",
+      "name": "Alhaurín de la Torre"
+    },
+    {
+      "ine": "29008",
+      "slug": "alhaurin-el-grande",
+      "name": "Alhaurín el Grande"
+    },
+    {
+      "ine": "29009",
+      "slug": "almachar",
+      "name": "Almáchar"
+    },
+    {
+      "ine": "29010",
+      "slug": "almargen",
+      "name": "Almargen"
+    },
+    {
+      "ine": "29011",
+      "slug": "almogia",
+      "name": "Almogía"
+    },
+    {
+      "ine": "29012",
+      "slug": "alora",
+      "name": "Álora"
+    },
+    {
+      "ine": "29013",
+      "slug": "alozaina",
+      "name": "Alozaina"
+    },
+    {
+      "ine": "29014",
+      "slug": "alpandeire",
+      "name": "Alpandeire"
+    },
+    {
+      "ine": "29015",
+      "slug": "antequera",
+      "name": "Antequera"
+    },
+    {
+      "ine": "29016",
+      "slug": "archez",
+      "name": "Árchez"
+    },
+    {
+      "ine": "29017",
+      "slug": "archidona",
+      "name": "Archidona"
+    },
+    {
+      "ine": "29018",
+      "slug": "ardales",
+      "name": "Ardales"
+    },
+    {
+      "ine": "29019",
+      "slug": "arenas",
+      "name": "Arenas"
+    },
+    {
+      "ine": "29020",
+      "slug": "arriate",
+      "name": "Arriate"
+    },
+    {
+      "ine": "29021",
+      "slug": "atajate",
+      "name": "Atajate"
+    },
+    {
+      "ine": "29022",
+      "slug": "benadalid",
+      "name": "Benadalid"
+    },
+    {
+      "ine": "29023",
+      "slug": "benahavis",
+      "name": "Benahavís"
+    },
+    {
+      "ine": "29024",
+      "slug": "benalauria",
+      "name": "Benalauría"
+    },
+    {
+      "ine": "29025",
+      "slug": "benalmadena",
+      "name": "Benalmádena"
+    },
+    {
+      "ine": "29026",
+      "slug": "benamargosa",
+      "name": "Benamargosa"
+    },
+    {
+      "ine": "29027",
+      "slug": "benamocarra",
+      "name": "Benamocarra"
+    },
+    {
+      "ine": "29028",
+      "slug": "benaojan",
+      "name": "Benaoján"
+    },
+    {
+      "ine": "29029",
+      "slug": "benarraba",
+      "name": "Benarrabá"
+    },
+    {
+      "ine": "29030",
+      "slug": "borge-el",
+      "name": "Borge, El"
+    },
+    {
+      "ine": "29031",
+      "slug": "burgo-el",
+      "name": "Burgo, El"
+    },
+    {
+      "ine": "29032",
+      "slug": "campillos",
+      "name": "Campillos"
+    },
+    {
+      "ine": "29033",
+      "slug": "canillas-de-aceituno",
+      "name": "Canillas de Aceituno"
+    },
+    {
+      "ine": "29034",
+      "slug": "canillas-de-albaida",
+      "name": "Canillas de Albaida"
+    },
+    {
+      "ine": "29035",
+      "slug": "canete-la-real",
+      "name": "Cañete la Real"
+    },
+    {
+      "ine": "29036",
+      "slug": "carratraca",
+      "name": "Carratraca"
+    },
+    {
+      "ine": "29037",
+      "slug": "cartajima",
+      "name": "Cartajima"
+    },
+    {
+      "ine": "29038",
+      "slug": "cartama",
+      "name": "Cártama"
+    },
+    {
+      "ine": "29039",
+      "slug": "casabermeja",
+      "name": "Casabermeja"
+    },
+    {
+      "ine": "29040",
+      "slug": "casarabonela",
+      "name": "Casarabonela"
+    },
+    {
+      "ine": "29041",
+      "slug": "casares",
+      "name": "Casares"
+    },
+    {
+      "ine": "29042",
+      "slug": "coin",
+      "name": "Coín"
+    },
+    {
+      "ine": "29043",
+      "slug": "colmenar",
+      "name": "Colmenar"
+    },
+    {
+      "ine": "29044",
+      "slug": "comares",
+      "name": "Comares"
+    },
+    {
+      "ine": "29045",
+      "slug": "competa",
+      "name": "Cómpeta"
+    },
+    {
+      "ine": "29046",
+      "slug": "cortes-de-la-frontera",
+      "name": "Cortes de la Frontera"
+    },
+    {
+      "ine": "29047",
+      "slug": "cuevas-bajas",
+      "name": "Cuevas Bajas"
+    },
+    {
+      "ine": "29049",
+      "slug": "cuevas-de-san-marcos",
+      "name": "Cuevas de San Marcos"
+    },
+    {
+      "ine": "29048",
+      "slug": "cuevas-del-becerro",
+      "name": "Cuevas del Becerro"
+    },
+    {
+      "ine": "29050",
+      "slug": "cutar",
+      "name": "Cútar"
+    },
+    {
+      "ine": "29051",
+      "slug": "estepona",
+      "name": "Estepona"
+    },
+    {
+      "ine": "29052",
+      "slug": "farajan",
+      "name": "Faraján"
+    },
+    {
+      "ine": "29053",
+      "slug": "frigiliana",
+      "name": "Frigiliana"
+    },
+    {
+      "ine": "29054",
+      "slug": "fuengirola",
+      "name": "Fuengirola"
+    },
+    {
+      "ine": "29055",
+      "slug": "fuente-de-piedra",
+      "name": "Fuente de Piedra"
+    },
+    {
+      "ine": "29056",
+      "slug": "gaucin",
+      "name": "Gaucín"
+    },
+    {
+      "ine": "29057",
+      "slug": "genalguacil",
+      "name": "Genalguacil"
+    },
+    {
+      "ine": "29058",
+      "slug": "guaro",
+      "name": "Guaro"
+    },
+    {
+      "ine": "29059",
+      "slug": "humilladero",
+      "name": "Humilladero"
+    },
+    {
+      "ine": "29060",
+      "slug": "igualeja",
+      "name": "Igualeja"
+    },
+    {
+      "ine": "29061",
+      "slug": "istan",
+      "name": "Istán"
+    },
+    {
+      "ine": "29062",
+      "slug": "iznate",
+      "name": "Iznate"
+    },
+    {
+      "ine": "29063",
+      "slug": "jimera-de-libar",
+      "name": "Jimera de Líbar"
+    },
+    {
+      "ine": "29064",
+      "slug": "jubrique",
+      "name": "Jubrique"
+    },
+    {
+      "ine": "29065",
+      "slug": "juzcar",
+      "name": "Júzcar"
+    },
+    {
+      "ine": "29066",
+      "slug": "macharaviaya",
+      "name": "Macharaviaya"
+    },
+    {
+      "ine": "29067",
+      "slug": "malaga",
+      "name": "Málaga"
+    },
+    {
+      "ine": "29068",
+      "slug": "manilva",
+      "name": "Manilva"
+    },
+    {
+      "ine": "29069",
+      "slug": "marbella",
+      "name": "Marbella"
+    },
+    {
+      "ine": "29070",
+      "slug": "mijas",
+      "name": "Mijas"
+    },
+    {
+      "ine": "29071",
+      "slug": "moclinejo",
+      "name": "Moclinejo"
+    },
+    {
+      "ine": "29072",
+      "slug": "mollina",
+      "name": "Mollina"
+    },
+    {
+      "ine": "29073",
+      "slug": "monda",
+      "name": "Monda"
+    },
+    {
+      "ine": "29903",
+      "slug": "montecorto",
+      "name": "Montecorto"
+    },
+    {
+      "ine": "29074",
+      "slug": "montejaque",
+      "name": "Montejaque"
+    },
+    {
+      "ine": "29075",
+      "slug": "nerja",
+      "name": "Nerja"
+    },
+    {
+      "ine": "29076",
+      "slug": "ojen",
+      "name": "Ojén"
+    },
+    {
+      "ine": "29077",
+      "slug": "parauta",
+      "name": "Parauta"
+    },
+    {
+      "ine": "29079",
+      "slug": "periana",
+      "name": "Periana"
+    },
+    {
+      "ine": "29080",
+      "slug": "pizarra",
+      "name": "Pizarra"
+    },
+    {
+      "ine": "29081",
+      "slug": "pujerra",
+      "name": "Pujerra"
+    },
+    {
+      "ine": "29082",
+      "slug": "rincon-de-la-victoria",
+      "name": "Rincón de la Victoria"
+    },
+    {
+      "ine": "29083",
+      "slug": "riogordo",
+      "name": "Riogordo"
+    },
+    {
+      "ine": "29084",
+      "slug": "ronda",
+      "name": "Ronda"
+    },
+    {
+      "ine": "29085",
+      "slug": "salares",
+      "name": "Salares"
+    },
+    {
+      "ine": "29086",
+      "slug": "sayalonga",
+      "name": "Sayalonga"
+    },
+    {
+      "ine": "29087",
+      "slug": "sedella",
+      "name": "Sedella"
+    },
+    {
+      "ine": "29904",
+      "slug": "serrato",
+      "name": "Serrato"
+    },
+    {
+      "ine": "29088",
+      "slug": "sierra-de-yeguas",
+      "name": "Sierra de Yeguas"
+    },
+    {
+      "ine": "29089",
+      "slug": "teba",
+      "name": "Teba"
+    },
+    {
+      "ine": "29090",
+      "slug": "tolox",
+      "name": "Tolox"
+    },
+    {
+      "ine": "29901",
+      "slug": "torremolinos",
+      "name": "Torremolinos"
+    },
+    {
+      "ine": "29091",
+      "slug": "torrox",
+      "name": "Torrox"
+    },
+    {
+      "ine": "29092",
+      "slug": "totalan",
+      "name": "Totalán"
+    },
+    {
+      "ine": "29093",
+      "slug": "valle-de-abdalajis",
+      "name": "Valle de Abdalajís"
+    },
+    {
+      "ine": "29094",
+      "slug": "velez-malaga",
+      "name": "Vélez-Málaga"
+    },
+    {
+      "ine": "29095",
+      "slug": "villanueva-de-algaidas",
+      "name": "Villanueva de Algaidas"
+    },
+    {
+      "ine": "29902",
+      "slug": "villanueva-de-la-concepcion",
+      "name": "Villanueva de la Concepción"
+    },
+    {
+      "ine": "29098",
+      "slug": "villanueva-de-tapia",
+      "name": "Villanueva de Tapia"
+    },
+    {
+      "ine": "29096",
+      "slug": "villanueva-del-rosario",
+      "name": "Villanueva del Rosario"
+    },
+    {
+      "ine": "29097",
+      "slug": "villanueva-del-trabuco",
+      "name": "Villanueva del Trabuco"
+    },
+    {
+      "ine": "29099",
+      "slug": "vinuela",
+      "name": "Viñuela"
+    },
+    {
+      "ine": "29100",
+      "slug": "yunquera",
+      "name": "Yunquera"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}

@@ -463,13 +463,13 @@ export const EmpresaDAO = {
   getAll: () => db.prepare('SELECT * FROM empresas').all() as Empresa[],
   getById: (id: number) => db.prepare('SELECT * FROM empresas WHERE id = ?').get(id) as Empresa,
   create: (empresa: Empresa) => {
-    const stmt = db.prepare('INSERT INTO empresas (nombre, direccion, ciudad, cif, email, tlfn, comentarios) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, empresa.comentarios ?? null);
+    const stmt = db.prepare('INSERT INTO empresas (nombre, direccion, ciudad, cif, email, tlfn, comentarios, personaContacto, comunidad, provincia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, empresa.comentarios ?? null, empresa.personaContacto ?? null, empresa.comunidad ?? null, empresa.provincia ?? null);
     return info.lastInsertRowid;
   },
   update: (id: number, empresa: Empresa) => {
-    const stmt = db.prepare('UPDATE empresas SET nombre = ?, direccion = ?, ciudad = ?, cif = ?, email = ?, tlfn = ?, comentarios = ? WHERE id = ?');
-    stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, empresa.comentarios ?? null, id);
+    const stmt = db.prepare('UPDATE empresas SET nombre = ?, direccion = ?, ciudad = ?, cif = ?, email = ?, tlfn = ?, comentarios = ?, personaContacto = ?, comunidad = ?, provincia = ? WHERE id = ?');
+    stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, empresa.comentarios ?? null, empresa.personaContacto ?? null, empresa.comunidad ?? null, empresa.provincia ?? null, id);
   },
   delete: (id: number) => db.prepare('DELETE FROM empresas WHERE id = ?').run(id)
 };

@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "year": 2026,
+  "generatedAt": "2026-05-11T22:38:31.350Z",
+  "calendarType": "laboral",
+  "scope": "localidades",
+  "region": {
+    "code": "EUS",
+    "slug": "eus",
+    "name": "País Vasco"
+  },
+  "province": {
+    "code": "01",
+    "slug": "alava",
+    "name": "Álava"
+  },
+  "municipalities": [
+    {
+      "ine": "01051",
+      "slug": "agurain-salvatierra",
+      "name": "Agurain/Salvatierra"
+    },
+    {
+      "ine": "01001",
+      "slug": "alegria-dulantzi",
+      "name": "Alegría-Dulantzi"
+    },
+    {
+      "ine": "01002",
+      "slug": "amurrio",
+      "name": "Amurrio"
+    },
+    {
+      "ine": "01049",
+      "slug": "anana",
+      "name": "Añana"
+    },
+    {
+      "ine": "01003",
+      "slug": "aramaio",
+      "name": "Aramaio"
+    },
+    {
+      "ine": "01006",
+      "slug": "arminon",
+      "name": "Armiñón"
+    },
+    {
+      "ine": "01037",
+      "slug": "arraia-maeztu",
+      "name": "Arraia-Maeztu"
+    },
+    {
+      "ine": "01008",
+      "slug": "arratzua-ubarrundia",
+      "name": "Arratzua-Ubarrundia"
+    },
+    {
+      "ine": "01004",
+      "slug": "artziniega",
+      "name": "Artziniega"
+    },
+    {
+      "ine": "01009",
+      "slug": "asparrena",
+      "name": "Asparrena"
+    },
+    {
+      "ine": "01010",
+      "slug": "ayala-aiara",
+      "name": "Ayala/Aiara"
+    },
+    {
+      "ine": "01011",
+      "slug": "banos-de-ebro-manueta",
+      "name": "Baños de Ebro/Mañueta"
+    },
+    {
+      "ine": "01013",
+      "slug": "barrundia",
+      "name": "Barrundia"
+    },
+    {
+      "ine": "01014",
+      "slug": "berantevilla",
+      "name": "Berantevilla"
+    },
+    {
+      "ine": "01016",
+      "slug": "bernedo",
+      "name": "Bernedo"
+    },
+    {
+      "ine": "01017",
+      "slug": "campezo-kanpezu",
+      "name": "Campezo/Kanpezu"
+    },
+    {
+      "ine": "01021",
+      "slug": "elburgo-burgelu",
+      "name": "Elburgo/Burgelu"
+    },
+    {
+      "ine": "01022",
+      "slug": "elciego",
+      "name": "Elciego"
+    },
+    {
+      "ine": "01023",
+      "slug": "elvillar-bilar",
+      "name": "Elvillar/Bilar"
+    },
+    {
+      "ine": "01046",
+      "slug": "erriberagoitia-ribera-alta",
+      "name": "Erriberagoitia/Ribera Alta"
+    },
+    {
+      "ine": "01056",
+      "slug": "harana-valle-de-arana",
+      "name": "Harana/Valle de Arana"
+    },
+    {
+      "ine": "01901",
+      "slug": "iruna-oka-iruna-de-oca",
+      "name": "Iruña Oka/Iruña de Oca"
+    },
+    {
+      "ine": "01027",
+      "slug": "iruraiz-gauna",
+      "name": "Iruraiz-Gauna"
+    },
+    {
+      "ine": "01019",
+      "slug": "kripan",
+      "name": "Kripan"
+    },
+    {
+      "ine": "01020",
+      "slug": "kuartango",
+      "name": "Kuartango"
+    },
+    {
+      "ine": "01028",
+      "slug": "labastida-bastida",
+      "name": "Labastida/Bastida"
+    },
+    {
+      "ine": "01030",
+      "slug": "lagran",
+      "name": "Lagrán"
+    },
+    {
+      "ine": "01031",
+      "slug": "laguardia",
+      "name": "Laguardia"
+    },
+    {
+      "ine": "01032",
+      "slug": "lanciego-lantziego",
+      "name": "Lanciego/Lantziego"
+    },
+    {
+      "ine": "01902",
+      "slug": "lantaron",
+      "name": "Lantarón"
+    },
+    {
+      "ine": "01033",
+      "slug": "lapuebla-de-labarca",
+      "name": "Lapuebla de Labarca"
+    },
+    {
+      "ine": "01036",
+      "slug": "laudio-llodio",
+      "name": "Laudio/Llodio"
+    },
+    {
+      "ine": "01058",
+      "slug": "legutio",
+      "name": "Legutio"
+    },
+    {
+      "ine": "01034",
+      "slug": "leza",
+      "name": "Leza"
+    },
+    {
+      "ine": "01039",
+      "slug": "moreda-de-alava-moreda-araba",
+      "name": "Moreda de Álava/Moreda Araba"
+    },
+    {
+      "ine": "01041",
+      "slug": "navaridas",
+      "name": "Navaridas"
+    },
+    {
+      "ine": "01042",
+      "slug": "okondo",
+      "name": "Okondo"
+    },
+    {
+      "ine": "01043",
+      "slug": "oyon-oion",
+      "name": "Oyón-Oion"
+    },
+    {
+      "ine": "01044",
+      "slug": "penacerrada-urizaharra",
+      "name": "Peñacerrada-Urizaharra"
+    },
+    {
+      "ine": "01047",
+      "slug": "ribera-baja-erribera-beitia",
+      "name": "Ribera Baja/Erribera Beitia"
+    },
+    {
+      "ine": "01052",
+      "slug": "samaniego",
+      "name": "Samaniego"
+    },
+    {
+      "ine": "01053",
+      "slug": "san-millan-donemiliaga",
+      "name": "San Millán/Donemiliaga"
+    },
+    {
+      "ine": "01054",
+      "slug": "urkabustaiz",
+      "name": "Urkabustaiz"
+    },
+    {
+      "ine": "01055",
+      "slug": "valdegovia-gaubea",
+      "name": "Valdegovía/Gaubea"
+    },
+    {
+      "ine": "01057",
+      "slug": "villabuena-de-alava-eskuernaga",
+      "name": "Villabuena de Álava/Eskuernaga"
+    },
+    {
+      "ine": "01059",
+      "slug": "vitoria-gasteiz",
+      "name": "Vitoria-Gasteiz"
+    },
+    {
+      "ine": "01060",
+      "slug": "yecora-iekora",
+      "name": "Yécora/Iekora"
+    },
+    {
+      "ine": "01061",
+      "slug": "zalduondo",
+      "name": "Zalduondo"
+    },
+    {
+      "ine": "01062",
+      "slug": "zambrana",
+      "name": "Zambrana"
+    },
+    {
+      "ine": "01018",
+      "slug": "zigoitia",
+      "name": "Zigoitia"
+    },
+    {
+      "ine": "01063",
+      "slug": "zuia",
+      "name": "Zuia"
+    }
+  ],
+  "disclaimer": "Este servicio se proporciona de forma gratuita, sin garantía de ningún tipo, expresa o implícita. Los datos son meramente informativos y no sustituyen a las fuentes oficiales (BOE, diarios oficiales, organismos competentes de cada país). El acceso, sea anónimo o mediante cuenta gratuita, no genera relación contractual ni obligación alguna por parte de Calendarios Nacionales. El titular del servicio no se responsabiliza de daños o perjuicios derivados del uso o interpretación de estos datos."
+}
