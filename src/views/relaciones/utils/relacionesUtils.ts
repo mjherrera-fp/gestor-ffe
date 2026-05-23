@@ -57,7 +57,8 @@ export const calculateEndDateForHours = (
   startDate: string,
   totalHours: number,
   horario: HorarioSemanal | undefined,
-  festivos: string[]
+  festivos: string[],
+  usarFestivos: boolean = true
 ): string | null => {
   if (!startDate || !totalHours || !horario) return null;
 
@@ -69,9 +70,9 @@ export const calculateEndDateForHours = (
   while (remainingHoras > 0 && iterations < 365) {
     const dateStr = formatDateLocal(current);
     const dayOfWeek = current.getDay();
-    const isFestivo = festivos.includes(dateStr);
+    const saltarFestivo = usarFestivos && festivos.includes(dateStr);
 
-    if (!isFestivo) {
+    if (!saltarFestivo) {
       let dailyHoras = 0;
       switch (dayOfWeek) {
         case 1: dailyHoras = horario.lunes.horas; break;
@@ -96,7 +97,8 @@ export const calculateStartDateFromEnd = (
   targetEndDate: string,
   totalHours: number,
   horario: HorarioSemanal | undefined,
-  festivos: string[]
+  festivos: string[],
+  usarFestivos: boolean = true
 ): string | null => {
   if (!targetEndDate || !totalHours || !horario) return null;
 
@@ -108,9 +110,9 @@ export const calculateStartDateFromEnd = (
   while (remainingHoras > 0 && iterations < 365) {
     const dateStr = formatDateLocal(current);
     const dayOfWeek = current.getDay();
-    const isFestivo = festivos.includes(dateStr);
+    const saltarFestivo = usarFestivos && festivos.includes(dateStr);
 
-    if (!isFestivo) {
+    if (!saltarFestivo) {
       let dailyHoras = 0;
       switch (dayOfWeek) {
         case 1: dailyHoras = horario.lunes.horas; break;

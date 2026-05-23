@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { db } from './src/lib/db.ts';
-import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase } from './src/lib/dao.ts';
+import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
@@ -225,7 +225,18 @@ async function startServer() {
     const existing = ProfesorDAO.get();
     if (!existing) return res.status(400).json({ error: 'No hay profesor' });
     ConfiguracionDAO.setConfig(existing.id!, req.params.tipo, req.body);
-    res.json({ success: true });
+
+    // Si cambia usar_festivos, recalcular fechas de todos los alumnos
+    let recalculadas = -1;
+    if (req.params.tipo === 'festivos') {
+      try {
+        recalculadas = recalcularFechasAlumnos(existing.id!);
+      } catch (e) {
+        console.error('Error al recalcular fechas:', e);
+      }
+    }
+
+    res.json({ success: true, recalculadas });
   });
   app.get('/api/profesor/aceptacion-uso', (req, res) => {
     res.json({ aceptado: AceptacionUsoDAO.getAceptado() });
@@ -1302,8 +1313,16 @@ async function startServer() {
       // Obtener festivos del centro educativo y tutorías del detalle académico
       const centro = CentroDAO.getById(convenio.centroId);
       const detalle = DetalleAcademicoDAO.getById(alumno.detalleAcademicoId);
-      const festivos = centro?.festivos || [];
       const tutorias = detalle?.tutorias || [];
+
+      // Leer config para saber si se descuentan festivos
+      const profesor = ProfesorDAO.get();
+      let usarFestivos = true;
+      if (profesor?.id) {
+        const cfg = ConfiguracionDAO.getConfig(profesor.id, 'festivos');
+        usarFestivos = cfg.usar_festivos !== '0';
+      }
+      const festivos = usarFestivos ? (centro?.festivos || []) : [];
 
       // --- LÓGICA DE GENERACIÓN DE MESES PARA EL CALENDARIO ---
       const mesesData = [];

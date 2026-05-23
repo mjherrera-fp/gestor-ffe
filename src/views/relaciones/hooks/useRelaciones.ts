@@ -47,6 +47,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
     const [tutores, setTutores] = useState<TutorEmpresa[]>([]);
     const [curso, setCurso] = useState<Curso | null>(null);
     const [centroFestivos, setCentroFestivos] = useState<string[]>([]);
+    const [usarFestivos, setUsarFestivos] = useState(true);
 
     // ── UI de listado ──
     const [selectedRelacion, setSelectedRelacion] = useState<RelacionAlumno | null>(null);
@@ -152,11 +153,12 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         const convParams = new URLSearchParams({ cursoId: String(cursoId) });
         const alumParams = new URLSearchParams({ cursoId: String(cursoId) });
         if (detalleAcademicoId) alumParams.set('detalleAcademicoId', String(detalleAcademicoId));
-        const [relRes, convRes, cursoRes, alumRes] = await Promise.all([
+        const [relRes, convRes, cursoRes, alumRes, configRes] = await Promise.all([
             fetch(`/api/relaciones-alumnos?${relParams}`),
             fetch(`/api/convenios?${convParams}`),
             fetch(`/api/cursos`),
             fetch(`/api/alumnos?${alumParams}`),
+            fetch('/api/profesor/config/festivos'),
         ]);
 
         const allRelaciones: RelacionAlumno[] = await relRes.json();
@@ -168,6 +170,11 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setConvenios(allConvenios);
         setAlumnos(allAlumnos);
         setCurso(allCursos.find((c: Curso) => c.id === cursoId));
+
+        if (configRes.ok) {
+            const configData = await configRes.json();
+            setUsarFestivos(configData.usar_festivos !== '0');
+        }
 
         if (selectedRelacion) {
             const updated = allRelaciones.find(r => r.id === selectedRelacion.id);
@@ -209,12 +216,12 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             setFormData(prev => ({
                 ...prev,
                 alumnos: (prev.alumnos || []).map(ar => {
-                    const endDate = calculateEndDateForHours(ar.fechaInicio || '', ar.totalHorasFFE, prev.horario, centroFestivos);
+                    const endDate = calculateEndDateForHours(ar.fechaInicio || '', ar.totalHorasFFE, prev.horario, centroFestivos, usarFestivos);
                     return endDate ? { ...ar, fechaFin: endDate } : ar;
                 }),
             }));
         }
-    }, [formData.horario]);
+    }, [formData.horario, usarFestivos]);
 
     // ─────────────────────────────────────────
     //  LÓGICA DEL FORMULARIO
@@ -321,7 +328,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = calculateEndDateForHours(a.fechaInicio || '', hours, prev.horario, centroFestivos);
+                const newEndDate = calculateEndDateForHours(a.fechaInicio || '', hours, prev.horario, centroFestivos, usarFestivos);
                 return { ...a, totalHorasFFE: hours, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -332,7 +339,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = calculateEndDateForHours(date, a.totalHorasFFE || 0, prev.horario, centroFestivos);
+                const newEndDate = calculateEndDateForHours(date, a.totalHorasFFE || 0, prev.horario, centroFestivos, usarFestivos);
                 return { ...a, fechaInicio: date, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -344,7 +351,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
             ...prev,
             alumnos: (prev.alumnos || []).map(a => ({
                 ...a,
-                fechaInicio: calculateStartDateFromEnd(targetEndDate, a.totalHorasFFE, prev.horario, centroFestivos) || a.fechaInicio,
+                fechaInicio: calculateStartDateFromEnd(targetEndDate, a.totalHorasFFE, prev.horario, centroFestivos, usarFestivos) || a.fechaInicio,
                 fechaFin: targetEndDate,
             })),
         }));
@@ -355,7 +362,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
-                const endDate = calculateEndDateForHours(targetStartDate, a.totalHorasFFE || 0, prev.horario, centroFestivos);
+                const endDate = calculateEndDateForHours(targetStartDate, a.totalHorasFFE || 0, prev.horario, centroFestivos, usarFestivos);
                 return { ...a, fechaInicio: targetStartDate, fechaFin: endDate || a.fechaFin };
             }),
         }));

@@ -786,6 +786,14 @@ export const PanelDAO = {
     const filtroAlumno = detalleAcademicoId ? 'AND a.detalleAcademicoId = ?' : '';
     const paramsAlumno: any[] = detalleAcademicoId ? [cursoId, detalleAcademicoId] : [cursoId];
 
+    // Leer configuración de usar_festivos
+    const profesor = ProfesorDAO.get();
+    let usarFestivos = true;
+    if (profesor?.id) {
+      const config = ConfiguracionDAO.getConfig(profesor.id, 'festivos');
+      usarFestivos = config.usar_festivos !== '0';
+    }
+
     const alumnos = db.prepare(
       `SELECT id, nombre, apellidos, fechaInicio, fechaFin FROM alumnos a WHERE a.cursoId = ? ${filtroAlumno}`
     ).all(...paramsAlumno) as { id: number; nombre: string; apellidos: string; fechaInicio: string | null; fechaFin: string | null }[];
@@ -878,7 +886,8 @@ export const PanelDAO = {
         let dias = 0;
         const d = new Date(start);
         while (d <= end) {
-          if (diasSet.has(d.getDay()) && !festivosSet.has(toLocalDateStr(d))) dias++;
+          const esFestivo = festivosSet.has(toLocalDateStr(d));
+          if (diasSet.has(d.getDay()) && (!esFestivo || !usarFestivos)) dias++;
           d.setDate(d.getDate() + 1);
         }
 
@@ -1008,4 +1017,86 @@ export const AvisosDAO = {
     return AvisosDAO.getActivos();
   },
 };
+
+// ─────────────────────────────────────────
+//  RECÁLCULO DE FECHAS
+// ─────────────────────────────────────────
+
+export function recalcularFechasAlumnos(profesorId: number): number {
+  const config = ConfiguracionDAO.getConfig(profesorId, 'festivos');
+  const usarFestivos = config.usar_festivos !== '0';
+
+  const alumnos = db.prepare(`
+    SELECT a.id as alumnoId, a.fechaInicio, a.totalHorasFFE, a.relacionId,
+           r.horario, r.convenioId
+    FROM alumnos a
+    JOIN relaciones r ON a.relacionId = r.id
+    WHERE a.relacionId IS NOT NULL AND a.fechaInicio IS NOT NULL AND a.totalHorasFFE > 0
+  `).all() as any[];
+
+  // Build centro → festivos map
+  const centroFestivosMap: Record<number, string[]> = {};
+  for (const alumno of alumnos) {
+    const conv = db.prepare('SELECT centroId FROM convenios WHERE id = ?').get(alumno.convenioId) as any;
+    if (conv?.centroId && !centroFestivosMap[conv.centroId]) {
+      const centro = db.prepare('SELECT festivos FROM centros_educativos WHERE id = ?').get(conv.centroId) as any;
+      centroFestivosMap[conv.centroId] = centro?.festivos ? JSON.parse(centro.festivos) : [];
+    }
+  }
+
+  const formatDateLocal = (date: Date): string => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
+  let contador = 0;
+  const updateStmt = db.prepare('UPDATE alumnos SET fechaFin = ? WHERE id = ?');
+
+  const transaction = db.transaction(() => {
+    for (const alumno of alumnos) {
+      const horario = safeParse(alumno.horario, {});
+      if (!horario || Object.keys(horario).length === 0) continue;
+
+      const conv = db.prepare('SELECT centroId FROM convenios WHERE id = ?').get(alumno.convenioId) as any;
+      const festivos = conv?.centroId ? (centroFestivosMap[conv.centroId] || []) : [];
+
+      const startParts = alumno.fechaInicio.split('-').map(Number);
+      let current = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+      let remainingHoras = alumno.totalHorasFFE;
+      let iterations = 0;
+
+      while (remainingHoras > 0 && iterations < 365) {
+        const dateStr = formatDateLocal(current);
+        const dayOfWeek = current.getDay();
+        const saltarFestivo = usarFestivos && festivos.includes(dateStr);
+
+        if (!saltarFestivo) {
+          let dailyHoras = 0;
+          switch (dayOfWeek) {
+            case 1: dailyHoras = horario.lunes?.horas || 0; break;
+            case 2: dailyHoras = horario.martes?.horas || 0; break;
+            case 3: dailyHoras = horario.miercoles?.horas || 0; break;
+            case 4: dailyHoras = horario.jueves?.horas || 0; break;
+            case 5: dailyHoras = horario.viernes?.horas || 0; break;
+            case 6: dailyHoras = horario.sabado?.horas || 0; break;
+            case 0: dailyHoras = horario.domingo?.horas || 0; break;
+          }
+          remainingHoras -= dailyHoras;
+        }
+
+        if (remainingHoras > 0) current.setDate(current.getDate() + 1);
+        iterations++;
+      }
+
+      const nuevaFechaFin = formatDateLocal(current);
+      updateStmt.run(nuevaFechaFin, alumno.alumnoId);
+      contador++;
+    }
+  });
+
+  transaction();
+  return contador;
+}
 
