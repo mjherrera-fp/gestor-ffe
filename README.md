@@ -1,9 +1,13 @@
+<div align="center">
+<img width="1200" height="475" alt="Banner" src="./assets/banner.png" />
+</div>
+
 # Gestor FFE — Sistema de Gestión de Prácticas Formativas
 
 **Versión:** 0.1.0-alpha  
-**Plataforma:** Windows (instalador NSIS / portable)
+**Plataforma:** Windows (portable)
 
-Aplicación de escritorio para la gestión integral de la Formación en Centros de Trabajo (FCT) / Formación Profesional en Empresa (FFE). Permite administrar alumnos, empresas, convenios, relaciones de prácticas, generación de documentos oficiales, envío de correos electrónicos y cálculo de días de Seguridad Social, todo en un mismo entorno.
+Aplicación de escritorio para la gestión integral de la Fase de Formación en Empresa (FFE). Permite administrar alumnos, empresas, convenios, relaciones de prácticas, generación de documentos oficiales, envío de correos electrónicos y cálculo de días de Seguridad Social, todo en un mismo entorno.
 
 ---
 
@@ -24,13 +28,41 @@ Aplicación de escritorio para la gestión integral de la Formación en Centros 
 13. [Configuración](#13-configuración)
 14. [Histórico / Auditoría](#14-histórico--auditoría)
 15. [Seguridad y Cifrado](#15-seguridad-y-cifrado)
-16. [Preguntas Frecuentes](#16-preguntas-frecuentes)
+16. [Servicios conectados](#16-servicios-conectados)
+17. [Preguntas Frecuentes](#16-preguntas-frecuentes)
 
 ---
 
 ## 1. Introducción
 
 **Gestor FFE** es una aplicación de escritorio desarrollada con tecnología web (React + Electron) que centraliza toda la gestión de las prácticas formativas de un centro educativo.
+
+### Condiciones de uso
+
+El usuario es responsable de cumplir con todas las leyes y regulaciones aplicables al utilizar este software.
+
+El desarrollador de esta aplicación **no se hace responsable** de ningún daño, pérdida o perjuicio que pueda derivarse del uso indebido, inapropiado o incorrecto de la aplicación. El uso de esta aplicación es bajo su propio riesgo.
+
+**No garantizamos** que la aplicación funcione sin errores, interrupciones o fallos, ni que los resultados obtenidos sean precisos o completos. La aplicación se proporciona "tal cual" y "según disponibilidad", sin ninguna garantía expresa o implícita de ningún tipo.
+
+Al utilizar esta aplicación, usted **acepta que el desarrollador no será responsable** de ningún daño directo, indirecto, incidental, especial o consecuente que pueda surgir del uso o mal funcionamiento de la aplicación.
+
+### Derechos de autor
+Copyright (c) Manuel Jesús Herrera Morgaz. Todos los derechos reservados.
+
+Este software se distribuye bajo una licencia de código fuente disponible. Se permite usar,
+ver y estudiar el código. <a href="https://github.com/mjherrera-fp/gestor-ffe" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">El código fuente está disponible en GitHub</a>.
+
+No se permite copiar, redistribuir, sublicenciar o usar con fines comerciales o de ningún otro tipo sin
+autorización expresa del autor.
+
+Toda copia autorizada deberá mantener esta nota de copyright y atribuir al autor original.
+
+Al aceptar estas condiciones, el usuario se compromete a hacer un uso responsable de la
+aplicación y de los datos gestionados a través de la misma, cumpliendo con la normativa
+vigente en materia de protección de datos.
+
+El desarrollador no se hace responsable de la gestión, almacenamiento o protección de los datos introducidos en la aplicación. Es responsabilidad del usuario asegurarse de que los datos gestionados a través de la aplicación cumplen con las leyes y regulaciones aplicables, incluyendo pero no limitándose a la Ley de Protección de Datos Personales.
 
 ### Funcionalidades principales
 
@@ -48,9 +80,9 @@ Aplicación de escritorio para la gestión integral de la Formación en Centros 
 
 ## 2. Primeros pasos
 
-### 2.1 Instalación
+### 2.1 Uso
 
-Descarga el instalador `.exe` o la versión portable `.exe` desde la página de distribución. Ejecuta el instalador y sigue los pasos. En la versión portable, descomprime el archivo y ejecuta `GestorFFE.exe`.
+Descarga la última versión portable `.zip` desde la página de distribución. Descomprime el archivo y ejecuta el programa `GestorFFE.exe`.
 
 ### 2.2 Inicio de sesión / Desbloqueo
 
@@ -60,9 +92,15 @@ Si la base de datos está protegida con contraseña, al iniciar la aplicación a
 
 Introduce la contraseña maestra y pulsa **Desbloquear**. Si es la primera vez que usas la aplicación, se creará una base de datos vacía sin contraseña.
 
+> ⚠️ Se recomienda cifrar la base de datos para proteger la información de los alumnos/as.
+
 ### 2.3 Configuración inicial
 
-Antes de comenzar, dirígete a **Configuración → Correo** para configurar los parámetros SMTP si planeas enviar correos desde la aplicación. Consulta la sección [11. Correo Electrónico](#11-correo-electrónico) para más detalles.
+Antes de comenzar, dirígete a **Configuración** revisa los parámetros configurables de la aplicación y no te olvides de configurar tu correo si planeas enviar emails desde la aplicación. Consulta la sección [11. Correo Electrónico](#11-correo-electrónico) para más detalles.
+
+En la seccion **Seguridad** podrás introducir una contraseña para cifrar la base de datos. Consulta la sección [15. Seguridad y Cifrado](#15-seguridad-y-cifrado)
+
+> **MUY importante**, una vez cifrada la base de datos, esta operación **NO se puede revertir** y SIEMPRE quedará cifrada, por lo que si decides cifrar **NO** olvides la contraseña dado que no se puede recuperar y **los datos se perderían para siempre**.
 
 ### 2.4 Estructura de la navegación
 
@@ -282,9 +320,9 @@ PENDIENTE_ENVIAR_EMPRESA → PENDIENTE_FIRMA_EMPRESA → PENDIENTE_ENVIAR_DIRECT
 
 Cada alumno tiene tres estados independientes:
 
-- **Plan Formativo:** PENDIENTE_ENVIAR_ESTUDIANTE → PENDIENTE_FIRMAR_ESTUDIANTE → PENDIENTE_ENVIAR_EMPRESA → PENDIENTE_FIRMA_EMPRESA → PENDIENTE_FIRMA_TUTOR → COMPLETADO
-- **Seguimiento:** PENDIENTE → ENVIADO_A_EMPRESA → RECIBIDO
-- **Valoración:** PENDIENTE → ENVIADO_A_EMPRESA → RECIBIDO
+- **Plan Formativo:** ```PENDIENTE_ENVIAR_ESTUDIANTE → PENDIENTE_FIRMAR_ESTUDIANTE → PENDIENTE_ENVIAR_EMPRESA → PENDIENTE_FIRMA_EMPRESA → PENDIENTE_FIRMA_TUTOR → COMPLETADO```
+- **Seguimiento:** ```PENDIENTE → ENVIADO_A_EMPRESA → RECIBIDO```
+- **Valoración:** ```PENDIENTE → ENVIADO_A_EMPRESA → RECIBIDO```
 
 > `[IMAGEN: Detalle de relación con los estados individuales de cada alumno]`
 
@@ -492,9 +530,18 @@ La aplicación utiliza SQLCipher para cifrar la base de datos SQLite. Cuando la 
 
 Puedes bloquear la aplicación manualmente desde el icono de candado en la barra superior. La aplicación se bloquea y requiere la contraseña para reanudar.
 
+## 16. Servicios conectados
+Desde Gestor FFE se usan los siguientes servicios:
+
+| Icono | URL | Uso|
+|-------|-----|--------|
+| <img src="https://calendariosnacionales.com/logo-mark.svg" width="40" height="40"> | https://calendariosnacionales.com/ |Obtención automática de los días festivos|
+
+**¡Gracias!**
+
 ---
 
-## 16. Preguntas Frecuentes
+## 17. Preguntas Frecuentes
 
 **¿Cómo se calcula la fecha de fin de prácticas?**
 El sistema suma las horas FFE del alumno día a día según su horario semanal, saltando los festivos del centro y de la empresa (si están activados) y los fines de semana no laborables.

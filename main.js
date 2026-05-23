@@ -59,8 +59,17 @@ function createWindow() {
     }
   });
 
+  const esLocal = (url) => {
+    try {
+      const parsed = new URL(url);
+      return parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost';
+    } catch {
+      return false;
+    }
+  };
+
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('https://') || url.startsWith('http://')) {
+    if (!esLocal(url) && (url.startsWith('https://') || url.startsWith('http://'))) {
       shell.openExternal(url);
       return { action: 'deny' };
     }
@@ -68,7 +77,7 @@ function createWindow() {
   });
 
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    if (url.startsWith('https://') || url.startsWith('http://')) {
+    if (!esLocal(url) && (url.startsWith('https://') || url.startsWith('http://'))) {
       event.preventDefault();
       shell.openExternal(url);
     }

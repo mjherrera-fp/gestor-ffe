@@ -41,10 +41,11 @@ export function EmpresaFestivosModal({ localidad, festivos, onSave, onClose }: E
       const res = await fetch(`/api/festivos/obtener?slug=${slug}`);
       const data = await res.json();
       if (data.fechas?.length) {
+        const nuevasFechas = data.fechas.filter((f: string) => !dates.includes(f));
         const newSet = [...new Set([...dates, ...data.fechas])];
         newSet.sort();
         setDates(newSet);
-        setFestivosImportados(data.fechas.length);
+        setFestivosImportados(nuevasFechas.length);
         setShowAgradecimiento(true);
       }
     } catch {
@@ -106,7 +107,7 @@ export function EmpresaFestivosModal({ localidad, festivos, onSave, onClose }: E
         </form>
 
         {showAgradecimiento && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[60] p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-60 p-4">
             <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
