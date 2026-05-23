@@ -222,7 +222,7 @@ export function CentroFormModal({
 
         {/* Agradecimiento API */}
         {showAgradecimiento && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[60] p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-60 p-4">
             <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
