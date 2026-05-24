@@ -144,17 +144,18 @@ export function RelacionesListado({
             </div>
             <div className="flex items-center gap-2">
               
-              <button
-                onClick={() => { if (relaciones) setTargetDownloadRelaciones(relaciones); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
-                title="Descargar todos los documentos"
-              >
-                {isDownloading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-                ) : (
-                  <Download className="h-3.5 w-3.5" />
-                )}
-              </button>
+              <Title text="Descargar todos los documentos">
+                <button
+                  onClick={() => { if (relaciones) setTargetDownloadRelaciones(relaciones); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
+                >
+                  {isDownloading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                  ) : (
+                    <Download className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              </Title>
               <button
                 onClick={() => createRelacion(null)}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold shadow-md shadow-blue-600/10 transition-all"
@@ -240,17 +241,18 @@ export function RelacionesListado({
                           <option key={o.id} value={o.id}>{o.label}</option>
                         ))}
                       </select>
-                      <button
-                        onClick={() => onStatusFilterChange(tipo, f.value, !f.negate)}
-                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all ${
-                          f.negate
-                            ? 'bg-red-50 text-red-500 border border-red-200'
-                            : 'bg-blue-50 text-blue-500 border border-blue-200'
-                        }`}
-                        title={f.negate ? 'Excluir este estado' : 'Incluir este estado'}
-                      >
-                        {f.negate ? '≠' : '='}
-                      </button>
+                      <Title text={f.negate ? 'Excluir este estado' : 'Incluir este estado'}>
+                        <button
+                          onClick={() => onStatusFilterChange(tipo, f.value, !f.negate)}
+                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all ${
+                            f.negate
+                              ? 'bg-red-50 text-red-500 border border-red-200'
+                              : 'bg-blue-50 text-blue-500 border border-blue-200'
+                          }`}
+                        >
+                          {f.negate ? '≠' : '='}
+                        </button>
+                      </Title>
                     </div>
                   );
                 })}
@@ -357,13 +359,14 @@ export function RelacionesListado({
                         </div>
 
                         <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                          <button
-                            onClick={() => onOpenStats(rel)}
-                            className="p-2 text-slate-400 hover:text-amber-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
-                            title="Estadísticas de la empresa"
-                          >
-                            <Star className="h-4 w-4" />
-                          </button>
+                          <Title text="Estadísticas de la empresa">
+                            <button
+                              onClick={() => onOpenStats(rel)}
+                              className="p-2 text-slate-400 hover:text-amber-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                            >
+                              <Star className="h-4 w-4" />
+                            </button>
+                          </Title>
                           <button
                             onClick={() => onEdit(rel)}
                             className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"

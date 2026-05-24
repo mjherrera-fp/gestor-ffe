@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, Phone, GraduationCap, Edit2, Trash2, Send, CheckCircle, Clock, Search, Mail } from 'lucide-react';
 import { Alumno } from '../../../types/index.ts';
+import { Title } from '../../../components/Title.tsx';
 
 interface AlumnosTableProps {
   alumnos: Alumno[];
@@ -90,13 +91,14 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                 {/* Acciones */}
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-1">
-                    <button
-                      onClick={() => onEmail(alumno)}
-                      title="Enviar correo"
-                      className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                    >
-                      <Mail className="h-4 w-4" />
-                    </button>
+                    <Title text="Enviar correo">
+                      <button
+                        onClick={() => onEmail(alumno)}
+                        className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                      >
+                        <Mail className="h-4 w-4" />
+                      </button>
+                    </Title>
                     <button
                       onClick={() => onEdit(alumno)}
                       className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"

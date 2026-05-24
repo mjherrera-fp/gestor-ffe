@@ -16,19 +16,20 @@ function FirmaSelector({ value, onChange }: { value?: FirmaTipo; onChange: (v: F
     return FIRMA_CICLO[(idx + 1) % FIRMA_CICLO.length];
   };
   return (
-    <button
-      type="button"
-      onClick={(e) => { e.stopPropagation(); onChange(next()); }}
-      className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${firma === FirmaTipo.DIGITAL
-          ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
-          : firma === FirmaTipo.MANUAL
-            ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'
-            : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
-        }`}
-      title="Haz clic para cambiar tipo de firma"
-    >
-      {FirmaTipoLabels[firma]}
-    </button>
+    <Title text="Haz clic para cambiar tipo de firma">
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onChange(next()); }}
+        className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${firma === FirmaTipo.DIGITAL
+            ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
+            : firma === FirmaTipo.MANUAL
+              ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'
+              : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
+          }`}
+      >
+        {FirmaTipoLabels[firma]}
+      </button>
+    </Title>
   );
 }
 
@@ -143,28 +144,30 @@ export function RelacionDetalle({
 
 
         {/* Botón de Enviar Todo */}
-        <button
-          onClick={() => { if (selectedRelacion) setTargetEmailRelaciones([selectedRelacion]); }}
-          className="flex items-center gap-1.5 px-3 py-1.5 mr-3 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
-          title="Enviar documentación seleccionada por correo a la empresa"
-        >
-          <Mail className="h-3.5 w-3.5" />
-        </button>
+        <Title text="Enviar documentación seleccionada por correo a la empresa">
+          <button
+            onClick={() => { if (selectedRelacion) setTargetEmailRelaciones([selectedRelacion]); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 mr-3 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
+          >
+            <Mail className="h-3.5 w-3.5" />
+          </button>
+        </Title>
 
         {/* Botón de Descargar Todo */}
-        <button
-          onClick={() => {
-            if (selectedRelacion) setTargetDownloadRelaciones([selectedRelacion]);
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
-          title="Descargar todos los documentos"
-        >
-          {isDownloading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-          ) : (
-            <Download className="h-3.5 w-3.5" />
-          )}
-        </button>
+        <Title text="Descargar todos los documentos">
+          <button
+            onClick={() => {
+              if (selectedRelacion) setTargetDownloadRelaciones([selectedRelacion]);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
+          >
+            {isDownloading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+            ) : (
+              <Download className="h-3.5 w-3.5" />
+            )}
+          </button>
+        </Title>
 
       </div>
 
@@ -199,14 +202,15 @@ export function RelacionDetalle({
                   onClick={() => onDescargarRelacion('pdf')}
                   showText={true}
                 />
-                <button
-                  onClick={async () => { setSendingEmail('relacion'); try { await onEmailRelacion('pdf'); } finally { setSendingEmail(null); } }}
-                  disabled={sendingEmail === 'relacion'}
-                  title="Enviar por correo"
-                  className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 text-[10px] font-bold uppercase disabled:opacity-50"
-                >
-                  {sendingEmail === 'relacion' ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-                </button>
+                <Title text="Enviar por correo">
+                  <button
+                    onClick={async () => { setSendingEmail('relacion'); try { await onEmailRelacion('pdf'); } finally { setSendingEmail(null); } }}
+                    disabled={sendingEmail === 'relacion'}
+                    className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 text-[10px] font-bold uppercase disabled:opacity-50"
+                  >
+                    {sendingEmail === 'relacion' ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                  </button>
+                </Title>
               </div>
 
               {anexoBtn ? (
@@ -287,14 +291,15 @@ export function RelacionDetalle({
                             showText={true}
                             className="h-8 px-2 bg-white border border-slate-200 text-red-600 rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-red-50 transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
                           />
-                          <button
-                            onClick={async () => { const key = `plan-${alumno.id}`; setSendingEmail(key); try { await onEmailPlanFormativo('pdf', alumno); } finally { setSendingEmail(null); } }}
-                            disabled={sendingEmail === `plan-${alumno.id}`}
-                            title="Enviar por correo"
-                            className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 text-[10px] font-bold uppercase disabled:opacity-50"
-                          >
-                            {sendingEmail === `plan-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-                          </button>
+                          <Title text="Enviar por correo">
+                            <button
+                              onClick={async () => { const key = `plan-${alumno.id}`; setSendingEmail(key); try { await onEmailPlanFormativo('pdf', alumno); } finally { setSendingEmail(null); } }}
+                              disabled={sendingEmail === `plan-${alumno.id}`}
+                              className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 text-[10px] font-bold uppercase disabled:opacity-50"
+                            >
+                              {sendingEmail === `plan-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                            </button>
+                          </Title>
                         </div>
 
                         {planBtn ? (
@@ -376,14 +381,15 @@ export function RelacionDetalle({
                             showText={true}
                             className="h-8 px-2 bg-white border border-slate-200 text-blue-600 rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-blue-50 transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
                           />
-                          <button
-                            onClick={async () => { const key = `seg-${alumno.id}`; setSendingEmail(key); try { await onEmailSeguimiento(alumno); } finally { setSendingEmail(null); } }}
-                            disabled={sendingEmail === `seg-${alumno.id}`}
-                            title="Enviar por correo"
-                            className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 text-[10px] font-bold uppercase disabled:opacity-50"
-                          >
-                            {sendingEmail === `seg-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-                          </button>
+                          <Title text="Enviar por correo">
+                            <button
+                              onClick={async () => { const key = `seg-${alumno.id}`; setSendingEmail(key); try { await onEmailSeguimiento(alumno); } finally { setSendingEmail(null); } }}
+                              disabled={sendingEmail === `seg-${alumno.id}`}
+                              className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 text-[10px] font-bold uppercase disabled:opacity-50"
+                            >
+                              {sendingEmail === `seg-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                            </button>
+                          </Title>
                         </div>
 
                         {planBtn ? (
@@ -465,14 +471,15 @@ export function RelacionDetalle({
                             showText={true}
                             className="h-8 px-2 bg-white border border-slate-200 text-blue-600 rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-blue-50 transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
                           />
-                          <button
-                            onClick={async () => { const key = `val-${alumno.id}`; setSendingEmail(key); try { await onEmailValoracion(alumno); } finally { setSendingEmail(null); } }}
-                            disabled={sendingEmail === `val-${alumno.id}`}
-                            title="Enviar por correo"
-                            className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 text-[10px] font-bold uppercase disabled:opacity-50"
-                          >
-                            {sendingEmail === `val-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-                          </button>
+                          <Title text="Enviar por correo">
+                            <button
+                              onClick={async () => { const key = `val-${alumno.id}`; setSendingEmail(key); try { await onEmailValoracion(alumno); } finally { setSendingEmail(null); } }}
+                              disabled={sendingEmail === `val-${alumno.id}`}
+                              className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 text-[10px] font-bold uppercase disabled:opacity-50"
+                            >
+                              {sendingEmail === `val-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                            </button>
+                          </Title>
                         </div>
 
                         {planBtn ? (
@@ -517,22 +524,25 @@ export function RelacionDetalle({
           </div>
 
           <div className="flex gap-2">
-            <div className="flex-1" title="Descargar Carta de Presentación">
-              <BotonDescargaPDF
-                onClick={async () => onDescargarCarta()}
-                showText={true}
-                text="Carta de inicio de las FFE"
-                className="w-full py-2.5 font-bold text-[10px] uppercase flex items-center justify-center gap-2 bg-white border border-slate-200 text-red-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 rounded-lg transition-all shadow-sm active:scale-90 disabled:opacity-50"
-              />
+            <div className="flex-1">
+              <Title text="Descargar Carta de Presentación">
+                <BotonDescargaPDF
+                  onClick={async () => onDescargarCarta()}
+                  showText={true}
+                  text="Carta de inicio de las FFE"
+                  className="w-full py-2.5 font-bold text-[10px] uppercase flex items-center justify-center gap-2 bg-white border border-slate-200 text-red-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 rounded-lg transition-all shadow-sm active:scale-90 disabled:opacity-50"
+                />
+              </Title>
             </div>
-            <button
-              onClick={async () => { setSendingEmail('carta'); try { await onEmailCarta(); } finally { setSendingEmail(null); } }}
-              disabled={sendingEmail === 'carta'}
-              title="Enviar por correo"
-              className="h-10 px-3 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 shrink-0 text-[10px] font-bold uppercase disabled:opacity-50"
-            >
-              {sendingEmail === 'carta' ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-            </button>
+            <Title text="Enviar por correo">
+              <button
+                onClick={async () => { setSendingEmail('carta'); try { await onEmailCarta(); } finally { setSendingEmail(null); } }}
+                disabled={sendingEmail === 'carta'}
+                className="h-10 px-3 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 shrink-0 text-[10px] font-bold uppercase disabled:opacity-50"
+              >
+                {sendingEmail === 'carta' ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+              </button>
+            </Title>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
@@ -553,23 +563,26 @@ export function RelacionDetalle({
 
                 {/* Acciones de Descarga */}
                 <div className="flex gap-1.5">
-                  <div title="Descargar Calendario" className="flex-1">
-                    <BotonDescargaPDF
-                      onClick={async () => onDescargarCalendario(alumno)}
-                      showText={true}
-                      text="CALENDARIO"
-                      icon={CalendarDays}
-                      className="h-8 w-full gap-1.5 flex items-center justify-center bg-white border border-slate-200 text-red-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 rounded-lg transition-all shadow-sm active:scale-90 disabled:opacity-50"
-                    />
+                  <div className="flex-1">
+                    <Title text="Descargar Calendario">
+                      <BotonDescargaPDF
+                        onClick={async () => onDescargarCalendario(alumno)}
+                        showText={true}
+                        text="CALENDARIO"
+                        icon={CalendarDays}
+                        className="h-8 w-full gap-1.5 flex items-center justify-center bg-white border border-slate-200 text-red-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 rounded-lg transition-all shadow-sm active:scale-90 disabled:opacity-50"
+                      />
+                    </Title>
                   </div>
-                  <button
-                    onClick={async () => { const key = `cal-${alumno.id}`; setSendingEmail(key); try { await onEmailCalendario(alumno); } finally { setSendingEmail(null); } }}
-                    disabled={sendingEmail === `cal-${alumno.id}`}
-                    title="Enviar por correo"
-                    className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 shrink-0 text-[10px] font-bold uppercase disabled:opacity-50"
-                  >
-                    {sendingEmail === `cal-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-                  </button>
+                  <Title text="Enviar por correo">
+                    <button
+                      onClick={async () => { const key = `cal-${alumno.id}`; setSendingEmail(key); try { await onEmailCalendario(alumno); } finally { setSendingEmail(null); } }}
+                      disabled={sendingEmail === `cal-${alumno.id}`}
+                      className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 shrink-0 text-[10px] font-bold uppercase disabled:opacity-50"
+                    >
+                      {sendingEmail === `cal-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                    </button>
+                  </Title>
                 </div>
               </div>
             ))}

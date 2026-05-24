@@ -1,6 +1,7 @@
 import React from 'react';
 import { Building, Hash, Plus, Edit2, Trash2, Mail, Phone, X, Star, Filter, Download, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { Empresa } from '../../../types/index.ts';
+import { Title } from '../../../components/Title.tsx';
 
 interface EmpresasListadoProps {
   empresas: Empresa[];
@@ -61,29 +62,32 @@ export function EmpresasListado({
             </span>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={onBulkEmail}
-              title="Enviar correo a empresas filtradas"
-              className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-blue-100 transition-all border border-blue-100"
-            >
-              <Mail className="h-4 w-4" />
-            </button>
-            <button
-              onClick={onDownloadTemplate}
-              title="Descargar plantilla Excel"
-              className="flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all border border-slate-200"
-            >
-              <Download className="h-4 w-4" /> Plantilla
-            </button>
-            <button
-              onClick={onImportClick}
-              disabled={isImporting}
-              title="Importar desde Excel"
-              className="flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-emerald-100 transition-all border border-emerald-100 disabled:opacity-50"
-            >
-              {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
-              {isImporting ? 'Importando...' : 'Importar Excel'}
-            </button>
+            <Title text="Enviar correo a empresas filtradas">
+              <button
+                onClick={onBulkEmail}
+                className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-blue-100 transition-all border border-blue-100"
+              >
+                <Mail className="h-4 w-4" />
+              </button>
+            </Title>
+            <Title text="Descargar plantilla Excel">
+              <button
+                onClick={onDownloadTemplate}
+                className="flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all border border-slate-200"
+              >
+                <Download className="h-4 w-4" /> Plantilla
+              </button>
+            </Title>
+            <Title text="Importar desde Excel">
+              <button
+                onClick={onImportClick}
+                disabled={isImporting}
+                className="flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-emerald-100 transition-all border border-emerald-100 disabled:opacity-50"
+              >
+                {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
+                {isImporting ? 'Importando...' : 'Importar Excel'}
+              </button>
+            </Title>
             <button
               onClick={onNew}
               className="bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
@@ -196,13 +200,14 @@ export function EmpresasListado({
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <button
-                  onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
-                  title="Enviar correo"
-                  className="p-2 text-text-muted hover:text-blue-500"
-                >
-                  <Mail className="h-4 w-4" />
-                </button>
+                <Title text="Enviar correo">
+                  <button
+                    onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
+                    className="p-2 text-text-muted hover:text-blue-500"
+                  >
+                    <Mail className="h-4 w-4" />
+                  </button>
+                </Title>
                 <button
                   onClick={e => { e.stopPropagation(); onEdit(emp); }}
                   className="p-2 text-text-muted hover:text-primary"
@@ -251,13 +256,14 @@ export function EmpresasListado({
                 </td>
                 <td className="px-5 py-4 text-right">
                   <div className="flex items-center gap-2 justify-end">
-                    <button
-                      onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
-                      title="Enviar correo"
-                      className="p-1.5 text-text-muted hover:text-blue-500 transition-colors"
-                    >
-                      <Mail className="h-4 w-4" />
-                    </button>
+                    <Title text="Enviar correo">
+                      <button
+                        onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
+                        className="p-1.5 text-text-muted hover:text-blue-500 transition-colors"
+                      >
+                        <Mail className="h-4 w-4" />
+                      </button>
+                    </Title>
                     <button
                       onClick={e => { e.stopPropagation(); onEdit(emp); }}
                       className="p-1.5 text-text-muted hover:text-primary transition-colors"

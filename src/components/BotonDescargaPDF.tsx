@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { File as FilePdf, Loader2, LucideIcon } from 'lucide-react';
 import { mostrarToast } from '../utils/toast.ts';
+import { Title } from './Title.tsx';
 
 interface Props {
   url?: string;
@@ -48,18 +49,19 @@ export function BotonDescargaPDF({ url, name, showText = true, text, onClick, cl
   const defaultStyles = "p-2.5 h-8 text-red-600 hover:text-red-700 transition-all hover:bg-red-50 rounded-xl border border-red-100 shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
-    <button 
-      onClick={descargarPDF}
-      disabled={isDownloading}
-      className={className || defaultStyles}
-      title="Descargar Anexo en PDF"
-    >
-      {isDownloading ? (
-        <Loader2 className="h-4 w-4 animate-spin shrink-0" />
-      ) : (
-        <Icon className="h-4 w-4 shrink-0" />
-      )}
-      {showText && <span className="text-[9px] font-bold truncate">{text || 'PDF'}</span>}
-    </button>
+    <Title text="Descargar Anexo en PDF">
+      <button 
+        onClick={descargarPDF}
+        disabled={isDownloading}
+        className={className || defaultStyles}
+      >
+        {isDownloading ? (
+          <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+        ) : (
+          <Icon className="h-4 w-4 shrink-0" />
+        )}
+        {showText && <span className="text-[9px] font-bold truncate">{text || 'PDF'}</span>}
+      </button>
+    </Title>
   );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileText, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { ConvenioEstado, ConvenioEstadoLabels, FirmaTipo, FirmaTipoLabels } from '../../../types/index.ts';
+import { Title } from '../../../components/Title.tsx';
 import { ConvenioExtendido } from '../hooks/useConvenios.ts';
 import { getStatusButton } from '../utils/conveniosUtils.ts';
 
@@ -20,20 +21,21 @@ function FirmaSelector({ value, onChange }: { value?: FirmaTipo; onChange: (v: F
     return FIRMA_CICLO[(idx + 1) % FIRMA_CICLO.length];
   };
   return (
-    <button
-      type="button"
-      onClick={() => onChange(next())}
-      className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${
-        firma === FirmaTipo.DIGITAL
-          ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
-          : firma === FirmaTipo.MANUAL
-          ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'
-          : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
-      }`}
-      title="Haz clic para cambiar tipo de firma"
-    >
-      {FirmaTipoLabels[firma]}
-    </button>
+    <Title text="Haz clic para cambiar tipo de firma">
+      <button
+        type="button"
+        onClick={() => onChange(next())}
+        className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${
+          firma === FirmaTipo.DIGITAL
+            ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
+            : firma === FirmaTipo.MANUAL
+            ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'
+            : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
+        }`}
+      >
+        {FirmaTipoLabels[firma]}
+      </button>
+    </Title>
   );
 }
 

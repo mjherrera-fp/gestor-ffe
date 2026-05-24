@@ -4,6 +4,7 @@ import {
   FileUp, CheckCircle, Clock, X, Eye
 } from 'lucide-react';
 import { Alumno } from '../../../types/index.ts';
+import { Title } from '../../../components/Title.tsx';
 
 interface AlumnoGridCardProps {
   alumno: Alumno;
@@ -59,24 +60,26 @@ export function AlumnoGridCard({
             <User className="h-6 w-6 text-slate-400 group-hover:text-primary transition-colors" />
           </div>
           <div className="flex gap-1.5">
-            <button
-              onClick={() => onAcademicDetail(alumno)}
-              title="Detalles Académicos"
-              className={`p-1.5 transition-colors rounded-md ${
-                alumno.detalleAcademicoId
-                  ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
-                  : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-50'
-              }`}
-            >
-              <GraduationCap className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => onEmail(alumno)}
-              title="Enviar correo"
-              className="p-1.5 text-slate-400 hover:text-blue-500 transition-colors hover:bg-blue-50 rounded-md"
-            >
-              <Mail className="h-4 w-4" />
-            </button>
+            <Title text="Detalles Académicos">
+              <button
+                onClick={() => onAcademicDetail(alumno)}
+                className={`p-1.5 transition-colors rounded-md ${
+                  alumno.detalleAcademicoId
+                    ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
+                    : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-50'
+                }`}
+              >
+                <GraduationCap className="h-4 w-4" />
+              </button>
+            </Title>
+            <Title text="Enviar correo">
+              <button
+                onClick={() => onEmail(alumno)}
+                className="p-1.5 text-slate-400 hover:text-blue-500 transition-colors hover:bg-blue-50 rounded-md"
+              >
+                <Mail className="h-4 w-4" />
+              </button>
+            </Title>
             <button
               onClick={() => onEdit(alumno)}
               className="p-1.5 text-slate-400 hover:text-primary transition-colors hover:bg-primary-light rounded-md"
@@ -131,14 +134,15 @@ export function AlumnoGridCard({
             >
               <Eye className="h-4 w-4" /> Ver CV
             </button>
-            <button
-              onClick={handleDeleteCV}
-              disabled={isDeleting}
-              title="Eliminar CV"
-              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <Title text="Eliminar CV">
+              <button
+                onClick={handleDeleteCV}
+                disabled={isDeleting}
+                className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </Title>
           </div>
         ) : (
           <label className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-primary transition-colors">

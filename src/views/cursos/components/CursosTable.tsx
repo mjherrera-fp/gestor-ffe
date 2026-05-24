@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar, Edit2, Trash2 } from 'lucide-react';
 import { Curso } from '../../../types/index.ts';
 import { formatDate } from '../../../lib/dateUtils.ts';
+import { Title } from '../../../components/Title.tsx';
 
 interface CursosTableProps {
   cursos: Curso[];
@@ -41,22 +42,24 @@ export function CursosTable({ cursos, onEdit, onDeleteRequest }: CursosTableProp
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      title="Editar"
-                      onClick={() => onEdit(curso)}
-                      className="p-2 text-slate-500 bg-white border border-slate-200 hover:text-primary hover:border-primary-light hover:bg-primary-light transition-all rounded-lg shadow-sm active:scale-95"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      title="Eliminar"
-                      onClick={() => onDeleteRequest(curso.id!)}
-                      className="p-2 text-slate-500 bg-white border border-slate-200 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all rounded-lg shadow-sm active:scale-95"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <Title text="Editar">
+                      <button
+                        type="button"
+                        onClick={() => onEdit(curso)}
+                        className="p-2 text-slate-500 bg-white border border-slate-200 hover:text-primary hover:border-primary-light hover:bg-primary-light transition-all rounded-lg shadow-sm active:scale-95"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                    </Title>
+                    <Title text="Eliminar">
+                      <button
+                        type="button"
+                        onClick={() => onDeleteRequest(curso.id!)}
+                        className="p-2 text-slate-500 bg-white border border-slate-200 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all rounded-lg shadow-sm active:scale-95"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </Title>
                   </div>
                 </td>
               </tr>

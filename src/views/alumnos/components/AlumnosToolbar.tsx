@@ -5,6 +5,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
+import { Title } from '../../../components/Title.tsx';
 import { SortField, SortOrder, FilterStatus, ViewMode } from '../hooks/useAlumnos.ts';
 
 const FILTER_OPTIONS = [
@@ -53,29 +54,32 @@ export function AlumnosToolbar({
           Alumnado del Curso
         </h1>
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={onDownloadTemplate}
-            title="Descargar plantilla Excel"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all border border-slate-200"
-          >
-            <Download className="h-4 w-4" /> Plantilla
-          </button>
-          <button
-            onClick={onImportClick}
-            disabled={isImporting}
-            title="Importar desde Excel"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-emerald-100 transition-all border border-emerald-100 disabled:opacity-50"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            {isImporting ? 'Importando...' : 'Importar Excel'}
-          </button>
-          <button
-            onClick={onBulkEmail}
-            title="Enviar correo a alumnos filtrados"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-50 text-blue-600 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-blue-100 transition-all border border-blue-100"
-          >
-            <Mail className="h-4 w-4" />
-          </button>
+          <Title text="Descargar plantilla Excel">
+            <button
+              onClick={onDownloadTemplate}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all border border-slate-200"
+            >
+              <Download className="h-4 w-4" /> Plantilla
+            </button>
+          </Title>
+          <Title text="Importar desde Excel">
+            <button
+              onClick={onImportClick}
+              disabled={isImporting}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-emerald-100 transition-all border border-emerald-100 disabled:opacity-50"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              {isImporting ? 'Importando...' : 'Importar Excel'}
+            </button>
+          </Title>
+          <Title text="Enviar correo a alumnos filtrados">
+            <button
+              onClick={onBulkEmail}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-50 text-blue-600 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-blue-100 transition-all border border-blue-100"
+            >
+              <Mail className="h-4 w-4" />
+            </button>
+          </Title>
           <button
             onClick={onNewAlumno}
             className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
@@ -110,20 +114,22 @@ export function AlumnosToolbar({
           <div className="flex gap-2">
             {/* Toggle vista */}
             <div className="flex bg-slate-100 p-1 rounded-lg">
-              <button
-                onClick={() => onViewModeChange('grid')}
-                title="Vista Cuadrícula"
-                className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => onViewModeChange('table')}
-                title="Vista Tabla"
-                className={`p-1.5 rounded-md transition-all ${viewMode === 'table' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-              >
-                <List className="h-4 w-4" />
-              </button>
+              <Title text="Vista Cuadrícula">
+                <button
+                  onClick={() => onViewModeChange('grid')}
+                  className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+              </Title>
+              <Title text="Vista Tabla">
+                <button
+                  onClick={() => onViewModeChange('table')}
+                  className={`p-1.5 rounded-md transition-all ${viewMode === 'table' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  <List className="h-4 w-4" />
+                </button>
+              </Title>
             </div>
 
             {/* Filtro estado */}

@@ -24,6 +24,7 @@ import { Profesor, Curso, DetalleAcademico, Aviso } from './types/index.ts';
 import packageJson from '../package.json';
 
 // Components
+import { Title } from './components/Title.tsx';
 import ProfesorView from './views/profesor/ProfesorView.tsx';
 import CursosView from './views/cursos/CursosView.tsx';
 import AlumnosView from './views/alumnos/AlumnosView.tsx';
@@ -385,33 +386,36 @@ export default function App() {
             )}
             {/* Solo mostramos el botón si la base de datos es de tipo cifrada */}
             {isEncrypted && (
-              <button
-                onClick={handleLock}
-                title="Bloquear Aplicación"
-                className="p-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all flex items-center justify-center"
-              >
-                <Lock className="h-5 w-5" />
-              </button>
+              <Title text="Bloquear Aplicación">
+                <button
+                  onClick={handleLock}
+                  className="p-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all flex items-center justify-center"
+                >
+                  <Lock className="h-5 w-5" />
+                </button>
+              </Title>
             )}
-            <button
-              onClick={() => setActiveTab('historico')}
-              title="Histórico"
-              className="pl-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all"
-            >
-              <History className="h-5 w-5" />
-            </button>
+            <Title text="Histórico">
+              <button
+                onClick={() => setActiveTab('historico')}
+                className="pl-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all"
+              >
+                <History className="h-5 w-5" />
+              </button>
+            </Title>
             <NotificationBell
               avisos={avisos}
               onDescartar={handleDescartarAviso}
               onAbrirCrear={() => setShowCreateNotification(true)}
             />
-            <button
-              onClick={() => setActiveTab('configuracion')}
-              title="Configuración"
-              className="rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all"
-            >
-              <Settings className="h-5 w-5" />
-            </button>
+            <Title text="Configuración">
+              <button
+                onClick={() => setActiveTab('configuracion')}
+                className="rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+            </Title>
             <div
               onClick={() => setActiveTab('dashboard')}
               className="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-primary-light flex items-center justify-center text-primary cursor-pointer hover:bg-primary/10 transition-colors"

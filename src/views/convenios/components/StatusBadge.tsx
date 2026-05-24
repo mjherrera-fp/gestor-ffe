@@ -1,6 +1,7 @@
 // components/StatusBadge.tsx
 import React from 'react';
 import { ConvenioEstado, ConvenioEstadoLabels } from '../../../types/index.ts';
+import { Title } from '../../../components/Title.tsx';
 
 const STATUS_STYLES: Record<ConvenioEstado, string> = {
   [ConvenioEstado.PENDIENTE_ENVIAR]:          'bg-orange-50 text-orange-700',
@@ -11,7 +12,9 @@ const STATUS_STYLES: Record<ConvenioEstado, string> = {
 };
 
 export const StatusBadge = ({ estado }: { estado: ConvenioEstado }) => (
-  <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${STATUS_STYLES[estado]}`}>
-    {ConvenioEstadoLabels[estado]}
-  </span>
+  <Title text={ConvenioEstadoLabels[estado]}>
+    <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${STATUS_STYLES[estado]}`}>
+      {ConvenioEstadoLabels[estado]}
+    </span>
+  </Title>
 );

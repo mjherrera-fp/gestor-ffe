@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
 import { mostrarToast } from '../utils/toast.ts';
+import { Title } from './Title.tsx';
 
 interface Props {
   url?: string;
@@ -47,18 +48,19 @@ export function BotonDescargaDOCX({ url, name, showText = true, onClick, classNa
   const defaultStyles = "p-2.5 h-8 text-blue-600 hover:text-blue-700 transition-all hover:bg-blue-50 rounded-xl border border-blue-100 shadow-sm flex items-center gap-1.5 disabled:opacity-50";
 
   return (
-    <button
-      onClick={handleDownload}
-      disabled={isDownloading}
-      className={className || defaultStyles}
-      title="Descargar Word"
-    >
-      {isDownloading ? (
-        <Loader2 className="h-4 w-4 animate-spin shrink-0" />
-      ) : (
-        <FileText className="h-4 w-4 shrink-0" />
-      )}
-      {showText && <span className='text-[9px] font-bold truncate'>DOCX</span>}
-    </button>
+    <Title text="Descargar Word">
+      <button
+        onClick={handleDownload}
+        disabled={isDownloading}
+        className={className || defaultStyles}
+      >
+        {isDownloading ? (
+          <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+        ) : (
+          <FileText className="h-4 w-4 shrink-0" />
+        )}
+        {showText && <span className='text-[9px] font-bold truncate'>DOCX</span>}
+      </button>
+    </Title>
   );
 }
