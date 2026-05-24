@@ -401,10 +401,12 @@ export const CursoDAO = {
   delete: (id: number) => {
     const delRelaciones = db.prepare('DELETE FROM relaciones WHERE convenioId IN (SELECT id FROM convenios WHERE cursoId = ?)');
     const delAlumnos = db.prepare('DELETE FROM alumnos WHERE cursoId = ?');
+    const delFestivosEmpresa = db.prepare('DELETE FROM configuracion WHERE tipo = ?');
     const delCurso = db.prepare('DELETE FROM cursos WHERE id = ?');
     db.transaction(() => {
       delRelaciones.run(id);
       delAlumnos.run(id);
+      delFestivosEmpresa.run('festivos_empresa');
       delCurso.run(id);
     })();
   },

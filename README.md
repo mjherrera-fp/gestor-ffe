@@ -111,19 +111,26 @@ La navegación principal se encuentra en la barra lateral izquierda. Cada icono 
 | Icono | Módulo | Descripción |
 |-------|--------|-------------|
 | 🧑‍🏫 | Profesor | Datos personales, centros educativos y ciclos |
-| 📚 | Cursos | Gestión de cursos académicos |
+| 📖 | Cursos | Gestión de cursos académicos |
+| 📊 | Panel | Dashboard, estadísticas y Seguridad Social |
 | 👥 | Alumnos | Gestión del alumnado |
 | 🏢 | Empresas | Empresas colaboradoras y tutores |
 | 🔗 | Intereses | Preferencias alumno-empresa |
 | 📄 | Convenios | Convenios de colaboración |
 | 🤝 | Relaciones | Periodos de prácticas |
-| 📊 | Panel | Dashboard, estadísticas y Seguridad Social |
+
+En la parte superior podemos encontrar otra sección de iconos que nos llevan a elementos más generales:
+| Icono | Módulo | Descripción |
+|-------|--------|-------------|
+| 🕓 | Histórico | Auditoría de operaciones |
+| 🔔 | Avisos | Ver y crear nuevos avisos |
 | ⚙️ | Configuración | Avisos, festivos, correo y seguridad |
-| 📋 | Histórico | Auditoría de operaciones |
+
+> ℹ️ En esta fila superior encontraremos un selector de ciclo, pudiendo elegir entre diferentes ciclos de los que seamos tutores de FFE.
 
 ---
 
-## 3. Módulo de Profesor
+## 🧑‍🏫 3. Módulo de Profesor
 
 > `[IMAGEN: Vista del módulo Profesor con el formulario de datos personales y la lista de centros educativos]`
 
@@ -150,17 +157,17 @@ Dentro de cada centro, puedes gestionar los ciclos formativos:
 
 ---
 
-## 4. Cursos
+## 📖 4. Cursos
 
 > `[IMAGEN: Listado de cursos con tabla de cursos académicos]`
 
 Gestiona los cursos académicos. Cada curso tiene una descripción, fecha de inicio y fecha de fin.
 
-**Importante:** Al crear un nuevo curso, los alumnos, relaciones e intereses del curso anterior se eliminan automáticamente (las empresas y convenios se conservan).
+> ⚠️ **Importante:** Al crear un nuevo curso, los alumnos, relaciones e intereses del curso anterior se eliminan automáticamente (las empresas y convenios se conservan).
 
 ---
 
-## 5. Alumnos
+## 👥 5. Alumnos
 
 > `[IMAGEN: Vista de alumnos en modo grid con tarjetas]`
 
@@ -192,7 +199,7 @@ Cambia entre la vista de tarjetas (grid) y la vista de tabla usando el selector 
 
 ---
 
-## 6. Empresas
+## 🏢 6. Empresas
 
 > `[IMAGEN: Listado de empresas con buscador y filtros]`
 
@@ -229,7 +236,7 @@ Filtra las empresas por valoración mínima, últimos cursos con colaboración o
 
 ---
 
-## 7. Intereses Alumno-Empresa
+## 🔗 7. Intereses Alumno-Empresa
 
 > `[IMAGEN: Vista de intereses con sidebar de alumnos y grid de empresas con toggles]`
 
@@ -242,7 +249,7 @@ Usa los botones de toggle en cada celda para activar/desactivar los intereses. P
 
 ---
 
-## 8. Convenios
+## 📄 8. Convenios
 
 > `[IMAGEN: Listado de convenios con filtros por empresa y estado]`
 
@@ -268,7 +275,7 @@ Usa los botones **Avanzar** / **Retroceder** para mover el convenio entre estado
 
 ---
 
-## 9. Relaciones Alumno-Empresa
+## 🤝 9. Relaciones Alumno-Empresa
 
 > `[IMAGEN: Listado de relaciones con filtros y buscador]`
 
