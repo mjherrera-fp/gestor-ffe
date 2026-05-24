@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
+import { mostrarToast } from '../utils/toast.ts';
 
 interface Props {
   url?: string;
@@ -37,7 +38,7 @@ export function BotonDescargaDOCX({ url, name, showText = true, onClick, classNa
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('No se pudo descargar el documento Word.');
+      mostrarToast('No se pudo descargar el documento', 'error');
     } finally {
       setIsDownloading(false);
     }

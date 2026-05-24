@@ -1432,7 +1432,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number) {
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Calendario_${numRel}_${nombreAlumno}.pdf`);
-        setEmailTo(getEmpresaEmail());
+        setEmailTo(alumno.emailEduca ? [alumno.emailEduca] : []);
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());

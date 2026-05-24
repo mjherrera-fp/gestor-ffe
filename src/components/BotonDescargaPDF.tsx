@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { File as FilePdf, Loader2, LucideIcon } from 'lucide-react';
+import { mostrarToast } from '../utils/toast.ts';
 
 interface Props {
   url?: string;
@@ -38,7 +39,7 @@ export function BotonDescargaPDF({ url, name, showText = true, text, onClick, cl
       }
     } catch (error) {
       console.error(error);
-      alert('Hubo un error al generar el PDF oficial.');
+      mostrarToast('Hubo un error al generar el PDF oficial', 'error');
     } finally {
       setIsDownloading(false);
     }

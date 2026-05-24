@@ -79,7 +79,7 @@ export function RelacionDetalle({
   onDescargarValoracion, onAdvanceValoracionIndividual, onMoveBackValoracionIndividual,
   onEmailRelacion, onEmailPlanFormativo, onEmailSeguimiento, onEmailValoracion,
   onEmailCarta, onEmailCalendario,
-  onDescargarCarta, onDescargarCalendario, onHandleDescargarTodo,
+  onDescargarCarta, onDescargarCalendario, onDescargarRelacion, onHandleDescargarTodo,
   isDownloadingMasivo, downloadProgress, downloadStatus,
   setTargetDownloadRelaciones, targetDownloadRelaciones, setSelectedDocs, selectedDocs,
   setTargetEmailRelaciones,
@@ -192,13 +192,11 @@ export function RelacionDetalle({
 
               <div className="flex gap-2">
                 <BotonDescargaDOCX
-                  url={`/api/relaciones-alumnos/${selectedRelacion.id}/documento`}
-                  name={`Anexo_${selectedRelacion.numRelacion.replace(/\//g, '_')}.docx`}
+                  onClick={() => onDescargarRelacion('docx')}
                   showText={true}
                 />
                 <BotonDescargaPDF
-                  url={`/api/relaciones-alumnos/${selectedRelacion.id}/documento/pdf`}
-                  name={`Anexo_${selectedRelacion.numRelacion.replace(/\//g, '_')}.pdf`}
+                  onClick={() => onDescargarRelacion('pdf')}
                   showText={true}
                 />
                 <button
