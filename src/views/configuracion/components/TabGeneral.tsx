@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Settings, Loader2, CalendarDays, Building2, Plus } from 'lucide-react';
+import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, FileDown, FolderOpen } from 'lucide-react';
 import { EmpresaFestivosModal } from './EmpresaFestivosModal.tsx';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
@@ -36,6 +36,14 @@ export function TabGeneral() {
   const [empresaFestivos, setEmpresaFestivos] = useState<Record<string, string[]>>({});
   const [festivosModalLocalidad, setFestivosModalLocalidad] = useState<string | null>(null);
 
+  // ── Estado creación de ficheros ──
+  const [modoCreacion, setModoCreacion] = useState('descargar');
+  const [carpetaEstudiante, setCarpetaEstudiante] = useState(false);
+  const [loadingCreacion, setLoadingCreacion] = useState(true);
+  const [savingCreacion, setSavingCreacion] = useState(false);
+  const [successCreacion, setSuccessCreacion] = useState('');
+  const [errorCreacion, setErrorCreacion] = useState('');
+
   // ── Cargar configuraciones ──
   useEffect(() => {
     fetch('/api/profesor/config/avisos')
@@ -68,6 +76,15 @@ export function TabGeneral() {
       .then(r => r.json())
       .then(data => setEmpresaFestivos(data))
       .catch(() => {});
+
+    fetch('/api/profesor/config/creacion-ficheros')
+      .then(r => r.json())
+      .then(data => {
+        setModoCreacion(data.modo || 'descargar');
+        setCarpetaEstudiante(data.carpeta_estudiante === '1');
+      })
+      .catch(() => setErrorCreacion('Error al cargar configuración de creación de ficheros'))
+      .finally(() => setLoadingCreacion(false));
   }, []);
 
   // ── Handlers avisos ──
@@ -138,7 +155,31 @@ export function TabGeneral() {
     setFestivosModalLocalidad(null);
   };
 
-  const loading = loadingAvisos || loadingFestivos;
+  // ── Handlers creación de ficheros ──
+  const handleSubmitCreacion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingCreacion(true);
+    setSuccessCreacion('');
+    setErrorCreacion('');
+    try {
+      const res = await fetch('/api/profesor/config/creacion-ficheros', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modo: modoCreacion, carpeta_estudiante: carpetaEstudiante ? '1' : '0' }),
+      });
+      if (res.ok) {
+        setSuccessCreacion('Configuración de creación de ficheros guardada correctamente.');
+      } else {
+        setErrorCreacion('Error al guardar configuración de creación de ficheros');
+      }
+    } catch {
+      setErrorCreacion('Error de conexión');
+    } finally {
+      setSavingCreacion(false);
+    }
+  };
+
+  const loading = loadingAvisos || loadingFestivos || loadingCreacion;
 
   if (loading) {
     return (
@@ -231,6 +272,99 @@ export function TabGeneral() {
                 <span className="flex items-center justify-center gap-2">
                   <Settings className="h-5 w-5" />
                   {savingAvisos ? 'Guardando...' : 'Guardar Configuración de Avisos'}
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* ─── SECCIÓN CREACIÓN DE FICHEROS ─── */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
+              <FileDown className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">Creación de ficheros</h3>
+              <p className="text-sm text-slate-500">
+                Elige cómo se generan los documentos (PDF, DOCX, XLSX) al descargarlos.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          {errorCreacion && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">{errorCreacion}</div>
+          )}
+          {successCreacion && (
+            <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+              {successCreacion}
+            </div>
+          )}
+          <form onSubmit={handleSubmitCreacion} className="space-y-6">
+            <div className="space-y-3">
+              <label className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
+                <input
+                  type="radio"
+                  name="modoCreacion"
+                  value="descargar"
+                  checked={modoCreacion === 'descargar'}
+                  onChange={e => setModoCreacion(e.target.value)}
+                  className="mt-0.5"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <FolderOpen className="h-4 w-4 text-slate-500" />
+                    <span className="text-sm font-semibold text-slate-800">Descargar</span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Los documentos se descargan por el navegador a la carpeta de descargas del sistema.
+                  </p>
+                </div>
+              </label>
+              <label className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
+                <input
+                  type="radio"
+                  name="modoCreacion"
+                  value="crear"
+                  checked={modoCreacion === 'crear'}
+                  onChange={e => setModoCreacion(e.target.value)}
+                  className="mt-0.5"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <FileDown className="h-4 w-4 text-emerald-600" />
+                    <span className="text-sm font-semibold text-slate-800">Guardar en carpeta docs/</span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Los documentos se guardan automáticamente en la carpeta <code className="bg-slate-200 px-1 rounded text-xs">docs/</code> junto al ejecutable de la aplicación.
+                  </p>
+                </div>
+              </label>
+            </div>
+            <div className="pt-4 border-t border-slate-100">
+              <label className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={carpetaEstudiante}
+                  onChange={e => setCarpetaEstudiante(e.target.checked)}
+                  className="rounded"
+                />
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-semibold text-slate-800">Crear una carpeta por estudiante</span>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Si está marcado, dentro de la carpeta de cada empresa se crearán subcarpetas por alumno con sus documentos individuales.
+                  </p>
+                </div>
+              </label>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+              <button type="submit" disabled={savingCreacion} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-indigo-600 disabled:opacity-50 transition-colors">
+                <span className="flex items-center justify-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  {savingCreacion ? 'Guardando...' : 'Guardar Configuración'}
                 </span>
               </button>
             </div>

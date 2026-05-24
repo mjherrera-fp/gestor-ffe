@@ -15,7 +15,7 @@ interface EmpresasListadoProps {
   onIndividualEmail: (emp: Empresa) => void;
   onBulkEmail: () => void;
   // Excel
-  onDownloadTemplate: () => void;
+  onDownloadTemplate: () => void | Promise<void>;
   onImportClick: () => void;
   isImporting: boolean;
   // Filters

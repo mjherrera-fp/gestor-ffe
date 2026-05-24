@@ -42,6 +42,53 @@ async function startServer() {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 
+  // Carpeta docs para guardar documentos junto al .exe
+  const docsDir = path.join(baseDir, 'docs');
+  if (!fs.existsSync(docsDir)) {
+    fs.mkdirSync(docsDir, { recursive: true });
+  }
+
+  function getCreacionFicherosModo(): string {
+    try {
+      const profesor = ProfesorDAO.get();
+      if (!profesor?.id) return 'descargar';
+      const config = ConfiguracionDAO.getConfig(profesor.id, 'creacion-ficheros');
+      return config.modo || 'descargar';
+    } catch {
+      return 'descargar';
+    }
+  }
+
+  function getCreacionFicherosConfig(): { modo: string; carpeta_estudiante: boolean } {
+    try {
+      const profesor = ProfesorDAO.get();
+      if (!profesor?.id) return { modo: 'descargar', carpeta_estudiante: false };
+      const config = ConfiguracionDAO.getConfig(profesor.id, 'creacion-ficheros');
+      return {
+        modo: config.modo || 'descargar',
+        carpeta_estudiante: config.carpeta_estudiante === '1'
+      };
+    } catch {
+      return { modo: 'descargar', carpeta_estudiante: false };
+    }
+  }
+
+  function sanitizeDirName(name: string): string {
+    return name.replace(/[<>:"/\\|?*]/g, '_').trim();
+  }
+
+  function saveToDocs(filename: string, buffer: Buffer, ...subdirs: string[]): { filePath: string; relativePath: string } {
+    const subdirPath = subdirs.filter(Boolean).map(s => sanitizeDirName(s)).join(path.sep);
+    const targetDir = subdirPath ? path.join(docsDir, subdirPath) : docsDir;
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+    const filePath = path.join(targetDir, filename);
+    fs.writeFileSync(filePath, buffer);
+    const relativePath = subdirPath ? path.join(subdirPath, filename) : filename;
+    return { filePath, relativePath };
+  }
+
   // Actualiza tu configuración de multer:
   const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadDir), // Usa la nueva ruta
@@ -818,6 +865,7 @@ async function startServer() {
   // GENERAR DOCX
   app.get('/api/relaciones-alumnos/:id/documento', (req, res) => {
     try {
+      const modo = getCreacionFicherosModo();
       const relacionId = Number(req.params.id);
       const relacionAlumno = RelacionAlumnoDAO.getById(relacionId);
 
@@ -925,8 +973,14 @@ async function startServer() {
       });
 
       const buf = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
+      const filename = `Anexo_Relacion_${relacionAlumno.numRelacion.replace(/\//g, '_')}.docx`;
 
-      res.setHeader('Content-Disposition', `attachment; filename=Anexo_Relacion_${relacionAlumno.numRelacion.replace(/\//g, '_')}.docx`);
+      if (modo === 'crear') {
+        const result = saveToDocs(filename, buf, empresa?.nombre);
+        return res.json({ success: true, filename: result.relativePath, path: result.filePath });
+      }
+
+      res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       res.send(buf);
 
@@ -1084,16 +1138,24 @@ async function startServer() {
       await browser.close();
 
       // 4. ENVÍO SEGURO DEL BUFFER
+      const modo = getCreacionFicherosModo();
+      const filenamePdf = `Anexo_Relacion_${relacionAlumno.numRelacion.replace(/\//g, '_')}.pdf`;
+
+      if (modo === 'crear') {
+        const result = saveToDocs(filenamePdf, pdfBuffer, empresa?.nombre);
+        return res.json({ success: true, filename: result.relativePath, path: result.filePath });
+      }
+
       // Limpiamos cualquier cabecera previa que pudiera estar interfiriendo
       res.removeHeader('Transfer-Encoding');
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Length', pdfBuffer.length);
-      res.setHeader('Content-Disposition', `attachment; filename=Anexo_Relacion_${relacionAlumno.numRelacion.replace(/\//g, '_')}.pdf`);
+      res.setHeader('Content-Disposition', `attachment; filename=${filenamePdf}`);
 
       return res.end(pdfBuffer); // Usamos .end() para enviar el buffer binario puro
 
     } catch (error: any) {
-      console.error('💥 ERROR CRÍTICO GENERANDO EL DOCX:');
+      console.error('💥 ERROR CRÍTICO GENERANDO EL PDF:');
 
       if (error.properties && error.properties.errors) {
         console.error('El motor de plantillas ha encontrado estos errores en tu archivo Word:');
@@ -1189,8 +1251,19 @@ async function startServer() {
         console.error("Advertencia: El buffer generado es demasiado pequeño:", buf.length);
       }
 
+      const modoPF = getCreacionFicherosModo();
+      const filenamePF = `Plan_Formativo_${alumno.apellidos.replace(/\s+/g, '_')}.docx`;
+
+      if (modoPF === 'crear') {
+        const cfg = getCreacionFicherosConfig();
+        const subdirs = [empresa?.nombre];
+        if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
+        const result = saveToDocs(filenamePF, buf, ...subdirs);
+        return res.json({ success: true, filename: result.relativePath, path: result.filePath });
+      }
+
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-      res.setHeader('Content-Disposition', `attachment; filename="Plan_Formativo_${alumno.apellidos.replace(/\s+/g, '_')}.docx"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${filenamePF}"`);
       res.setHeader('Content-Length', buf.length);
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
@@ -1310,11 +1383,22 @@ async function startServer() {
       await browser.close();
 
       // 4. ENVÍO SEGURO DEL BUFFER
+      const modoPFPDF = getCreacionFicherosModo();
+      const filenamePFPDF = `Plan_Formativo_${alumno.apellidos.replace(/\s+/g, '_')}.pdf`;
+
+      if (modoPFPDF === 'crear') {
+        const cfg = getCreacionFicherosConfig();
+        const subdirs = [empresa?.nombre];
+        if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
+        const result = saveToDocs(filenamePFPDF, pdfBuffer, ...subdirs);
+        return res.json({ success: true, filename: result.relativePath, path: result.filePath });
+      }
+
       // Limpiamos cualquier cabecera previa que pudiera estar interfiriendo
       res.removeHeader('Transfer-Encoding');
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Length', pdfBuffer.length);
-      res.setHeader('Content-Disposition', `attachment; filename=Plan_Formativo_${alumno.apellidos.replace(/\s+/g, '_')}.pdf`);
+      res.setHeader('Content-Disposition', `attachment; filename=${filenamePFPDF}`);
 
       return res.end(pdfBuffer); // Usamos .end() para enviar el buffer binario puro
 
@@ -1369,8 +1453,8 @@ async function startServer() {
 
       // Obtener festivos de empresa
       let festivosEmpresa: string[] = [];
+      const empresa = EmpresaDAO.getById(convenio.empresaId);
       if (usarFestivosEmpresa && profesor?.id) {
-        const empresa = EmpresaDAO.getById(convenio.empresaId);
         if (empresa?.ciudad) {
           festivosEmpresa = EmpresaFestivosDAO.getByCiudad(profesor.id, empresa.ciudad);
         }
@@ -1478,10 +1562,21 @@ async function startServer() {
 
       await browser.close();
 
+      const modoCal = getCreacionFicherosModo();
+      const filenameCal = `Calendario_${alumno.apellidos.replace(/\s+/g, '_')}.pdf`;
+
+      if (modoCal === 'crear') {
+        const cfg = getCreacionFicherosConfig();
+        const subdirs = [empresa?.nombre];
+        if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
+        const result = saveToDocs(filenameCal, pdfBuffer, ...subdirs);
+        return res.json({ success: true, filename: result.relativePath, path: result.filePath });
+      }
+
       res.removeHeader('Transfer-Encoding');
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Length', pdfBuffer.length);
-      res.setHeader('Content-Disposition', `attachment; filename=Plan_Formativo_${alumno.apellidos.replace(/\s+/g, '_')}.pdf`);
+      res.setHeader('Content-Disposition', `attachment; filename=${filenameCal}`);
 
       return res.end(pdfBuffer); // Usamos .end() para enviar el buffer binario puro
 
@@ -1562,11 +1657,19 @@ async function startServer() {
       await browser.close();
 
       // 4. ENVÍO SEGURO DEL BUFFER
+      const modoCarta = getCreacionFicherosModo();
+      const filenameCarta = `Carta_Informativa_${empresa?.nombre.replace(/\s+/g, '_')}.pdf`;
+
+      if (modoCarta === 'crear') {
+        const result = saveToDocs(filenameCarta, pdfBuffer, empresa?.nombre);
+        return res.json({ success: true, filename: result.relativePath, path: result.filePath });
+      }
+
       // Limpiamos cualquier cabecera previa que pudiera estar interfiriendo
       res.removeHeader('Transfer-Encoding');
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Length', pdfBuffer.length);
-      res.setHeader('Content-Disposition', `attachment; filename=Carta_Informativa_${empresa?.nombre.replace(/\s+/g, '_')}.pdf`);
+      res.setHeader('Content-Disposition', `attachment; filename=${filenameCarta}`);
 
       return res.end(pdfBuffer); // Usamos .end() para enviar el buffer binario puro
 
@@ -1668,10 +1771,21 @@ async function startServer() {
       // 5. Limpieza XML
       buf = limpiarFilasActiveX(buf);
 
+      const modeSeg = getCreacionFicherosModo();
+      const filenameSeg = `Seguimiento_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.apellidos.replace(/\s+/g, '_')}.docx`;
+
+      if (modeSeg === 'crear') {
+        const cfg = getCreacionFicherosConfig();
+        const subdirs = [empresa?.nombre];
+        if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
+        const result = saveToDocs(filenameSeg, buf, ...subdirs);
+        return res.json({ success: true, filename: result.relativePath, path: result.filePath });
+      }
+
       // IMPORTANTE: Finalizar correctamente la respuesta
       res.writeHead(200, {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Disposition': `attachment; filename=Seguimiento_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.apellidos.replace(/\s+/g, '_')}.docx`,
+        'Content-Disposition': `attachment; filename=${filenameSeg}`,
         'Content-Length': buf.length
       });
       res.end(buf);
@@ -1752,10 +1866,21 @@ async function startServer() {
       // 5. Limpieza XML
       buf = limpiarFilasActiveX(buf);
 
+      const modoVal = getCreacionFicherosModo();
+      const filenameVal = `Valoracion_final_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.apellidos.replace(/\s+/g, '_')}.docx`;
+
+      if (modoVal === 'crear') {
+        const cfg = getCreacionFicherosConfig();
+        const subdirs = [empresa?.nombre];
+        if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
+        const result = saveToDocs(filenameVal, buf, ...subdirs);
+        return res.json({ success: true, filename: result.relativePath, path: result.filePath });
+      }
+
       // IMPORTANTE: Finalizar correctamente la respuesta
       res.writeHead(200, {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Disposition': `attachment; filename=Valoración_final_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.apellidos.replace(/\s+/g, '_')}.docx`,
+        'Content-Disposition': `attachment; filename=${filenameVal}`,
         'Content-Length': buf.length
       });
       res.end(buf);
@@ -1766,6 +1891,20 @@ async function startServer() {
   });
 
 
+
+  // ENDPOINT PARA GUARDAR XLSX (templates generados en cliente)
+  app.post('/api/save-xlsx', (req, res) => {
+    try {
+      const { filename, base64Data } = req.body;
+      if (!filename || !base64Data) return res.status(400).json({ error: 'filename y base64Data son requeridos' });
+      const buffer = Buffer.from(base64Data, 'base64');
+      const result = saveToDocs(filename, buffer);
+      res.json({ success: true, filename: result.relativePath, path: result.filePath });
+    } catch (error: any) {
+      console.error('Error guardando XLSX:', error);
+      res.status(500).json({ error: error.message || 'Error al guardar el archivo' });
+    }
+  });
 
   // Panel
   app.get('/api/panel/resumen', (req, res) => {

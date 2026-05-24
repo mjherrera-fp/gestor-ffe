@@ -5,6 +5,7 @@ dist-server/
 binarios/
 release/
 coverage/
+docs/
 .DS_Store
 *.log
 .env*

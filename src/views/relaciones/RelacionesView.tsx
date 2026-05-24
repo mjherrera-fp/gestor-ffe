@@ -33,7 +33,9 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
             <div className="mb-4">
               <h3 className="text-lg font-bold text-slate-800">Seleccionar Documentación</h3>
               <p className="text-xs text-slate-500 mt-1">
-                Elige qué archivos deseas incluir en el paquete comprimido (.ZIP) de la relación actual.
+                {ctx.modoCreacion === 'crear'
+                  ? 'Elige qué documentos deseas generar y guardar en la carpeta docs/ para la relación actual.'
+                  : 'Elige qué archivos deseas incluir en el paquete comprimido (.ZIP) de la relación actual.'}
               </p>
             </div>
 

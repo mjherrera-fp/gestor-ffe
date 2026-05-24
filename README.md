@@ -345,18 +345,29 @@ Cada alumno tiene tres estados independientes:
 
 Desde el detalle de una relación, usa los botones **Descargar** junto a cada tipo de documento. Selecciona DOCX o PDF según el formato disponible.
 
-### 10.3 Descarga masiva en ZIP
+### 10.3 Descarga masiva
 
-Puedes descargar múltiples documentos de una o varias relaciones en un solo archivo ZIP:
+Puedes descargar múltiples documentos de una o varias relaciones en un solo archivo ZIP o guardarlos directamente en disco:
 
 1. Pulsa **Descargar todo**.
 2. Selecciona los tipos de documento que deseas incluir.
-3. Confirma la selección y espera a que se genere el ZIP.
-4. El archivo se descargará automáticamente.
+3. Confirma la selección.
 
-> `[IMAGEN: Modal de selección de documentos para descarga masiva]`
+El comportamiento depende del modo configurado en **Configuración → General → Creación de ficheros**:
 
-### 10.4 Calendario de prácticas
+- **Descargar (ZIP):** se genera un archivo ZIP con la estructura `{empresa}/{alumno}/{documento}` y se descarga por el navegador.
+- **Guardar en carpeta docs/:** los documentos se guardan directamente en la carpeta `docs/` junto al ejecutable, con la misma estructura de subcarpetas.
+
+### 10.4 Guardar en carpeta (modo sin descarga)
+
+Cuando se selecciona **Guardar en carpeta docs/** en la configuración, los documentos no se descargan por el navegador sino que se almacenan automáticamente en el disco:
+
+- Todos los documentos se guardan en `docs/{nombre_empresa}/`.
+- Si la opción **Crear una carpeta por estudiante** está activa (por defecto lo está), los documentos individuales (plan formativo, seguimiento, valoración, calendario) se organizan en subcarpetas por alumno: `docs/{empresa}/{alumno}/`.
+- Los documentos comunes de la relación (relación de alumnos, carta a la empresa) se guardan siempre en la carpeta de la empresa.
+- Al usar **Descargar todo** en este modo, los documentos se generan y guardan directamente en las carpetas correspondientes sin crear un ZIP, mostrando una barra de progreso.
+
+### 10.5 Calendario de prácticas
 
 El calendario generado en PDF muestra cada mes del período de prácticas con un código de colores:
 
@@ -473,6 +484,17 @@ Activa o desactiva la opción **Usar días festivos de empresa** para descontar 
 4. Usa **Obtener festivos** para importar automáticamente los festivos desde la API de Calendarios Nacionales (localidades de Madrid).
 
 > `[IMAGEN: Modal de gestión de festivos de empresa por localidad con lista de fechas]`
+
+#### Creación de ficheros
+
+Configura cómo se generan los documentos (DOCX, PDF, XLSX):
+
+- **Modo de creación:**
+  - **Descargar:** los documentos se descargan por el navegador a la carpeta de descargas del sistema.
+  - **Guardar en carpeta docs/:** los documentos se guardan automáticamente en la carpeta `docs/` junto al ejecutable de la aplicación, organizados por empresa.
+- **Crear una carpeta por estudiante:** cuando está marcado, dentro de la carpeta de cada empresa se crean subcarpetas por alumno para los documentos individuales (plan formativo, seguimiento, valoración, calendario). Los documentos comunes (relación, carta) se guardan siempre en la carpeta de la empresa.
+
+> `[IMAGEN: Sección de configuración de creación de ficheros con selector de modo y checkbox]`
 
 ### 13.2 Correo
 

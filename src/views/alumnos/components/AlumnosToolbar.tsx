@@ -30,7 +30,7 @@ interface AlumnosToolbarProps {
   sortOrder: SortOrder;
   onToggleSort: (field: SortField) => void;
   isImporting: boolean;
-  onDownloadTemplate: () => void;
+  onDownloadTemplate: () => void | Promise<void>;
   onImportClick: () => void;
   onNewAlumno: () => void;
   onBulkEmail: () => void;

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { Empresa, TutorEmpresa, EmpresaEstadistica, Curso } from '../../../types/index.ts';
 import { EmailAttachment } from '../../../types/email.ts';
+import { mostrarToast } from '../../../utils/toast.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -79,6 +80,7 @@ export function useEmpresas(cursoId: number) {
   const [filterUltimosCursos, setFilterUltimosCursos] = useState(0);
   const [filterColaboracion,  setFilterColaboracion]  = useState<'todas' | 'con' | 'sin' | 'sin_convenio'>('todas');
   const [empresaIdsConConvenio, setEmpresaIdsConConvenio] = useState<number[]>([]);
+  const [modoCreacion, setModoCreacion] = useState('descargar');
 
   // ─────────────────────────────────────────
   //  EFECTOS
@@ -90,6 +92,13 @@ export function useEmpresas(cursoId: number) {
     fetchCurso();
     fetchAllEstadisticas();
     fetchEmpresasConConvenio();
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/profesor/config/creacion-ficheros')
+      .then(r => r.json())
+      .then(data => setModoCreacion(data.modo || 'descargar'))
+      .catch(() => {});
   }, []);
 
   // ─────────────────────────────────────────
@@ -155,7 +164,7 @@ export function useEmpresas(cursoId: number) {
   //  HANDLERS: EXCEL
   // ─────────────────────────────────────────
 
-  const downloadTemplate = () => {
+  const downloadTemplate = async () => {
     const headers = [[
       'Nombre', 'Dirección', 'Ciudad', 'CIF', 'Email', 'Teléfono', 'Comentarios',
       'Nº Convenio', 'Fecha Convenio', 'Centro Convenio',
@@ -164,7 +173,25 @@ export function useEmpresas(cursoId: number) {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(headers);
     XLSX.utils.book_append_sheet(wb, ws, 'Plantilla Empresas');
-    XLSX.writeFile(wb, 'plantilla_importacion_empresas.xlsx');
+    const filename = 'plantilla_importacion_empresas.xlsx';
+
+    if (modoCreacion === 'crear') {
+      const wbData = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+      try {
+        const res = await fetch('/api/save-xlsx', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename, base64Data: wbData }),
+        });
+        const data = await res.json();
+        if (data.success) mostrarToast(`Plantilla guardada en docs/${data.filename}`);
+      } catch {
+        mostrarToast('Error al guardar la plantilla', 'error');
+      }
+      return;
+    }
+
+    XLSX.writeFile(wb, filename);
   };
 
   const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
