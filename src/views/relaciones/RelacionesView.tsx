@@ -8,15 +8,17 @@ import { RelacionFormModal }            from './components/RelacionesFormModal.t
 import { RelacionEstadisticaFormModal } from './components/RelacionEstadisticaFormModal.tsx';
 import { calculateEndDateForHours }     from './utils/relacionesUtils.ts';
 import { EmailModal }                   from '../../components/EmailModal.tsx';
+import { PLANTILLAS_CORREO }            from '../../data/emailTemplates.ts';
 
 interface Props {
   cursoId: number;
   detalleAcademicoId?: number;
   onGoToConfig?: () => void;
+  profesor?: import('../../types/index.ts').Profesor;
 }
 
-export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConfig }: Props) {
-  const ctx = useRelaciones(cursoId, detalleAcademicoId);
+export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConfig, profesor }: Props) {
+  const ctx = useRelaciones(cursoId, detalleAcademicoId, profesor);
 
   // Adaptador para calculateEndDateForHours que inyecta los festivos del centro
   const calcEndDate = (start: string, hours: number) =>
@@ -175,131 +177,61 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         </div>
       )}
 
-      {/* MODAL 2: SELECCIÓN DE DOCUMENTOS A ENVIAR POR EMAIL */}
+      {/* MODAL 2: SELECCIÓN DE PLANTILLA DE CORREO */}
       {ctx.targetEmailRelaciones.length > 0 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">          
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-100">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-100">
 
             <div className="mb-4">
-              <h3 className="text-lg font-bold text-slate-800">Seleccionar Documentación</h3>
+              <h3 className="text-lg font-bold text-slate-800">Seleccionar Plantilla</h3>
               <p className="text-xs text-slate-500 mt-1">
-                Elige qué archivos deseas adjuntar en el correo electrónico.
+                Elige la plantilla de correo que deseas enviar.
               </p>
             </div>
 
-            <div className="flex justify-end gap-3 mb-2">
-              <button
-                type="button"
-                onClick={() => ctx.setSelectedDocs({
-                  plan: true,
-                  seguimiento: true,
-                  valoracion: true,
-                  calendario: true,
-                  relacion: true,
-                  carta: true
-                })}
-                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-wider"
-              >
-                Seleccionar Todos
-              </button>
-              <span className="text-slate-300 text-[11px]">|</span>
-              <button
-                type="button"
-                onClick={() => ctx.setSelectedDocs({
-                  plan: false,
-                  seguimiento: false,
-                  valoracion: false,
-                  calendario: false,
-                  relacion: false,
-                  carta: false
-                })}
-                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors uppercase tracking-wider"
-              >
-                Deseleccionar Todos
-              </button>
-            </div>
-
             <div className="space-y-3 my-6">
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={ctx.selectedDocs.relacion}
-                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, relacion: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Relación de alumnos</p>
-                  <p className="text-[11px] text-slate-400">Documento en formato Word (.docx) y PDF con la relación de alumnos</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={ctx.selectedDocs.plan}
-                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, plan: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Plan Formativo</p>
-                  <p className="text-[11px] text-slate-400">Documento por alumno en formato Word (.docx) y PDF</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={ctx.selectedDocs.seguimiento}
-                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, seguimiento: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Ficha de Seguimiento Periódico</p>
-                  <p className="text-[11px] text-slate-400">Plantilla editable por alumno en formato Word (.docx)</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={ctx.selectedDocs.valoracion}
-                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, valoracion: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Valoración Final</p>
-                  <p className="text-[11px] text-slate-400">Plantilla editable por alumno en formato Word (.docx)</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={ctx.selectedDocs.calendario}
-                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, calendario: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Calendario de Prácticas</p>
-                  <p className="text-[11px] text-slate-400">Documento de asistencia por alumno en formato PDF</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={ctx.selectedDocs.carta}
-                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, carta: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Carta a la empresa</p>
-                  <p className="text-[11px] text-slate-400">Documento explicativo sobre las FFE</p>
-                </div>
-              </label>
+              {(() => {
+                const iconMap: Record<string, string> = {
+                  documento: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />',
+                  plan: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />',
+                  inicio: '<path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />',
+                  fin: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />',
+                  otros: '<path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />',
+                };
+                const colorMap: Record<string, { border: string; bg: string; iconBg: string; iconText: string; btnText: string }> = {
+                  blue: { border: 'border-blue-100', bg: 'bg-blue-50/50', iconBg: 'bg-blue-100', iconText: 'text-blue-600', btnText: 'text-blue-600' },
+                  emerald: { border: 'border-emerald-100', bg: 'bg-emerald-50/50', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', btnText: 'text-emerald-600' },
+                  amber: { border: 'border-amber-100', bg: 'bg-amber-50/50', iconBg: 'bg-amber-100', iconText: 'text-amber-600', btnText: 'text-amber-600' },
+                  purple: { border: 'border-purple-100', bg: 'bg-purple-50/50', iconBg: 'bg-purple-100', iconText: 'text-purple-600', btnText: 'text-purple-600' },
+                  slate: { border: 'border-slate-200', bg: 'bg-white', iconBg: 'bg-slate-100', iconText: 'text-slate-500', btnText: 'text-slate-500' },
+                };
+                return PLANTILLAS_CORREO.map((p, i) => {
+                  const c = colorMap[p.color] || colorMap.slate;
+                  const icon = iconMap[p.icon] || iconMap.otros;
+                  const isOtros = p.id === 'otros';
+                  return (
+                    <React.Fragment key={p.id}>
+                      {isOtros && <div className="border-t border-slate-100 pt-3 mt-3" />}
+                      <button
+                        onClick={() => ctx.handleEmailConPlantilla(ctx.targetEmailRelaciones, p.id)}
+                        className={`w-full flex items-center gap-4 p-4 rounded-xl border ${c.border} ${c.bg} hover:bg-slate-50 hover:border-slate-300 transition-all text-left`}
+                      >
+                        <div className={`h-10 w-10 rounded-lg ${c.iconBg} ${c.iconText} flex items-center justify-center shrink-0`}>
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" dangerouslySetInnerHTML={{ __html: icon }} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-slate-800">{p.name}</p>
+                          <p className="text-[11px] text-slate-500 mt-0.5">{p.description}</p>
+                        </div>
+                        <span className={`text-[10px] font-bold ${c.btnText} uppercase shrink-0`}>Seleccionar</span>
+                      </button>
+                    </React.Fragment>
+                  );
+                });
+              })()}
             </div>
 
-            <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-slate-100">
+            <div className="flex justify-end mt-4 pt-4 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => ctx.setTargetEmailRelaciones([])}
@@ -307,15 +239,30 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
               >
                 Cancelar
               </button>
-              <button
-                type="button"
-                onClick={() => ctx.handleEmailConTodo(ctx.targetEmailRelaciones)}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md shadow-blue-600/10 transition-all transform active:scale-98"
-              >
-                Aceptar y Enviar
-              </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE PREPARACIÓN DE EMAIL */}
+      {ctx.isPreparingEmail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative overflow-hidden">
+            <div className="flex flex-col items-center text-center mt-2">
+              <div className="h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800">Preparando correo</h3>
+              <p className="text-sm text-slate-500 mt-2">
+                Generando documentos para adjuntar...
+              </p>
+              <div className="w-full mt-6">
+                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                  <div className="bg-blue-600 h-2.5 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -557,6 +504,8 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         initialTo={ctx.emailTo}
         initialBcc={ctx.emailBcc}
         initialAttachments={ctx.emailAttachments}
+        initialSubject={ctx.emailSubject}
+        initialBody={ctx.emailBody}
         onGoToConfig={onGoToConfig}
         contextualContactIds={ctx.contextualContactIds}
       />

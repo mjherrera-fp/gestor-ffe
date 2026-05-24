@@ -1,4 +1,4 @@
-import { EmailTemplate } from '../types/email.ts';
+import { EmailTemplate, PlantillaCorreo } from '../types/email.ts';
 
 export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
@@ -72,10 +72,100 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
   },
 ];
 
+export const PLANTILLAS_CORREO: PlantillaCorreo[] = [
+  {
+    id: 'relacion',
+    name: 'Envío de relación',
+    description: 'Anexo de relación → Email de la empresa',
+    subject: 'Documento de relación',
+    body: `<p>Estimado/a <strong>{{nombreEmpresa}}</strong>,</p>
+<p>Adjuntamos el anexo de relación de alumnos correspondiente al periodo de Formación en Centros de Trabajo (FCT).</p>
+<p>Rogamos revisen el documento y nos confirmen su conformidad.</p>
+<p>Atentamente,</p>
+<p><strong>{{nombreProfesor}}</strong></p>`,
+    documents: ['relacion'],
+    recipientTarget: 'empresa',
+    icon: 'documento',
+    color: 'blue',
+  },
+  {
+    id: 'plan',
+    name: 'Envío de planes formativos',
+    description: 'Plan formativo → Estudiante (según estado) o Tutor',
+    subject: 'Plan formativo',
+    body: `<p>Estimado/a,</p>
+<p>Adjuntamos el plan formativo correspondiente al periodo de prácticas.</p>
+<p>Por favor, revisen el contenido y procedan a su firma si están de acuerdo.</p>
+<p>Atentamente,</p>
+<p><strong>{{nombreProfesor}}</strong></p>`,
+    documents: ['plan'],
+    recipientTarget: 'estudiante_conditional',
+    icon: 'plan',
+    color: 'emerald',
+  },
+  {
+    id: 'inicio',
+    name: 'Inicio de las FFE',
+    description: 'Seguimiento + Valoración + Calendario + Carta → Tutor de la empresa',
+    subject: 'Inicio de las FFE',
+    body: `<p>Estimado/a {{nombreTutor}},</p>
+<p>Este email es para recordar que en los próximos días dará comienzo la Fase de Formación en Empresas (FFE) para nuestros alumnos {{nombreApellidosAlumnos}}.</p>
+<p>Según los convenios firmados su centro de trabajo es en {{Dirección}}.</p>
+<p>Estará/n allí al inicio de la jornada, y preguntará/n directamente por ti. Aprovecho el email, para adjuntar:</p>
+<ul>
+<li>Carta de inicio de las FFE</li>
+<li>Calendario/s</li>
+<li>Fichas de seguimiento y valoración</li>
+</ul>
+<p>Por último, también me gustaría recordar un par de detalles, el primero, que como tutor cualquier duda, problema o inconveniente que surja durante el periodo de FFE, estoy a vuestra entera disposición. Y segundo, que los alumnos/as en FFE son estudiantes en periodo formativo y que por tanto necesitan asesoramiento y guía en las actividades a desarrollar en la empresa.</p>
+<p>Agradecemos de antemano su colaboración.</p>
+<p>Atentamente,</p>`,
+    documents: ['seguimiento', 'valoracion', 'calendario', 'carta'],
+    recipientTarget: 'tutor',
+    icon: 'inicio',
+    color: 'amber',
+  },
+  {
+    id: 'fin',
+    name: 'Fin de las FFE',
+    description: 'Seguimiento + Valoración → Tutor de la empresa',
+    subject: 'Fin de las FFE',
+    body: `<p>Estimado/a <strong>{{nombreTutor}}</strong>,</p>
+<p>Adjuntamos la documentación de seguimiento y valoración final correspondiente al periodo de Formación en Centros de Trabajo (FFE) en <strong>{{nombreEmpresa}}</strong>.</p>
+<p><strong>Alumnos asignados:</strong> {{nombreApellidosAlumnos}}</p>
+<p>Agradecemos su colaboración y dedicación durante este periodo.</p>
+<p>Atentamente,</p>
+<p><strong>{{nombreProfesor}}</strong></p>`,
+    documents: ['seguimiento', 'valoracion'],
+    recipientTarget: 'tutor',
+    icon: 'fin',
+    color: 'purple',
+  },
+  {
+    id: 'otros',
+    name: 'Otros',
+    description: 'Correo libre sin documentos adjuntos',
+    subject: '',
+    body: '',
+    documents: [],
+    recipientTarget: 'ninguno',
+    icon: 'otros',
+    color: 'slate',
+  },
+];
+
 export function getTemplatesByCategory(category: 'empresa' | 'estudiante'): EmailTemplate[] {
   return EMAIL_TEMPLATES.filter(t => t.category === category);
 }
 
 export function getTemplateById(id: string): EmailTemplate | undefined {
   return EMAIL_TEMPLATES.find(t => t.id === id);
+}
+
+export function getPlantillaById(id: string): PlantillaCorreo | undefined {
+  return PLANTILLAS_CORREO.find(p => p.id === id);
+}
+
+export function interpolateBody(body: string, placeholders: Record<string, string>): string {
+  return body.replace(/\{\{([\wáéíóúÁÉÍÓÚñÑ]+)\}\}/g, (_, key) => placeholders[key] ?? `{{${key}}}`);
 }

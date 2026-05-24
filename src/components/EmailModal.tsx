@@ -1,14 +1,34 @@
-import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useEditor, EditorContent, EditorContext } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
+import TextAlign from '@tiptap/extension-text-align';
+import { TaskList, TaskItem } from '@tiptap/extension-list';
+import Highlight from '@tiptap/extension-highlight';
+import Subscript from '@tiptap/extension-subscript';
+import Superscript from '@tiptap/extension-superscript';
+import { Image } from '@tiptap/extension-image';
+import Typography from '@tiptap/extension-typography';
+import { Selection } from '@tiptap/extensions';
+import "@/components/tiptap-node/list-node/list-node.scss";
 import {
-  X, Send, Settings, Building2, GraduationCap, Paperclip, Bold, Italic, Underline,
-  List, ListOrdered, Heading1, Heading2, Trash2, Loader2, FileText, User, Briefcase, GraduationCap as StudentIcon
+  X, Send, Settings, Paperclip, Trash2, Loader2, FileText, User, Briefcase, GraduationCap as StudentIcon
 } from 'lucide-react';
-import { EmailTemplate, EmailAttachment, EmailSendRequest } from '../types/email.ts';
-import { EMAIL_TEMPLATES } from '../data/emailTemplates.ts';
+import { EmailAttachment, EmailSendRequest } from '../types/email.ts';
 import { uploadAttachment, deleteAttachment } from '../utils/emailUtils.ts';
+import { Title } from './Title.tsx';
+import { Toolbar, ToolbarGroup, ToolbarSeparator } from '@/components/tiptap-ui-primitive/toolbar';
+import { Spacer } from '@/components/tiptap-ui-primitive/spacer';
+import { UndoRedoButton } from '@/components/tiptap-ui/undo-redo-button';
+import { HeadingDropdownMenu } from '@/components/tiptap-ui/heading-dropdown-menu';
+import { ListDropdownMenu } from '@/components/tiptap-ui/list-dropdown-menu';
+import { BlockquoteButton } from '@/components/tiptap-ui/blockquote-button';
+import { CodeBlockButton } from '@/components/tiptap-ui/code-block-button';
+import { MarkButton } from '@/components/tiptap-ui/mark-button';
+import { TextAlignButton } from '@/components/tiptap-ui/text-align-button';
+import { ColorHighlightPopover } from '@/components/tiptap-ui/color-highlight-popover';
+import { LinkPopover } from '@/components/tiptap-ui/link-popover';
 
 interface EmailContact {
   id: number;
@@ -220,6 +240,8 @@ interface EmailModalProps {
   initialTo?: string[];
   initialBcc?: string[];
   initialAttachments?: EmailAttachment[];
+  initialSubject?: string;
+  initialBody?: string;
   onGoToConfig?: () => void;
   contextualContactIds?: Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>;
 }
@@ -230,6 +252,8 @@ export function EmailModal({
   initialTo = [],
   initialBcc = [],
   initialAttachments = [],
+  initialSubject = '',
+  initialBody = '',
   onGoToConfig,
   contextualContactIds = [],
 }: EmailModalProps) {
@@ -258,12 +282,25 @@ export function EmailModal({
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        horizontalRule: false,
+        link: { openOnClick: false },
+      }),
+      Underline,
       Placeholder.configure({ placeholder: 'Escribe el contenido del correo aquí...' }),
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      Highlight.configure({ multicolor: true }),
+      Image,
+      Typography,
+      Superscript,
+      Subscript,
+      Selection,
     ],
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-64 p-4',
+        class: 'tiptap prose prose-sm max-w-none focus:outline-none min-h-64 p-4',
       },
     },
   });
@@ -274,19 +311,15 @@ export function EmailModal({
       setTo(initialTo.join(', '));
       setBcc(initialBcc.join(', '));
       setCc('');
-      setSubject('');
+      setSubject(initialSubject);
       setAttachments(initialAttachments);
       setError('');
       setSending(false);
       setSendIndividual(initialTo.length > 1);
-      editor?.commands.setContent('');
+      editor?.commands.setContent(initialBody);
+      editor?.chain().selectAll().setTextAlign('justify').setTextSelection(1).run();
     }
   }, [isOpen]);
-
-  const handleSelectTemplate = useCallback((template: EmailTemplate) => {
-    setSubject(template.subject);
-    editor?.commands.setContent(template.body);
-  }, [editor]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -354,7 +387,11 @@ export function EmailModal({
       return;
     }
 
-    const html = editor?.getHTML() || '';
+    const editorHtml = editor?.getHTML() || '';
+    const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333">
+<style>p{margin:0 0 1.25em 0 !important}ul{list-style:disc outside;margin:0 0 1.25em 0 !important}ol{list-style:decimal outside;margin:0 0 1.25em 0 !important}li{margin:0 !important}li>p{margin:0 !important}table{border-collapse:collapse;width:100%;margin:0 0 1.25em 0}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style>
+${editorHtml}
+</div>`;
 
     const payload: EmailSendRequest = {
       to: sendIndividual && toList.length > 1 ? toList : allRecipients,
@@ -388,19 +425,7 @@ export function EmailModal({
 
   if (!isOpen) return null;
 
-  const empresaTemplates = EMAIL_TEMPLATES.filter(t => t.category === 'empresa');
-  const estudianteTemplates = EMAIL_TEMPLATES.filter(t => t.category === 'estudiante');
   const totalRecipients = parseEmails(to).length + parseEmails(cc).length + parseEmails(bcc).length;
-
-  const ToolbarButton = ({ onClick, active, children }: any) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`p-1.5 rounded transition-colors ${active ? 'bg-blue-100 text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
-    >
-      {children}
-    </button>
-  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-2">
@@ -454,49 +479,61 @@ export function EmailModal({
           </div>
         ) : (
           <div className="flex flex-1 overflow-hidden">
-            {/* Left panel: Templates */}
-            <div className="w-64 lg:w-72 shrink-0 border-r border-slate-200 bg-slate-50/50 overflow-y-auto p-4 space-y-6">
-              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Plantillas</h3>
+            {/* Left panel: Attachments */}
+            <div className="w-64 lg:w-72 shrink-0 border-r border-slate-200 bg-slate-50/50 overflow-y-auto p-4 space-y-4">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-blue-600 text-white text-xs font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+              >
+                <Paperclip className="h-4 w-4" />
+                Añadir adjunto
+              </button>
+              <input ref={fileInputRef} type="file" multiple onChange={handleFileSelect} className="hidden" />
 
-              {empresaTemplates.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="h-4 w-4 text-blue-600" />
-                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Empresa</span>
-                  </div>
-                  <div className="space-y-1">
-                    {empresaTemplates.map(t => (
-                      <button
-                        key={t.id}
-                        onClick={() => handleSelectTemplate(t)}
-                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-transparent hover:border-blue-100"
+              <div>
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Adjuntos</h3>
+                {attachments.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {attachments.map(att => (
+                      <div
+                        key={att.id}
+                        className="bg-white border border-slate-200 rounded-lg px-3 py-2 space-y-1"
                       >
-                        <span className="block truncate">{t.name}</span>
-                      </button>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FileText className="h-4 w-4 text-slate-400 shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <Title text={att.filename}>
+                              <span className="block text-xs text-slate-700 font-medium truncate">{att.filename}</span>
+                            </Title>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-slate-400">{(att.size / 1024).toFixed(1)} KB</span>
+                            <span className="text-[10px] text-slate-400 font-mono">{att.filename.split('.').pop()?.toUpperCase()}</span>
+                            {att.source === 'generated' && (
+                              <>
+                                <span className="text-slate-300">·</span>
+                                <span className="text-[9px] font-bold text-blue-500 uppercase">Generado</span>
+                              </>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAttachment(att)}
+                            className="p-1 text-slate-400 hover:text-red-500 rounded"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {estudianteTemplates.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <GraduationCap className="h-4 w-4 text-emerald-600" />
-                    <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Estudiante</span>
-                  </div>
-                  <div className="space-y-1">
-                    {estudianteTemplates.map(t => (
-                      <button
-                        key={t.id}
-                        onClick={() => handleSelectTemplate(t)}
-                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors border border-transparent hover:border-emerald-100"
-                      >
-                        <span className="block truncate">{t.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+                ) : (
+                  <p className="text-xs text-slate-400 italic">Ningún archivo adjunto</p>
+                )}
+              </div>
             </div>
 
             {/* Right panel: Form */}
@@ -631,85 +668,52 @@ export function EmailModal({
                 {/* WYSIWYG Editor */}
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cuerpo</label>
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <div className="flex items-center gap-1 px-3 py-2 bg-slate-50 border-b border-slate-200 flex-wrap">
-                      <ToolbarButton onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive('bold')}>
-                        <Bold className="h-4 w-4" />
-                      </ToolbarButton>
-                      <ToolbarButton onClick={() => editor?.chain().focus().toggleItalic().run()} active={editor?.isActive('italic')}>
-                        <Italic className="h-4 w-4" />
-                      </ToolbarButton>
-                      <ToolbarButton onClick={() => editor?.chain().focus().toggleUnderline().run()} active={editor?.isActive('underline')}>
-                        <Underline className="h-4 w-4" />
-                      </ToolbarButton>
-                      <span className="w-px h-5 bg-slate-200 mx-1" />
-                      <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} active={editor?.isActive('heading', { level: 1 })}>
-                        <Heading1 className="h-4 w-4" />
-                      </ToolbarButton>
-                      <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} active={editor?.isActive('heading', { level: 2 })}>
-                        <Heading2 className="h-4 w-4" />
-                      </ToolbarButton>
-                      <span className="w-px h-5 bg-slate-200 mx-1" />
-                      <ToolbarButton onClick={() => editor?.chain().focus().toggleBulletList().run()} active={editor?.isActive('bulletList')}>
-                        <List className="h-4 w-4" />
-                      </ToolbarButton>
-                      <ToolbarButton onClick={() => editor?.chain().focus().toggleOrderedList().run()} active={editor?.isActive('orderedList')}>
-                        <ListOrdered className="h-4 w-4" />
-                      </ToolbarButton>
-                    </div>
-                    <EditorContent editor={editor} />
+                  <div className="border border-slate-200 rounded-lg overflow-hidden editor-body">
+                    <style>{`.editor-body .ProseMirror p { margin-bottom: 1.25em; } .editor-body .ProseMirror ul { margin-bottom: 1.25em; }`}</style>
+                    <EditorContext.Provider value={{ editor }}>
+                      <Toolbar variant="fixed">
+                        <Spacer />
+                        <ToolbarGroup>
+                          <UndoRedoButton action="undo" />
+                          <UndoRedoButton action="redo" />
+                        </ToolbarGroup>
+                        <ToolbarSeparator />
+                        <ToolbarGroup>
+                          <HeadingDropdownMenu modal={false} levels={[1, 2, 3]} />
+                          <ListDropdownMenu modal={false} types={['bulletList', 'orderedList']} />
+                          <BlockquoteButton />
+                          <CodeBlockButton />
+                        </ToolbarGroup>
+                        <ToolbarSeparator />
+                        <ToolbarGroup>
+                          <MarkButton type="bold" />
+                          <MarkButton type="italic" />
+                          <MarkButton type="underline" />
+                          <MarkButton type="strike" />
+                          <MarkButton type="code" />
+                          <ColorHighlightPopover />
+                          <LinkPopover />
+                        </ToolbarGroup>
+                        <ToolbarSeparator />
+                        <ToolbarGroup>
+                          <MarkButton type="superscript" />
+                          <MarkButton type="subscript" />
+                        </ToolbarGroup>
+                        <ToolbarSeparator />
+                        <ToolbarGroup>
+                          <TextAlignButton align="left" />
+                          <TextAlignButton align="center" />
+                          <TextAlignButton align="right" />
+                          <TextAlignButton align="justify" />
+                        </ToolbarGroup>
+                        <Spacer />
+                      </Toolbar>
+                      <EditorContent editor={editor} />
+                    </EditorContext.Provider>
                   </div>
                 </div>
 
-                {/* Attachments */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Adjuntos</label>
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-700 transition-colors"
-                    >
-                      <Paperclip className="h-3 w-3" />
-                      Añadir archivos
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                  </div>
-                  {attachments.length > 0 ? (
-                    <div className="space-y-1.5">
-                      {attachments.map(att => (
-                        <div
-                          key={att.id}
-                          className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-2"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <FileText className="h-4 w-4 text-slate-400 shrink-0" />
-                            <span className="text-xs text-slate-600 truncate">{att.filename}</span>
-                            <span className="text-[10px] text-slate-400">({(att.size / 1024).toFixed(1)} KB)</span>
-                            {att.source === 'generated' && (
-                              <span className="text-[9px] font-bold text-blue-500 uppercase">Generado</span>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveAttachment(att)}
-                            className="p-1 text-slate-400 hover:text-red-500 rounded"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-400 italic">Ningún archivo adjunto</p>
-                  )}
-                </div>
+
               </div>
 
               {/* Footer */}
