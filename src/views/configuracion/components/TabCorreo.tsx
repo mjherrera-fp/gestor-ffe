@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Settings, Send, Loader2, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { Mail, Settings, Send, Loader2, Eye, EyeOff, Trash2, Square, CheckSquare } from 'lucide-react';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
@@ -129,12 +129,20 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
             </div>
           )}
 
-          <div className="flex items-center">
-            <input type="checkbox" id="smtp_secure" name="smtp_secure" checked={emailConfig.smtp_secure} onChange={handleChange} className="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" />
-            <label htmlFor="smtp_secure" className="ml-2 text-sm text-slate-600">
+          <button
+            type="button"
+            onClick={() => onChange({ ...emailConfig, smtp_secure: !emailConfig.smtp_secure })}
+            className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-left"
+          >
+            {emailConfig.smtp_secure ? (
+              <CheckSquare className="h-5 w-5 text-blue-500 shrink-0" />
+            ) : (
+              <Square className="h-5 w-5 text-slate-400 shrink-0" />
+            )}
+            <span className="text-sm text-slate-700">
               Usar conexión segura SSL/TLS (Puerto 465). Dejar desmarcado para STARTTLS (Puerto 587).
-            </label>
-          </div>
+            </span>
+          </button>
 
           {/* Delay entre envíos */}
           <div className="pt-4 border-t border-slate-100">

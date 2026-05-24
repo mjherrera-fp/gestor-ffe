@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, FileDown, FolderOpen } from 'lucide-react';
+import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, FileDown, FolderOpen, Square, CheckSquare, Circle, CheckCircle2 } from 'lucide-react';
 import { EmpresaFestivosModal } from './EmpresaFestivosModal.tsx';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
@@ -304,61 +304,74 @@ export function TabGeneral() {
             </div>
           )}
           <form onSubmit={handleSubmitCreacion} className="space-y-6">
-            <div className="space-y-3">
-              <label className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
-                <input
-                  type="radio"
-                  name="modoCreacion"
-                  value="descargar"
-                  checked={modoCreacion === 'descargar'}
-                  onChange={e => setModoCreacion(e.target.value)}
-                  className="mt-0.5"
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setModoCreacion('descargar')}
+                className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
+                  modoCreacion === 'descargar'
+                    ? 'bg-indigo-50 border-indigo-400 shadow-sm'
+                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                }`}
+              >
+                {modoCreacion === 'descargar' ? (
+                  <CheckCircle2 className="h-5 w-5 text-indigo-500 mt-0.5 shrink-0" />
+                ) : (
+                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <FolderOpen className="h-4 w-4 text-slate-500" />
-                    <span className="text-sm font-semibold text-slate-800">Descargar</span>
+                    <FolderOpen className={`h-4 w-4 ${modoCreacion === 'descargar' ? 'text-indigo-500' : 'text-slate-500'}`} />
+                    <span className={`text-sm font-semibold ${modoCreacion === 'descargar' ? 'text-indigo-800' : 'text-slate-800'}`}>Descargar</span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className={`text-xs mt-1 ${modoCreacion === 'descargar' ? 'text-indigo-600' : 'text-slate-500'}`}>
                     Los documentos se descargan por el navegador a la carpeta de descargas del sistema.
                   </p>
                 </div>
-              </label>
-              <label className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
-                <input
-                  type="radio"
-                  name="modoCreacion"
-                  value="crear"
-                  checked={modoCreacion === 'crear'}
-                  onChange={e => setModoCreacion(e.target.value)}
-                  className="mt-0.5"
-                />
+              </button>
+              <button
+                type="button"
+                onClick={() => setModoCreacion('crear')}
+                className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
+                  modoCreacion === 'crear'
+                    ? 'bg-emerald-50 border-emerald-400 shadow-sm'
+                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                }`}
+              >
+                {modoCreacion === 'crear' ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
+                ) : (
+                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <FileDown className="h-4 w-4 text-emerald-600" />
-                    <span className="text-sm font-semibold text-slate-800">Guardar en carpeta docs/</span>
+                    <FileDown className={`h-4 w-4 ${modoCreacion === 'crear' ? 'text-emerald-500' : 'text-slate-500'}`} />
+                    <span className={`text-sm font-semibold ${modoCreacion === 'crear' ? 'text-emerald-800' : 'text-slate-800'}`}>Guardar en carpeta docs/</span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className={`text-xs mt-1 ${modoCreacion === 'crear' ? 'text-emerald-600' : 'text-slate-500'}`}>
                     Los documentos se guardan automáticamente en la carpeta <code className="bg-slate-200 px-1 rounded text-xs">docs/</code> junto al ejecutable de la aplicación.
                   </p>
                 </div>
-              </label>
+              </button>
             </div>
             <div className="pt-4 border-t border-slate-100">
-              <label className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={carpetaEstudiante}
-                  onChange={e => setCarpetaEstudiante(e.target.checked)}
-                  className="rounded"
-                />
+              <button
+                type="button"
+                onClick={() => setCarpetaEstudiante(!carpetaEstudiante)}
+                className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-left"
+              >
+                {carpetaEstudiante ? (
+                  <CheckSquare className="h-5 w-5 text-blue-500 shrink-0" />
+                ) : (
+                  <Square className="h-5 w-5 text-slate-400 shrink-0" />
+                )}
                 <div className="flex-1 min-w-0">
                   <span className="text-sm font-semibold text-slate-800">Crear una carpeta por estudiante</span>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Si está marcado, dentro de la carpeta de cada empresa se crearán subcarpetas por alumno con sus documentos individuales.
                   </p>
                 </div>
-              </label>
+              </button>
             </div>
             <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
               <button type="submit" disabled={savingCreacion} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-indigo-600 disabled:opacity-50 transition-colors">
