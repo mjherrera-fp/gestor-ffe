@@ -1,4 +1,4 @@
-import { EmailTemplate, PlantillaCorreo } from '../types/email.ts';
+import { EmailTemplate, PlantillaCorreo } from '../../src/types/email.ts';
 
 export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {

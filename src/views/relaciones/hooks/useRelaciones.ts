@@ -21,7 +21,7 @@ import {
 import { EmailAttachment, PlantillaCorreo } from '../../../types/email.ts';
 import { uploadGeneratedAttachment } from '../../../utils/emailUtils.ts';
 import { mostrarToast } from '../../../utils/toast.ts';
-import { PLANTILLAS_CORREO, getPlantillaById, interpolateBody } from '../../../data/emailTemplates.ts';
+import { PLANTILLAS_CORREO, getPlantillaById, interpolateBody } from '../../../../templates/emails/emailTemplates.ts';
 
 //todo el estado y lógica de relaciones-alumnos, incluyendo gestión de alumnos en el formulario, cambios de estado y descargas de planes formativos
 

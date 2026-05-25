@@ -9,7 +9,7 @@ import { RelacionEstadisticaFormModal } from './components/RelacionEstadisticaFo
 import { calculateEndDateForHours }     from './utils/relacionesUtils.ts';
 import { EmailModal }                   from '../../components/EmailModal.tsx';
 import { Modal }                        from '../../components/ui/Modal.tsx';
-import { PLANTILLAS_CORREO }            from '../../data/emailTemplates.ts';
+import { PLANTILLAS_CORREO }            from '../../../templates/emails/emailTemplates.ts';
 
 interface Props {
   cursoId: number;
