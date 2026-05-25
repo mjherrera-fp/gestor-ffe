@@ -1,0 +1,25 @@
+diff --git a/node_modules/@radix-ui/react-slot/dist/index.js b/node_modules/@radix-ui/react-slot/dist/index.js
+index 3691205..369f164 100644
+--- a/node_modules/@radix-ui/react-slot/dist/index.js
++++ b/node_modules/@radix-ui/react-slot/dist/index.js
+@@ -137,16 +137,9 @@ function mergeProps(slotProps, childProps) {
+   return { ...slotProps, ...overrideProps };
+ }
+ function getElementRef(element) {
+-  let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
+-  let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+-  if (mayWarn) {
+-    return element.ref;
+-  }
+-  getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
+-  mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+-  if (mayWarn) {
+-    return element.props.ref;
+-  }
+-  return element.props.ref || element.ref;
++  // React 19+: ref is a regular prop, access via element.props.ref
++  // React 18 fallback: element.ref
++  if (element.props.ref !== void 0) return element.props.ref;
++  return element.ref;
+ }
+ //# sourceMappingURL=index.js.map

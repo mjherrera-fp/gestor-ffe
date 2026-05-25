@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Save, X, GraduationCap, Building2, MapPin, Phone, Mail, Hash, Layers, ListFilter } from 'lucide-react';
 import { DetalleAcademico, Alumno } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 
 interface Props {
+  open: boolean;
   alumno: Alumno;
   onClose: () => void;
 }
 
-export default function DetalleAcademicoModal({ alumno, onClose }: Props) {
+export default function DetalleAcademicoModal({ open, alumno, onClose }: Props) {
   const [detalles, setDetalles] = useState<DetalleAcademico[]>([]);
-  const [selectedId, setSelectedId] = useState<string>(alumno.detalleAcademicoId?.toString() || '');
+  const [selectedId, setSelectedId] = useState<string>(alumno?.detalleAcademicoId?.toString() || '');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -46,12 +48,11 @@ export default function DetalleAcademicoModal({ alumno, onClose }: Props) {
     }
   };
 
-  if (loading) return null;
+  if (loading || !alumno) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
-        <div className="px-8 py-6 border-b border-border-base flex items-center justify-between bg-slate-50/50">
+    <Modal open={open} onClose={onClose} maxWidth="lg">
+        <div className="px-8 py-6 border-b border-border-base flex items-center justify-between bg-slate-50/50 shrink-0">
           <div className="flex items-center gap-3">
             <div className="bg-emerald-50 p-2 rounded-lg text-emerald-600">
               <GraduationCap className="h-5 w-5" />
@@ -66,7 +67,7 @@ export default function DetalleAcademicoModal({ alumno, onClose }: Props) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8">
+        <form onSubmit={handleSubmit} className="p-8 overflow-y-auto flex-1">
           <div className="mb-6">
             <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2">Seleccionar Centro / Ciclo / Grupo</label>
             <div className="bg-white rounded-xl overflow-visible"> {/* Cambiar hidden por visible */}
@@ -95,7 +96,6 @@ export default function DetalleAcademicoModal({ alumno, onClose }: Props) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

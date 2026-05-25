@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Convenio, Empresa, CentroEducativo, ConvenioEstado, FirmaTipo } from '../../../types/index.ts';
 import { getNextConvenioEstado, getPrevConvenioEstado } from '../utils/conveniosUtils.ts';
 
@@ -211,7 +211,7 @@ export function useConvenios(cursoId: number, centroId?: number) {
   //  DATOS DERIVADOS
   // ─────────────────────────────────────────
 
-  const filteredAndSortedConvenios = convenios
+  const filteredAndSortedConvenios = useMemo(() => convenios
     .filter(conv => {
       const q = listSearchTerm.toLowerCase();
       const matchesSearch = !listSearchTerm ||
@@ -226,11 +226,11 @@ export function useConvenios(cursoId: number, centroId?: number) {
         ? a.empresaNombre.localeCompare(b.empresaNombre)
         : a.estado.localeCompare(b.estado);
       return sortOrder === 'asc' ? cmp : -cmp;
-    });
+    }), [convenios, listSearchTerm, statusFilter, sortBy, sortOrder]);
 
-  const filteredEmpresas = empresas.filter(e =>
+  const filteredEmpresas = useMemo(() => empresas.filter(e =>
     e.nombre.toLowerCase().includes(searchTermEmpresa.toLowerCase())
-  );
+  ), [empresas, searchTermEmpresa]);
 
   // ─────────────────────────────────────────
   //  RETURN

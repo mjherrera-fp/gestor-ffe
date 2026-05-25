@@ -8,6 +8,7 @@ import { EmpresaFormModal }           from './components/EmpresaFormModal.tsx';
 import { TutorFormModal }             from './components/TutorFormModal.tsx';
 import { EmpresaEstadisticasPanel }   from './components/EmpresaEstadisticasPanel.tsx';
 import { EmailModal }                 from '../../components/EmailModal.tsx';
+import { Modal }                      from '../../components/ui/Modal.tsx';
 
 interface Props {
   cursoId: number;
@@ -164,53 +165,49 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
       )}
 
       {/* ── MODAL: Empresa ── */}
-      {ctx.showEmpresaForm && (
-        <EmpresaFormModal
-          editing={ctx.editingEmpresa}
-          formData={ctx.empresaFormData}
-          onChange={ctx.setEmpresaFormData}
-          convenioRapido={ctx.convenioRapido}
-          onConvenioRapidoChange={ctx.setConvenioRapido}
-          centros={ctx.centros}
-          onSubmit={ctx.handleEmpresaSubmit}
-          onClose={() => ctx.setShowEmpresaForm(false)}
-        />
-      )}
+      <EmpresaFormModal
+        open={ctx.showEmpresaForm}
+        editing={ctx.editingEmpresa}
+        formData={ctx.empresaFormData}
+        onChange={ctx.setEmpresaFormData}
+        convenioRapido={ctx.convenioRapido}
+        onConvenioRapidoChange={ctx.setConvenioRapido}
+        centros={ctx.centros}
+        onSubmit={ctx.handleEmpresaSubmit}
+        onClose={() => ctx.setShowEmpresaForm(false)}
+      />
 
       {/* ── MODAL: Tutor ── */}
-      {ctx.showTutorForm && (
-        <TutorFormModal
-          editing={ctx.editingTutor}
-          formData={ctx.tutorFormData}
-          onChange={ctx.setTutorFormData}
-          onSubmit={ctx.handleTutorSubmit}
-          onClose={() => ctx.setShowTutorForm(false)}
-        />
-      )}
+      <TutorFormModal
+        open={ctx.showTutorForm}
+        editing={ctx.editingTutor}
+        formData={ctx.tutorFormData}
+        onChange={ctx.setTutorFormData}
+        onSubmit={ctx.handleTutorSubmit}
+        onClose={() => ctx.setShowTutorForm(false)}
+      />
 
       {/* ── MODAL: Resultado importación ── */}
-      {ctx.importResult && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 text-center">
-            <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
-              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Importación finalizada</h3>
-            <div className="space-y-2 text-sm text-slate-600">
-              <p><span className="font-bold text-emerald-600">{ctx.importResult.success}</span> empresas nuevas</p>
-              <p><span className="font-bold text-blue-600">{ctx.importResult.updated}</span> empresas actualizadas</p>
-            </div>
-            <button
-              onClick={() => ctx.setImportResult(null)}
-              className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
-            >
-              Aceptar
-            </button>
+      <Modal open={!!ctx.importResult} onClose={() => ctx.setImportResult(null)} maxWidth="sm">
+        <div className="p-6 text-center">
+          <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
           </div>
+          <h3 className="text-lg font-bold text-slate-800 mb-4">Importación finalizada</h3>
+          <div className="space-y-2 text-sm text-slate-600">
+            <p><span className="font-bold text-emerald-600">{ctx.importResult?.success}</span> empresas nuevas</p>
+            <p><span className="font-bold text-blue-600">{ctx.importResult?.updated}</span> empresas actualizadas</p>
+          </div>
+          <button
+            onClick={() => ctx.setImportResult(null)}
+            className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+          >
+            Aceptar
+          </button>
         </div>
-      )}
+      </Modal>
 
       {/* ── MODAL: Email ── */}
       <EmailModal

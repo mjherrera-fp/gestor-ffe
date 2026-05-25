@@ -104,15 +104,14 @@ export default function CursosView({ cursos, onUpdate }: Props) {
       </div>
 
       {/* MODAL: Formulario */}
-      {ctx.showForm && (
-        <CursoFormModal
-          editing={ctx.editing}
-          formData={ctx.formData}
-          setFormData={ctx.setFormData}
-          onSubmit={ctx.handleSubmit}
-          onClose={() => ctx.setShowForm(false)}
-        />
-      )}
+      <CursoFormModal
+        open={ctx.showForm}
+        editing={ctx.editing}
+        formData={ctx.formData}
+        setFormData={ctx.setFormData}
+        onSubmit={ctx.handleSubmit}
+        onClose={() => ctx.setShowForm(false)}
+      />
 
       {/* TABLA / LISTADO */}
       <div className="bg-white rounded-xl border border-border-base shadow-sm overflow-hidden">

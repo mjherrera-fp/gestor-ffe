@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Loader2, MapPin, ExternalLink, X } from 'lucide-react';
 import { CentroEducativo } from '../../../types/index.ts';
 import { DateList } from '../../../components/ui/DateList.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 import localidades from '../../../data/geo/localidades-madrid.json';
 
 const labelClass = 'block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
 
 interface CentroFormModalProps {
+  open: boolean;
   editing: CentroEducativo | null;
   formData: Partial<CentroEducativo>;
   onChange: (data: Partial<CentroEducativo>) => void;
@@ -20,7 +22,7 @@ interface CentroFormModalProps {
 }
 
 export function CentroFormModal({
-  editing, formData, onChange,
+  open, editing, formData, onChange,
   newFestivo, setNewFestivo, onAddFestivo, onRemoveFestivo,
   onSubmit, onClose,
 }: CentroFormModalProps) {
@@ -109,11 +111,10 @@ export function CentroFormModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-4xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+    <Modal open={open} onClose={onClose} maxWidth="lg" backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl">
 
         {/* Header */}
-        <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
           <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
             {editing ? 'Editar Centro' : 'Añadir Nuevo Centro'}
           </h3>
@@ -123,7 +124,7 @@ export function CentroFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-8 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <form onSubmit={onSubmit} className="p-8 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)] flex-1">
           <div>
             <label className={labelClass}>Nombre del Centro</label>
             <input
@@ -221,9 +222,7 @@ export function CentroFormModal({
         </form>
 
         {/* Agradecimiento API */}
-        {showAgradecimiento && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-60 p-4">
-            <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 p-8">
+        <Modal open={showAgradecimiento} onClose={() => setShowAgradecimiento(false)} maxWidth="sm" zIndex={60} backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
                   Festivos añadidos
@@ -254,10 +253,7 @@ export function CentroFormModal({
               >
                 Entendido
               </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+            </Modal>
+      </Modal>
   );
 }

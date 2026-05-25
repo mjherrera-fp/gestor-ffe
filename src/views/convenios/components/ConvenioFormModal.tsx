@@ -2,9 +2,11 @@ import React from 'react';
 import { X, Search, Building2, CheckCircle2 } from 'lucide-react';
 import { Empresa, CentroEducativo } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 import { ConvenioFormState } from '../hooks/useConvenios.ts';
 
 interface ConvenioFormModalProps {
+  open: boolean;
   isEditing: boolean;
   formData: ConvenioFormState;
   setFormData: React.Dispatch<React.SetStateAction<ConvenioFormState>>;
@@ -26,18 +28,17 @@ interface ConvenioFormModalProps {
 }
 
 export function ConvenioFormModal({
-  isEditing, formData, setFormData,
+  open, isEditing, formData, setFormData,
   empresas, filteredEmpresas, selectedEmpresa, searchTermEmpresa,
   onSearchEmpresaChange, onSelectEmpresa, onClearEmpresa,
   centros, selectedCentro, onCentroChange,
   onSubmit, onClose,
 }: ConvenioFormModalProps) {
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-4xl shadow-2xl w-full max-w-3xl my-8 overflow-hidden">
+    <Modal open={open} onClose={onClose} maxWidth="3xl" cardClass="rounded-4xl">
 
         {/* Header */}
-        <div className="px-10 py-8 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-10 py-8 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
           <div>
             <h3 className="text-2xl font-black text-slate-900 tracking-tight">
               {isEditing ? 'Editar Convenio' : 'Nuevo Convenio de Prácticas'}
@@ -54,7 +55,7 @@ export function ConvenioFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-10 space-y-8">
+        <form onSubmit={onSubmit} className="p-10 space-y-8 overflow-y-auto flex-1">
 
           {/* Centro Educativo */}
           <div>
@@ -194,7 +195,6 @@ export function ConvenioFormModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

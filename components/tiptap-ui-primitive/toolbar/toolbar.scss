@@ -42,21 +42,25 @@
     overflow-x: auto;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
 
     &::-webkit-scrollbar {
-      display: none;
+      height: 4px;
     }
 
-    @media (max-width: 480px) {
+    &::-webkit-scrollbar-thumb {
+      background: var(--tt-gray-light-a-200, #cbd5e1);
+      border-radius: 2px;
+    }
+
+    @media (max-width: 768px) {
       position: absolute;
       top: auto;
-      height: calc(var(--tt-toolbar-height) + var(--tt-safe-area-bottom));
+      height: auto;
+      min-height: calc(var(--tt-toolbar-height) + var(--tt-safe-area-bottom));
       border-top: 1px solid var(--tt-toolbar-border-color);
       border-bottom: none;
-      padding: 0 0.5rem var(--tt-safe-area-bottom);
-      flex-wrap: nowrap;
+      padding: 0.25rem 0.5rem calc(0.25rem + var(--tt-safe-area-bottom));
+      flex-wrap: wrap;
       justify-content: flex-start;
 
       .tiptap-toolbar-group {

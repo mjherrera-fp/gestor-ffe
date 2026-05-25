@@ -1,11 +1,13 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Curso } from '../../../types/index.ts';
+import { Modal } from '../../../components/ui/Modal.tsx';
 
 const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 const labelCls = 'block text-sm font-medium text-slate-700 mb-1';
 
 interface CursoFormModalProps {
+  open: boolean;
   editing: Curso | null;
   formData: Partial<Curso>;
   setFormData: React.Dispatch<React.SetStateAction<Partial<Curso>>>;
@@ -14,12 +16,11 @@ interface CursoFormModalProps {
 }
 
 export function CursoFormModal({
-  editing, formData, setFormData,
+  open, editing, formData, setFormData,
   onSubmit, onClose,
 }: CursoFormModalProps) {
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+    <Modal open={open} onClose={onClose} maxWidth="lg">
 
         {/* Header */}
         <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
@@ -32,7 +33,7 @@ export function CursoFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-8 space-y-6 overflow-y-auto">
+        <form onSubmit={onSubmit} className="p-8 space-y-6 overflow-y-auto flex-1">
 
           {/* Descripción */}
           <div>
@@ -87,7 +88,6 @@ export function CursoFormModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

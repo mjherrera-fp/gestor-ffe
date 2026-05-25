@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, MapPin } from 'lucide-react';
 import { Empresa } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 import { ConvenioRapidoState } from '../hooks/useEmpresas.ts';
 import { comunidades, allProvincias, searchProvincias, searchLocalidades, getComunidadBySlug } from '../../../data/geo/geoData.ts';
 
@@ -9,6 +10,7 @@ const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-
 const labelCls = 'block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1';
 
 interface EmpresaFormModalProps {
+  open: boolean;
   editing: Empresa | null;
   formData: Partial<Empresa>;
   onChange: (data: Partial<Empresa>) => void;
@@ -20,7 +22,7 @@ interface EmpresaFormModalProps {
 }
 
 export function EmpresaFormModal({
-  editing, formData, onChange,
+  open, editing, formData, onChange,
   convenioRapido, onConvenioRapidoChange,
   centros, onSubmit, onClose,
 }: EmpresaFormModalProps) {
@@ -164,8 +166,7 @@ export function EmpresaFormModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+    <Modal open={open} onClose={onClose} maxWidth="2xl" cardClass="rounded-3xl">
 
         {/* Header */}
         <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
@@ -178,7 +179,7 @@ export function EmpresaFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-8 space-y-4 overflow-y-auto">
+        <form onSubmit={onSubmit} className="p-8 space-y-4 overflow-y-auto flex-1">
           <div>
             <label className={labelCls}>Nombre Comercial</label>
             <input required className={inputCls} value={formData.nombre || ''} onChange={update('nombre')} />
@@ -380,7 +381,6 @@ export function EmpresaFormModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

@@ -43,7 +43,7 @@ export default function NotificationBell({ avisos, onDescartar, onAbrirCrear }: 
         </button>
       </Title>
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {open && (
           <motion.div
             initial={{ opacity: 0, y: -8, scale: 0.95 }}

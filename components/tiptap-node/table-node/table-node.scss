@@ -1,0 +1,45 @@
+.tiptap.ProseMirror {
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.5em 0;
+    overflow: hidden;
+
+    th,
+    td {
+      border: 1px solid var(--tt-gray-light-a-300, #cbd5e1);
+      padding: 0.5em 0.75em;
+      text-align: left;
+      vertical-align: top;
+      min-width: 2.5em;
+      position: relative;
+    }
+
+    th {
+      background-color: var(--tt-gray-light-100, #f4f4f5);
+      font-weight: 600;
+    }
+
+    .selectedCell {
+      background-color: var(--tt-gray-light-800, #f8fafc);
+    }
+
+    .column-resize-handle {
+      position: absolute;
+      right: -1px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: var(--tt-gray-light-a-200, #94a3b8);
+      pointer-events: none;
+    }
+  }
+
+  .tableWrapper {
+    overflow-x: auto;
+  }
+
+  .resize-cursor {
+    cursor: col-resize;
+  }
+}

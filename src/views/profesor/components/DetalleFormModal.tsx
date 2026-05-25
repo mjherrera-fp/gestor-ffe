@@ -2,11 +2,13 @@ import React from 'react';
 import { Plus, Trash2, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { DetalleAcademico, ResultadoAprendizaje } from '../../../types/index.ts';
 import { DateList } from '../../../components/ui/DateList.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 
 const labelClass = 'block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
 
 interface DetalleFormModalProps {
+  open: boolean;
   editing: DetalleAcademico | null;
   formData: Partial<DetalleAcademico>;
   onChange: (data: Partial<DetalleAcademico>) => void;
@@ -23,7 +25,7 @@ interface DetalleFormModalProps {
 }
 
 export function DetalleFormModal({
-  editing, formData, onChange,
+  open, editing, formData, onChange,
   newRA, onNewRAChange, onAddRA, onRemoveRA,
   newTutoria, setNewTutoria, onAddTutoria, onRemoveTutoria,
   onSubmit, onClose,
@@ -32,11 +34,10 @@ export function DetalleFormModal({
     onChange({ ...formData, [field]: e.target.value });
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-4xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
+    <Modal open={open} onClose={onClose} maxWidth="2xl" backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl">
 
         {/* Header */}
-        <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
           <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
             Configuración de Ciclo (Detalle Académico)
           </h3>
@@ -46,7 +47,7 @@ export function DetalleFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)] custom-scrollbar">
+        <form onSubmit={onSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)] custom-scrollbar flex-1">
 
           {/* ── Datos del ciclo ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -255,7 +256,6 @@ export function DetalleFormModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

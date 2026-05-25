@@ -130,12 +130,20 @@ export const PLANTILLAS_CORREO: PlantillaCorreo[] = [
     name: 'Fin de las FFE',
     description: 'Seguimiento + Valoración → Tutor de la empresa',
     subject: 'Fin de las FFE',
-    body: `<p>Estimado/a <strong>{{nombreTutor}}</strong>,</p>
-<p>Adjuntamos la documentación de seguimiento y valoración final correspondiente al periodo de Formación en Centros de Trabajo (FFE) en <strong>{{nombreEmpresa}}</strong>.</p>
-<p><strong>Alumnos asignados:</strong> {{nombreApellidosAlumnos}}</p>
-<p>Agradecemos su colaboración y dedicación durante este periodo.</p>
-<p>Atentamente,</p>
-<p><strong>{{nombreProfesor}}</strong></p>`,
+    body: `<p>Estimado/a {{nombreTutor}},</p>
+<p>Próximamente finalizará el periodo de FFE de nuestros alumnos/as en su empresa y necesitamos que se rellene y se firme los siguientes documentos:</p>
+<ul>
+    <li>Ficha de seguimiento</li>
+    <li>Valoración de las FFE</li>
+</ul>
+<p>Por favor, rellenad la información que sea necesaria en los documentos adjuntos ante de la firma. En el seguimiento aparece precargado en la columna "actividad formativa desarrollada", si queréis podéis poner actividades específicas desarrolladas por el alumno/a, pero es <strong>muy importante que guarden relación con los RA</strong> que están especificados en el documento. Si no sabéis de que va ese RA preguntad al alumno/a.</p>
+<p>Con respecto a la firma es muy importante que se siga cierto protocolo:</p>
+<ul>
+    <li>Si la <strong>firma es manual</strong>, se debe imprimir el documento, firmarlo y a poder ser sellarlo y entregárselo al alumno/a antes de la finalización de las prácticas para que nos lo entregue cuando venga al centro.</li>
+    <li>Si la <sttrong>firma es mediante certificado digital</strong>, bastaría con firmar el documento y enviármelo a mi por correo.</li>
+</ul>
+<p>Es muy importante la entrega de esta documentación, <strong>sin esta documentación debidamente cumplimentada y firmada no podrán titular nuestros alumnos/as</strong>.</p>
+<p>Atentamente,</p>`,
     documents: ['seguimiento', 'valoracion'],
     recipientTarget: 'tutor',
     icon: 'fin',

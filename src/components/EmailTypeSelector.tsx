@@ -1,23 +1,22 @@
 import React from 'react';
 import { X, Mail } from 'lucide-react';
 import { EmailTargetType } from '../types/email.ts';
+import { Modal } from './ui/Modal.tsx';
 
 interface EmailTypeSelectorProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
   onConfirm: (tipo: EmailTargetType) => void;
   nombreAlumno?: string;
 }
 
 export function EmailTypeSelector({
-  isOpen,
+  open,
   onClose,
   onConfirm,
   nombreAlumno,
 }: EmailTypeSelectorProps) {
   const [selected, setSelected] = React.useState<EmailTargetType>('educamadrid');
-
-  if (!isOpen) return null;
 
   const options: { value: EmailTargetType; label: string; description: string; color: string }[] = [
     { value: 'educamadrid', label: 'Correo EducaMadrid', description: 'usuario@educa.madrid.org', color: 'blue' },
@@ -26,8 +25,7 @@ export function EmailTypeSelector({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+    <Modal open={open} onClose={onClose} maxWidth="sm" backdropClass="bg-slate-900/60 backdrop-blur-sm">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
@@ -106,7 +104,6 @@ export function EmailTypeSelector({
             Aceptar
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

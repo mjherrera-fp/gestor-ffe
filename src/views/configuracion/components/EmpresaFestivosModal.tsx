@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Loader2, ExternalLink, X } from 'lucide-react';
 import { DateList } from '../../../components/ui/DateList.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 import { allLocalidades, LocalidadEntry } from '../../../data/geo/geoData.ts';
 
 interface EmpresaFestivosModalProps {
-  localidad: string;
+  open: boolean;
+  localidad: string | null;
   festivos: string[];
   onSave: (festivos: string[]) => void;
   onClose: () => void;
 }
 
-export function EmpresaFestivosModal({ localidad, festivos, onSave, onClose }: EmpresaFestivosModalProps) {
+export function EmpresaFestivosModal({ open, localidad, festivos, onSave, onClose }: EmpresaFestivosModalProps) {
   const [dates, setDates] = useState<string[]>([...festivos].sort());
   const [newDate, setNewDate] = useState('');
   const [loadingFestivos, setLoadingFestivos] = useState(false);
   const [showAgradecimiento, setShowAgradecimiento] = useState(false);
   const [festivosImportados, setFestivosImportados] = useState(0);
 
-  const localidadEntry: LocalidadEntry | undefined = allLocalidades.find(
-    l => l.name.toLowerCase() === localidad.toLowerCase()
-  );
+  const localidadEntry: LocalidadEntry | undefined = localidad
+    ? allLocalidades.find(l => l.name.toLowerCase() === localidad.toLowerCase())
+    : undefined;
   const slug = localidadEntry?.slug || null;
 
   const handleAdd = () => {
@@ -61,9 +63,8 @@ export function EmpresaFestivosModal({ localidad, festivos, onSave, onClose }: E
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-4xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+    <Modal open={open} onClose={onClose} maxWidth="lg" backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl">
+        <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
           <div>
             <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
               Festivos de empresa
@@ -75,7 +76,7 @@ export function EmpresaFestivosModal({ localidad, festivos, onSave, onClose }: E
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <form onSubmit={handleSubmit} className="p-8 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)] flex-1">
           <DateList
             label="Días Festivos"
             count={dates.length}
@@ -106,9 +107,7 @@ export function EmpresaFestivosModal({ localidad, festivos, onSave, onClose }: E
           </button>
         </form>
 
-        {showAgradecimiento && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-60 p-4">
-            <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 p-8">
+        <Modal open={showAgradecimiento} onClose={() => setShowAgradecimiento(false)} maxWidth="sm" zIndex={60} backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
                   Festivos añadidos
@@ -139,10 +138,7 @@ export function EmpresaFestivosModal({ localidad, festivos, onSave, onClose }: E
               >
                 Entendido
               </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+            </Modal>
+    </Modal>
   );
 }

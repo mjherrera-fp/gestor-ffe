@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import JSZip from 'jszip';
 import {
     RelacionAlumno, Convenio, TutorEmpresa, Alumno, Curso, Profesor,
@@ -1208,7 +1208,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     //  DATOS DERIVADOS
     // ─────────────────────────────────────────
 
-    const filteredAndSortedRelaciones = relaciones
+    const filteredAndSortedRelaciones = useMemo(() => relaciones
         .filter(rel => {
             const conv = convenios.find(c => c.id === rel.convenioId);
             if (!conv) return false;
@@ -1292,20 +1292,20 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                 comparison = a.estado.localeCompare(b.estado);
             }
             return sortOrder === 'asc' ? comparison : -comparison;
-        });
+        }), [relaciones, convenios, listSearchTerm, statusFilters, dateFilters, sortBy, sortOrder]);
 
-    const filteredAlumnos = searchTermAlumno.trim().length > 0
+    const filteredAlumnos = useMemo(() => searchTermAlumno.trim().length > 0
         ? alumnos.filter(a => {
             const matchesSearch = (a.nombre + ' ' + a.apellidos).toLowerCase().includes(searchTermAlumno.toLowerCase());
             const isAlreadyInForm = selectedAlumnosIds.includes(a.id!);
             return matchesSearch && !isAlreadyInForm && !a.relacionId;
         })
-        : [];
+        : [], [searchTermAlumno, alumnos, selectedAlumnosIds]);
 
-    const filteredConvenios = convenios.filter(c =>
+    const filteredConvenios = useMemo(() => convenios.filter(c =>
         c.estado === 'COMPLETADO' &&
         `${c.empresaNombre} ${c.numConvenio}`.toLowerCase().includes(searchTermConvenio.toLowerCase())
-    );
+    ), [convenios, searchTermConvenio]);
 
     // ─────────────────────────────────────────
     //  EMAIL

@@ -11,7 +11,11 @@ import Superscript from '@tiptap/extension-superscript';
 import { Image } from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
 import { Selection } from '@tiptap/extensions';
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
 import "@/components/tiptap-node/list-node/list-node.scss";
+import "@/components/tiptap-node/heading-node/heading-node.scss";
+import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
+import "@/components/tiptap-node/table-node/table-node.scss";
 import {
   X, Send, Settings, Paperclip, Trash2, Loader2, FileText, User, Briefcase, GraduationCap as StudentIcon
 } from 'lucide-react';
@@ -29,6 +33,7 @@ import { MarkButton } from '@/components/tiptap-ui/mark-button';
 import { TextAlignButton } from '@/components/tiptap-ui/text-align-button';
 import { ColorHighlightPopover } from '@/components/tiptap-ui/color-highlight-popover';
 import { LinkPopover } from '@/components/tiptap-ui/link-popover';
+import { TableDropdownMenu } from '@/components/tiptap-ui/table-dropdown-menu';
 
 interface EmailContact {
   id: number;
@@ -284,6 +289,7 @@ export function EmailModal({
     extensions: [
       StarterKit.configure({
         horizontalRule: false,
+        underline: false,
         link: { openOnClick: false },
       }),
       Underline,
@@ -297,6 +303,10 @@ export function EmailModal({
       Superscript,
       Subscript,
       Selection,
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableCell,
+      TableHeader,
     ],
     editorProps: {
       attributes: {
@@ -389,7 +399,7 @@ export function EmailModal({
 
     const editorHtml = editor?.getHTML() || '';
     const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333">
-<style>p{margin:0 0 1.25em 0 !important}ul{list-style:disc outside;margin:0 0 1.25em 0 !important}ol{list-style:decimal outside;margin:0 0 1.25em 0 !important}li{margin:0 !important}li>p{margin:0 !important}table{border-collapse:collapse;width:100%;margin:0 0 1.25em 0}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style>
+<style>p{margin:0 0 1.25em 0 !important}h1{font-size:1.5em;font-weight:700;margin:0 0 0.5em 0 !important}h2{font-size:1.25em;font-weight:700;margin:0 0 0.5em 0 !important}h3{font-size:1.125em;font-weight:600;margin:0 0 0.5em 0 !important}blockquote{padding-left:1em;margin:1.5rem 0;border-left:4px solid #cbd5e1}blockquote p{margin:0}ul{list-style:disc outside;margin:0 0 1.25em 0 !important}ol{list-style:decimal outside;margin:0 0 1.25em 0 !important}li{margin:0 !important}li>p{margin:0 !important}table{border-collapse:collapse;width:100%;margin:0 0 1.25em 0}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style>
 ${editorHtml}
 </div>`;
 
@@ -683,6 +693,7 @@ ${editorHtml}
                           <ListDropdownMenu modal={false} types={['bulletList', 'orderedList']} />
                           <BlockquoteButton />
                           <CodeBlockButton />
+                          <TableDropdownMenu editor={editor} />
                         </ToolbarGroup>
                         <ToolbarSeparator />
                         <ToolbarGroup>

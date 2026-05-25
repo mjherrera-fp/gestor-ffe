@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, ShieldAlert, KeyRound, ArrowRight, Copyright } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import packageJson from '../../../package.json';
 import CopyrightModal from '../../components/CopyrightModal.tsx';
 
@@ -97,9 +97,7 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
           </p>
       </motion.div>
 
-      <AnimatePresence>
-        {showCopyright && <CopyrightModal onClose={() => setShowCopyright(false)} />}
-      </AnimatePresence>
+      <CopyrightModal open={showCopyright} onClose={() => setShowCopyright(false)} />
     </div>
   );
 }

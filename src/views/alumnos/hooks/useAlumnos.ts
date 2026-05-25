@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import { Alumno, DetalleAcademico, RelacionAlumno } from '../../../types/index.ts';
 import { EmailAttachment, EmailTargetType } from '../../../types/email.ts';
@@ -337,7 +337,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     else { setSortBy(field); setSortOrder('asc'); }
   };
 
-  const filteredAndSortedAlumnos = alumnos
+  const filteredAndSortedAlumnos = useMemo(() => alumnos
     .filter(alumno => {
       const q = searchTerm.toLowerCase();
       const matchesSearch =
@@ -359,7 +359,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
       if (sortBy === 'apellidos') cmp = a.apellidos.localeCompare(b.apellidos);
       if (sortBy === 'horas')     cmp = (a.totalHorasFFE || 0) - (b.totalHorasFFE || 0);
       return sortOrder === 'asc' ? cmp : -cmp;
-    });
+    }), [alumnos, searchTerm, filterStatus, sortBy, sortOrder]);
 
   // ─────────────────────────────────────────
   //  EMAIL

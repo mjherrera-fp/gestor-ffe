@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import { Empresa, TutorEmpresa, EmpresaEstadistica, Curso } from '../../../types/index.ts';
 import { EmailAttachment } from '../../../types/email.ts';
@@ -474,26 +474,29 @@ export function useEmpresas(cursoId: number) {
   //  DATOS DERIVADOS
   // ─────────────────────────────────────────
 
-  const cursosUnicos = [...new Set(allEstadisticas.map(e => e.curso))]
+  const cursosUnicos = useMemo(() => [...new Set(allEstadisticas.map(e => e.curso))]
     .sort((a, b) => {
       const yearA = parseInt(a.split('/')[0]);
       const yearB = parseInt(b.split('/')[0]);
       return yearB - yearA;
+    }), [allEstadisticas]);
+
+  const { empresaValoracionMedia, empresaCursos } = useMemo(() => {
+    const valoracionMedia: Record<number, number> = {};
+    const cursos: Record<number, string[]> = {};
+    allEstadisticas.forEach(e => {
+      if (!cursos[e.empresaId]) cursos[e.empresaId] = [];
+      cursos[e.empresaId].push(e.curso);
     });
+    allEstadisticas.forEach(e => {
+      if (e.valoracion != null && e.valoracion > 0) {
+        valoracionMedia[e.empresaId] = Math.max(valoracionMedia[e.empresaId] || 0, e.valoracion);
+      }
+    });
+    return { empresaValoracionMedia: valoracionMedia, empresaCursos: cursos };
+  }, [allEstadisticas]);
 
-  const empresaValoracionMedia: Record<number, number> = {};
-  const empresaCursos: Record<number, string[]> = {};
-  allEstadisticas.forEach(e => {
-    if (!empresaCursos[e.empresaId]) empresaCursos[e.empresaId] = [];
-    empresaCursos[e.empresaId].push(e.curso);
-  });
-  allEstadisticas.forEach(e => {
-    if (e.valoracion != null && e.valoracion > 0) {
-      empresaValoracionMedia[e.empresaId] = Math.max(empresaValoracionMedia[e.empresaId] || 0, e.valoracion);
-    }
-  });
-
-  const filteredEmpresas = empresas.filter(emp => {
+  const filteredEmpresas = useMemo(() => empresas.filter(emp => {
     if (!emp.id) return false;
 
     const matchesSearch = emp.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -516,7 +519,7 @@ export function useEmpresas(cursoId: number) {
     if (filterColaboracion === 'sin_convenio' && empresaIdsConConvenio.includes(emp.id)) return false;
 
     return true;
-  });
+  }), [empresas, searchTerm, filterValoracion, filterUltimosCursos, filterColaboracion, empresaValoracionMedia, empresaCursos, cursosUnicos, empresaIdsConConvenio]);
 
   // ─────────────────────────────────────────
   //  EMAIL

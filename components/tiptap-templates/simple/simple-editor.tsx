@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
+import { EditorContent, EditorContext, useEditor, type Editor } from "@tiptap/react"
 
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit"
@@ -13,6 +13,7 @@ import { Highlight } from "@tiptap/extension-highlight"
 import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { Selection } from "@tiptap/extensions"
+import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table"
 
 // --- UI Primitives ---
 import { Button } from "@/components/tiptap-ui-primitive/button"
@@ -33,6 +34,7 @@ import "@/components/tiptap-node/list-node/list-node.scss"
 import "@/components/tiptap-node/image-node/image-node.scss"
 import "@/components/tiptap-node/heading-node/heading-node.scss"
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss"
+import "@/components/tiptap-node/table-node/table-node.scss"
 
 // --- Tiptap UI ---
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu"
@@ -58,6 +60,7 @@ import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button"
 import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon"
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
 import { LinkIcon } from "@/components/tiptap-icons/link-icon"
+import { TableDropdownMenu } from "@/components/tiptap-ui/table-dropdown-menu"
 
 // --- Hooks ---
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint"
@@ -76,10 +79,12 @@ import "@/components/tiptap-templates/simple/simple-editor.scss"
 import content from "@/components/tiptap-templates/simple/data/content.json"
 
 const MainToolbarContent = ({
+  editor,
   onHighlighterClick,
   onLinkClick,
   isMobile,
 }: {
+  editor: Editor | null
   onHighlighterClick: () => void
   onLinkClick: () => void
   isMobile: boolean
@@ -141,6 +146,12 @@ const MainToolbarContent = ({
 
       <ToolbarGroup>
         <ImageUploadButton text="Add" />
+      </ToolbarGroup>
+
+      <ToolbarSeparator />
+
+      <ToolbarGroup>
+        <TableDropdownMenu editor={editor} />
       </ToolbarGroup>
 
       <Spacer />
@@ -227,6 +238,10 @@ export function SimpleEditor() {
         upload: handleImageUpload,
         onError: (error) => console.error("Upload failed:", error),
       }),
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableCell,
+      TableHeader,
     ],
     content,
   })
@@ -257,6 +272,7 @@ export function SimpleEditor() {
         >
           {mobileView === "main" ? (
             <MainToolbarContent
+              editor={editor}
               onHighlighterClick={() => setMobileView("highlighter")}
               onLinkClick={() => setMobileView("link")}
               isMobile={isMobile}

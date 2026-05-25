@@ -145,7 +145,7 @@ export function TabSeguridad({
       </div>
 
       {createPortal(
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {showConfirmModal && (
             <>
               <motion.div

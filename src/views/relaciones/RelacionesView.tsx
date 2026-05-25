@@ -8,6 +8,7 @@ import { RelacionFormModal }            from './components/RelacionesFormModal.t
 import { RelacionEstadisticaFormModal } from './components/RelacionEstadisticaFormModal.tsx';
 import { calculateEndDateForHours }     from './utils/relacionesUtils.ts';
 import { EmailModal }                   from '../../components/EmailModal.tsx';
+import { Modal }                        from '../../components/ui/Modal.tsx';
 import { PLANTILLAS_CORREO }            from '../../data/emailTemplates.ts';
 
 interface Props {
@@ -28,11 +29,10 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
     <div className="space-y-6 flex flex-col h-full animate-in fade-in duration-500">
 
       {/* MODAL 1: SELECCIÓN DE DOCUMENTOS A DESCARGAR */}
-      {ctx.targetDownloadRelaciones.length > 0 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">          
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-100">
+      <Modal open={ctx.targetDownloadRelaciones.length > 0} onClose={() => ctx.setTargetDownloadRelaciones([])} maxWidth="md">
+        <div className="px-6 py-5 flex flex-col flex-1 min-h-0 gap-3">
 
-            <div className="mb-4">
+            <div className="shrink-0">
               <h3 className="text-lg font-bold text-slate-800">Seleccionar Documentación</h3>
               <p className="text-xs text-slate-500 mt-1">
                 {ctx.modoCreacion === 'crear'
@@ -42,7 +42,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
             </div>
 
             {/* NUEVO: Botones de Selección Rápida */}
-            <div className="flex justify-end gap-3 mb-2">
+            <div className="shrink-0 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => ctx.setSelectedDocs({
@@ -75,7 +75,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
             </div>
 
             {/* Checkboxes de opciones */}
-            <div className="space-y-3 my-6">
+            <div className="flex-1 overflow-y-auto min-h-0 space-y-3">
               <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
                 <input
                   type="checkbox"
@@ -156,7 +156,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
             </div>
 
             {/* Botones de acción del Modal */}
-            <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-slate-100">
+            <div className="shrink-0 flex gap-3 justify-end pt-4 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => ctx.setTargetDownloadRelaciones([])}
@@ -172,83 +172,77 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
                 Aceptar y Generar
               </button>
             </div>
-
           </div>
-        </div>
-      )}
+      </Modal>
 
       {/* MODAL 2: SELECCIÓN DE PLANTILLA DE CORREO */}
-      {ctx.targetEmailRelaciones.length > 0 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">          
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-100">
+      <Modal open={ctx.targetEmailRelaciones.length > 0} onClose={() => ctx.setTargetEmailRelaciones([])} maxWidth="lg">
+        <div className="px-6 py-5 flex flex-col flex-1 min-h-0 gap-3 mb-0">
+          <div className="shrink-0">
+            <h3 className="text-lg font-bold text-slate-800">Seleccionar Plantilla</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Elige la plantilla de correo que deseas enviar.
+            </p>
+          </div>
 
-            <div className="mb-4">
-              <h3 className="text-lg font-bold text-slate-800">Seleccionar Plantilla</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Elige la plantilla de correo que deseas enviar.
-              </p>
-            </div>
+          <div className="flex-1 overflow-y-auto min-h-0 space-y-3">
+            {(() => {
+              const iconMap: Record<string, string> = {
+                documento: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />',
+                plan: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />',
+                inicio: '<path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />',
+                fin: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />',
+                otros: '<path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />',
+              };
+              const colorMap: Record<string, { border: string; bg: string; iconBg: string; iconText: string; btnText: string }> = {
+                blue: { border: 'border-blue-100', bg: 'bg-blue-50/50', iconBg: 'bg-blue-100', iconText: 'text-blue-600', btnText: 'text-blue-600' },
+                emerald: { border: 'border-emerald-100', bg: 'bg-emerald-50/50', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', btnText: 'text-emerald-600' },
+                amber: { border: 'border-amber-100', bg: 'bg-amber-50/50', iconBg: 'bg-amber-100', iconText: 'text-amber-600', btnText: 'text-amber-600' },
+                purple: { border: 'border-purple-100', bg: 'bg-purple-50/50', iconBg: 'bg-purple-100', iconText: 'text-purple-600', btnText: 'text-purple-600' },
+                slate: { border: 'border-slate-200', bg: 'bg-white', iconBg: 'bg-slate-100', iconText: 'text-slate-500', btnText: 'text-slate-500' },
+              };
+              return PLANTILLAS_CORREO.map((p, i) => {
+                const c = colorMap[p.color] || colorMap.slate;
+                const icon = iconMap[p.icon] || iconMap.otros;
+                const isOtros = p.id === 'otros';
+                return (
+                  <React.Fragment key={p.id}>
+                    {isOtros && <div className="border-t border-slate-100 pt-3 mt-3" />}
+                    <button
+                      onClick={() => ctx.handleEmailConPlantilla(ctx.targetEmailRelaciones, p.id)}
+                      className={`w-full flex items-center gap-4 p-4 rounded-xl border ${c.border} ${c.bg} hover:bg-slate-50 hover:border-slate-300 transition-all text-left`}
+                    >
+                      <div className={`h-10 w-10 rounded-lg ${c.iconBg} ${c.iconText} flex items-center justify-center shrink-0`}>
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" dangerouslySetInnerHTML={{ __html: icon }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-slate-800">{p.name}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">{p.description}</p>
+                      </div>
+                      <span className={`text-[10px] font-bold ${c.btnText} uppercase shrink-0`}>Seleccionar</span>
+                    </button>
+                  </React.Fragment>
+                );
+              });
+            })()}
+          </div>
 
-            <div className="space-y-3 my-6">
-              {(() => {
-                const iconMap: Record<string, string> = {
-                  documento: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />',
-                  plan: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />',
-                  inicio: '<path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />',
-                  fin: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />',
-                  otros: '<path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />',
-                };
-                const colorMap: Record<string, { border: string; bg: string; iconBg: string; iconText: string; btnText: string }> = {
-                  blue: { border: 'border-blue-100', bg: 'bg-blue-50/50', iconBg: 'bg-blue-100', iconText: 'text-blue-600', btnText: 'text-blue-600' },
-                  emerald: { border: 'border-emerald-100', bg: 'bg-emerald-50/50', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', btnText: 'text-emerald-600' },
-                  amber: { border: 'border-amber-100', bg: 'bg-amber-50/50', iconBg: 'bg-amber-100', iconText: 'text-amber-600', btnText: 'text-amber-600' },
-                  purple: { border: 'border-purple-100', bg: 'bg-purple-50/50', iconBg: 'bg-purple-100', iconText: 'text-purple-600', btnText: 'text-purple-600' },
-                  slate: { border: 'border-slate-200', bg: 'bg-white', iconBg: 'bg-slate-100', iconText: 'text-slate-500', btnText: 'text-slate-500' },
-                };
-                return PLANTILLAS_CORREO.map((p, i) => {
-                  const c = colorMap[p.color] || colorMap.slate;
-                  const icon = iconMap[p.icon] || iconMap.otros;
-                  const isOtros = p.id === 'otros';
-                  return (
-                    <React.Fragment key={p.id}>
-                      {isOtros && <div className="border-t border-slate-100 pt-3 mt-3" />}
-                      <button
-                        onClick={() => ctx.handleEmailConPlantilla(ctx.targetEmailRelaciones, p.id)}
-                        className={`w-full flex items-center gap-4 p-4 rounded-xl border ${c.border} ${c.bg} hover:bg-slate-50 hover:border-slate-300 transition-all text-left`}
-                      >
-                        <div className={`h-10 w-10 rounded-lg ${c.iconBg} ${c.iconText} flex items-center justify-center shrink-0`}>
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" dangerouslySetInnerHTML={{ __html: icon }} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-slate-800">{p.name}</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">{p.description}</p>
-                        </div>
-                        <span className={`text-[10px] font-bold ${c.btnText} uppercase shrink-0`}>Seleccionar</span>
-                      </button>
-                    </React.Fragment>
-                  );
-                });
-              })()}
-            </div>
-
-            <div className="flex justify-end mt-4 pt-4 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => ctx.setTargetEmailRelaciones([])}
-                className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-
+          <div className="shrink-0 flex justify-end pt-4 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => ctx.setTargetEmailRelaciones([])}
+              className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+            >
+              Cancelar
+            </button>
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* MODAL DE PREPARACIÓN DE EMAIL */}
       {ctx.isPreparingEmail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative overflow-hidden">
+        <Modal open={ctx.isPreparingEmail} onClose={() => {}} maxWidth="sm">
+          <div className="p-6">
             <div className="flex flex-col items-center text-center mt-2">
               <div className="h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
                 <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
@@ -264,57 +258,53 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
               </div>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* MODAL DE PROGRESO DE DESCARGA */}
-      {ctx.isDownloadingMasivo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative overflow-hidden">
+      <Modal open={ctx.isDownloadingMasivo} onClose={() => {}} maxWidth="sm">
+        <div className="p-6 relative overflow-hidden">
+          {/* Decoración superior */}
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-100">
+            <div
+              className="h-full bg-blue-500 transition-all duration-300 ease-out"
+              style={{ width: `${ctx.downloadProgress}%` }}
+            />
+          </div>
 
-            {/* Decoración superior */}
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-100">
-              <div
-                className="h-full bg-blue-500 transition-all duration-300 ease-out"
-                style={{ width: `${ctx.downloadProgress}%` }}
-              />
+          <div className="flex flex-col items-center text-center mt-2 pt-2">
+            <div className="h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+              {ctx.downloadProgress === 100 ? (
+                <FileArchive className="h-6 w-6 text-blue-600" />
+              ) : (
+                <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
+              )}
             </div>
 
-            <div className="flex flex-col items-center text-center mt-2">
-              <div className="h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                {ctx.downloadProgress === 100 ? (
-                  <FileArchive className="h-6 w-6 text-blue-600" />
-                ) : (
-                  <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
-                )}
+            <h3 className="text-lg font-bold text-slate-800">
+              Descargando Documentación
+            </h3>
+
+            <p className="text-sm text-slate-500 mt-2 min-h-10">
+              {ctx.downloadStatus}
+            </p>
+
+            {/* Barra de progreso */}
+            <div className="w-full mt-6">
+              <div className="flex justify-between text-xs font-semibold text-slate-600 mb-2">
+                <span>Progreso</span>
+                <span>{Math.round(ctx.downloadProgress)}%</span>
               </div>
-
-              <h3 className="text-lg font-bold text-slate-800">
-                Descargando Documentación
-              </h3>
-
-              <p className="text-sm text-slate-500 mt-2 min-h-10">
-                {ctx.downloadStatus}
-              </p>
-
-              {/* Barra de progreso */}
-              <div className="w-full mt-6">
-                <div className="flex justify-between text-xs font-semibold text-slate-600 mb-2">
-                  <span>Progreso</span>
-                  <span>{Math.round(ctx.downloadProgress)}%</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                  <div
-                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
-                    style={{ width: `${ctx.downloadProgress}%` }}
-                  ></div>
-                </div>
+              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${ctx.downloadProgress}%` }}
+                ></div>
               </div>
-
             </div>
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* ── HEADER ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -372,7 +362,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         />
 
         {/* Columna derecha: detalle */}
-        <div className="w-full lg:w-96 lg:shrink-0 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden min-h-150">
+        <div className="w-full lg:w-96 lg:shrink-0 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-150">
           <RelacionDetalle
             selectedRelacion={ctx.selectedRelacion}
             alumnos={ctx.alumnos}
@@ -448,54 +438,52 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
       )}
 
       {/* ── MODAL: Formulario crear/editar ── */}
-      {ctx.showForm && (
-        <RelacionFormModal
-          editing={ctx.editing}
-          formData={ctx.formData}
-          setFormData={ctx.setFormData}
-          alumnos={ctx.alumnos}
-          searchTermAlumno={ctx.searchTermAlumno}
-          setSearchTermAlumno={ctx.setSearchTermAlumno}
-          filteredAlumnos={ctx.filteredAlumnos}
-          onAddAlumno={ctx.addAlumnoToRelacion}
-          onRemoveAlumno={ctx.removeAlumnoFromRelacion}
-          onUpdateStudentHours={ctx.updateStudentHours}
-          onUpdateStudentStartDate={ctx.updateStudentStartDate}
-          calculateEndDateForHours={calcEndDate}
-          targetStartDate={ctx.targetStartDate}
-          setTargetStartDate={ctx.setTargetStartDate}
-          targetEndDate={ctx.targetEndDate}
-          setTargetEndDate={ctx.setTargetEndDate}
-          onApplyStartDateToAll={ctx.applyStartDateToAll}
-          onApplyTargetEndDate={ctx.applyTargetEndDate}
-          convenios={ctx.convenios}
-          filteredConvenios={ctx.filteredConvenios}
-          searchTermConvenio={ctx.searchTermConvenio}
-          setSearchTermConvenio={ctx.setSearchTermConvenio}
-          isConvenioDropdownOpen={ctx.isConvenioDropdownOpen}
-          setIsConvenioDropdownOpen={ctx.setIsConvenioDropdownOpen}
-          tutores={ctx.tutores}
-          bulkHorario={ctx.bulkHorario}
-          setBulkHorario={ctx.setBulkHorario}
-          onApplyBulkHorario={ctx.applyBulkHorario}
-          onSubmit={ctx.handleSubmit}
-          onClose={() => ctx.setShowForm(false)}
-        />
-      )}
+      <RelacionFormModal
+        open={ctx.showForm}
+        editing={ctx.editing}
+        formData={ctx.formData}
+        setFormData={ctx.setFormData}
+        alumnos={ctx.alumnos}
+        searchTermAlumno={ctx.searchTermAlumno}
+        setSearchTermAlumno={ctx.setSearchTermAlumno}
+        filteredAlumnos={ctx.filteredAlumnos}
+        onAddAlumno={ctx.addAlumnoToRelacion}
+        onRemoveAlumno={ctx.removeAlumnoFromRelacion}
+        onUpdateStudentHours={ctx.updateStudentHours}
+        onUpdateStudentStartDate={ctx.updateStudentStartDate}
+        calculateEndDateForHours={calcEndDate}
+        targetStartDate={ctx.targetStartDate}
+        setTargetStartDate={ctx.setTargetStartDate}
+        targetEndDate={ctx.targetEndDate}
+        setTargetEndDate={ctx.setTargetEndDate}
+        onApplyStartDateToAll={ctx.applyStartDateToAll}
+        onApplyTargetEndDate={ctx.applyTargetEndDate}
+        convenios={ctx.convenios}
+        filteredConvenios={ctx.filteredConvenios}
+        searchTermConvenio={ctx.searchTermConvenio}
+        setSearchTermConvenio={ctx.setSearchTermConvenio}
+        isConvenioDropdownOpen={ctx.isConvenioDropdownOpen}
+        setIsConvenioDropdownOpen={ctx.setIsConvenioDropdownOpen}
+        tutores={ctx.tutores}
+        bulkHorario={ctx.bulkHorario}
+        setBulkHorario={ctx.setBulkHorario}
+        onApplyBulkHorario={ctx.applyBulkHorario}
+        onSubmit={ctx.handleSubmit}
+        onClose={() => ctx.setShowForm(false)}
+      />
 
-      {ctx.showEstadisticaModal && (
-        <RelacionEstadisticaFormModal
-          empresaNombre={ctx.estadisticaEmpresaNombre}
-          curso={ctx.estadisticaCurso}
-          numAlumnos={ctx.estadisticaNumAlumnos}
-          contratados={ctx.estadisticaContratados}
-          valoracion={ctx.estadisticaValoracion}
-          onContratadosChange={ctx.setEstadisticaContratados}
-          onValoracionChange={ctx.setEstadisticaValoracion}
-          onSubmit={ctx.handleEstadisticaSubmit}
-          onClose={() => ctx.setShowEstadisticaModal(false)}
-        />
-      )}
+      <RelacionEstadisticaFormModal
+        open={ctx.showEstadisticaModal}
+        empresaNombre={ctx.estadisticaEmpresaNombre}
+        curso={ctx.estadisticaCurso}
+        numAlumnos={ctx.estadisticaNumAlumnos}
+        contratados={ctx.estadisticaContratados}
+        valoracion={ctx.estadisticaValoracion}
+        onContratadosChange={ctx.setEstadisticaContratados}
+        onValoracionChange={ctx.setEstadisticaValoracion}
+        onSubmit={ctx.handleEstadisticaSubmit}
+        onClose={() => ctx.setShowEstadisticaModal(false)}
+      />
 
       {/* ── MODAL: Email ── */}
       <EmailModal
