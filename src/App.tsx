@@ -490,7 +490,7 @@ export default function App() {
               />
             )}
           {activeTab === 'relaciones' && activeCurso && (
-            <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} profesor={profesor} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} />
+            <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} profesor={profesor ?? undefined} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} />
           )}
           {activeTab === 'historico' && <HistoricoView />}
           {activeTab === 'configuracion' && <ConfiguracionView initialTab={configTab} />}

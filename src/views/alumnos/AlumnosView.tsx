@@ -130,7 +130,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
       {/* ── MODAL: Detalle académico ── */}
       <DetalleAcademicoModal
         open={!!ctx.academicDetailAlumno}
-        alumno={ctx.academicDetailAlumno}
+        alumno={ctx.academicDetailAlumno!}
         onClose={() => {
           ctx.setAcademicDetailAlumno(null);
           ctx.fetchAlumnos();
