@@ -17,7 +17,7 @@ import "@/components/tiptap-node/heading-node/heading-node.scss";
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/table-node/table-node.scss";
 import {
-  X, Send, Settings, Paperclip, Trash2, Loader2, FileText, User, Briefcase, GraduationCap as StudentIcon
+  X, Send, Settings, Paperclip, Trash2, Loader2, FileText, User, Briefcase, GraduationCap as StudentIcon, Info
 } from 'lucide-react';
 import { EmailAttachment, EmailSendRequest } from '../types/email.ts';
 import { uploadAttachment, deleteAttachment } from '../utils/emailUtils.ts';
@@ -247,6 +247,7 @@ interface EmailModalProps {
   initialAttachments?: EmailAttachment[];
   initialSubject?: string;
   initialBody?: string;
+  perRecipientData?: Record<string, Record<string, string>>;
   onGoToConfig?: () => void;
   contextualContactIds?: Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>;
 }
@@ -259,6 +260,7 @@ export function EmailModal({
   initialAttachments = [],
   initialSubject = '',
   initialBody = '',
+  perRecipientData,
   onGoToConfig,
   contextualContactIds = [],
 }: EmailModalProps) {
@@ -397,19 +399,60 @@ export function EmailModal({
       return;
     }
 
-    const editorHtml = editor?.getHTML() || '';
-    const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333">
+    const html = editor?.getHTML() || '';
+
+    const sendHtml = (h: string) => `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333">
 <style>p{margin:0 0 1.25em 0 !important}h1{font-size:1.5em;font-weight:700;margin:0 0 0.5em 0 !important}h2{font-size:1.25em;font-weight:700;margin:0 0 0.5em 0 !important}h3{font-size:1.125em;font-weight:600;margin:0 0 0.5em 0 !important}blockquote{padding-left:1em;margin:1.5rem 0;border-left:4px solid #cbd5e1}blockquote p{margin:0}ul{list-style:disc outside;margin:0 0 1.25em 0 !important}ol{list-style:decimal outside;margin:0 0 1.25em 0 !important}li{margin:0 !important}li>p{margin:0 !important}table{border-collapse:collapse;width:100%;margin:0 0 1.25em 0}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style>
-${editorHtml}
+${h}
 </div>`;
 
+    const stripMarkers = (h: string) => h.replace(/\{\{@\w+\}\}/g, '');
+
+    const sendIndividualMode = sendIndividual && toList.length > 1;
+    const hasMarkers = html.includes('{{@');
+
+    if (sendIndividualMode && perRecipientData && hasMarkers) {
+      for (let i = 0; i < toList.length; i++) {
+        const data = perRecipientData[toList[i]];
+        if (!data) continue;
+        const personalizedHtml = html.replace(/\{\{@(\w+)\}\}/g, (_, key: string) => data[key] ?? `{{@${key}}}`);
+        const payload: EmailSendRequest = {
+          to: [toList[i]],
+          cc: [],
+          subject,
+          html: sendHtml(personalizedHtml),
+          attachments: attachments.map(a => ({ filename: a.filename, path: a.path })),
+          sendIndividual: false,
+          delayMs: 1500,
+        };
+        try {
+          const res = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error((await res.json()).error || 'Error al enviar');
+          if (i < toList.length - 1) await new Promise(r => setTimeout(r, 1500));
+        } catch (err: any) {
+          setError(err.message || 'Error al enviar el correo');
+          setSending(false);
+          return;
+        }
+      }
+      onClose();
+      setSending(false);
+      return;
+    }
+
+    const finalHtml = hasMarkers ? stripMarkers(html) : html;
+
     const payload: EmailSendRequest = {
-      to: sendIndividual && toList.length > 1 ? toList : allRecipients,
-      cc: sendIndividual && toList.length > 1 ? [] : [],
+      to: sendIndividualMode ? toList : allRecipients,
+      cc: sendIndividualMode ? [] : [],
       subject,
-      html,
+      html: sendHtml(finalHtml),
       attachments: attachments.map(a => ({ filename: a.filename, path: a.path })),
-      sendIndividual: sendIndividual && toList.length > 1,
+      sendIndividual: sendIndividualMode,
       delayMs: 1500,
     };
 
@@ -724,6 +767,12 @@ ${editorHtml}
                   </div>
                 </div>
 
+                {initialBody.includes('{{@') && (
+                  <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-700 rounded-lg text-xs border border-amber-200">
+                    <Info className="h-4 w-4 shrink-0" />
+                    <span>El cuerpo contiene marcadores <code className="font-mono font-bold">{'{{@...}}'}</code> que se sustituirán automáticamente al enviar según el destinatario.</span>
+                  </div>
+                )}
 
               </div>
 

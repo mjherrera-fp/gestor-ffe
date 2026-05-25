@@ -559,6 +559,7 @@ export function useEmpresas(cursoId: number) {
   const [emailAttachments, setEmailAttachments] = useState<EmailAttachment[]>([]);
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
+  const [perRecipientData, setPerRecipientData] = useState<Record<string, Record<string, string>> | undefined>(undefined);
   const [contextualContactIds, setContextualContactIds] = useState<Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>>([]);
 
   const handleOpenIndividualEmail = async (empresa: Empresa) => {
@@ -582,7 +583,8 @@ export function useEmpresas(cursoId: number) {
     const cfg = getPlantillaById(plantillaId);
     if (!cfg) return;
 
-    const empresa = filteredEmpresas.find(e => e.email);
+    const empresasConEmail = filteredEmpresas.filter(e => e.email);
+    const empresa = empresasConEmail[0];
     const nombreEmpresa = empresa?.nombre ?? '';
     const contacto = empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`;
     const nombreProfesor = profesor ? `${profesor.nombre} ${profesor.apellidos}` : '';
@@ -599,11 +601,21 @@ export function useEmpresas(cursoId: number) {
       nombreCentro,
     });
 
-    setEmailTo(filteredEmpresas.map(e => e.email).filter(Boolean) as string[]);
+    const perData: Record<string, Record<string, string>> = {};
+    for (const e of empresasConEmail) {
+      const eNombre = e.nombre ?? '';
+      perData[e.email!] = {
+        contacto: e.personaContacto || `persona de contacto de ${eNombre}`,
+        nombreEmpresa: eNombre,
+      };
+    }
+
+    setEmailTo(empresasConEmail.map(e => e.email!).filter(Boolean));
     setEmailBcc([]);
     setEmailAttachments([]);
     setEmailSubject(cfg.subject);
     setEmailBody(bodyInterpolado);
+    setPerRecipientData(perData);
     setShowPlantillaSelector(false);
     setShowEmailModal(true);
   };
@@ -650,7 +662,7 @@ export function useEmpresas(cursoId: number) {
     // Email
     showPlantillaSelector, setShowPlantillaSelector,
     showEmailModal, setShowEmailModal,
-    emailTo, emailBcc, emailAttachments, emailSubject, emailBody, contextualContactIds,
+    emailTo, emailBcc, emailAttachments, emailSubject, emailBody, perRecipientData, setPerRecipientData, contextualContactIds,
     handleOpenIndividualEmail, handleOpenBulkEmail, handleEmailConPlantilla,
   };
 }

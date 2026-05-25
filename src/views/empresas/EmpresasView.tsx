@@ -274,12 +274,13 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
       {/* ── MODAL: Email ── */}
       <EmailModal
         isOpen={ctx.showEmailModal}
-        onClose={() => ctx.setShowEmailModal(false)}
+        onClose={() => { ctx.setShowEmailModal(false); ctx.setPerRecipientData(undefined); }}
         initialTo={ctx.emailTo}
         initialBcc={ctx.emailBcc}
         initialAttachments={ctx.emailAttachments}
         initialSubject={ctx.emailSubject}
         initialBody={ctx.emailBody}
+        perRecipientData={ctx.perRecipientData}
         onGoToConfig={onGoToConfig}
         contextualContactIds={ctx.contextualContactIds}
       />

@@ -91,7 +91,7 @@ export const PLANTILLAS_CORREO: PlantillaCorreo[] = [
     name: 'Nuevo contacto',
     description: 'Empresas nuevas sin convenio',
     subject: 'Presentación del Programa de Formación en Centros de Trabajo (FCT)',
-    body: `<p>Estimado/a {{contacto}},</p>
+    body: `<p>Estimado/a {{@contacto}},</p>
 <p>Mi nombre es {{profesor}} y me dirijo a usted como profesor del {{nombreCentro}} para explorar la posibilidad de que su empresa colabore con nosotros acogiendo a estudiantes para realizar la fase de formación en empresa (FFE). Esta FFE están reguladas por la Ley de Formación Profesional y son un requisito indispensable para que los estudiantes completen su formación académica.</p>
 <p>La FFE están diseñadas para que los estudiantes continúen su formación en el ámbito laboral, obteniendo así una experiencia formativa en un entorno de trabajo real.</p>
 <p>Confiamos en que esta colaboración no solo será una oportunidad de aprendizaje valiosa para nuestros alumnos, sino también una manera de que su empresa tenga acceso a jóvenes con motivación, energía y conocimientos actualizados que seguro serán útiles en su organización.</p>
@@ -108,14 +108,13 @@ export const PLANTILLAS_CORREO: PlantillaCorreo[] = [
     name: 'Nueva colaboración',
     description: 'Empresas con convenio existente',
     subject: 'Colaboración para FCT',
-    body: `<p>Estimado/a {{contacto}},</p>
-<p>Desde el centro educativo {{centroEducativo}} estamos buscando empresas colaboradoras para el programa de Formación en Centros de Trabajo (FCT) del curso {{curso}}.</p>
-<p>Su empresa ha sido seleccionada por su trayectoria y consideramos que sería un excelente lugar para que nuestros estudiantes realicen sus prácticas formativas.</p>
-<p>Le agradeceríamos si pudiera valorar esta propuesta y nos concediera una reunión para explicarle los detalles del programa.</p>
-<p>Adjuntamos la documentación informativa sobre el programa.</p>
+    body: `<p>Estimado/a {{@contacto}},</p>
+<p>Desde el {{centroEducativo}} os contactamos para explorar la posibilidad, un curso más, de colaborar para el programa de Formación en Empresas (FFE) del curso {{curso}}.</p>
+<p>Queremos seguir colaborando con vosotros porque consideramos que vuestra empresa es un excelente lugar para que nuestros estudiantes realicen sus prácticas formativas.</p>
+<p>Necesitamos saber, lo antes posible, si estáis dispuestos a seguir colaborando, y de ser así, que previsión de plazas tendríais.</p>
+<p>Si necesitáis más información, no dudéis en contactarnos.</p>
 <p>Quedamos a la espera de su respuesta.</p>
-<p>Atentamente,</p>
-<p><strong>{{nombreProfesor}}</strong></p>`,
+<p>Atentamente,</p>`,
     documents: [],
     recipientTarget: 'empresa',
     icon: 'colaboracion',
