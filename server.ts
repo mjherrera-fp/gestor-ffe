@@ -5,7 +5,6 @@ import Docxtemplater from 'docxtemplater';
 import puppeteer from 'puppeteer';
 import Handlebars from 'handlebars';
 import nodemailer from 'nodemailer';
-import { render } from '@react-email/render';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
@@ -13,8 +12,6 @@ import { db } from './src/lib/db.ts';
 import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, EmpresaFestivosDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
-import { EstudianteTemplate } from './src/emails/EstudianteTemplate.tsx';
-import { EmpresaTemplate } from './src/emails/EmpresasTemplate.tsx';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1142,7 +1139,7 @@ async function startServer() {
       const filenamePdf = `Anexo_Relacion_${relacionAlumno.numRelacion.replace(/\//g, '_')}.pdf`;
 
       if (modo === 'crear') {
-        const result = saveToDocs(filenamePdf, pdfBuffer, empresa?.nombre);
+        const result = saveToDocs(filenamePdf, Buffer.from(pdfBuffer), empresa?.nombre);
         return res.json({ success: true, filename: result.relativePath, path: result.filePath });
       }
 
@@ -1390,7 +1387,7 @@ async function startServer() {
         const cfg = getCreacionFicherosConfig();
         const subdirs = [empresa?.nombre];
         if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
-        const result = saveToDocs(filenamePFPDF, pdfBuffer, ...subdirs);
+        const result = saveToDocs(filenamePFPDF, Buffer.from(pdfBuffer), ...subdirs);
         return res.json({ success: true, filename: result.relativePath, path: result.filePath });
       }
 
@@ -1569,7 +1566,7 @@ async function startServer() {
         const cfg = getCreacionFicherosConfig();
         const subdirs = [empresa?.nombre];
         if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
-        const result = saveToDocs(filenameCal, pdfBuffer, ...subdirs);
+        const result = saveToDocs(filenameCal, Buffer.from(pdfBuffer), ...subdirs);
         return res.json({ success: true, filename: result.relativePath, path: result.filePath });
       }
 
@@ -1661,7 +1658,7 @@ async function startServer() {
       const filenameCarta = `Carta_Informativa_${empresa?.nombre.replace(/\s+/g, '_')}.pdf`;
 
       if (modoCarta === 'crear') {
-        const result = saveToDocs(filenameCarta, pdfBuffer, empresa?.nombre);
+        const result = saveToDocs(filenameCarta, Buffer.from(pdfBuffer), empresa?.nombre);
         return res.json({ success: true, filename: result.relativePath, path: result.filePath });
       }
 
