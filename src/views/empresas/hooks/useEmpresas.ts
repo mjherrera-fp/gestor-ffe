@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import { Empresa, TutorEmpresa, EmpresaEstadistica, Curso } from '../../../types/index.ts';
 import { EmailAttachment } from '../../../types/email.ts';
 import { mostrarToast } from '../../../utils/toast.ts';
+import { getPlantillaById, interpolateBody } from '../../../../templates/emails/emailTemplates.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -48,11 +49,13 @@ export function useEmpresas(cursoId: number) {
   const [tutores,    setTutores]    = useState<TutorEmpresa[]>([]);
   const [centros,    setCentros]    = useState<any[]>([]);
   const [cursoInfo,  setCursoInfo]  = useState<Curso | null>(null);
+  const [profesor,   setProfesor]   = useState<{ nombre: string; apellidos: string } | null>(null);
 
   // ── UI listado ──
   const [selectedEmpresa,  setSelectedEmpresa]  = useState<Empresa | null>(null);
   const [searchTerm,       setSearchTerm]       = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<DeleteTarget | null>(null);
+  const [showPlantillaSelector, setShowPlantillaSelector] = useState(false);
 
   // ── Modal empresa ──
   const [showEmpresaForm,  setShowEmpresaForm]  = useState(false);
@@ -79,6 +82,8 @@ export function useEmpresas(cursoId: number) {
   const [filterValoracion,    setFilterValoracion]    = useState(0);
   const [filterUltimosCursos, setFilterUltimosCursos] = useState(0);
   const [filterColaboracion,  setFilterColaboracion]  = useState<'todas' | 'con' | 'sin' | 'sin_convenio'>('todas');
+  const [filterContactado,  setFilterContactado]  = useState<'todas' | 'contactada' | 'no_contactada'>('todas');
+  const [emailsContactados, setEmailsContactados] = useState<Set<string>>(new Set());
   const [empresaIdsConConvenio, setEmpresaIdsConConvenio] = useState<number[]>([]);
   const [modoCreacion, setModoCreacion] = useState('descargar');
 
@@ -92,6 +97,8 @@ export function useEmpresas(cursoId: number) {
     fetchCurso();
     fetchAllEstadisticas();
     fetchEmpresasConConvenio();
+    fetchProfesor();
+    fetchEmailsContactados();
   }, []);
 
   useEffect(() => {
@@ -139,6 +146,24 @@ export function useEmpresas(cursoId: number) {
       if (res.ok) setCursoInfo(await res.json());
     } catch {
       console.error('Error al cargar el curso');
+    }
+  };
+
+  const fetchProfesor = async () => {
+    try {
+      const res = await fetch('/api/profesor');
+      if (res.ok) setProfesor(await res.json());
+    } catch {
+      console.error('Error al cargar el profesor');
+    }
+  };
+
+  const fetchEmailsContactados = async () => {
+    try {
+      const res = await fetch('/api/historico/emails-contactados');
+      if (res.ok) setEmailsContactados(new Set(await res.json()));
+    } catch {
+      console.error('Error al cargar emails contactados');
     }
   };
 
@@ -518,8 +543,11 @@ export function useEmpresas(cursoId: number) {
     if (filterColaboracion === 'sin' && empresaCursos[emp.id]) return false;
     if (filterColaboracion === 'sin_convenio' && empresaIdsConConvenio.includes(emp.id)) return false;
 
+    if (filterContactado === 'contactada' && !emailsContactados.has(emp.email?.toLowerCase() ?? '')) return false;
+    if (filterContactado === 'no_contactada' && emailsContactados.has(emp.email?.toLowerCase() ?? '')) return false;
+
     return true;
-  }), [empresas, searchTerm, filterValoracion, filterUltimosCursos, filterColaboracion, empresaValoracionMedia, empresaCursos, cursosUnicos, empresaIdsConConvenio]);
+  }), [empresas, searchTerm, filterValoracion, filterUltimosCursos, filterColaboracion, filterContactado, empresaValoracionMedia, empresaCursos, cursosUnicos, empresaIdsConConvenio, emailsContactados]);
 
   // ─────────────────────────────────────────
   //  EMAIL
@@ -529,6 +557,8 @@ export function useEmpresas(cursoId: number) {
   const [emailTo, setEmailTo] = useState<string[]>([]);
   const [emailBcc, setEmailBcc] = useState<string[]>([]);
   const [emailAttachments, setEmailAttachments] = useState<EmailAttachment[]>([]);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
   const [contextualContactIds, setContextualContactIds] = useState<Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>>([]);
 
   const handleOpenIndividualEmail = async (empresa: Empresa) => {
@@ -545,9 +575,36 @@ export function useEmpresas(cursoId: number) {
   };
 
   const handleOpenBulkEmail = () => {
-    setEmailTo([]);
-    setEmailBcc(filteredEmpresas.map(e => e.email).filter(Boolean) as string[]);
+    setShowPlantillaSelector(true);
+  };
+
+  const handleEmailConPlantilla = async (plantillaId: string) => {
+    const cfg = getPlantillaById(plantillaId);
+    if (!cfg) return;
+
+    const empresa = filteredEmpresas.find(e => e.email);
+    const nombreEmpresa = empresa?.nombre ?? '';
+    const contacto = empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`;
+    const nombreProfesor = profesor ? `${profesor.nombre} ${profesor.apellidos}` : '';
+    const curso = cursoInfo?.descripcion ?? '';
+    const nombreCentro = centros[0]?.nombre ?? '';
+
+    const bodyInterpolado = interpolateBody(cfg.body, {
+      contacto,
+      nombreEmpresa,
+      nombreProfesor,
+      profesor: nombreProfesor,
+      curso,
+      centroEducativo: nombreCentro,
+      nombreCentro,
+    });
+
+    setEmailTo(filteredEmpresas.map(e => e.email).filter(Boolean) as string[]);
+    setEmailBcc([]);
     setEmailAttachments([]);
+    setEmailSubject(cfg.subject);
+    setEmailBody(bodyInterpolado);
+    setShowPlantillaSelector(false);
     setShowEmailModal(true);
   };
 
@@ -570,6 +627,7 @@ export function useEmpresas(cursoId: number) {
     filterValoracion, setFilterValoracion,
     filterUltimosCursos, setFilterUltimosCursos,
     filterColaboracion, setFilterColaboracion,
+    filterContactado, setFilterContactado,
     cursosUnicos,
     empresaIdsConConvenio,
     // Empresa modal
@@ -590,8 +648,9 @@ export function useEmpresas(cursoId: number) {
     downloadTemplate,
     handleImportExcel,
     // Email
+    showPlantillaSelector, setShowPlantillaSelector,
     showEmailModal, setShowEmailModal,
-    emailTo, emailBcc, emailAttachments, contextualContactIds,
-    handleOpenIndividualEmail, handleOpenBulkEmail,
+    emailTo, emailBcc, emailAttachments, emailSubject, emailBody, contextualContactIds,
+    handleOpenIndividualEmail, handleOpenBulkEmail, handleEmailConPlantilla,
   };
 }

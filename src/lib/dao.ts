@@ -187,6 +187,19 @@ export const HistoricoDAO = {
     ).run(tipoProceso, estadoOrigen, estadoDestino, entidadId || null, referencia || null);
   },
 
+  getEmailsContactados(): string[] {
+    const rows = db.prepare("SELECT para, cc, cco FROM historico_comunicaciones").all() as { para: string; cc: string; cco: string }[];
+    const emails = new Set<string>();
+    for (const row of rows) {
+      for (const field of [row.para, row.cc, row.cco]) {
+        if (field) {
+          field.split(',').map(e => e.trim().toLowerCase()).filter(Boolean).forEach(e => emails.add(e));
+        }
+      }
+    }
+    return [...emails];
+  },
+
   getComunicaciones(filtros: PaginacionFiltros): PaginacionResultado<{
     id: number; para: string; cc: string; cco: string; fecha_hora: string;
     asunto: string; cuerpo: string; ficheros_adjuntos: string

@@ -26,6 +26,8 @@ interface EmpresasListadoProps {
   onFilterUltimosCursosChange: (v: number) => void;
   filterColaboracion: 'todas' | 'con' | 'sin' | 'sin_convenio';
   onFilterColaboracionChange: (v: 'todas' | 'con' | 'sin' | 'sin_convenio') => void;
+  filterContactado: 'todas' | 'contactada' | 'no_contactada';
+  onFilterContactadoChange: (v: 'todas' | 'contactada' | 'no_contactada') => void;
   cursosUnicos: string[];
 }
 
@@ -38,6 +40,7 @@ export function EmpresasListado({
   filterValoracion, onFilterValoracionChange,
   filterUltimosCursos, onFilterUltimosCursosChange,
   filterColaboracion, onFilterColaboracionChange,
+  filterContactado, onFilterContactadoChange,
   cursosUnicos,
 }: EmpresasListadoProps) {
 
@@ -45,7 +48,7 @@ export function EmpresasListado({
     ? 'No se encontraron empresas para esta búsqueda.'
     : 'No hay empresas registradas todavía.';
 
-  const cleanFilters = filterValoracion > 0 || filterUltimosCursos > 0 || filterColaboracion !== 'todas';
+  const cleanFilters = filterValoracion > 0 || filterUltimosCursos > 0 || filterColaboracion !== 'todas' || filterContactado !== 'todas';
 
   return (
     <div className="w-full lg:flex-1 bg-white rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col h-full">
@@ -135,6 +138,16 @@ export function EmpresasListado({
             <option value="sin_convenio">Sin convenio</option>
           </select>
 
+          <select
+            className="text-[10px] bg-white border border-border-base rounded-lg px-2 py-1.5 font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+            value={filterContactado}
+            onChange={e => onFilterContactadoChange(e.target.value as 'todas' | 'contactada' | 'no_contactada')}
+          >
+            <option value="todas">Cualquier contacto</option>
+            <option value="contactada">Contactada</option>
+            <option value="no_contactada">No contactada</option>
+          </select>
+
           {cursosUnicos.length > 0 && (
             <select
               className="text-[10px] bg-white border border-border-base rounded-lg px-2 py-1.5 font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
@@ -169,7 +182,7 @@ export function EmpresasListado({
 
           {cleanFilters && (
             <button
-              onClick={() => { onFilterValoracionChange(0); onFilterUltimosCursosChange(0); onFilterColaboracionChange('todas'); }}
+              onClick={() => { onFilterValoracionChange(0); onFilterUltimosCursosChange(0); onFilterColaboracionChange('todas'); onFilterContactadoChange('todas'); }}
               className="text-[10px] font-bold text-text-muted hover:text-primary underline"
             >
               Limpiar

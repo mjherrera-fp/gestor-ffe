@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileArchive, Loader2, Plus, Trash2 } from 'lucide-react';
+import { FileArchive, Loader2, Plus, Trash2, FileText, ClipboardCheck, Play, CheckCircle, MoreHorizontal } from 'lucide-react';
 
 import { useRelaciones }                from './hooks/useRelaciones.ts';
 import { RelacionesListado }            from './components/RelacionesListado.tsx';
@@ -187,12 +187,12 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
 
           <div className="flex-1 overflow-y-auto min-h-0 space-y-3">
             {(() => {
-              const iconMap: Record<string, string> = {
-                documento: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />',
-                plan: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />',
-                inicio: '<path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />',
-                fin: '<path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />',
-                otros: '<path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />',
+              const componentMap: Record<string, React.ComponentType<{ className?: string }>> = {
+                documento: FileText,
+                plan: ClipboardCheck,
+                inicio: Play,
+                fin: CheckCircle,
+                otros: MoreHorizontal,
               };
               const colorMap: Record<string, { border: string; bg: string; iconBg: string; iconText: string; btnText: string }> = {
                 blue: { border: 'border-blue-100', bg: 'bg-blue-50/50', iconBg: 'bg-blue-100', iconText: 'text-blue-600', btnText: 'text-blue-600' },
@@ -201,9 +201,11 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
                 purple: { border: 'border-purple-100', bg: 'bg-purple-50/50', iconBg: 'bg-purple-100', iconText: 'text-purple-600', btnText: 'text-purple-600' },
                 slate: { border: 'border-slate-200', bg: 'bg-white', iconBg: 'bg-slate-100', iconText: 'text-slate-500', btnText: 'text-slate-500' },
               };
-              return PLANTILLAS_CORREO.map((p, i) => {
+              return PLANTILLAS_CORREO
+                .filter(p => p.id === 'relacion' || p.id === 'plan' || p.id === 'inicio' || p.id === 'fin' || p.id === 'otros')
+                .map((p, i) => {
                 const c = colorMap[p.color] || colorMap.slate;
-                const icon = iconMap[p.icon] || iconMap.otros;
+                const IconComponent = componentMap[p.icon] || componentMap.otros;
                 const isOtros = p.id === 'otros';
                 return (
                   <React.Fragment key={p.id}>
@@ -213,7 +215,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
                       className={`w-full flex items-center gap-4 p-4 rounded-xl border ${c.border} ${c.bg} hover:bg-slate-50 hover:border-slate-300 transition-all text-left`}
                     >
                       <div className={`h-10 w-10 rounded-lg ${c.iconBg} ${c.iconText} flex items-center justify-center shrink-0`}>
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" dangerouslySetInnerHTML={{ __html: icon }} />
+                        <IconComponent className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-slate-800">{p.name}</p>

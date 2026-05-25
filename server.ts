@@ -797,6 +797,9 @@ async function startServer() {
   app.get('/api/historico/comunicaciones', (req, res) => {
     res.json(HistoricoDAO.getComunicaciones(req.query as any));
   });
+  app.get('/api/historico/emails-contactados', (req, res) => {
+    res.json(HistoricoDAO.getEmailsContactados());
+  });
   app.get('/api/historico/convenios', (req, res) => {
     res.json(HistoricoDAO.getOperacionesConvenio(req.query as any));
   });
@@ -934,8 +937,8 @@ async function startServer() {
 
       const isProd = process.env.NODE_ENV === 'production';
       const templatePath = isProd
-        ? path.join(__dirname, '..', 'templates', 'plantilla_relacion.docx')
-        : path.join(process.cwd(), 'templates', 'plantilla_relacion.docx');
+        ? path.join(__dirname, '..', 'templates', 'docs', 'plantilla_relacion.docx')
+        : path.join(process.cwd(), 'templates', 'docs', 'plantilla_relacion.docx');
 
       const content = fs.readFileSync(templatePath, 'binary');
       const zip = new PizZip(content);
@@ -1070,7 +1073,7 @@ async function startServer() {
       // 2. PROCESAMIENTO DE PLANTILLA HTML CON VERIFICACIÓN
       const isProd = process.env.NODE_ENV === 'production';
       // Intentamos localizar la carpeta templates de forma absoluta
-      const templatesDir = isProd ? path.join(__dirname, '..', 'templates') : path.resolve(process.cwd(), 'templates');
+      const templatesDir = isProd ? path.join(__dirname, '..', 'templates', 'docs') : path.resolve(process.cwd(), 'templates', 'docs');
       const templatePath = path.join(templatesDir, 'plantilla_relacion.html');
 
       console.log(`Intentando leer plantilla en: ${templatePath}`);
@@ -1198,8 +1201,8 @@ async function startServer() {
       }));
 
       const templatePath = isProd
-        ? path.join(__dirname, '..', 'templates', 'plan_formacion.docx')
-        : path.join(process.cwd(), 'templates', 'plan_formacion.docx');
+        ? path.join(__dirname, '..', 'templates', 'docs', 'plan_formacion.docx')
+        : path.join(process.cwd(), 'templates', 'docs', 'plan_formacion.docx');
       if (!fs.existsSync(templatePath)) throw new Error("Plantilla no encontrada");
 
       const content = fs.readFileSync(templatePath, 'binary');
@@ -1291,6 +1294,7 @@ async function startServer() {
       const curso = CursoDAO.getById(convenio.cursoId);
       const profesor = ProfesorDAO.get();
       const alumno = AlumnoDAO.getById(Number(alumnoId));
+      if (!alumno) return res.status(404).json({ error: 'Alumno no encontrado' });
 
       const alumnosAsignados: Alumno[] = relacionAlumno.alumnos || [];
 
@@ -1307,7 +1311,7 @@ async function startServer() {
       // 2. PROCESAMIENTO DE PLANTILLA HTML CON VERIFICACIÓN
       const isProd = process.env.NODE_ENV === 'production';
       // Intentamos localizar la carpeta templates de forma absoluta
-      const templatesDir = isProd ? path.join(__dirname, '..', 'templates') : path.resolve(process.cwd(), 'templates');
+      const templatesDir = isProd ? path.join(__dirname, '..', 'templates', 'docs') : path.resolve(process.cwd(), 'templates', 'docs');
       const templatePath = path.join(templatesDir, 'plan_formacion.html');
 
       console.log(`Intentando leer plantilla en: ${templatePath}`);
@@ -1400,15 +1404,13 @@ async function startServer() {
       return res.end(pdfBuffer); // Usamos .end() para enviar el buffer binario puro
 
     } catch (error: any) {
-      console.error('💥 ERROR CRÍTICO GENERANDO EL PDF:');
+      console.error('💥 ERROR CRÍTICO GENERANDO EL PDF:', error.message || error, error.stack || '');
 
       if (error.properties && error.properties.errors) {
         console.error('El motor de plantillas ha encontrado estos errores en tu archivo PDF:');
         error.properties.errors.forEach((err: any) => {
           console.error(`- Etiqueta problemática: {${err.properties.id}} | Motivo: ${err.message}`);
         });
-      } else {
-        console.error(error);
       }
 
       res.status(500).json({ error: 'No se pudo generar el plan formativo' });
@@ -1527,7 +1529,7 @@ async function startServer() {
       }
 
       // --- RENDERIZADO ---
-      const templatesDir = isProd ? path.join(__dirname, '..', 'templates') : path.resolve(process.cwd(), 'templates');
+      const templatesDir = isProd ? path.join(__dirname, '..', 'templates', 'docs') : path.resolve(process.cwd(), 'templates', 'docs');
       const templatePath = path.join(templatesDir, 'calendar.html');
 
       if (!fs.existsSync(templatePath)) {
@@ -1601,7 +1603,7 @@ async function startServer() {
       // 2. PROCESAMIENTO DE PLANTILLA HTML CON VERIFICACIÓN
       const isProd = process.env.NODE_ENV === 'production';
       // Intentamos localizar la carpeta templates de forma absoluta
-      const templatesDir = isProd ? path.join(__dirname, '..', 'templates') : path.resolve(process.cwd(), 'templates');
+      const templatesDir = isProd ? path.join(__dirname, '..', 'templates', 'docs') : path.resolve(process.cwd(), 'templates', 'docs');
       const templatePath = path.join(templatesDir, 'carta_inicio.html');
 
       console.log(`Intentando leer plantilla en: ${templatePath}`);
@@ -1723,8 +1725,8 @@ async function startServer() {
 
       // 2. Cargar plantilla
       const templatePath = isProd
-        ? path.join(__dirname, '..', 'templates', 'ficha_de_seguimiento_periodico.docx')
-        : path.join(process.cwd(), 'templates', 'ficha_de_seguimiento_periodico.docx');
+        ? path.join(__dirname, '..', 'templates', 'docs', 'ficha_de_seguimiento_periodico.docx')
+        : path.join(process.cwd(), 'templates', 'docs', 'ficha_de_seguimiento_periodico.docx');
       const content = fs.readFileSync(templatePath, 'binary');
       const zip = new PizZip(content);
       const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
@@ -1819,8 +1821,8 @@ async function startServer() {
 
       // 2. Cargar plantilla
       const templatePath = isProd
-        ? path.join(__dirname, '..', 'templates', 'valoracion_final.docx')
-        : path.join(process.cwd(), 'templates', 'valoracion_final.docx');
+        ? path.join(__dirname, '..', 'templates', 'docs', 'valoracion_final.docx')
+        : path.join(process.cwd(), 'templates', 'docs', 'valoracion_final.docx');
       const content = fs.readFileSync(templatePath, 'binary');
       const zip = new PizZip(content);
       const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });

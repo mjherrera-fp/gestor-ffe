@@ -1355,6 +1355,37 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         return { to: getTutorEmail(), bcc: [] };
     };
 
+    const buildPlaceholders = (relacion: RelacionAlumno, alumno?: Alumno, contactoOverride?: string) => {
+        const empresa = relacion.empresa;
+        const nombreEmpresa = convenios?.find(c => c.id === relacion.convenioId)?.empresaNombre ?? empresa?.nombre ?? '';
+        const tutor = tutores?.find(t => t.id === relacion.tutorEmpresaId);
+        const nombreTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
+        const contactoEmpresa = empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`;
+        const nombreProfesor = profesor ? `${profesor.nombre} ${profesor.apellidos}` : '';
+        const listaAlumnos = (relacion.alumnos || [])
+            .map(a => `${a.nombre} ${a.apellidos}`)
+            .filter(Boolean);
+        const nombresUnicos = [...new Set(listaAlumnos)];
+        const nombreApellidosAlumnos = nombresUnicos.length <= 1
+          ? nombresUnicos.join(', ')
+          : nombresUnicos.slice(0, -1).join(', ') +
+            (nombresUnicos[nombresUnicos.length - 1].startsWith('I') || nombresUnicos[nombresUnicos.length - 1].startsWith('Í')
+              ? ' e '
+              : ' y ') +
+            nombresUnicos[nombresUnicos.length - 1];
+        const direccion = empresa?.direccion ?? '';
+        let alumnoTutor = '';
+        if (alumno) {
+            const estado = alumno.estadoPlanFormativo;
+            const esEstudiante = estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE || estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
+            alumnoTutor = esEstudiante ? `${alumno.nombre} ${alumno.apellidos}` : nombreTutor;
+        } else {
+            alumnoTutor = nombreTutor;
+        }
+        const contacto = contactoOverride ?? (alumno ? `${alumno.nombre} ${alumno.apellidos}` : nombreTutor);
+        return { nombreTutor, nombreEmpresa, contactoEmpresa, nombreProfesor, nombreApellidosAlumnos, alumnoTutor, contacto, Dirección: direccion };
+    };
+
     const handleEmailConRelacion = async (tipo: 'docx' | 'pdf') => {
         if (!selectedRelacion) return;
         const blob = await crearDocumentoRelacion(tipo, selectedRelacion);
@@ -1362,12 +1393,14 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const ext = tipo === 'pdf' ? 'pdf' : 'docx';
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const att = await uploadGeneratedAttachment(blob, `Relacion_${numRel}.${ext}`);
+        const cfg = getPlantillaById('relacion');
+        const placeholders = buildPlaceholders(selectedRelacion);
         setEmailTo(getEmpresaEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject('');
-        setEmailBody('');
+        setEmailSubject(cfg?.subject ?? '');
+        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
         setShowEmailModal(true);
     };
 
@@ -1380,12 +1413,14 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Plan_${numRel}_${nombreAlumno}.${ext}`);
         const { to, bcc } = getPlanDestinatarios(alumno);
+        const cfg = getPlantillaById('plan');
+        const placeholders = buildPlaceholders(selectedRelacion, alumno);
         setEmailTo(to);
         setEmailBcc(bcc);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject('');
-        setEmailBody('');
+        setEmailSubject(cfg?.subject ?? '');
+        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
         setShowEmailModal(true);
     };
 
@@ -1396,12 +1431,16 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Seguimiento_${numRel}_${nombreAlumno}.docx`);
+        const cfg = getPlantillaById('seg');
+        const tutor = tutores.find(t => t.id === selectedRelacion.tutorEmpresaId);
+        const nombreTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
+        const placeholders = buildPlaceholders(selectedRelacion, undefined, nombreTutor);
         setEmailTo(getTutorEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject('');
-        setEmailBody('');
+        setEmailSubject(cfg?.subject ?? '');
+        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
         setShowEmailModal(true);
     };
 
@@ -1412,12 +1451,16 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Valoracion_${numRel}_${nombreAlumno}.docx`);
+        const cfg = getPlantillaById('val');
+        const tutor = tutores.find(t => t.id === selectedRelacion.tutorEmpresaId);
+        const nombreTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
+        const placeholders = buildPlaceholders(selectedRelacion, undefined, nombreTutor);
         setEmailTo(getTutorEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject('');
-        setEmailBody('');
+        setEmailSubject(cfg?.subject ?? '');
+        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
         setShowEmailModal(true);
     };
 
@@ -1430,12 +1473,15 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const convenio = convenios.find(c => c.id === selectedRelacion.convenioId);
         if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Carta_${numRel}_${nombreEmpresa}.pdf`);
+        const cfg = getPlantillaById('carta-inicio');
+        const lugarContacto = selectedRelacion.empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`;
+        const placeholders = buildPlaceholders(selectedRelacion, undefined, lugarContacto);
         setEmailTo(getEmpresaEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject('');
-        setEmailBody('');
+        setEmailSubject(cfg?.subject ?? '');
+        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
         setShowEmailModal(true);
     };
 
@@ -1446,12 +1492,14 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Calendario_${numRel}_${nombreAlumno}.pdf`);
+        const cfg = getPlantillaById('cal');
+        const placeholders = buildPlaceholders(selectedRelacion, alumno);
         setEmailTo(alumno.emailEduca ? [alumno.emailEduca] : []);
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject('');
-        setEmailBody('');
+        setEmailSubject(cfg?.subject ?? '');
+        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
         setShowEmailModal(true);
     };
 
@@ -1681,11 +1729,28 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             nombresUnicos[nombresUnicos.length - 1];
         const direccion = primeraRelacion?.empresa?.direccion ?? '';
 
+        const contactoEmpresa = primeraRelacion?.empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`;
+
+        let alumnoTutor = '';
+        if (plantillaId === 'plan' && primeraRelacion?.alumnos?.length) {
+            const firstAlumno = primeraRelacion.alumnos[0];
+            const estado = firstAlumno.estadoPlanFormativo;
+            const esEstudiante = estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE || estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
+            if (esEstudiante) {
+                alumnoTutor = nombreApellidosAlumnos;
+            } else {
+                const tutor = tutores.find(t => t.id === primeraRelacion.tutorEmpresaId);
+                alumnoTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
+            }
+        }
+
         const bodyInterpolado = interpolateBody(cfg.body, {
             nombreTutor,
             nombreEmpresa,
+            contactoEmpresa,
             nombreProfesor,
             nombreApellidosAlumnos,
+            alumnoTutor,
             Dirección: direccion,
         });
 
