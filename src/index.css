@@ -45,4 +45,7 @@
   }
 }
 
+.ProseMirror-trailingBreak {
+  display: none !important;
+}
 

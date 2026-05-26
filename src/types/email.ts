@@ -39,3 +39,26 @@ export interface PlantillaCorreo {
   icon: string;
   color: string;
 }
+
+export interface PlantillaCorreoDB {
+  id: number;
+  plantillaId: string;
+  name: string;
+  description: string;
+  subject: string;
+  body: string;
+  documents: string;
+  recipientTarget: string;
+  icon: string;
+  color: string;
+  place: 'empresa' | 'relaciones' | '';
+  tipo: 'sistema' | 'personal';
+  grupo?: string;
+}
+
+export interface MarcadorPersonalizado {
+  id: number;
+  nombre: string;
+  valor: string;
+  descripcion: string;
+}

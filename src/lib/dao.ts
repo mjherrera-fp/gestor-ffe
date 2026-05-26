@@ -1,5 +1,6 @@
 import { db, isDbEncrypted, unlockDB, lockDB } from './db.ts';
 import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, EmpresaEstadistica, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData, Aviso } from '../types/index.ts';
+import { PlantillaCorreoDB, MarcadorPersonalizado } from '../types/email.ts';
 
 const safeParse = (str: any, fallback: any) => {
   if (!str || str === 'undefined' || str === 'null') return fallback;
@@ -977,6 +978,81 @@ export const PanelDAO = {
 
     return { meses, alumnos, datos };
   }
+};
+
+export const PlantillaCorreoDAO = {
+  getAll: (place?: string): PlantillaCorreoDB[] => {
+    let sql = 'SELECT * FROM plantillas_correo';
+    const params: any[] = [];
+    if (place) {
+      sql += ' WHERE (place = ? OR place = ?)';
+      params.push(place, '');
+    }
+    sql += ' ORDER BY tipo DESC, id ASC';
+    return db.prepare(sql).all(...params) as PlantillaCorreoDB[];
+  },
+  getById: (id: number): PlantillaCorreoDB | undefined => {
+    return db.prepare('SELECT * FROM plantillas_correo WHERE id = ?').get(id) as PlantillaCorreoDB | undefined;
+  },
+  getByPlantillaId: (plantillaId: string): PlantillaCorreoDB | undefined => {
+    return db.prepare('SELECT * FROM plantillas_correo WHERE plantillaId = ?').get(plantillaId) as PlantillaCorreoDB | undefined;
+  },
+  create: (data: Omit<PlantillaCorreoDB, 'id'>) => {
+    const stmt = db.prepare(`
+      INSERT INTO plantillas_correo (plantillaId, name, description, subject, body, documents, recipientTarget, icon, color, place, tipo, grupo)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const info = stmt.run(data.plantillaId, data.name, data.description, data.subject, data.body, data.documents, data.recipientTarget, data.icon, data.color, data.place, data.tipo, data.grupo || '');
+    return info.lastInsertRowid;
+  },
+  update: (id: number, data: Partial<PlantillaCorreoDB>) => {
+    const fields: string[] = [];
+    const params: any[] = [];
+    for (const [key, value] of Object.entries(data)) {
+      if (key === 'id') continue;
+      fields.push(`${key} = ?`);
+      params.push(value);
+    }
+    if (fields.length === 0) return;
+    params.push(id);
+    db.prepare(`UPDATE plantillas_correo SET ${fields.join(', ')} WHERE id = ?`).run(...params);
+  },
+  delete: (id: number) => {
+    db.prepare('DELETE FROM plantillas_correo WHERE id = ? AND tipo = ?').run(id, 'personal');
+  },
+  count: (): number => {
+    const row = db.prepare('SELECT COUNT(*) as count FROM plantillas_correo').get() as any;
+    return row.count;
+  },
+};
+
+export const MarcadorPersonalizadoDAO = {
+  getAll: (): MarcadorPersonalizado[] => {
+    return db.prepare('SELECT * FROM marcadores_personalizados ORDER BY nombre ASC').all() as MarcadorPersonalizado[];
+  },
+  getById: (id: number): MarcadorPersonalizado | undefined => {
+    return db.prepare('SELECT * FROM marcadores_personalizados WHERE id = ?').get(id) as MarcadorPersonalizado | undefined;
+  },
+  create: (data: Omit<MarcadorPersonalizado, 'id'>) => {
+    const stmt = db.prepare('INSERT INTO marcadores_personalizados (nombre, valor, descripcion) VALUES (?, ?, ?)');
+    const info = stmt.run(data.nombre, data.valor, data.descripcion);
+    return info.lastInsertRowid;
+  },
+  update: (id: number, data: Partial<MarcadorPersonalizado>) => {
+    const fields: string[] = [];
+    const params: any[] = [];
+    for (const [key, value] of Object.entries(data)) {
+      if (key === 'id') continue;
+      fields.push(`${key} = ?`);
+      params.push(value);
+    }
+    if (fields.length === 0) return;
+    params.push(id);
+    db.prepare(`UPDATE marcadores_personalizados SET ${fields.join(', ')} WHERE id = ?`).run(...params);
+  },
+  delete: (id: number) => {
+    db.prepare('DELETE FROM marcadores_personalizados WHERE id = ?').run(id);
+  },
 };
 
 export const AvisosDAO = {
