@@ -328,7 +328,8 @@ export function EmailModal({
       setError('');
       setSending(false);
       setSendIndividual(initialTo.length > 1 || hasGroupMarkers);
-      editor?.commands.setContent(initialBody);
+      const cleanBody = initialBody.replace(/<p[^>]*>\s*<br[^>]*>\s*<\/p>/gi, '');
+      editor?.commands.setContent(cleanBody);
       editor?.chain().selectAll().setTextAlign('justify').setTextSelection(1).run();
     }
   }, [isOpen]);
@@ -399,7 +400,13 @@ export function EmailModal({
       return;
     }
 
-    const html = editor?.getHTML() || '';
+    const html = (editor?.getHTML() || '').replace(/<p[^>]*>\s*<br[^>]*>\s*<\/p>/gi, '');
+
+    if (html.includes('{{destinatario}}') && toList.length > 1) {
+      setError('La plantilla contiene {{destinatario}} pero hay más de un correo en el campo Para. Usa {{@destinatarios}} en su lugar.');
+      setSending(false);
+      return;
+    }
 
     const sendHtml = (h: string) => `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333">
 <style>p{margin:0 0 1.25em 0 !important}h1{font-size:1.5em;font-weight:700;margin:0 0 0.5em 0 !important}h2{font-size:1.25em;font-weight:700;margin:0 0 0.5em 0 !important}h3{font-size:1.125em;font-weight:600;margin:0 0 0.5em 0 !important}blockquote{padding-left:1em;margin:1.5rem 0;border-left:4px solid #cbd5e1}blockquote p{margin:0}ul{list-style:disc outside;margin:0 0 1.25em 0 !important}ol{list-style:decimal outside;margin:0 0 1.25em 0 !important}li{margin:0 !important}li>p{margin:0 !important}table{border-collapse:collapse;width:100%;margin:0 0 1.25em 0}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style>

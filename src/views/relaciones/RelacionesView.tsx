@@ -1,5 +1,5 @@
-import React from 'react';
-import { FileArchive, Loader2, Plus, Trash2, FileText, ClipboardCheck, Play, CheckCircle, MoreHorizontal } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileArchive, Loader2, Plus, Trash2, FileText, ClipboardCheck, Play, CheckCircle, MoreHorizontal, PencilRuler } from 'lucide-react';
 
 import { useRelaciones }                from './hooks/useRelaciones.ts';
 import { RelacionesListado }            from './components/RelacionesListado.tsx';
@@ -9,7 +9,7 @@ import { RelacionEstadisticaFormModal } from './components/RelacionEstadisticaFo
 import { calculateEndDateForHours }     from './utils/relacionesUtils.ts';
 import { EmailModal }                   from '../../components/EmailModal.tsx';
 import { Modal }                        from '../../components/ui/Modal.tsx';
-import { PLANTILLAS_CORREO }            from '../../../templates/emails/emailTemplates.ts';
+
 
 interface Props {
   cursoId: number;
@@ -20,6 +20,16 @@ interface Props {
 
 export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConfig, profesor }: Props) {
   const ctx = useRelaciones(cursoId, detalleAcademicoId, profesor);
+  const [plantillas, setPlantillas] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (ctx.targetEmailRelaciones.length > 0) {
+      fetch('/api/plantillas?place=relaciones')
+        .then(r => r.json())
+        .then(setPlantillas)
+        .catch(() => setPlantillas([]));
+    }
+  }, [ctx.targetEmailRelaciones]);
 
   // Adaptador para calculateEndDateForHours que inyecta los festivos del centro
   const calcEndDate = (start: string, hours: number) =>
@@ -193,6 +203,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
                 inicio: Play,
                 fin: CheckCircle,
                 otros: MoreHorizontal,
+                'pencil-ruler': PencilRuler,
               };
               const colorMap: Record<string, { border: string; bg: string; iconBg: string; iconText: string; btnText: string }> = {
                 blue: { border: 'border-blue-100', bg: 'bg-blue-50/50', iconBg: 'bg-blue-100', iconText: 'text-blue-600', btnText: 'text-blue-600' },
@@ -201,27 +212,30 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
                 purple: { border: 'border-purple-100', bg: 'bg-purple-50/50', iconBg: 'bg-purple-100', iconText: 'text-purple-600', btnText: 'text-purple-600' },
                 slate: { border: 'border-slate-200', bg: 'bg-white', iconBg: 'bg-slate-100', iconText: 'text-slate-500', btnText: 'text-slate-500' },
               };
-              return PLANTILLAS_CORREO
-                .filter(p => p.id === 'relacion' || p.id === 'plan' || p.id === 'inicio' || p.id === 'fin' || p.id === 'otros')
-                .map((p, i) => {
-                const c = colorMap[p.color] || colorMap.slate;
+              const sorted = [...plantillas]
+                .filter((p: any) => p.grupo === 'varios-registros' || !p.grupo)
+                .sort((a, b) => a.plantillaId === 'otros' ? 1 : b.plantillaId === 'otros' ? -1 : 0);
+              return sorted.map((p: any) => {
+                const isHex = p.color?.startsWith('#');
+                const c = isHex ? null : (colorMap[p.color] || colorMap.slate);
                 const IconComponent = componentMap[p.icon] || componentMap.otros;
-                const isOtros = p.id === 'otros';
+                const cardStyle = isHex ? { borderColor: p.color + '40', backgroundColor: p.color + '08' } : {};
+                const iconStyle = isHex ? { backgroundColor: p.color + '20', color: p.color } : {};
                 return (
                   <React.Fragment key={p.id}>
-                    {isOtros && <div className="border-t border-slate-100 pt-3 mt-3" />}
                     <button
-                      onClick={() => ctx.handleEmailConPlantilla(ctx.targetEmailRelaciones, p.id)}
-                      className={`w-full flex items-center gap-4 p-4 rounded-xl border ${c.border} ${c.bg} hover:bg-slate-50 hover:border-slate-300 transition-all text-left`}
+                      onClick={() => ctx.handleEmailConPlantilla(ctx.targetEmailRelaciones, p.plantillaId)}
+                      className={`w-full flex items-center gap-4 p-4 rounded-xl border hover:bg-slate-50 hover:border-slate-300 transition-all text-left ${c?.border || 'border-slate-200'} ${c?.bg || ''}`}
+                      style={Object.keys(cardStyle).length ? cardStyle : undefined}
                     >
-                      <div className={`h-10 w-10 rounded-lg ${c.iconBg} ${c.iconText} flex items-center justify-center shrink-0`}>
+                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${c?.iconBg || ''} ${c?.iconText || ''}`} style={Object.keys(iconStyle).length ? iconStyle : undefined}>
                         <IconComponent className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-slate-800">{p.name}</p>
                         <p className="text-[11px] text-slate-500 mt-0.5">{p.description}</p>
                       </div>
-                      <span className={`text-[10px] font-bold ${c.btnText} uppercase shrink-0`}>Seleccionar</span>
+                      <span className={`text-[10px] font-bold uppercase shrink-0 ${c?.btnText || ''}`} style={isHex ? { color: p.color } : undefined}>Seleccionar</span>
                     </button>
                   </React.Fragment>
                 );

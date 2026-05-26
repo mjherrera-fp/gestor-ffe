@@ -55,7 +55,7 @@ export function CustomSelect({ options, value, onChange, label, required, name, 
           >
             {/* ListboxOptions en lugar de Listbox.Options */}
             <ListboxOptions
-              className="absolute z-50 mt-2 max-h-60 overflow-auto rounded-2xl bg-white py-2 text-xs shadow-2xl ring-1 ring-black/5 focus:outline-none animate-in fade-in zoom-in-95 duration-200
+              className="absolute z-70 mt-2 max-h-60 overflow-auto rounded-2xl bg-white py-2 text-xs shadow-2xl ring-1 ring-black/5 focus:outline-none animate-in fade-in zoom-in-95 duration-200
                w-max min-w-full left-0">
               {options.map((option) => (
                 /* ListboxOption en lugar de Listbox.Option */

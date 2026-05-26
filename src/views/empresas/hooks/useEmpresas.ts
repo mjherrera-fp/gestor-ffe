@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { Empresa, TutorEmpresa, EmpresaEstadistica, Curso } from '../../../types/index.ts';
 import { EmailAttachment } from '../../../types/email.ts';
 import { mostrarToast } from '../../../utils/toast.ts';
-import { getPlantillaById, interpolateBody } from '../../../../templates/emails/emailTemplates.ts';
+import { interpolateBody, applyCustomMarkers } from '../../../../templates/emails/emailTemplates.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -580,26 +580,25 @@ export function useEmpresas(cursoId: number) {
   };
 
   const handleEmailConPlantilla = async (plantillaId: string) => {
-    const cfg = getPlantillaById(plantillaId);
-    if (!cfg) return;
+    const res = await fetch(`/api/plantillas/by-plantilla-id/${plantillaId}`);
+    if (!res.ok) return;
+    const cfg = await res.json();
+
+    const marcadoresRes = await fetch('/api/marcadores-personalizados');
+    const marcadores = marcadoresRes.ok ? await marcadoresRes.json() : [];
 
     const empresasConEmail = filteredEmpresas.filter(e => e.email);
     const empresa = empresasConEmail[0];
-    const nombreEmpresa = empresa?.nombre ?? '';
-    const contacto = empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`;
-    const nombreProfesor = profesor ? `${profesor.nombre} ${profesor.apellidos}` : '';
-    const curso = cursoInfo?.descripcion ?? '';
-    const nombreCentro = centros[0]?.nombre ?? '';
 
-    const bodyInterpolado = interpolateBody(cfg.body, {
-      contacto,
-      nombreEmpresa,
-      nombreProfesor,
-      profesor: nombreProfesor,
-      curso,
-      centroEducativo: nombreCentro,
-      nombreCentro,
-    });
+    const context: Record<string, any> = {
+      profesor: profesor ? { nombre: profesor.nombre, apellidos: profesor.apellidos } : null,
+      centro: centros.length > 0 ? { nombre: centros[0].nombre } : null,
+      curso: cursoInfo ? { descripcion: cursoInfo.descripcion } : null,
+      empresa: empresa ? { nombre: empresa.nombre, personaContacto: empresa.personaContacto } : null,
+    };
+
+    let body = applyCustomMarkers(cfg.body, marcadores);
+    body = interpolateBody(body, context);
 
     const perData: Record<string, Record<string, string>> = {};
     for (const e of empresasConEmail) {
@@ -614,7 +613,7 @@ export function useEmpresas(cursoId: number) {
     setEmailBcc([]);
     setEmailAttachments([]);
     setEmailSubject(cfg.subject);
-    setEmailBody(bodyInterpolado);
+    setEmailBody(body);
     setPerRecipientData(perData);
     setShowPlantillaSelector(false);
     setShowEmailModal(true);

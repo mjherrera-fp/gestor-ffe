@@ -9,7 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { db } from './src/lib/db.ts';
-import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, EmpresaFestivosDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
+import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, EmpresaFestivosDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, PlantillaCorreoDAO, MarcadorPersonalizadoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 
@@ -609,6 +609,92 @@ async function startServer() {
       }
     }
     res.json(ids);
+  });
+
+  // ─── PLANTILLAS DE CORREO ─────────────────────────────
+
+  app.get('/api/plantillas', (req, res) => {
+    const place = req.query.place as string | undefined;
+    res.json(PlantillaCorreoDAO.getAll(place));
+  });
+
+  app.get('/api/plantillas/by-plantilla-id/:plantillaId', (req, res) => {
+    const p = PlantillaCorreoDAO.getByPlantillaId(req.params.plantillaId);
+    if (!p) return res.status(404).json({ error: 'Plantilla no encontrada' });
+    res.json(p);
+  });
+
+  app.get('/api/plantillas/:id', (req, res) => {
+    const p = PlantillaCorreoDAO.getById(Number(req.params.id));
+    if (!p) return res.status(404).json({ error: 'Plantilla no encontrada' });
+    res.json(p);
+  });
+
+  app.post('/api/plantillas', (req, res) => {
+    const { plantillaId, name, description, subject, body, documents, recipientTarget, icon, color, place, grupo } = req.body;
+    if (!name) return res.status(400).json({ error: 'El nombre es obligatorio' });
+    const id = PlantillaCorreoDAO.create({
+      plantillaId: plantillaId || crypto.randomUUID(),
+      name, description: description || '', subject: subject || '', body: body || '',
+      documents: documents ? JSON.stringify(documents) : '[]',
+      recipientTarget: recipientTarget || 'ninguno',
+      icon: icon || 'file-text', color: color || 'slate',
+      place: place || 'relaciones', tipo: 'personal',
+      grupo: grupo || '',
+    });
+    res.json({ id, success: true });
+  });
+
+  app.put('/api/plantillas/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const existing = PlantillaCorreoDAO.getById(id);
+    if (!existing) return res.status(404).json({ error: 'Plantilla no encontrada' });
+    const allowed: Record<string, any> = {};
+    for (const key of ['name', 'description', 'subject', 'body', 'documents', 'recipientTarget', 'icon', 'color', 'place', 'grupo']) {
+      if (req.body[key] !== undefined) allowed[key] = req.body[key];
+    }
+    if (allowed.documents && Array.isArray(allowed.documents)) allowed.documents = JSON.stringify(allowed.documents);
+    PlantillaCorreoDAO.update(id, allowed);
+    res.json({ success: true });
+  });
+
+  app.delete('/api/plantillas/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const existing = PlantillaCorreoDAO.getById(id);
+    if (!existing) return res.status(404).json({ error: 'Plantilla no encontrada' });
+    if (existing.tipo === 'sistema') return res.status(403).json({ error: 'No se puede eliminar una plantilla de sistema' });
+    PlantillaCorreoDAO.delete(id);
+    res.json({ success: true });
+  });
+
+  // ─── MARCADORES PERSONALIZADOS ────────────────────────
+
+  app.get('/api/marcadores-personalizados', (req, res) => {
+    res.json(MarcadorPersonalizadoDAO.getAll());
+  });
+
+  app.post('/api/marcadores-personalizados', (req, res) => {
+    const { nombre, valor, descripcion } = req.body;
+    if (!nombre) return res.status(400).json({ error: 'El nombre es obligatorio' });
+    const id = MarcadorPersonalizadoDAO.create({ nombre, valor: valor || '', descripcion: descripcion || '' });
+    res.json({ id, success: true });
+  });
+
+  app.put('/api/marcadores-personalizados/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const existing = MarcadorPersonalizadoDAO.getById(id);
+    if (!existing) return res.status(404).json({ error: 'Marcador no encontrado' });
+    const allowed: Record<string, any> = {};
+    for (const key of ['nombre', 'valor', 'descripcion']) {
+      if (req.body[key] !== undefined) allowed[key] = req.body[key];
+    }
+    MarcadorPersonalizadoDAO.update(id, allowed);
+    res.json({ success: true });
+  });
+
+  app.delete('/api/marcadores-personalizados/:id', (req, res) => {
+    MarcadorPersonalizadoDAO.delete(Number(req.params.id));
+    res.json({ success: true });
   });
 
   // Empresas

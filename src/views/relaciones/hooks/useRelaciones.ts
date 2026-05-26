@@ -18,10 +18,10 @@ import {
     getNextValoracionEstado,
     getPrevValoracionEstado
 } from '../utils/relacionesUtils.ts';
-import { EmailAttachment, PlantillaCorreo } from '../../../types/email.ts';
+import { EmailAttachment } from '../../../types/email.ts';
 import { uploadGeneratedAttachment } from '../../../utils/emailUtils.ts';
 import { mostrarToast } from '../../../utils/toast.ts';
-import { PLANTILLAS_CORREO, getPlantillaById, interpolateBody } from '../../../../templates/emails/emailTemplates.ts';
+import { interpolateBody, applyCustomMarkers } from '../../../../templates/emails/emailTemplates.ts';
 
 //todo el estado y lógica de relaciones-alumnos, incluyendo gestión de alumnos en el formulario, cambios de estado y descargas de planes formativos
 
@@ -1383,7 +1383,25 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             alumnoTutor = nombreTutor;
         }
         const contacto = contactoOverride ?? (alumno ? `${alumno.nombre} ${alumno.apellidos}` : nombreTutor);
-        return { nombreTutor, nombreEmpresa, contactoEmpresa, nombreProfesor, nombreApellidosAlumnos, alumnoTutor, contacto, Dirección: direccion };
+        const context: Record<string, any> = {
+            profesor: profesor ? { nombre: profesor.nombre, apellidos: profesor.apellidos } : null,
+            empresa: empresa ? { nombre: nombreEmpresa, direccion, personaContacto: contactoEmpresa } : null,
+            tutor: tutor ? { nombre: tutor.nombre, apellidos: tutor.apellidos } : null,
+            nombreApellidosAlumnos,
+            alumnoTutor,
+        };
+        return context;
+    };
+
+    const buildTemplateBody = async (plantillaId: string, placeholders: Record<string, any>) => {
+        const res = await fetch(`/api/plantillas/by-plantilla-id/${plantillaId}`);
+        if (!res.ok) return null;
+        const cfg = await res.json();
+        const marcadoresRes = await fetch('/api/marcadores-personalizados');
+        const marcadores = marcadoresRes.ok ? await marcadoresRes.json() : [];
+        let body = applyCustomMarkers(cfg.body, marcadores);
+        body = interpolateBody(body, placeholders);
+        return { ...cfg, body };
     };
 
     const handleEmailConRelacion = async (tipo: 'docx' | 'pdf') => {
@@ -1393,14 +1411,15 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const ext = tipo === 'pdf' ? 'pdf' : 'docx';
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const att = await uploadGeneratedAttachment(blob, `Relacion_${numRel}.${ext}`);
-        const cfg = getPlantillaById('relacion');
         const placeholders = buildPlaceholders(selectedRelacion);
+        const cfg = await buildTemplateBody('relacion', placeholders);
+        if (!cfg) return;
         setEmailTo(getEmpresaEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg?.subject ?? '');
-        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
+        setEmailSubject(cfg.subject);
+        setEmailBody(cfg.body);
         setShowEmailModal(true);
     };
 
@@ -1413,14 +1432,15 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Plan_${numRel}_${nombreAlumno}.${ext}`);
         const { to, bcc } = getPlanDestinatarios(alumno);
-        const cfg = getPlantillaById('plan');
         const placeholders = buildPlaceholders(selectedRelacion, alumno);
+        const cfg = await buildTemplateBody('plan', placeholders);
+        if (!cfg) return;
         setEmailTo(to);
         setEmailBcc(bcc);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg?.subject ?? '');
-        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
+        setEmailSubject(cfg.subject);
+        setEmailBody(cfg.body);
         setShowEmailModal(true);
     };
 
@@ -1431,16 +1451,17 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Seguimiento_${numRel}_${nombreAlumno}.docx`);
-        const cfg = getPlantillaById('seg');
         const tutor = tutores.find(t => t.id === selectedRelacion.tutorEmpresaId);
         const nombreTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
         const placeholders = buildPlaceholders(selectedRelacion, undefined, nombreTutor);
+        const cfg = await buildTemplateBody('seg', placeholders);
+        if (!cfg) return;
         setEmailTo(getTutorEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg?.subject ?? '');
-        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
+        setEmailSubject(cfg.subject);
+        setEmailBody(cfg.body);
         setShowEmailModal(true);
     };
 
@@ -1451,16 +1472,17 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Valoracion_${numRel}_${nombreAlumno}.docx`);
-        const cfg = getPlantillaById('val');
         const tutor = tutores.find(t => t.id === selectedRelacion.tutorEmpresaId);
         const nombreTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
         const placeholders = buildPlaceholders(selectedRelacion, undefined, nombreTutor);
+        const cfg = await buildTemplateBody('val', placeholders);
+        if (!cfg) return;
         setEmailTo(getTutorEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg?.subject ?? '');
-        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
+        setEmailSubject(cfg.subject);
+        setEmailBody(cfg.body);
         setShowEmailModal(true);
     };
 
@@ -1473,15 +1495,16 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const convenio = convenios.find(c => c.id === selectedRelacion.convenioId);
         if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Carta_${numRel}_${nombreEmpresa}.pdf`);
-        const cfg = getPlantillaById('carta-inicio');
         const lugarContacto = selectedRelacion.empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`;
         const placeholders = buildPlaceholders(selectedRelacion, undefined, lugarContacto);
+        const cfg = await buildTemplateBody('carta-inicio', placeholders);
+        if (!cfg) return;
         setEmailTo(getEmpresaEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg?.subject ?? '');
-        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
+        setEmailSubject(cfg.subject);
+        setEmailBody(cfg.body);
         setShowEmailModal(true);
     };
 
@@ -1492,14 +1515,15 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const att = await uploadGeneratedAttachment(blob, `Calendario_${numRel}_${nombreAlumno}.pdf`);
-        const cfg = getPlantillaById('cal');
         const placeholders = buildPlaceholders(selectedRelacion, alumno);
+        const cfg = await buildTemplateBody('cal', placeholders);
+        if (!cfg) return;
         setEmailTo(alumno.emailEduca ? [alumno.emailEduca] : []);
         setEmailBcc([]);
         setEmailAttachments([att]);
         setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg?.subject ?? '');
-        setEmailBody(cfg ? interpolateBody(cfg.body, placeholders) : '');
+        setEmailSubject(cfg.subject);
+        setEmailBody(cfg.body);
         setShowEmailModal(true);
     };
 
@@ -1604,8 +1628,9 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
 
     const handleEmailConPlantilla = async (relaciones: RelacionAlumno[], plantillaId: string) => {
         if (!relaciones.length) return;
-        const cfg = getPlantillaById(plantillaId);
-        if (!cfg) return;
+        const res = await fetch(`/api/plantillas/by-plantilla-id/${plantillaId}`);
+        if (!res.ok) return;
+        const cfg = await res.json();
 
         setIsPreparingEmail(true);
         setTargetEmailRelaciones([]);
@@ -1646,7 +1671,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             }
 
             // Documentos según la configuración de la plantilla
-            for (const doc of cfg.documents) {
+            for (const doc of JSON.parse(cfg.documents || '[]') as string[]) {
                 if (doc === 'relacion') {
                     const blob = await crearDocumentoRelacion('pdf', relacion);
                     if (blob) {
@@ -1744,21 +1769,24 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             }
         }
 
-        const bodyInterpolado = interpolateBody(cfg.body, {
-            nombreTutor,
-            nombreEmpresa,
-            contactoEmpresa,
-            nombreProfesor,
+        const context: Record<string, any> = {
+            profesor: profesor ? { nombre: profesor.nombre, apellidos: profesor.apellidos } : null,
+            tutor: tutor ? { nombre: tutor.nombre, apellidos: tutor.apellidos } : null,
+            empresa: primeraRelacion?.empresa ? { nombre: nombreEmpresa, direccion, personaContacto: contactoEmpresa } : null,
             nombreApellidosAlumnos,
             alumnoTutor,
-            Dirección: direccion,
-        });
+        };
+
+        const marcadoresRes = await fetch('/api/marcadores-personalizados');
+        const marcadores = marcadoresRes.ok ? await marcadoresRes.json() : [];
+        let body = applyCustomMarkers(cfg.body, marcadores);
+        body = interpolateBody(body, context);
 
         setEmailTo(Array.from(destinatarios));
         setEmailBcc([]);
         setEmailAttachments(atts);
         setEmailSubject(cfg.subject);
-        setEmailBody(bodyInterpolado);
+        setEmailBody(body);
         setContextualContactIds(contactIds);
         setShowEmailModal(true);
     };

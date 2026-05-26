@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3-multiple-ciphers';
 import path from 'path';
+import { PlantillaCorreoDB } from '../types/email.ts';
 
 // Recuperamos la ruta que configuramos en el servidor
 const baseDir = process.env.PORTABLE_EXECUTABLE_DIR || process.cwd();
@@ -271,6 +272,33 @@ function setupTables() {
     );
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS plantillas_correo (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      plantillaId TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      subject TEXT NOT NULL DEFAULT '',
+      body TEXT NOT NULL DEFAULT '',
+      documents TEXT NOT NULL DEFAULT '[]',
+      recipientTarget TEXT NOT NULL DEFAULT 'ninguno',
+      icon TEXT NOT NULL DEFAULT 'file-text',
+      color TEXT NOT NULL DEFAULT 'slate',
+      place TEXT NOT NULL DEFAULT 'relaciones',
+        tipo TEXT NOT NULL DEFAULT 'sistema',
+        grupo TEXT NOT NULL DEFAULT ''
+    );
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS marcadores_personalizados (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre TEXT UNIQUE NOT NULL,
+      valor TEXT NOT NULL DEFAULT '',
+      descripcion TEXT NOT NULL DEFAULT ''
+    );
+  `);
+
   // Migración: añadir columnas nuevas a tablas existentes
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaRelacion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaPlanFormativo TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
@@ -278,6 +306,10 @@ function setupTables() {
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE convenios ADD COLUMN tipoFirma TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE profesores ADD COLUMN send_delay_ms INTEGER DEFAULT 1500"); } catch {}
+
+  // Migración: actualizar grupo de plantillas existentes
+  try { db.exec("UPDATE plantillas_correo SET grupo = 'varios-registros' WHERE grupo = 'enviar-todo'"); } catch {}
+  try { db.exec("UPDATE plantillas_correo SET grupo = 'registro-individual' WHERE grupo = 'documento'"); } catch {}
 
   // Migración: añadir festivos a centros_educativos y tutorias a detalles_academicos
   try { db.exec("ALTER TABLE centros_educativos ADD COLUMN festivos TEXT"); } catch {}
@@ -289,6 +321,9 @@ function setupTables() {
   try { db.exec("ALTER TABLE empresas ADD COLUMN personaContacto TEXT"); } catch {}
   try { db.exec("ALTER TABLE empresas ADD COLUMN comunidad TEXT"); } catch {}
   try { db.exec("ALTER TABLE empresas ADD COLUMN provincia TEXT"); } catch {}
+
+  // Migración: añadir grupo a plantillas_correo
+  try { db.exec("ALTER TABLE plantillas_correo ADD COLUMN grupo TEXT NOT NULL DEFAULT ''"); } catch {}
 
   // Migración: renombrar tutores_empresa → empresa_tutores
   try {
@@ -320,6 +355,30 @@ function setupTables() {
   } catch (e) {
     console.error("Migration rename tutores_empresa (may be already applied):", e);
   }
+
+  // Seed: migrar plantillas si la tabla está vacía
+  const count = db.prepare("SELECT COUNT(*) as count FROM plantillas_correo").get() as any;
+  if (count.count === 0) {
+    const seedData: Omit<PlantillaCorreoDB, 'id'>[] = [
+      { plantillaId: 'relacion', name: 'Envío de relación', description: 'Anexo de relación → Email de la empresa', subject: 'Documento de relación', body: '<p>Estimado/a {{empresa.personaContacto}},</p>\n<p>Adjuntamos el anexo de relación de alumnos correspondiente al periodo de Formación en Empresa (FFE).</p>\n<p>Rogamos revisen el documento detenidamente y si todo está en orden, nos lo devuelvan firmado. Tenga en cuenta que es importante que el documento esté correctamente rellenado y firmado para poder proceder con el proceso.</p>\n<p>Es importante que el documento esté correctamente rellenado y firmado para poder proceder con el proceso. Con respecto a la firma, tenga en cuenta que:</p>\n<ul>\n<li>Si la <strong>firma es manual</strong>, se debe imprimir el documento, firmarlo y a poder ser sellarlo y entregárselo al alumno/a antes de la finalización de las prácticas para que nos lo entregue cuando venga al centro.</li>\n<li>Si la <strong>firma es mediante certificado digital</strong>, bastaría con firmar el documento y enviármelo a mi por correo.</li>\n</ul>\n<p>Agradecemos de antemano su colaboración.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['relacion']), recipientTarget: 'empresa', icon: 'documento', color: 'blue', place: 'relaciones', tipo: 'sistema', grupo: 'varios-registros' },
+      { plantillaId: 'plan', name: 'Envío de planes formativos', description: 'Plan formativo → Estudiante (según estado) o Tutor', subject: 'Plan formativo', body: '<p>Estimado/a, {{alumnoTutor}}</p>\n<p>Adjuntamos el plan formativo correspondiente a la fase de formación en empresa.</p>\n<p>Rogamos revisen el documento detenidamente y si todo está en orden, nos lo devuelvan firmado.</p>\n<p>Recuerden que es importante que el plan esté correctamente rellenado y firmado para poder proceder con el proceso. Con respecto a la firma, tenga en cuenta que:</p>\n<ul>\n<li>Si la <strong>firma es manual</strong>, se debe imprimir el documento, firmarlo y a poder ser sellarlo y entregárselo al alumno/a antes de la finalización de las prácticas para que nos lo entregue cuando venga al centro.</li>\n<li>Si la <strong>firma es mediante certificado digital</strong>, bastaría con firmar el documento y enviármelo a mi por correo.</li>\n</ul>\n<p>Atentamente,</p>', documents: JSON.stringify(['plan']), recipientTarget: 'estudiante_conditional', icon: 'plan', color: 'emerald', place: 'relaciones', tipo: 'sistema', grupo: 'varios-registros' },
+      { plantillaId: 'inicio', name: 'Inicio de las FFE', description: 'Seguimiento + Valoración + Calendario + Carta → Tutor de la empresa', subject: 'Inicio de las FFE', body: '<p>Estimado/a {{tutor.nombre}} {{tutor.apellidos}},</p>\n<p>Este email es para recordar que en los próximos días dará comienzo la Fase de Formación en Empresas (FFE) para nuestros alumnos {{nombreApellidosAlumnos}}.</p>\n<p>Según los convenios firmados su centro de trabajo es en {{empresa.direccion}}.</p>\n<p>Estará/n allí al inicio de la jornada, y preguntará/n directamente por ti. Aprovecho el email, para adjuntar:</p>\n<ul>\n<li>Carta de inicio de las FFE</li>\n<li>Calendario/s</li>\n<li>Fichas de seguimiento y valoración</li>\n</ul>\n<p>Por último, también me gustaría recordar un par de detalles, el primero, que como tutor cualquier duda, problema o inconveniente que surja durante el periodo de FFE, estoy a vuestra entera disposición. Y segundo, que los alumnos/as en FFE son estudiantes en periodo formativo y que por tanto necesitan asesoramiento y guía en las actividades a desarrollar en la empresa.</p>\n<p>Agradecemos de antemano su colaboración.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['seguimiento', 'valoracion', 'calendario', 'carta']), recipientTarget: 'tutor', icon: 'inicio', color: 'amber', place: 'relaciones', tipo: 'sistema', grupo: 'varios-registros' },
+      { plantillaId: 'fin', name: 'Fin de las FFE', description: 'Seguimiento + Valoración → Tutor de la empresa', subject: 'Fin de las FFE', body: '<p>Estimado/a {{tutor.nombre}} {{tutor.apellidos}},</p>\n<p>Próximamente finalizará el periodo de FFE de nuestros alumnos/as en su empresa y necesitamos que se rellene y se firme los siguientes documentos:</p>\n<ul>\n<li>Ficha de seguimiento</li>\n<li>Valoración de las FFE</li>\n</ul>\n<p>Por favor, rellenad la información que sea necesaria en los documentos adjuntos ante de la firma. En el seguimiento aparece precargado en la columna "actividad formativa desarrollada", si queréis podéis poner actividades específicas desarrolladas por el alumno/a, pero es <strong>muy importante que guarden relación con los RA</strong> que están especificados en el documento. Si no sabéis de que va ese RA preguntad al alumno/a.</p>\n<p>Con respecto a la firma es muy importante que se siga cierto protocolo:</p>\n<ul>\n<li>Si la <strong>firma es manual</strong>, se debe imprimir el documento, firmarlo y a poder ser sellarlo y entregárselo al alumno/a antes de la finalización de las prácticas para que nos lo entregue cuando venga al centro.</li>\n<li>Si la <strong>firma es mediante certificado digital</strong>, bastaría con firmar el documento y enviármelo a mi por correo.</li>\n</ul>\n<p>Es muy importante la entrega de esta documentación, <strong>sin esta documentación debidamente cumplimentada y firmada no podrán titular nuestros alumnos/as</strong>.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['seguimiento', 'valoracion']), recipientTarget: 'tutor', icon: 'fin', color: 'purple', place: 'relaciones', tipo: 'sistema', grupo: 'varios-registros' },
+      { plantillaId: 'nuevo-contacto', name: 'Nuevo contacto', description: 'Empresas nuevas sin convenio', subject: 'Presentación del Programa de Formación en Centros de Trabajo (FCT)', body: '<p>Estimado/a {{@contacto}},</p>\n<p>Mi nombre es {{profesor.nombre}} {{profesor.apellidos}} y me dirijo a usted como profesor del {{centro.nombre}} para explorar la posibilidad de que su empresa colabore con nosotros acogiendo a estudiantes para realizar la fase de formación en empresa (FFE). Esta FFE están reguladas por la Ley de Formación Profesional y son un requisito indispensable para que los estudiantes completen su formación académica.</p>\n<p>La FFE están diseñadas para que los estudiantes continúen su formación en el ámbito laboral, obteniendo así una experiencia formativa en un entorno de trabajo real.</p>\n<p>Confiamos en que esta colaboración no solo será una oportunidad de aprendizaje valiosa para nuestros alumnos, sino también una manera de que su empresa tenga acceso a jóvenes con motivación, energía y conocimientos actualizados que seguro serán útiles en su organización.</p>\n<p>Nos encantaría poder concertar una reunión o llamada para hablar en más detalle sobre esta posibilidad y resolver cualquier duda que pudiera tener. </p>\n<p>Agradezco de antemano su atención y quedo a la espera de su respuesta.</p>\n<p>Un cordial saludo. Atentamente,</p>', documents: JSON.stringify([]), recipientTarget: 'empresa', icon: 'contacto', color: 'blue', place: 'empresa', tipo: 'sistema', grupo: 'varios-registros' },
+      { plantillaId: 'nueva-colaboracion', name: 'Nueva colaboración', description: 'Empresas con convenio existente', subject: 'Colaboración para FCT', body: '<p>Estimado/a {{@contacto}},</p>\n<p>Desde el {{centro.nombre}} os contactamos para explorar la posibilidad, un curso más, de colaborar para el programa de Formación en Empresas (FFE) del curso {{curso.descripcion}}.</p>\n<p>Queremos seguir colaborando con vosotros porque consideramos que vuestra empresa es un excelente lugar para que nuestros estudiantes realicen sus prácticas formativas.</p>\n<p>Necesitamos saber, lo antes posible, si estáis dispuestos a seguir colaborando, y de ser así, que previsión de plazas tendríais.</p>\n<p>Si necesitáis más información, no dudéis en contactarnos.</p>\n<p>Quedamos a la espera de su respuesta.</p>\n<p>Atentamente,</p>', documents: JSON.stringify([]), recipientTarget: 'empresa', icon: 'colaboracion', color: 'emerald', place: 'empresa', tipo: 'sistema', grupo: 'varios-registros' },
+      { plantillaId: 'seg', name: 'Envío de seguimiento', description: 'Seguimiento → Tutor de la empresa', subject: 'Seguimiento FFE', body: '<p>Estimado/a, {{empresa.personaContacto}}</p>\n<p>Adjuntamos la ficha de seguimiento correspondiente a la fase de formación en empresa.</p>\n<p>Rogamos revisen el documento detenidamente y si todo está en orden, nos lo devuelvan firmado.</p>\n<p>Recuerden que es importante que el seguimiento esté correctamente rellenado y firmado para poder proceder con el proceso. Con respecto a la firma, tenga en cuenta que:</p>\n<ul>\n<li>Si la <strong>firma es manual</strong>, se debe imprimir el documento, firmarlo y a poder ser sellarlo y entregárselo al alumno/a antes de la finalización de las prácticas para que nos lo entregue cuando venga al centro.</li>\n<li>Si la <strong>firma es mediante certificado digital</strong>, bastaría con firmar el documento y enviármelo a mi por correo.</li>\n</ul>\n<p>Agradecemos de antemano su colaboración.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['seguimiento']), recipientTarget: 'tutor', icon: 'seguimiento', color: 'blue', place: 'relaciones', tipo: 'sistema', grupo: 'registro-individual' },
+      { plantillaId: 'val', name: 'Envío de valoración', description: 'Valoración → Tutor de la empresa', subject: 'Valoración FFE', body: '<p>Estimado/a, {{empresa.personaContacto}}</p>\n<p>Adjuntamos la ficha de valoración correspondiente a la fase de formación en empresa.</p>\n<p>Rogamos revisen el documento detenidamente y si todo está en orden, nos lo devuelvan firmado.</p>\n<p>Con respecto a la firma, tenga en cuenta que:</p>\n<ul>\n<li>Si la <strong>firma es manual</strong>, se debe imprimir el documento, firmarlo y a poder ser sellarlo y entregárselo al alumno/a antes de la finalización de las prácticas para que nos lo entregue cuando venga al centro.</li>\n<li>Si la <strong>firma es mediante certificado digital</strong>, bastaría con firmar el documento y enviármelo a mi por correo.</li>\n</ul>\n<p>Agradecemos de antemano su colaboración.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['valoracion']), recipientTarget: 'tutor', icon: 'valoracion', color: 'purple', place: 'relaciones', tipo: 'sistema', grupo: 'registro-individual' },
+      { plantillaId: 'carta-inicio', name: 'Envío de carta de inicio', description: 'Carta de inicio → Empresa', subject: 'Carta de inicio de las FFE', body: '<p>Estimado/a, {{empresa.personaContacto}}</p>\n<p>Adjuntamos la carta de inicio correspondiente a la fase de formación en empresa.</p>\n<p>En esta carta se especifican aspectos importantes relacionados con el inicio de las FFE, por lo que rogamos revisen el documento detenidamente.</p>\n<p>Agradecemos de antemano su colaboración.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['carta']), recipientTarget: 'empresa', icon: 'carta', color: 'amber', place: 'relaciones', tipo: 'sistema', grupo: 'registro-individual' },
+      { plantillaId: 'cal', name: 'Envío de calendario', description: 'Calendario → Estudiante', subject: 'Calendario FFE', body: '<p>Estimado/a, {{empresa.personaContacto}}</p>\n<p>Adjuntamos el calendario correspondiente a la fase de formación en empresa.</p>\n<p>Rogamos revisen el documento detenidamente.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['calendario']), recipientTarget: 'estudiante_conditional', icon: 'calendario', color: 'green', place: 'relaciones', tipo: 'sistema', grupo: 'registro-individual' },
+      { plantillaId: 'otros', name: 'Otros', description: 'Correo libre sin plantilla predefinida ni documentos adjuntos', subject: '', body: '', documents: JSON.stringify([]), recipientTarget: 'ninguno', icon: 'otros', color: 'slate', place: '', tipo: 'sistema', grupo: 'varios-registros' },
+    ];
+    const stmt = db.prepare(`INSERT INTO plantillas_correo (plantillaId, name, description, subject, body, documents, recipientTarget, icon, color, place, tipo, grupo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+    for (const p of seedData) {
+      stmt.run(p.plantillaId, p.name, p.description, p.subject, p.body, p.documents, p.recipientTarget, p.icon, p.color, p.place, p.tipo, p.grupo || '');
+    }
+    console.log("Seed: plantillas_correo migradas a DB");
+  }
+  db.prepare("UPDATE plantillas_correo SET place = '' WHERE plantillaId = 'otros' AND place != ''").run();
 }
 
 // Ejecutamos el intento inicial al importar el módulo
