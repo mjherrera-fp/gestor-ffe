@@ -1,11 +1,13 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { TutorEmpresa } from '../../../types/index.ts';
+import { Modal } from '../../../components/ui/Modal.tsx';
 
 const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 const labelCls = 'block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1';
 
 interface TutorFormModalProps {
+  open: boolean;
   editing: TutorEmpresa | null;
   formData: Partial<TutorEmpresa>;
   onChange: (data: Partial<TutorEmpresa>) => void;
@@ -13,16 +15,15 @@ interface TutorFormModalProps {
   onClose: () => void;
 }
 
-export function TutorFormModal({ editing, formData, onChange, onSubmit, onClose }: TutorFormModalProps) {
+export function TutorFormModal({ open, editing, formData, onChange, onSubmit, onClose }: TutorFormModalProps) {
   const update = (field: keyof TutorEmpresa) => (e: React.ChangeEvent<HTMLInputElement>) =>
     onChange({ ...formData, [field]: e.target.value });
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+    <Modal open={open} onClose={onClose} maxWidth="md" cardClass="rounded-3xl">
 
         {/* Header */}
-        <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+        <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
           <h3 className="text-xl font-black text-slate-900 tracking-tight">
             {editing ? 'Editar Tutor' : 'Nuevo Tutor'}
           </h3>
@@ -32,7 +33,7 @@ export function TutorFormModal({ editing, formData, onChange, onSubmit, onClose 
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-8 space-y-4">
+        <form onSubmit={onSubmit} className="p-8 space-y-4 overflow-y-auto flex-1">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Nombre</label>
@@ -73,7 +74,6 @@ export function TutorFormModal({ editing, formData, onChange, onSubmit, onClose 
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

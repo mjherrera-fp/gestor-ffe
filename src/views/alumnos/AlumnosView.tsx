@@ -9,6 +9,7 @@ import { AlumnoFormModal }      from './components/AlumnoFormModal.tsx';
 import DetalleAcademicoModal    from './components/DetalleAcademicoModal.tsx';
 import { EmailModal }           from '../../components/EmailModal.tsx';
 import { EmailTypeSelector }    from '../../components/EmailTypeSelector.tsx';
+import { Modal }                from '../../components/ui/Modal.tsx';
 
 interface Props {
   cursoId: number;
@@ -87,19 +88,18 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
       )}
 
       {/* ── MODAL: Formulario alumno ── */}
-      {ctx.showForm && (
-        <AlumnoFormModal
-          editing={ctx.editing}
-          formData={ctx.formData}
-          setFormData={ctx.setFormData}
-          detalles={ctx.detalles}
-          pendingSubmitData={ctx.pendingSubmitData}
-          onSubmit={ctx.handleSubmit}
-          onConfirmClearDates={() => ctx.handleSubmit(undefined, ctx.pendingSubmitData, true)}
-          onCancelWarning={() => ctx.setPendingSubmitData(null)}
-          onClose={() => ctx.setShowForm(false)}
-        />
-      )}
+      <AlumnoFormModal
+        open={ctx.showForm}
+        editing={ctx.editing}
+        formData={ctx.formData}
+        setFormData={ctx.setFormData}
+        detalles={ctx.detalles}
+        pendingSubmitData={ctx.pendingSubmitData}
+        onSubmit={ctx.handleSubmit}
+        onConfirmClearDates={() => ctx.handleSubmit(undefined, ctx.pendingSubmitData, true)}
+        onCancelWarning={() => ctx.setPendingSubmitData(null)}
+        onClose={() => ctx.setShowForm(false)}
+      />
 
       {/* ── VISTA GRID o TABLA ── */}
       {ctx.viewMode === 'grid' ? (
@@ -128,43 +128,40 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
       )}
 
       {/* ── MODAL: Detalle académico ── */}
-      {ctx.academicDetailAlumno && (
-        <DetalleAcademicoModal
-          alumno={ctx.academicDetailAlumno}
-          onClose={() => {
-            ctx.setAcademicDetailAlumno(null);
-            ctx.fetchAlumnos();
-          }}
-        />
-      )}
+      <DetalleAcademicoModal
+        open={!!ctx.academicDetailAlumno}
+        alumno={ctx.academicDetailAlumno!}
+        onClose={() => {
+          ctx.setAcademicDetailAlumno(null);
+          ctx.fetchAlumnos();
+        }}
+      />
 
       {/* ── MODAL: Resultado importación ── */}
-      {ctx.importResult && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 text-center">
-            <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
-              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Importación finalizada</h3>
-            <div className="space-y-2 text-sm text-slate-600">
-              <p><span className="font-bold text-emerald-600">{ctx.importResult.success}</span> alumnos nuevos</p>
-              <p><span className="font-bold text-blue-600">{ctx.importResult.updated}</span> alumnos actualizados</p>
-            </div>
-            <button
-              onClick={() => ctx.setImportResult(null)}
-              className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
-            >
-              Aceptar
-            </button>
+      <Modal open={!!ctx.importResult} onClose={() => ctx.setImportResult(null)} maxWidth="sm">
+        <div className="p-6 text-center">
+          <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
           </div>
+          <h3 className="text-lg font-bold text-slate-800 mb-4">Importación finalizada</h3>
+          <div className="space-y-2 text-sm text-slate-600">
+            <p><span className="font-bold text-emerald-600">{ctx.importResult?.success}</span> alumnos nuevos</p>
+            <p><span className="font-bold text-blue-600">{ctx.importResult?.updated}</span> alumnos actualizados</p>
+          </div>
+          <button
+            onClick={() => ctx.setImportResult(null)}
+            className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+          >
+            Aceptar
+          </button>
         </div>
-      )}
+      </Modal>
 
       {/* ── MODAL: Email type selector ── */}
       <EmailTypeSelector
-        isOpen={ctx.showEmailTypeSelector}
+        open={ctx.showEmailTypeSelector}
         onClose={() => { ctx.setShowEmailTypeSelector(false); ctx.setPendingEmailTarget(null); }}
         onConfirm={ctx.handleEmailTypeConfirm}
         nombreAlumno={ctx.pendingEmailTarget?.alumno ? `${ctx.pendingEmailTarget.alumno.nombre} ${ctx.pendingEmailTarget.alumno.apellidos}` : undefined}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, X, BarChart3, Users, Building2 } from 'lucide-react';
+import { Trash2, X, BarChart3, Users, Building2, User, Handshake, MoreHorizontal } from 'lucide-react';
 
 import { useEmpresas }                from './hooks/useEmpresas.ts';
 import { EmpresasListado }            from './components/EmpresasListado.tsx';
@@ -8,6 +8,8 @@ import { EmpresaFormModal }           from './components/EmpresaFormModal.tsx';
 import { TutorFormModal }             from './components/TutorFormModal.tsx';
 import { EmpresaEstadisticasPanel }   from './components/EmpresaEstadisticasPanel.tsx';
 import { EmailModal }                 from '../../components/EmailModal.tsx';
+import { Modal }                      from '../../components/ui/Modal.tsx';
+import { PLANTILLAS_CORREO }          from '../../../templates/emails/emailTemplates.ts';
 
 interface Props {
   cursoId: number;
@@ -55,6 +57,8 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
           onFilterUltimosCursosChange={ctx.setFilterUltimosCursos}
           filterColaboracion={ctx.filterColaboracion}
           onFilterColaboracionChange={ctx.setFilterColaboracion}
+          filterContactado={ctx.filterContactado}
+          onFilterContactadoChange={ctx.setFilterContactado}
           cursosUnicos={ctx.cursosUnicos}
         />
 
@@ -164,61 +168,119 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
       )}
 
       {/* ── MODAL: Empresa ── */}
-      {ctx.showEmpresaForm && (
-        <EmpresaFormModal
-          editing={ctx.editingEmpresa}
-          formData={ctx.empresaFormData}
-          onChange={ctx.setEmpresaFormData}
-          convenioRapido={ctx.convenioRapido}
-          onConvenioRapidoChange={ctx.setConvenioRapido}
-          centros={ctx.centros}
-          onSubmit={ctx.handleEmpresaSubmit}
-          onClose={() => ctx.setShowEmpresaForm(false)}
-        />
-      )}
+      <EmpresaFormModal
+        open={ctx.showEmpresaForm}
+        editing={ctx.editingEmpresa}
+        formData={ctx.empresaFormData}
+        onChange={ctx.setEmpresaFormData}
+        convenioRapido={ctx.convenioRapido}
+        onConvenioRapidoChange={ctx.setConvenioRapido}
+        centros={ctx.centros}
+        onSubmit={ctx.handleEmpresaSubmit}
+        onClose={() => ctx.setShowEmpresaForm(false)}
+      />
 
       {/* ── MODAL: Tutor ── */}
-      {ctx.showTutorForm && (
-        <TutorFormModal
-          editing={ctx.editingTutor}
-          formData={ctx.tutorFormData}
-          onChange={ctx.setTutorFormData}
-          onSubmit={ctx.handleTutorSubmit}
-          onClose={() => ctx.setShowTutorForm(false)}
-        />
-      )}
+      <TutorFormModal
+        open={ctx.showTutorForm}
+        editing={ctx.editingTutor}
+        formData={ctx.tutorFormData}
+        onChange={ctx.setTutorFormData}
+        onSubmit={ctx.handleTutorSubmit}
+        onClose={() => ctx.setShowTutorForm(false)}
+      />
 
       {/* ── MODAL: Resultado importación ── */}
-      {ctx.importResult && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 text-center">
-            <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
-              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Importación finalizada</h3>
-            <div className="space-y-2 text-sm text-slate-600">
-              <p><span className="font-bold text-emerald-600">{ctx.importResult.success}</span> empresas nuevas</p>
-              <p><span className="font-bold text-blue-600">{ctx.importResult.updated}</span> empresas actualizadas</p>
-            </div>
+      <Modal open={!!ctx.importResult} onClose={() => ctx.setImportResult(null)} maxWidth="sm">
+        <div className="p-6 text-center">
+          <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-slate-800 mb-4">Importación finalizada</h3>
+          <div className="space-y-2 text-sm text-slate-600">
+            <p><span className="font-bold text-emerald-600">{ctx.importResult?.success}</span> empresas nuevas</p>
+            <p><span className="font-bold text-blue-600">{ctx.importResult?.updated}</span> empresas actualizadas</p>
+          </div>
+          <button
+            onClick={() => ctx.setImportResult(null)}
+            className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+          >
+            Aceptar
+          </button>
+        </div>
+      </Modal>
+
+      {/* ── MODAL: SELECCIÓN DE PLANTILLA DE CORREO ── */}
+      <Modal open={ctx.showPlantillaSelector} onClose={() => ctx.setShowPlantillaSelector(false)} maxWidth="lg">
+        <div className="px-6 py-5 flex flex-col flex-1 min-h-0 gap-3 mb-0">
+          <div className="shrink-0">
+            <h3 className="text-lg font-bold text-slate-800">Seleccionar Plantilla</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Elige la plantilla de correo que deseas enviar.
+            </p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto min-h-0 space-y-3">
+            {(() => {
+              const componentMap: Record<string, React.ComponentType<{ className?: string }>> = {
+                contacto: User,
+                colaboracion: Handshake,
+                otros: MoreHorizontal,
+              };
+              const colorMap: Record<string, { border: string; bg: string; iconBg: string; iconText: string; btnText: string }> = {
+                blue: { border: 'border-blue-100', bg: 'bg-blue-50/50', iconBg: 'bg-blue-100', iconText: 'text-blue-600', btnText: 'text-blue-600' },
+                emerald: { border: 'border-emerald-100', bg: 'bg-emerald-50/50', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', btnText: 'text-emerald-600' },
+                slate: { border: 'border-slate-200', bg: 'bg-white', iconBg: 'bg-slate-100', iconText: 'text-slate-500', btnText: 'text-slate-500' },
+              };
+              return PLANTILLAS_CORREO
+                .filter(p => p.id === 'nuevo-contacto' || p.id === 'nueva-colaboracion' || p.id === 'otros')
+                .map((p) => {
+                const c = colorMap[p.color] || colorMap.slate;
+                const IconComponent = componentMap[p.icon] || componentMap.otros;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => ctx.handleEmailConPlantilla(p.id)}
+                    className={`w-full flex items-center gap-4 p-4 rounded-xl border ${c.border} ${c.bg} hover:bg-slate-50 hover:border-slate-300 transition-all text-left`}
+                  >
+                    <div className={`h-10 w-10 rounded-lg ${c.iconBg} ${c.iconText} flex items-center justify-center shrink-0`}>
+                      <IconComponent className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-800">{p.name}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{p.description}</p>
+                    </div>
+                    <span className={`text-[10px] font-bold ${c.btnText} uppercase shrink-0`}>Seleccionar</span>
+                  </button>
+                );
+              });
+            })()}
+          </div>
+
+          <div className="shrink-0 flex justify-end pt-4 border-t border-slate-100">
             <button
-              onClick={() => ctx.setImportResult(null)}
-              className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+              type="button"
+              onClick={() => ctx.setShowPlantillaSelector(false)}
+              className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
             >
-              Aceptar
+              Cancelar
             </button>
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* ── MODAL: Email ── */}
       <EmailModal
         isOpen={ctx.showEmailModal}
-        onClose={() => ctx.setShowEmailModal(false)}
+        onClose={() => { ctx.setShowEmailModal(false); ctx.setPerRecipientData(undefined); }}
         initialTo={ctx.emailTo}
         initialBcc={ctx.emailBcc}
         initialAttachments={ctx.emailAttachments}
+        initialSubject={ctx.emailSubject}
+        initialBody={ctx.emailBody}
+        perRecipientData={ctx.perRecipientData}
         onGoToConfig={onGoToConfig}
         contextualContactIds={ctx.contextualContactIds}
       />

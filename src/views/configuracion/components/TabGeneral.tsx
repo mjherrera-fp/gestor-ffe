@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, FileDown, FolderOpen, Square, CheckSquare, Circle, CheckCircle2 } from 'lucide-react';
+import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, Trash2, FileDown, FolderOpen, Square, CheckSquare, Circle, CheckCircle2 } from 'lucide-react';
 import { EmpresaFestivosModal } from './EmpresaFestivosModal.tsx';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
@@ -153,6 +153,10 @@ export function TabGeneral() {
   const handleSaveEmpresaFestivos = (localidad: string, festivos: string[]) => {
     setEmpresaFestivos(prev => ({ ...prev, [localidad]: festivos }));
     setFestivosModalLocalidad(null);
+  };
+
+  const handleDeleteAllEmpresaFestivos = (localidad: string) => {
+    setEmpresaFestivos(prev => ({ ...prev, [localidad]: [] }));
   };
 
   // ── Handlers creación de ficheros ──
@@ -321,7 +325,7 @@ export function TabGeneral() {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <FolderOpen className={`h-4 w-4 ${modoCreacion === 'descargar' ? 'text-indigo-500' : 'text-slate-500'}`} />
+                    <FileDown className={`h-4 w-4 ${modoCreacion === 'descargar' ? 'text-indigo-500' : 'text-slate-500'}`} />
                     <span className={`text-sm font-semibold ${modoCreacion === 'descargar' ? 'text-indigo-800' : 'text-slate-800'}`}>Descargar</span>
                   </div>
                   <p className={`text-xs mt-1 ${modoCreacion === 'descargar' ? 'text-indigo-600' : 'text-slate-500'}`}>
@@ -345,7 +349,7 @@ export function TabGeneral() {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <FileDown className={`h-4 w-4 ${modoCreacion === 'crear' ? 'text-emerald-500' : 'text-slate-500'}`} />
+                    <FolderOpen className={`h-4 w-4 ${modoCreacion === 'crear' ? 'text-emerald-500' : 'text-slate-500'}`} />
                     <span className={`text-sm font-semibold ${modoCreacion === 'crear' ? 'text-emerald-800' : 'text-slate-800'}`}>Guardar en carpeta docs/</span>
                   </div>
                   <p className={`text-xs mt-1 ${modoCreacion === 'crear' ? 'text-emerald-600' : 'text-slate-500'}`}>
@@ -425,14 +429,14 @@ export function TabGeneral() {
                       }
                     </p>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer ml-4 flex-shrink-0">
+                  <label className="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
                     <input
                       type="checkbox"
                       checked={usarFestivos}
                       onChange={e => setUsarFestivos(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                   </label>
                 </div>
               </div>
@@ -453,14 +457,14 @@ export function TabGeneral() {
                       }
                     </p>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer ml-4 flex-shrink-0">
+                  <label className="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
                     <input
                       type="checkbox"
                       checked={usarFestivosEmpresa}
                       onChange={e => setUsarFestivosEmpresa(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                   </label>
                 </div>
               </div>
@@ -493,14 +497,25 @@ export function TabGeneral() {
                               </p>
                             </div>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => setFestivosModalLocalidad(loc)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0 ml-3"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                            Festivos
-                          </button>
+                          <div className="flex items-center gap-2 shrink-0 ml-3">
+                            {festivosLoc.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteAllEmpresaFestivos(loc)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-200 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setFestivosModalLocalidad(loc)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                            >
+                              <Plus className="h-3.5 w-3.5" />
+                              Festivos
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -522,14 +537,13 @@ export function TabGeneral() {
       </div>
 
       {/* ─── MODAL FESTIVOS EMPRESA ─── */}
-      {festivosModalLocalidad && (
-        <EmpresaFestivosModal
-          localidad={festivosModalLocalidad}
-          festivos={empresaFestivos[festivosModalLocalidad] || []}
-          onSave={(festivos) => handleSaveEmpresaFestivos(festivosModalLocalidad, festivos)}
-          onClose={() => setFestivosModalLocalidad(null)}
-        />
-      )}
+      <EmpresaFestivosModal
+        open={!!festivosModalLocalidad}
+        localidad={festivosModalLocalidad}
+        festivos={empresaFestivos[festivosModalLocalidad || ''] || []}
+        onSave={(festivos) => handleSaveEmpresaFestivos(festivosModalLocalidad || '', festivos)}
+        onClose={() => setFestivosModalLocalidad(null)}
+      />
 
     </div>
   );

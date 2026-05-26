@@ -27,3 +27,15 @@ export interface EmailSendRequest {
 }
 
 export type EmailTargetType = 'educamadrid' | 'personal' | 'ambos';
+
+export interface PlantillaCorreo {
+  id: string;
+  name: string;
+  description: string;
+  subject: string;
+  body: string;
+  documents: string[];
+  recipientTarget: 'empresa' | 'tutor' | 'estudiante_conditional' | 'ninguno';
+  icon: string;
+  color: string;
+}

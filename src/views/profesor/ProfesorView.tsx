@@ -84,38 +84,36 @@ export default function ProfesorView({ profesor, onUpdate, onRefresh }: Props) {
       />
 
       {/* ── MODAL: Centro ── */}
-      {ctx.showCentroForm && (
-        <CentroFormModal
-          editing={ctx.editingCentro}
-          formData={ctx.centroFormData}
-          onChange={ctx.setCentroFormData}
-          newFestivo={ctx.newFestivo}
-          setNewFestivo={ctx.setNewFestivo}
-          onAddFestivo={ctx.addFestivo}
-          onRemoveFestivo={ctx.removeFestivo}
-          onSubmit={ctx.handleSaveCentro}
-          onClose={() => ctx.setShowCentroForm(false)}
-        />
-      )}
+      <CentroFormModal
+        open={ctx.showCentroForm}
+        editing={ctx.editingCentro}
+        formData={ctx.centroFormData}
+        onChange={ctx.setCentroFormData}
+        newFestivo={ctx.newFestivo}
+        setNewFestivo={ctx.setNewFestivo}
+        onAddFestivo={ctx.addFestivo}
+        onRemoveFestivo={ctx.removeFestivo}
+        onSubmit={ctx.handleSaveCentro}
+        onClose={() => ctx.setShowCentroForm(false)}
+      />
 
       {/* ── MODAL: Detalle Académico ── */}
-      {ctx.showDetalleForm && (
-        <DetalleFormModal
-          editing={ctx.editingDetalle}
-          formData={ctx.detalleFormData}
-          onChange={ctx.setDetalleFormData}
-          newRA={ctx.newRA}
-          onNewRAChange={ctx.setNewRA}
-          onAddRA={ctx.addRA}
-          onRemoveRA={ctx.removeRA}
-          newTutoria={ctx.newTutoria}
-          setNewTutoria={ctx.setNewTutoria}
-          onAddTutoria={ctx.addTutoria}
-          onRemoveTutoria={ctx.removeTutoria}
-          onSubmit={ctx.handleSaveDetalle}
-          onClose={() => ctx.setShowDetalleForm(false)}
-        />
-      )}
+      <DetalleFormModal
+        open={ctx.showDetalleForm}
+        editing={ctx.editingDetalle}
+        formData={ctx.detalleFormData}
+        onChange={ctx.setDetalleFormData}
+        newRA={ctx.newRA}
+        onNewRAChange={ctx.setNewRA}
+        onAddRA={ctx.addRA}
+        onRemoveRA={ctx.removeRA}
+        newTutoria={ctx.newTutoria}
+        setNewTutoria={ctx.setNewTutoria}
+        onAddTutoria={ctx.addTutoria}
+        onRemoveTutoria={ctx.removeTutoria}
+        onSubmit={ctx.handleSaveDetalle}
+        onClose={() => ctx.setShowDetalleForm(false)}
+      />
     </div>
   );
 }

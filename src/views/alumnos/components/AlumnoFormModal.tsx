@@ -2,12 +2,14 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { Alumno, DetalleAcademico } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 import { HorasWarningModal } from './HorasWarningModal.tsx';
 
 const inputClass = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 const labelClass = 'block text-sm font-medium text-slate-700 mb-1';
 
 interface AlumnoFormModalProps {
+  open: boolean;
   editing: Alumno | null;
   formData: Partial<Alumno>;
   setFormData: React.Dispatch<React.SetStateAction<Partial<Alumno>>>;
@@ -20,7 +22,7 @@ interface AlumnoFormModalProps {
 }
 
 export function AlumnoFormModal({
-  editing, formData, setFormData,
+  open, editing, formData, setFormData,
   detalles, pendingSubmitData,
   onSubmit, onConfirmClearDates, onCancelWarning, onClose,
 }: AlumnoFormModalProps) {
@@ -28,11 +30,10 @@ export function AlumnoFormModal({
     setFormData(prev => ({ ...prev, [field]: e.target.value }));
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
+    <Modal open={open} onClose={onClose} maxWidth="2xl">
 
         {/* Header */}
-        <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
           <h3 className="text-xl font-bold text-slate-800">
             {editing ? 'Editar Expediente' : 'Nuevo Registro de Alumno'}
           </h3>
@@ -44,13 +45,14 @@ export function AlumnoFormModal({
         {/* Modal advertencia de horas (anidado) */}
         {pendingSubmitData && (
           <HorasWarningModal
+            open={!!pendingSubmitData}
             onConfirm={onConfirmClearDates}
             onCancel={onCancelWarning}
           />
         )}
 
         {/* Formulario */}
-        <form onSubmit={onSubmit} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={onSubmit} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto flex-1">
           <div>
             <label className={labelClass}>Nombre</label>
             <input required className={inputClass} value={formData.nombre || ''} onChange={update('nombre')} />
@@ -136,7 +138,6 @@ export function AlumnoFormModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

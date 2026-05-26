@@ -73,7 +73,7 @@ export function ConvenioDetalle({
         <div className="flex items-center justify-between">
           <div>
             <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Estado Actual</div>
-            <div className="text-sm font-bold text-warning">
+            <div className={`text-sm font-bold ${selectedConvenio.estado === ConvenioEstado.COMPLETADO ? 'text-emerald-500' : 'text-warning'}`}>
               {ConvenioEstadoLabels[selectedConvenio.estado]}
             </div>
           </div>

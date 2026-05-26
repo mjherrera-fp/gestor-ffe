@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Users,
   BookOpen,
@@ -159,7 +159,7 @@ export default function App() {
 
   const tieneProfesor = profesor !== null;
   const tieneCurso = activeCurso !== null;
-  const navItems = [
+  const navItems = useMemo(() => [
     { id: 'dashboard', label: 'Profesor', icon: UserCircle },
     { id: 'cursos', label: 'Cursos', icon: BookOpen, disabled: !tieneProfesor },
     { id: 'panel', label: 'Panel', icon: LayoutDashboard, disabled: !tieneProfesor || !tieneCurso },
@@ -168,7 +168,7 @@ export default function App() {
     { id: 'intereses', label: 'Intereses', icon: Link, disabled: !tieneProfesor || !tieneCurso },
     { id: 'convenios', label: 'Convenios', icon: FileText, disabled: !tieneProfesor || !tieneCurso },
     { id: 'relaciones', label: 'Relaciones', icon: ArrowLeftRight, disabled: !tieneProfesor || !tieneCurso },
-  ];
+  ], [tieneProfesor, tieneCurso]);
 
   // 3. Función para intentar desbloquear
   // Función para desbloquear (recibe directamente el string del componente)
@@ -237,7 +237,7 @@ export default function App() {
   return (
     <div className="flex h-screen bg-bg-base overflow-hidden font-sans relative">
       {/* Mobile Backdrop */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isSidebarOpen && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -426,7 +426,7 @@ export default function App() {
         </header>
 
         {/* Content Area */}
-        <section className="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth">
+        <section className="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth overscroll-contain">
           <div className="max-w-7xl mx-auto pb-20">
             {/* Gate: sin profesor */}
             {!tieneProfesor && activeTab !== 'dashboard' && activeTab !== 'configuracion' && (
@@ -490,7 +490,7 @@ export default function App() {
               />
             )}
           {activeTab === 'relaciones' && activeCurso && (
-            <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} />
+            <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} profesor={profesor ?? undefined} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} />
           )}
           {activeTab === 'historico' && <HistoricoView />}
           {activeTab === 'configuracion' && <ConfiguracionView initialTab={configTab} />}
@@ -498,9 +498,7 @@ export default function App() {
         </section>
       </main>
 
-      <AnimatePresence>
-        {showCopyright && <CopyrightModal onClose={() => setShowCopyright(false)} />}
-      </AnimatePresence>
+      <CopyrightModal open={showCopyright} onClose={() => setShowCopyright(false)} />
 
       <ToastContainer
         avisos={avisos}

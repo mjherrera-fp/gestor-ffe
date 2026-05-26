@@ -1,11 +1,13 @@
 import React from 'react';
 import { X, TrendingUp } from 'lucide-react';
 import { StarRating } from '../../../components/StarRating.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 
 const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 const labelCls = 'block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1';
 
 interface RelacionEstadisticaFormModalProps {
+  open: boolean;
   empresaNombre: string;
   curso: string;
   numAlumnos: number;
@@ -18,17 +20,16 @@ interface RelacionEstadisticaFormModalProps {
 }
 
 export function RelacionEstadisticaFormModal({
-  empresaNombre, curso, numAlumnos,
+  open, empresaNombre, curso, numAlumnos,
   contratados, valoracion,
   onContratadosChange, onValoracionChange,
   onSubmit, onClose,
 }: RelacionEstadisticaFormModalProps) {
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+    <Modal open={open} onClose={onClose} maxWidth="md" cardClass="rounded-3xl">
 
-        <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+        <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
           <h3 className="text-xl font-black text-slate-900 tracking-tight">
             Estadísticas de la Empresa
           </h3>
@@ -37,7 +38,7 @@ export function RelacionEstadisticaFormModal({
           </button>
         </div>
 
-        <form onSubmit={onSubmit} className="p-8 space-y-5">
+        <form onSubmit={onSubmit} className="p-8 space-y-5 overflow-y-auto flex-1">
           <div className="space-y-2">
             <p className="text-sm font-bold text-text-main">{empresaNombre}</p>
             <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{curso}</p>
@@ -97,7 +98,6 @@ export function RelacionEstadisticaFormModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

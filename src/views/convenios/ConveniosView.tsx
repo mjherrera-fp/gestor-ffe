@@ -89,37 +89,36 @@ export default function ConveniosView({ cursoId, centroId }: Props) {
       )}
 
       {/* ── MODAL: Formulario ── */}
-      {ctx.showForm && (
-        <ConvenioFormModal
-          isEditing={ctx.isEditing}
-          formData={ctx.formData}
-          setFormData={ctx.setFormData}
-          empresas={ctx.empresas}
-          filteredEmpresas={ctx.filteredEmpresas}
-          selectedEmpresa={ctx.selectedEmpresa}
-          searchTermEmpresa={ctx.searchTermEmpresa}
-          onSearchEmpresaChange={term => {
-            ctx.setSearchTermEmpresa(term);
-            if (ctx.selectedEmpresa) {
-              const emp = ctx.empresas.find(e => e.id === ctx.selectedEmpresa);
-              if (emp && emp.nombre !== term) ctx.setSelectedEmpresa(null);
-            }
-          }}
-          onSelectEmpresa={(id, nombre) => {
-            ctx.setSelectedEmpresa(id);
-            ctx.setSearchTermEmpresa(nombre);
-          }}
-          onClearEmpresa={() => {
-            ctx.setSelectedEmpresa(null);
-            ctx.setSearchTermEmpresa('');
-          }}
-          centros={ctx.centros}
-          selectedCentro={ctx.selectedCentro}
-          onCentroChange={ctx.setSelectedCentro}
-          onSubmit={ctx.handleSubmit}
-          onClose={() => ctx.setShowForm(false)}
-        />
-      )}
+      <ConvenioFormModal
+        open={ctx.showForm}
+        isEditing={ctx.isEditing}
+        formData={ctx.formData}
+        setFormData={ctx.setFormData}
+        empresas={ctx.empresas}
+        filteredEmpresas={ctx.filteredEmpresas}
+        selectedEmpresa={ctx.selectedEmpresa}
+        searchTermEmpresa={ctx.searchTermEmpresa}
+        onSearchEmpresaChange={term => {
+          ctx.setSearchTermEmpresa(term);
+          if (ctx.selectedEmpresa) {
+            const emp = ctx.empresas.find(e => e.id === ctx.selectedEmpresa);
+            if (emp && emp.nombre !== term) ctx.setSelectedEmpresa(null);
+          }
+        }}
+        onSelectEmpresa={(id, nombre) => {
+          ctx.setSelectedEmpresa(id);
+          ctx.setSearchTermEmpresa(nombre);
+        }}
+        onClearEmpresa={() => {
+          ctx.setSelectedEmpresa(null);
+          ctx.setSearchTermEmpresa('');
+        }}
+        centros={ctx.centros}
+        selectedCentro={ctx.selectedCentro}
+        onCentroChange={ctx.setSelectedCentro}
+        onSubmit={ctx.handleSubmit}
+        onClose={() => ctx.setShowForm(false)}
+      />
     </div>
   );
 }

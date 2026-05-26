@@ -108,7 +108,7 @@ export default function TermsView({ onAccept }: TermsViewProps) {
         </p>
       </motion.div>
 
-      {showCopyright && <CopyrightModal onClose={() => setShowCopyright(false)} />}
+      <CopyrightModal open={showCopyright} onClose={() => setShowCopyright(false)} />
     </div>
   );
 }

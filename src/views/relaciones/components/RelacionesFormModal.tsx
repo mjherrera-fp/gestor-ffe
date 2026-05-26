@@ -7,11 +7,13 @@ import {
   RelacionEstado, RelacionEstadoLabels, HorarioSemanal
 } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 import { DEFAULT_HORARIO, getDayName } from '../utils/relacionesUtils.ts';
 import { BulkHorario } from '../hooks/useRelaciones.ts';
 import { formatDate } from '../../../lib/dateUtils.ts';
 
 interface RelacionFormModalProps {
+  open: boolean;
   editing: RelacionAlumno | null;
   formData: Partial<RelacionAlumno>;
   setFormData: React.Dispatch<React.SetStateAction<Partial<RelacionAlumno>>>;
@@ -51,7 +53,7 @@ interface RelacionFormModalProps {
 }
 
 export function RelacionFormModal({
-  editing, formData, setFormData,
+  open, editing, formData, setFormData,
   alumnos, searchTermAlumno, setSearchTermAlumno, filteredAlumnos,
   onAddAlumno, onRemoveAlumno, onUpdateStudentHours, onUpdateStudentStartDate, calculateEndDateForHours,
   targetStartDate, setTargetStartDate, targetEndDate, setTargetEndDate,
@@ -78,8 +80,7 @@ export function RelacionFormModal({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-slate-900/60 backdrop-blur-md">
-      <div className="bg-white rounded-4xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+    <Modal open={open} onClose={onClose} maxWidth="6xl" backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl">
 
         {/* Header */}
         <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
@@ -467,7 +468,6 @@ export function RelacionFormModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }
