@@ -327,7 +327,7 @@ export function EmailModal({
       setAttachments(initialAttachments);
       setError('');
       setSending(false);
-      setSendIndividual(initialTo.length > 1);
+      setSendIndividual(initialTo.length > 1 || hasGroupMarkers);
       editor?.commands.setContent(initialBody);
       editor?.chain().selectAll().setTextAlign('justify').setTextSelection(1).run();
     }
@@ -409,9 +409,9 @@ ${h}
     const stripMarkers = (h: string) => h.replace(/\{\{@\w+\}\}/g, '');
 
     const sendIndividualMode = sendIndividual && toList.length > 1;
-    const hasMarkers = html.includes('{{@');
+    const hasGroupMarkers = html.includes('{{@');
 
-    if (sendIndividualMode && perRecipientData && hasMarkers) {
+    if (sendIndividualMode && perRecipientData && hasGroupMarkers) {
       for (let i = 0; i < toList.length; i++) {
         const data = perRecipientData[toList[i]];
         if (!data) continue;
@@ -444,7 +444,7 @@ ${h}
       return;
     }
 
-    const finalHtml = hasMarkers ? stripMarkers(html) : html;
+    const finalHtml = hasGroupMarkers ? stripMarkers(html) : html;
 
     const payload: EmailSendRequest = {
       to: sendIndividualMode ? toList : allRecipients,
@@ -479,6 +479,7 @@ ${h}
   if (!isOpen) return null;
 
   const totalRecipients = parseEmails(to).length + parseEmails(cc).length + parseEmails(bcc).length;
+  const hasGroupMarkers = initialBody.includes('{{@');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-2">
@@ -602,7 +603,7 @@ ${h}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Para</label>
-                    {parseEmails(to).length > 1 && (
+                    {parseEmails(to).length > 1 && !hasGroupMarkers && (
                       <button
                         type="button"
                         onClick={() => setSendIndividual(!sendIndividual)}
@@ -614,6 +615,11 @@ ${h}
                       >
                         {sendIndividual ? 'Enviar 1 a 1' : 'Agrupado'}
                       </button>
+                    )}
+                    {hasGroupMarkers && (
+                      <span className="px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border bg-blue-50 text-blue-600 border-blue-200">
+                        Enviar 1 a 1
+                      </span>
                     )}
                   </div>
                   <EmailAutocompleteField
@@ -636,7 +642,7 @@ ${h}
                 </div>
 
                 {/* Permutar Para / CCO */}
-                {(parseEmails(to).length > 0 || parseEmails(bcc).length > 0) && (
+                {!hasGroupMarkers && (parseEmails(to).length > 0 || parseEmails(bcc).length > 0) && (
                   <div className="flex items-center justify-end gap-3 -mt-1">
                     {parseEmails(to).length > 0 && (
                       <button
@@ -672,39 +678,41 @@ ${h}
                   </div>
                 )}
 
-                {/* CC */}
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">CC</label>
-                  <EmailAutocompleteField
-                    value={cc}
-                    onChange={setCc}
-                    placeholder="con.copia@ejemplo.com"
-                    contacts={contacts}
-                    active={activeAutocomplete === 'cc'}
-                    onFocus={() => setActiveAutocomplete('cc')}
-                    onBlur={() => setActiveAutocomplete(null)}
-                    suggestedContacts={suggestedContacts}
-                    allEmails={allEmails}
-                    blurTimerRef={blurTimerRef}
-                  />
-                </div>
+                {!hasGroupMarkers && (
+                  <>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">CC</label>
+                      <EmailAutocompleteField
+                        value={cc}
+                        onChange={setCc}
+                        placeholder="con.copia@ejemplo.com"
+                        contacts={contacts}
+                        active={activeAutocomplete === 'cc'}
+                        onFocus={() => setActiveAutocomplete('cc')}
+                        onBlur={() => setActiveAutocomplete(null)}
+                        suggestedContacts={suggestedContacts}
+                        allEmails={allEmails}
+                        blurTimerRef={blurTimerRef}
+                      />
+                    </div>
 
-                {/* BCC */}
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">CCO</label>
-                  <EmailAutocompleteField
-                    value={bcc}
-                    onChange={setBcc}
-                    placeholder="cco@ejemplo.com"
-                    contacts={contacts}
-                    active={activeAutocomplete === 'bcc'}
-                    onFocus={() => setActiveAutocomplete('bcc')}
-                    onBlur={() => setActiveAutocomplete(null)}
-                    suggestedContacts={suggestedContacts}
-                    allEmails={allEmails}
-                    blurTimerRef={blurTimerRef}
-                  />
-                </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">CCO</label>
+                      <EmailAutocompleteField
+                        value={bcc}
+                        onChange={setBcc}
+                        placeholder="cco@ejemplo.com"
+                        contacts={contacts}
+                        active={activeAutocomplete === 'bcc'}
+                        onFocus={() => setActiveAutocomplete('bcc')}
+                        onBlur={() => setActiveAutocomplete(null)}
+                        suggestedContacts={suggestedContacts}
+                        allEmails={allEmails}
+                        blurTimerRef={blurTimerRef}
+                      />
+                    </div>
+                  </>
+                )}
 
                 {/* Asunto */}
                 <div>
@@ -767,10 +775,10 @@ ${h}
                   </div>
                 </div>
 
-                {initialBody.includes('{{@') && (
+                {hasGroupMarkers && (
                   <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-700 rounded-lg text-xs border border-amber-200">
                     <Info className="h-4 w-4 shrink-0" />
-                    <span>El cuerpo contiene marcadores <code className="font-mono font-bold">{'{{@...}}'}</code> que se sustituirán automáticamente al enviar según el destinatario.</span>
+                    <span>El cuerpo contiene marcadores <code className="font-mono font-bold">{'{{@...}}'}</code> que se sustituirán automáticamente al enviar según el destinatario. Por este motivo solo será posible enviar correos 1 a 1 a destinatarios en el Para.</span>
                   </div>
                 )}
 
