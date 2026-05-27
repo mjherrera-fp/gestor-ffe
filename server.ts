@@ -9,7 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { db } from './src/lib/db.ts';
-import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, EmpresaFestivosDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, PlantillaCorreoDAO, MarcadorPersonalizadoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
+import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, EmpresaFestivosDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, PlantillaCorreoDAO, MarcadorPersonalizadoDAO, ContactoDAO, GrupoContactoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 
@@ -575,6 +575,77 @@ async function startServer() {
 
   // Contactos para autocompletado de email
   app.get('/api/email-contacts', (req, res) => res.json(EmailContactsDAO.getAll()));
+
+  // CRUD Contactos manuales
+  app.get('/api/contactos', (req, res) => res.json(ContactoDAO.getAll()));
+  app.post('/api/contactos', (req, res) => {
+    const { nombre, email, telefono } = req.body;
+    if (!nombre || !email) return res.status(400).json({ error: 'Nombre y email son obligatorios' });
+    const existing = (ContactoDAO.getAll() as any[]).find((c: any) => c.email.toLowerCase() === email.toLowerCase().trim());
+    if (existing) return res.status(400).json({ error: 'Ya existe un contacto con ese email' });
+    const id = ContactoDAO.create({ nombre, email, telefono: telefono || '' });
+    res.json({ id });
+  });
+  app.post('/api/contactos/batch', (req, res) => {
+    const { raw } = req.body;
+    if (!raw) return res.status(400).json({ error: 'No hay datos' });
+    const re = /([^,<]+)\s*<([^>]+)>/g;
+    let match;
+    let count = 0;
+    let skipped = 0;
+    const seen = new Set<string>();
+    const existingEmails = new Set(
+      (ContactoDAO.getAll() as any[]).map((c: any) => c.email.toLowerCase().trim())
+    );
+    while ((match = re.exec(raw)) !== null) {
+      const nombre = match[1].trim();
+      const email = match[2].trim().toLowerCase();
+      if (!nombre || !email) continue;
+      if (seen.has(email) || existingEmails.has(email)) {
+        skipped++;
+        continue;
+      }
+      seen.add(email);
+      try {
+        ContactoDAO.create({ nombre, email, telefono: '' });
+        count++;
+      } catch {
+        skipped++;
+      }
+    }
+    if (count === 0) return res.status(400).json({ error: `No se pudo importar ningún contacto. ${skipped > 0 ? `${skipped} contacto(s) ya existían.` : 'Formato esperado: Nombre Apellidos <email>, ...'}` });
+    res.json({ count, skipped });
+  });
+  app.put('/api/contactos/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const { nombre, email, telefono } = req.body;
+    ContactoDAO.update(id, { nombre, email, telefono });
+    res.json({ success: true });
+  });
+  app.delete('/api/contactos/:id', (req, res) => {
+    ContactoDAO.delete(Number(req.params.id));
+    res.json({ success: true });
+  });
+
+  // CRUD Grupos de contactos
+  app.get('/api/grupos-contactos', (req, res) => res.json(GrupoContactoDAO.getAllConMiembros()));
+  app.post('/api/grupos-contactos', (req, res) => {
+    const { nombre, miembros } = req.body;
+    if (!nombre) return res.status(400).json({ error: 'Nombre es obligatorio' });
+    if (!miembros || miembros.length < 2) return res.status(400).json({ error: 'El grupo debe tener al menos 2 miembros' });
+    const id = GrupoContactoDAO.create({ nombre, miembros });
+    res.json({ id });
+  });
+  app.put('/api/grupos-contactos/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const { nombre, miembros } = req.body;
+    GrupoContactoDAO.update(id, { nombre, miembros });
+    res.json({ success: true });
+  });
+  app.delete('/api/grupos-contactos/:id', (req, res) => {
+    GrupoContactoDAO.delete(Number(req.params.id));
+    res.json({ success: true });
+  });
 
   // Contexto para sugerencias de email
   app.get('/api/email-contexto', (req, res) => {

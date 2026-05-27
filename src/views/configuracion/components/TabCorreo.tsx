@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Mail, Settings, Send, Loader2, Eye, EyeOff, Trash2, Square, CheckSquare, FileText, ClipboardCheck, Play, CheckCircle, User, Building2, Handshake, MoreHorizontal, Plus, Pencil, X, Save, PencilRuler } from 'lucide-react';
+import { Mail, Settings, Send, Loader2, Eye, EyeOff, Trash2, Square, CheckSquare, FileText, ClipboardCheck, Play, CheckCircle, User, Building2, Handshake, MoreHorizontal, Plus, Pencil, X, Save, PencilRuler, Users, Phone } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
+import { Contacto, GrupoContacto, GrupoMiembroResolved } from '../../../types/email.ts';
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -168,12 +169,31 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
   const [filterTipo, setFilterTipo] = useState('');
   const [editTemplate, setEditTemplate] = useState<PlantillaEdit | null>(null);
   const [savingTemplate, setSavingTemplate] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'template' | 'marker'; id: number } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'template' | 'marker' | 'contacto' | 'grupo'; id: number } | null>(null);
 
   // Marker state
   const [marcadores, setMarcadores] = useState<MarcadorEdit[]>([]);
   const [editMarker, setEditMarker] = useState<MarcadorEdit | null>(null);
   const [savingMarker, setSavingMarker] = useState(false);
+
+  // Contact state
+  const [contactos, setContactos] = useState<Contacto[]>([]);
+  const [editContacto, setEditContacto] = useState<Contacto | null>(null);
+  const [savingContacto, setSavingContacto] = useState(false);
+  const [batchContactos, setBatchContactos] = useState('');
+  const [showBatchContacto, setShowBatchContacto] = useState(false);
+
+  // Group state
+  const [grupos, setGrupos] = useState<GrupoContacto[]>([]);
+  const [editGrupo, setEditGrupo] = useState<{ nombre: string; miembros: Array<{ tipoOrigen: string; origenId: number; label: string }> } | null>(null);
+  const [editGrupoId, setEditGrupoId] = useState<number | null>(null);
+  const [savingGrupo, setSavingGrupo] = useState(false);
+  const [grupoSearchTerm, setGrupoSearchTerm] = useState('');
+  const [grupoSearchSource, setGrupoSearchSource] = useState<'contacto' | 'empresa' | 'estudiante' | 'tutor'>('contacto');
+  const [grupoSearchResults, setGrupoSearchResults] = useState<Array<{ tipoOrigen: string; origenId: number; label: string; email: string }>>([]);
+
+  // Alert / Message modal
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const templateEditor = useEditor({
     extensions: [
@@ -288,7 +308,21 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
     } catch {}
   }, []);
 
-  useEffect(() => { fetchPlantillas(); fetchMarcadores(); }, [fetchPlantillas, fetchMarcadores]);
+  const fetchContactos = useCallback(async () => {
+    try {
+      const r = await fetch('/api/contactos');
+      if (r.ok) setContactos(await r.json());
+    } catch {}
+  }, []);
+
+  const fetchGrupos = useCallback(async () => {
+    try {
+      const r = await fetch('/api/grupos-contactos');
+      if (r.ok) setGrupos(await r.json());
+    } catch {}
+  }, []);
+
+  useEffect(() => { fetchPlantillas(); fetchMarcadores(); fetchContactos(); fetchGrupos(); }, [fetchPlantillas, fetchMarcadores, fetchContactos, fetchGrupos]);
 
   const handleDelete = () => {
     onChange({
@@ -350,7 +384,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       await fetchPlantillas();
       setEditTemplate(null);
     } catch (err: any) {
-      alert(err.message);
+      setMessage({ type: 'error', text: err.message });
     } finally {
       setSavingTemplate(false);
     }
@@ -362,7 +396,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       if (!r.ok) throw new Error((await r.json()).error || 'Error al eliminar');
       await fetchPlantillas();
     } catch (err: any) {
-      alert(err.message);
+      setMessage({ type: 'error', text: err.message });
     }
   };
 
@@ -396,22 +430,143 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       await fetchMarcadores();
       setEditMarker(null);
     } catch (err: any) {
-      alert(err.message);
+      setMessage({ type: 'error', text: err.message });
     } finally {
       setSavingMarker(false);
     }
   };
 
   const handleDeleteMarker = async (id: number) => {
-    if (!confirm('¿Eliminar este marcador personalizado?')) return;
     try {
       const r = await fetch(`/api/marcadores-personalizados/${id}`, { method: 'DELETE' });
       if (!r.ok) throw new Error((await r.json()).error || 'Error al eliminar');
       await fetchMarcadores();
     } catch (err: any) {
-      alert(err.message);
+      setMessage({ type: 'error', text: err.message });
     }
   };
+
+  const handleSaveContacto = async () => {
+    if (!editContacto) return;
+    setSavingContacto(true);
+    try {
+      const isNew = !editContacto.id;
+      const url = isNew ? '/api/contactos' : `/api/contactos/${editContacto.id}`;
+      const method = isNew ? 'POST' : 'PUT';
+      const r = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editContacto),
+      });
+      if (!r.ok) throw new Error((await r.json()).error || 'Error al guardar contacto');
+      await fetchContactos();
+      setEditContacto(null);
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setSavingContacto(false);
+    }
+  };
+
+  const handleBatchContactos = async () => {
+    if (!batchContactos.trim()) return;
+    setSavingContacto(true);
+    try {
+      const r = await fetch('/api/contactos/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raw: batchContactos }),
+      });
+      if (!r.ok) throw new Error((await r.json()).error || 'Error al importar contactos');
+      const data = await r.json();
+      await fetchContactos();
+      setBatchContactos('');
+      setShowBatchContacto(false);
+      setMessage({ type: 'success', text: `${data.count} contactos importados correctamente.${data.skipped ? ` ${data.skipped} omitido(s) por duplicado.` : ''}` });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setSavingContacto(false);
+    }
+  };
+
+  const handleDeleteContacto = async (id: number) => {
+    try {
+      const r = await fetch(`/api/contactos/${id}`, { method: 'DELETE' });
+      if (!r.ok) throw new Error((await r.json()).error || 'Error al eliminar contacto');
+      await fetchContactos();
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    }
+  };
+
+  const handleSaveGrupo = async () => {
+    if (!editGrupo) return;
+    setSavingGrupo(true);
+    try {
+      const isNew = !editGrupoId;
+      const miembros = editGrupo.miembros.map(m => ({ tipoOrigen: m.tipoOrigen, origenId: m.origenId }));
+      const url = isNew ? '/api/grupos-contactos' : `/api/grupos-contactos/${editGrupoId}`;
+      const method = isNew ? 'POST' : 'PUT';
+      const r = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: editGrupo.nombre, miembros }),
+      });
+      if (!r.ok) throw new Error((await r.json()).error || 'Error al guardar grupo');
+      await fetchGrupos();
+      setEditGrupo(null);
+      setEditGrupoId(null);
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setSavingGrupo(false);
+    }
+  };
+
+  const handleDeleteGrupo = async (id: number) => {
+    try {
+      const r = await fetch(`/api/grupos-contactos/${id}`, { method: 'DELETE' });
+      if (!r.ok) throw new Error((await r.json()).error || 'Error al eliminar grupo');
+      await fetchGrupos();
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    }
+  };
+
+  const searchGrupoContacts = useCallback(async (term: string, source: string) => {
+    if (!term || term.length < 1) { setGrupoSearchResults([]); return; }
+    try {
+      const r = await fetch(`/api/email-contacts`);
+      const data = await r.json();
+      const q = term.toLowerCase();
+      let results: Array<{ tipoOrigen: string; origenId: number; label: string; email: string }> = [];
+      if (source === 'contacto') {
+        results = (data.contactos || [])
+          .filter((c: any) => c.nombre.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
+          .map((c: any) => ({ tipoOrigen: 'contacto', origenId: c.id, label: `${c.nombre} <${c.email}>`, email: c.email }));
+      } else if (source === 'empresa') {
+        results = (data.empresas || [])
+          .filter((e: any) => e.nombre.toLowerCase().includes(q) || e.email.toLowerCase().includes(q))
+          .map((e: any) => ({ tipoOrigen: 'empresa', origenId: e.id, label: `${e.nombre} <${e.email}>`, email: e.email }));
+      } else if (source === 'estudiante') {
+        results = (data.alumnos || [])
+          .filter((a: any) => a.nombre.toLowerCase().includes(q) || a.apellidos?.toLowerCase().includes(q) || a.emailEduca?.toLowerCase().includes(q) || a.emailPersonal?.toLowerCase().includes(q))
+          .map((a: any) => {
+            const email = a.emailEduca || a.emailPersonal || '';
+            return { tipoOrigen: 'estudiante', origenId: a.id, label: `${a.nombre} ${a.apellidos || ''} <${email}>`, email };
+          });
+      } else if (source === 'tutor') {
+        results = (data.tutores || [])
+          .filter((t: any) => t.nombre.toLowerCase().includes(q) || t.apellidos?.toLowerCase().includes(q) || t.email.toLowerCase().includes(q))
+          .map((t: any) => ({ tipoOrigen: 'tutor', origenId: t.id, label: `${t.nombre} ${t.apellidos || ''} - ${t.empresaNombre || ''} <${t.email}>`, email: t.email }));
+      }
+      // Filter out already added members
+      const existingKeys = new Set((editGrupo?.miembros || []).map(m => `${m.tipoOrigen}-${m.origenId}`));
+      results = results.filter(r => !existingKeys.has(`${r.tipoOrigen}-${r.origenId}`));
+      setGrupoSearchResults(results);
+    } catch {}
+  }, [editGrupo?.miembros]);
 
   return (
     <div className="space-y-6">
@@ -790,6 +945,176 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
         </div>
       </div>
 
+      {/* Contactos Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
+                <User className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">Contactos</h3>
+                <p className="text-sm text-slate-500">
+                  Gestiona tus contactos para usar en el autocompletado de correo.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => { setBatchContactos(''); setShowBatchContacto(true); }}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-indigo-200 text-indigo-600 text-sm font-semibold rounded-xl hover:bg-indigo-50 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Importar múltiples
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditContacto({ id: 0, nombre: '', email: '', telefono: '' })}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Nuevo contacto
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          {contactos.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-8">No hay contactos.</p>
+          ) : (
+            <div className="space-y-3">
+              {contactos.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/30 group cursor-pointer hover:bg-slate-50 transition-all"
+                  onClick={() => setEditContacto({ ...c })}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-slate-800">{c.nombre}</p>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-xs text-indigo-600">{c.email}</span>
+                      {c.telefono && (
+                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                          <Phone className="h-3 w-3" /> {c.telefono}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); setEditContacto({ ...c }); }}
+                  >
+                    <Pencil className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                  </button>
+                  <button
+                    type="button"
+                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ type: 'contacto', id: c.id }); }}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Grupos Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-rose-100 text-rose-600">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">Grupos de contactos</h3>
+                <p className="text-sm text-slate-500">
+                  Crea grupos de contactos para agilizar el envío de correos a múltiples destinatarios.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setEditGrupo({ nombre: '', miembros: [] }); setEditGrupoId(null); setGrupoSearchResults([]); }}
+              className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white text-sm font-semibold rounded-xl hover:bg-rose-700 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Nuevo grupo
+            </button>
+          </div>
+        </div>
+        <div className="p-6">
+          {grupos.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-8">No hay grupos de contactos.</p>
+          ) : (
+            <div className="space-y-3">
+              {grupos.map((g) => (
+                <div
+                  key={g.id}
+                  className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/30 group cursor-pointer hover:bg-slate-50 transition-all"
+                  onClick={() => {
+                    setEditGrupo({
+                      nombre: g.nombre,
+                      miembros: (g.miembros || []).map(m => ({ tipoOrigen: m.tipoOrigen, origenId: m.origenId, label: `${m.nombre} <${m.email}>` }))
+                    });
+                    setEditGrupoId(g.id);
+                    setGrupoSearchResults([]);
+                  }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-slate-800">{g.nombre}</p>
+                      <span className="text-[10px] font-semibold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded">
+                        {(g.miembros || []).length} miembros
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {(g.miembros || []).slice(0, 5).map((m, i) => (
+                        <span key={i} className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded truncate max-w-40">
+                          {m.nombre}
+                        </span>
+                      ))}
+                      {(g.miembros || []).length > 5 && (
+                        <span className="text-[10px] text-slate-400">+{g.miembros.length - 5} más</span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditGrupo({
+                        nombre: g.nombre,
+                        miembros: (g.miembros || []).map(m => ({ tipoOrigen: m.tipoOrigen, origenId: m.origenId, label: `${m.nombre} <${m.email}>` }))
+                      });
+                      setEditGrupoId(g.id);
+                      setGrupoSearchResults([]);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                  </button>
+                  <button
+                    type="button"
+                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ type: 'grupo', id: g.id }); }}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Template Edit Modal */}
       <Modal open={!!editTemplate} onClose={() => setEditTemplate(null)} maxWidth="max-w-5xl">
         {editTemplate && (
@@ -1082,6 +1407,262 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
         )}
       </Modal>
 
+      {/* Contact Edit Modal */}
+      <Modal open={!!editContacto} onClose={() => setEditContacto(null)} maxWidth="max-w-md">
+        {editContacto && (
+          <>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+              <h3 className="text-lg font-bold text-slate-800">
+                {editContacto.id ? 'Editar contacto' : 'Nuevo contacto'}
+              </h3>
+              <button type="button" onClick={() => setEditContacto(null)} className="p-1 rounded-lg hover:bg-slate-200 transition-colors">
+                <X className="h-5 w-5 text-slate-500" />
+              </button>
+            </div>
+            <div className="p-6 space-y-5">
+              <div>
+                <label className={labelClass}>Nombre *</label>
+                <input
+                  type="text"
+                  value={editContacto.nombre}
+                  onChange={e => setEditContacto({ ...editContacto, nombre: e.target.value })}
+                  className={inputClass}
+                  required
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Email *</label>
+                <input
+                  type="email"
+                  value={editContacto.email}
+                  onChange={e => setEditContacto({ ...editContacto, email: e.target.value })}
+                  className={inputClass}
+                  required
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Teléfono</label>
+                <input
+                  type="text"
+                  value={editContacto.telefono}
+                  onChange={e => setEditContacto({ ...editContacto, telefono: e.target.value })}
+                  className={inputClass}
+                  placeholder="Opcional"
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 shrink-0">
+              <div>
+                {editContacto.id && (
+                  <button
+                    type="button"
+                    onClick={() => { const id = editContacto.id; setEditContacto(null); setDeleteConfirm({ type: 'contacto', id }); }}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Eliminar
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setEditContacto(null)} className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveContacto}
+                  disabled={savingContacto || !editContacto.nombre || !editContacto.email}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                >
+                  {savingContacto ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {savingContacto ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </Modal>
+
+      {/* Group Edit Modal */}
+      <Modal open={!!editGrupo} onClose={() => { setEditGrupo(null); setEditGrupoId(null); setGrupoSearchResults([]); }} maxWidth="max-w-2xl">
+        {editGrupo && (
+          <>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+              <h3 className="text-lg font-bold text-slate-800">
+                {editGrupoId ? 'Editar grupo' : 'Nuevo grupo'}
+              </h3>
+              <button type="button" onClick={() => { setEditGrupo(null); setEditGrupoId(null); setGrupoSearchResults([]); }} className="p-1 rounded-lg hover:bg-slate-200 transition-colors">
+                <X className="h-5 w-5 text-slate-500" />
+              </button>
+            </div>
+            <div className="p-6 space-y-5 overflow-y-auto max-h-96">
+              <div>
+                <label className={labelClass}>Nombre del grupo</label>
+                <input
+                  type="text"
+                  value={editGrupo.nombre}
+                  onChange={e => setEditGrupo({ ...editGrupo, nombre: e.target.value })}
+                  className={inputClass}
+                  required
+                />
+              </div>
+
+              {/* Member search */}
+              <div>
+                <label className={labelClass}>Añadir miembros</label>
+                <div className="flex items-center gap-2 mb-3">
+                  {(['contacto', 'empresa', 'estudiante', 'tutor'] as const).map(src => (
+                    <button
+                      key={src}
+                      type="button"
+                      onClick={() => { setGrupoSearchSource(src); setGrupoSearchTerm(''); setGrupoSearchResults([]); }}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                        grupoSearchSource === src
+                          ? 'bg-rose-600 text-white'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {src === 'contacto' ? 'Contactos' : src === 'empresa' ? 'Empresas' : src === 'estudiante' ? 'Estudiantes' : 'Tutores'}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={grupoSearchTerm}
+                  onChange={e => { setGrupoSearchTerm(e.target.value); searchGrupoContacts(e.target.value, grupoSearchSource); }}
+                  placeholder="Buscar..."
+                  className={inputClass}
+                />
+                {grupoSearchResults.length > 0 && (
+                  <div className="mt-2 border border-slate-200 rounded-lg max-h-40 overflow-y-auto">
+                    {grupoSearchResults.map((r, i) => (
+                      <button
+                        key={`${r.tipoOrigen}-${r.origenId}`}
+                        type="button"
+                        className="w-full text-left px-3 py-2 text-xs border-b border-slate-50 last:border-0 hover:bg-slate-50 flex items-center justify-between"
+                        onClick={() => {
+                          setEditGrupo({
+                            ...editGrupo,
+                            miembros: [...editGrupo.miembros, { tipoOrigen: r.tipoOrigen, origenId: r.origenId, label: r.label }]
+                          });
+                          setGrupoSearchTerm('');
+                          setGrupoSearchResults([]);
+                        }}
+                      >
+                        <span>{r.label}</span>
+                        <Plus className="h-3 w-3 text-rose-500 shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Current members */}
+              <div>
+                <label className={labelClass}>Miembros ({editGrupo.miembros.length})</label>
+                {editGrupo.miembros.length === 0 ? (
+                  <p className="text-xs text-slate-400">Aún no hay miembros. Busca y añade contactos arriba.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {editGrupo.miembros.map((m, i) => (
+                      <div key={`${m.tipoOrigen}-${m.origenId}`} className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase bg-slate-200 px-1 py-0.5 rounded">
+                            {m.tipoOrigen === 'contacto' ? 'Contacto' : m.tipoOrigen === 'empresa' ? 'Empresa' : m.tipoOrigen === 'estudiante' ? 'Estudiante' : 'Tutor'}
+                          </span>
+                          <span className="text-xs text-slate-700">{m.label}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nuevos = editGrupo.miembros.filter((_, idx) => idx !== i);
+                            setEditGrupo({ ...editGrupo, miembros: nuevos });
+                          }}
+                          className="p-1 rounded hover:bg-slate-200 transition-colors"
+                        >
+                          <X className="h-3 w-3 text-slate-400" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 shrink-0">
+              <div>
+                {editGrupoId && (
+                  <button
+                    type="button"
+                    onClick={() => { const id = editGrupoId; setEditGrupo(null); setEditGrupoId(null); setDeleteConfirm({ type: 'grupo', id }); }}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Eliminar
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => { setEditGrupo(null); setEditGrupoId(null); setGrupoSearchResults([]); }} className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveGrupo}
+                  disabled={savingGrupo || !editGrupo.nombre || editGrupo.miembros.length < 2}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-rose-600 text-white text-sm font-semibold rounded-xl hover:bg-rose-700 disabled:opacity-50 transition-colors"
+                >
+                  {savingGrupo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {savingGrupo ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </Modal>
+
+      {/* Batch Import Contactos Modal */}
+      <Modal open={showBatchContacto} onClose={() => { setShowBatchContacto(false); setBatchContactos(''); }} maxWidth="max-w-lg">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+          <h3 className="text-lg font-bold text-slate-800">Importar múltiples contactos</h3>
+          <button type="button" onClick={() => { setShowBatchContacto(false); setBatchContactos(''); }} className="p-1 rounded-lg hover:bg-slate-200 transition-colors">
+            <X className="h-5 w-5 text-slate-500" />
+          </button>
+        </div>
+        <div className="p-6 space-y-5">
+          <div>
+            <label className={labelClass}>Introduce los contactos</label>
+            <p className="text-xs text-slate-500 mb-2">
+              Formato: <code className="text-[10px] bg-slate-100 px-1 py-0.5 rounded">Nombre Apellidos &lt;email&gt;</code>, separados por coma.
+            </p>
+            <textarea
+              value={batchContactos}
+              onChange={e => setBatchContactos(e.target.value)}
+              className="w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans min-h-32 resize-y"
+              placeholder="Juan Pérez <juan@ejemplo.com>, María López <maria@ejemplo.com>, ..."
+              rows={6}
+            />
+          </div>
+          <div className="bg-indigo-50 rounded-lg p-3 text-xs text-indigo-700">
+            <strong>Ejemplo:</strong><br />
+            <code className="text-[10px]">Juan Pérez &lt;juan.perez@email.com&gt;, Ana García &lt;ana.garcia@email.com&gt;, Carlos Rodríguez &lt;carlos@email.com&gt;</code>
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 shrink-0">
+          <button type="button" onClick={() => { setShowBatchContacto(false); setBatchContactos(''); }} className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleBatchContactos}
+            disabled={savingContacto || !batchContactos.trim()}
+            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          >
+            {savingContacto ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {savingContacto ? 'Importando...' : 'Importar'}
+          </button>
+        </div>
+      </Modal>
+
       {/* Delete Confirmation Modal */}
       <Modal open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} maxWidth="max-w-sm">
         <div className="p-6">
@@ -1094,7 +1675,11 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
               <p className="text-sm text-slate-500">
                 {deleteConfirm?.type === 'template'
                   ? '¿Estás seguro de que deseas eliminar esta plantilla? Esta acción no se puede deshacer.'
-                  : '¿Estás seguro de que deseas eliminar este marcador personalizado? Esta acción no se puede deshacer.'}
+                  : deleteConfirm?.type === 'marker'
+                    ? '¿Estás seguro de que deseas eliminar este marcador personalizado? Esta acción no se puede deshacer.'
+                    : deleteConfirm?.type === 'grupo'
+                      ? '¿Estás seguro de que deseas eliminar este grupo? Los contactos en el grupo no se eliminarán, solo el grupo.'
+                      : '¿Estás seguro de que deseas eliminar este contacto? Esta acción no se puede deshacer.'}
               </p>
             </div>
           </div>
@@ -1111,13 +1696,41 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
               onClick={async () => {
                 if (!deleteConfirm) return;
                 if (deleteConfirm.type === 'template') await handleDeleteTemplate(deleteConfirm.id);
-                else await handleDeleteMarker(deleteConfirm.id);
+                else if (deleteConfirm.type === 'marker') await handleDeleteMarker(deleteConfirm.id);
+                else if (deleteConfirm.type === 'grupo') await handleDeleteGrupo(deleteConfirm.id);
+                else await handleDeleteContacto(deleteConfirm.id);
                 setDeleteConfirm(null);
               }}
               className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition-colors"
             >
               <Trash2 className="h-4 w-4" />
               Eliminar
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Alert / Message Modal */}
+      <Modal open={!!message} onClose={() => setMessage(null)} maxWidth="max-w-sm">
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`p-2 rounded-lg ${message?.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
+              {message?.type === 'error' ? <X className="h-5 w-5" /> : <CheckSquare className="h-5 w-5" />}
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">
+                {message?.type === 'error' ? 'Error' : 'Operación completada'}
+              </h3>
+              <p className="text-sm text-slate-500">{message?.text}</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-end mt-6">
+            <button
+              type="button"
+              onClick={() => setMessage(null)}
+              className="px-4 py-2 text-sm font-semibold bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors"
+            >
+              Aceptar
             </button>
           </div>
         </div>

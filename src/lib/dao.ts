@@ -1,6 +1,6 @@
 import { db, isDbEncrypted, unlockDB, lockDB } from './db.ts';
 import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, EmpresaEstadistica, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData, Aviso } from '../types/index.ts';
-import { PlantillaCorreoDB, MarcadorPersonalizado } from '../types/email.ts';
+import { PlantillaCorreoDB, MarcadorPersonalizado, Contacto, GrupoContacto, GrupoMiembro, GrupoMiembroResolved } from '../types/email.ts';
 
 const safeParse = (str: any, fallback: any) => {
   if (!str || str === 'undefined' || str === 'null') return fallback;
@@ -471,7 +471,105 @@ export const EmailContactsDAO = {
       FROM empresa_tutores t JOIN empresas e ON e.id = t.empresaId
     `).all() as { id: number; nombre: string; apellidos: string; email: string; empresaNombre: string }[];
     const alumnos = db.prepare('SELECT id, nombre, apellidos, emailEduca, emailPersonal FROM alumnos').all() as { id: number; nombre: string; apellidos: string; emailEduca: string; emailPersonal: string }[];
-    return { empresas, tutores, alumnos };
+    const contactos = db.prepare('SELECT id, nombre, email, telefono FROM contactos ORDER BY nombre ASC').all() as Contacto[];
+    const grupos = GrupoContactoDAO.getAllConMiembros();
+    return { empresas, tutores, alumnos, contactos, grupos };
+  },
+};
+
+export const ContactoDAO = {
+  getAll: (): Contacto[] => {
+    return db.prepare('SELECT * FROM contactos ORDER BY nombre ASC').all() as Contacto[];
+  },
+  getById: (id: number): Contacto | undefined => {
+    return db.prepare('SELECT * FROM contactos WHERE id = ?').get(id) as Contacto | undefined;
+  },
+  create: (data: Omit<Contacto, 'id'>) => {
+    const stmt = db.prepare('INSERT INTO contactos (nombre, email, telefono) VALUES (?, ?, ?)');
+    const info = stmt.run(data.nombre, data.email, data.telefono);
+    return info.lastInsertRowid;
+  },
+  update: (id: number, data: Partial<Contacto>) => {
+    const fields: string[] = [];
+    const params: any[] = [];
+    for (const [key, value] of Object.entries(data)) {
+      if (key === 'id') continue;
+      fields.push(`${key} = ?`);
+      params.push(value);
+    }
+    if (fields.length === 0) return;
+    params.push(id);
+    db.prepare(`UPDATE contactos SET ${fields.join(', ')} WHERE id = ?`).run(...params);
+  },
+  delete: (id: number) => {
+    db.prepare('DELETE FROM contactos WHERE id = ?').run(id);
+  },
+};
+
+export const GrupoContactoDAO = {
+  getAll: (): GrupoContacto[] => {
+    return db.prepare('SELECT * FROM grupos_contactos ORDER BY nombre ASC').all() as GrupoContacto[];
+  },
+  getById: (id: number): GrupoContacto | undefined => {
+    return db.prepare('SELECT * FROM grupos_contactos WHERE id = ?').get(id) as GrupoContacto | undefined;
+  },
+  resolveMiembros: (grupoId: number): GrupoMiembroResolved[] => {
+    const miembros = db.prepare('SELECT * FROM grupo_miembros WHERE grupoId = ?').all(grupoId) as GrupoMiembro[];
+    const resolved: GrupoMiembroResolved[] = [];
+    for (const m of miembros) {
+      let nombre = '';
+      let email = '';
+      if (m.tipoOrigen === 'contacto') {
+        const c = db.prepare('SELECT nombre, email FROM contactos WHERE id = ?').get(m.origenId) as { nombre: string; email: string } | undefined;
+        if (c) { nombre = c.nombre; email = c.email; }
+      } else if (m.tipoOrigen === 'empresa') {
+        const e = db.prepare('SELECT nombre, email FROM empresas WHERE id = ?').get(m.origenId) as { nombre: string; email: string } | undefined;
+        if (e) { nombre = e.nombre; email = e.email; }
+      } else if (m.tipoOrigen === 'estudiante') {
+        const a = db.prepare('SELECT nombre, apellidos, emailEduca, emailPersonal FROM alumnos WHERE id = ?').get(m.origenId) as { nombre: string; apellidos: string; emailEduca: string; emailPersonal: string } | undefined;
+        if (a) { nombre = `${a.nombre} ${a.apellidos}`; email = a.emailEduca || a.emailPersonal || ''; }
+      } else if (m.tipoOrigen === 'tutor') {
+        const t = db.prepare('SELECT nombre, apellidos, email FROM empresa_tutores WHERE id = ?').get(m.origenId) as { nombre: string; apellidos: string; email: string } | undefined;
+        if (t) { nombre = `${t.nombre} ${t.apellidos}`; email = t.email; }
+      }
+      if (email) {
+        resolved.push({ ...m, nombre, email });
+      }
+    }
+    return resolved;
+  },
+  getAllConMiembros: (): GrupoContacto[] => {
+    const grupos = GrupoContactoDAO.getAll();
+    for (const g of grupos) {
+      g.miembros = GrupoContactoDAO.resolveMiembros(g.id);
+    }
+    return grupos;
+  },
+  create: (data: { nombre: string; miembros: Array<{ tipoOrigen: string; origenId: number }> }) => {
+    const stmt = db.prepare('INSERT INTO grupos_contactos (nombre) VALUES (?)');
+    const info = stmt.run(data.nombre);
+    const grupoId = info.lastInsertRowid;
+    const insertMiembro = db.prepare('INSERT INTO grupo_miembros (grupoId, tipoOrigen, origenId) VALUES (?, ?, ?)');
+    for (const m of data.miembros) {
+      insertMiembro.run(grupoId, m.tipoOrigen, m.origenId);
+    }
+    return grupoId;
+  },
+  update: (id: number, data: { nombre?: string; miembros?: Array<{ tipoOrigen: string; origenId: number }> }) => {
+    if (data.nombre !== undefined) {
+      db.prepare('UPDATE grupos_contactos SET nombre = ? WHERE id = ?').run(data.nombre, id);
+    }
+    if (data.miembros !== undefined) {
+      db.prepare('DELETE FROM grupo_miembros WHERE grupoId = ?').run(id);
+      const insertMiembro = db.prepare('INSERT INTO grupo_miembros (grupoId, tipoOrigen, origenId) VALUES (?, ?, ?)');
+      for (const m of data.miembros) {
+        insertMiembro.run(id, m.tipoOrigen, m.origenId);
+      }
+    }
+  },
+  delete: (id: number) => {
+    db.prepare('DELETE FROM grupo_miembros WHERE grupoId = ?').run(id);
+    db.prepare('DELETE FROM grupos_contactos WHERE id = ?').run(id);
   },
 };
 

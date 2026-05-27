@@ -299,6 +299,31 @@ function setupTables() {
     );
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS contactos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre TEXT NOT NULL,
+      email TEXT NOT NULL,
+      telefono TEXT NOT NULL DEFAULT ''
+    );
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS grupos_contactos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre TEXT NOT NULL
+    );
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS grupo_miembros (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      grupoId INTEGER NOT NULL REFERENCES grupos_contactos(id) ON DELETE CASCADE,
+      tipoOrigen TEXT NOT NULL,
+      origenId INTEGER NOT NULL
+    );
+  `);
+
   // Migración: añadir columnas nuevas a tablas existentes
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaRelacion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
   try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaPlanFormativo TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
