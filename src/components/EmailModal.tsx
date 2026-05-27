@@ -17,9 +17,9 @@ import "@/components/tiptap-node/heading-node/heading-node.scss";
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/table-node/table-node.scss";
 import {
-  X, Send, Settings, Paperclip, Trash2, Loader2, FileText, User, Briefcase, GraduationCap as StudentIcon, Info
+  X, Send, Settings, Paperclip, Trash2, Loader2, FileText, User, Briefcase, GraduationCap as StudentIcon, Info, Users
 } from 'lucide-react';
-import { EmailAttachment, EmailSendRequest } from '../types/email.ts';
+import { EmailAttachment, EmailSendRequest, GrupoContacto } from '../types/email.ts';
 import { uploadAttachment, deleteAttachment } from '../utils/emailUtils.ts';
 import { Title } from './Title.tsx';
 import { Toolbar, ToolbarGroup, ToolbarSeparator } from '@/components/tiptap-ui-primitive/toolbar';
@@ -43,7 +43,9 @@ interface EmailContact {
   emailEduca?: string;
   emailPersonal?: string;
   empresaNombre?: string;
-  type: 'empresa' | 'tutor' | 'alumno';
+  telefono?: string;
+  type: 'empresa' | 'tutor' | 'alumno' | 'contacto';
+  groupName?: string;
 }
 
 interface AutocompleteFieldProps {
@@ -51,6 +53,7 @@ interface AutocompleteFieldProps {
   onChange: (v: string) => void;
   placeholder: string;
   contacts: EmailContact[];
+  grupos?: GrupoContacto[];
   active: boolean;
   onFocus: () => void;
   onBlur: () => void;
@@ -59,7 +62,7 @@ interface AutocompleteFieldProps {
   blurTimerRef?: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
 }
 
-function EmailAutocompleteField({ value, onChange, placeholder, contacts, active, onFocus, onBlur, suggestedContacts = [], allEmails = [], blurTimerRef }: AutocompleteFieldProps) {
+function EmailAutocompleteField({ value, onChange, placeholder, contacts, grupos = [], active, onFocus, onBlur, suggestedContacts = [], allEmails = [], blurTimerRef }: AutocompleteFieldProps) {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -75,7 +78,9 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
           || (c.apellidos && c.apellidos.toLowerCase().includes(q))
           || c.email.toLowerCase().includes(q)
           || (c.emailEduca && c.emailEduca.toLowerCase().includes(q))
-          || (c.emailPersonal && c.emailPersonal.toLowerCase().includes(q));
+          || (c.emailPersonal && c.emailPersonal.toLowerCase().includes(q))
+          || (c.telefono && c.telefono.includes(q))
+          || (c.groupName && c.groupName.toLowerCase().includes(q));
       }).slice(0, 20)
     : [];
 
@@ -87,6 +92,14 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
     email: string;
     label: string;
   }
+
+  interface GroupSuggestion {
+    type: 'grupo';
+    grupo: GrupoContacto;
+    label: string;
+  }
+
+  type SuggestionEntry = SuggestionItem | GroupSuggestion;
 
   const availableSuggestions: SuggestionItem[] = suggestedContacts.flatMap(c => {
     if (c.type === 'alumno') {
@@ -103,11 +116,19 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
       : [];
   });
 
-  const showSuggestions = active && !searchTerm && availableSuggestions.length > 0;
-  const show = active && filtered.length > 0;
+  const groupSuggestions: GroupSuggestion[] = grupos
+    .filter(g => g.miembros.some(m => m.email && !allEmails.includes(m.email)))
+    .map(g => ({
+      type: 'grupo' as const,
+      grupo: g,
+      label: `${g.nombre} (${g.miembros.filter(m => m.email).length})`
+    }));
 
-  // Reset highlight when results change
-  useEffect(() => { setHighlightedIndex(-1); }, [filtered.length]);
+  const showSuggestions = active && !searchTerm && (availableSuggestions.length > 0 || groupSuggestions.length > 0);
+  const show = active && filtered.length > 0;
+  const dropdownItems = showSuggestions ? [...availableSuggestions, ...groupSuggestions] as SuggestionEntry[] : filtered;
+
+  useEffect(() => { setHighlightedIndex(-1); }, [filtered.length, availableSuggestions.length, groupSuggestions.length]);
 
   const handleSelect = (contact: EmailContact) => {
     const email = getContactEmail(contact);
@@ -119,14 +140,19 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
     inputRef.current?.focus();
   };
 
-  const handleSelectSuggestion = (suggestion: SuggestionItem) => {
-    const newVal = value ? `${value}, ${suggestion.email}, ` : `${suggestion.email}, `;
-    onChange(newVal);
+  const handleSelectSuggestion = (suggestion: SuggestionEntry) => {
+    if ('type' in suggestion && suggestion.type === 'grupo') {
+      const emails = suggestion.grupo.miembros.filter(m => m.email).map(m => m.email);
+      const newVal = value ? `${value}, ${emails.join(', ')}, ` : `${emails.join(', ')}, `;
+      onChange(newVal);
+    } else {
+      const s = suggestion as SuggestionItem;
+      const newVal = value ? `${value}, ${s.email}, ` : `${s.email}, `;
+      onChange(newVal);
+    }
     setHighlightedIndex(-1);
     inputRef.current?.focus();
   };
-
-  const dropdownItems: (EmailContact | SuggestionItem)[] = showSuggestions ? availableSuggestions : filtered;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!show && !showSuggestions) return;
@@ -140,9 +166,9 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
       e.preventDefault();
       const item = dropdownItems[highlightedIndex];
       if (showSuggestions) {
-        handleSelectSuggestion(item as SuggestionItem);
+        handleSelectSuggestion(item as unknown as SuggestionEntry);
       } else {
-        handleSelect(item as EmailContact);
+        handleSelect(item as unknown as EmailContact);
       }
     } else if (e.key === 'Escape') {
       setHighlightedIndex(-1);
@@ -173,6 +199,7 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
       case 'empresa': return <Briefcase className="h-3.5 w-3.5 text-blue-500 shrink-0" />;
       case 'tutor': return <User className="h-3.5 w-3.5 text-amber-500 shrink-0" />;
       case 'alumno': return <StudentIcon className="h-3.5 w-3.5 text-emerald-500 shrink-0" />;
+      case 'contacto': return <User className="h-3.5 w-3.5 text-indigo-500 shrink-0" />;
     }
   };
 
@@ -180,7 +207,8 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
     const name = c.apellidos ? `${c.nombre} ${c.apellidos}` : c.nombre;
     const email = c.type === 'alumno' ? (c.emailEduca || c.emailPersonal) : c.email;
     const extra = c.type === 'tutor' && c.empresaNombre ? ` - ${c.empresaNombre}` : '';
-    return `${name}${extra} <${email}>`;
+    const groupTag = c.groupName ? ` [${c.groupName}]` : '';
+    return `${name}${extra}${groupTag} <${email}>`;
   };
 
   return (
@@ -201,24 +229,30 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, active
           <div className="px-3 py-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100">
             Sugerencias
           </div>
-          {availableSuggestions.map((s, i) => (
-            <button
-              key={`sug-${s.contact.type}-${s.contact.id}-${s.email}`}
-              type="button"
-              onMouseDown={e => { e.preventDefault(); handleSelectSuggestion(s); }}
-              onMouseEnter={() => setHighlightedIndex(i)}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-slate-50 last:border-0 ${
-                i === highlightedIndex ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              {contactIcon(s.contact)}
-              <span className="truncate">{s.label}</span>
-            </button>
-          ))}
+          {dropdownItems.map((item, i) => {
+            const isGroup = 'type' in item && item.type === 'grupo';
+            const s = item as (SuggestionItem | GroupSuggestion);
+            return (
+              <button
+                key={isGroup ? `grp-${(s as GroupSuggestion).grupo.id}` : `sug-${(s as SuggestionItem).contact.type}-${(s as SuggestionItem).contact.id}-${(s as SuggestionItem).email}`}
+                type="button"
+                onMouseDown={e => { e.preventDefault(); handleSelectSuggestion(s); }}
+                onMouseEnter={() => setHighlightedIndex(i)}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-slate-50 last:border-0 ${
+                  i === highlightedIndex ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {isGroup
+                  ? <Users className="h-3.5 w-3.5 text-purple-500 shrink-0" />
+                  : contactIcon((s as SuggestionItem).contact)}
+                <span className="truncate">{s.label}</span>
+              </button>
+            );
+          })}
         </div>
       )}
       {show && !showSuggestions && (
-        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+        <div className="absolute z-70 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
           {filtered.map((c, i) => (
             <button
               key={`${c.type}-${c.id}`}
@@ -274,6 +308,7 @@ export function EmailModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [sendIndividual, setSendIndividual] = useState(false);
   const [contacts, setContacts] = useState<EmailContact[]>([]);
+  const [gruposContactos, setGruposContactos] = useState<GrupoContacto[]>([]);
   const [activeAutocomplete, setActiveAutocomplete] = useState<'to' | 'cc' | 'bcc' | null>(null);
   const [configOk, setConfigOk] = useState<boolean>(true);
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -359,13 +394,41 @@ export function EmailModal({
     if (isOpen) {
       fetch('/api/email-contacts')
         .then(res => res.json())
-        .then((data: { empresas: any[]; tutores: any[]; alumnos: any[] }) => {
+        .then((data: { empresas: any[]; tutores: any[]; alumnos: any[]; contactos: any[]; grupos: any[] }) => {
           const all: EmailContact[] = [
             ...data.empresas.map(e => ({ ...e, type: 'empresa' as const, apellidos: undefined, emailEduca: undefined, emailPersonal: undefined })),
             ...data.tutores.map(t => ({ ...t, type: 'tutor' as const, emailEduca: undefined, emailPersonal: undefined })),
             ...data.alumnos.map(a => ({ ...a, type: 'alumno' as const, email: '' })),
+            ...data.contactos.map(c => ({ ...c, type: 'contacto' as const, apellidos: undefined, emailEduca: undefined, emailPersonal: undefined, empresaNombre: undefined })),
           ];
-          setContacts(all);
+          const seen = new Set<string>();
+          const deduped: EmailContact[] = [];
+          for (const c of all) {
+            const key = c.type === 'alumno' ? (c.emailEduca || c.emailPersonal || '') : c.email;
+            if (key && seen.has(key)) continue;
+            if (key) seen.add(key);
+            deduped.push(c);
+          }
+          for (const g of data.grupos || []) {
+            for (const m of g.miembros || []) {
+              const key = m.email;
+              if (key && seen.has(key)) continue;
+              if (key) seen.add(key);
+              deduped.push({
+                id: m.origenId,
+                nombre: m.nombre,
+                email: m.email,
+                type: m.tipoOrigen === 'tutor' ? 'tutor' as const : m.tipoOrigen === 'estudiante' ? 'alumno' as const : m.tipoOrigen === 'contacto' ? 'contacto' as const : 'empresa' as const,
+                groupName: g.nombre,
+                apellidos: undefined,
+                emailEduca: undefined,
+                emailPersonal: undefined,
+                empresaNombre: undefined,
+              });
+            }
+          }
+          setContacts(deduped);
+          setGruposContactos(data.grupos || []);
         })
         .catch(() => {});
     }
@@ -634,6 +697,7 @@ ${h}
                     onChange={setTo}
                     placeholder="email@ejemplo.com, otro@ejemplo.com"
                     contacts={contacts}
+                    grupos={gruposContactos}
                     active={activeAutocomplete === 'to'}
                     onFocus={() => setActiveAutocomplete('to')}
                     onBlur={() => setActiveAutocomplete(null)}
@@ -694,6 +758,7 @@ ${h}
                         onChange={setCc}
                         placeholder="con.copia@ejemplo.com"
                         contacts={contacts}
+                        grupos={gruposContactos}
                         active={activeAutocomplete === 'cc'}
                         onFocus={() => setActiveAutocomplete('cc')}
                         onBlur={() => setActiveAutocomplete(null)}
@@ -710,6 +775,7 @@ ${h}
                         onChange={setBcc}
                         placeholder="cco@ejemplo.com"
                         contacts={contacts}
+                        grupos={gruposContactos}
                         active={activeAutocomplete === 'bcc'}
                         onFocus={() => setActiveAutocomplete('bcc')}
                         onBlur={() => setActiveAutocomplete(null)}

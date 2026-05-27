@@ -62,3 +62,34 @@ export interface MarcadorPersonalizado {
   valor: string;
   descripcion: string;
 }
+
+export interface Contacto {
+  id: number;
+  nombre: string;
+  email: string;
+  telefono: string;
+}
+
+export type GrupoOrigenTipo = 'contacto' | 'empresa' | 'estudiante' | 'tutor';
+
+export interface GrupoMiembro {
+  id: number;
+  grupoId: number;
+  tipoOrigen: GrupoOrigenTipo;
+  origenId: number;
+}
+
+export interface GrupoMiembroResolved {
+  id: number;
+  grupoId: number;
+  tipoOrigen: GrupoOrigenTipo;
+  origenId: number;
+  nombre: string;
+  email: string;
+}
+
+export interface GrupoContacto {
+  id: number;
+  nombre: string;
+  miembros: GrupoMiembroResolved[];
+}
