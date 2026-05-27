@@ -24,6 +24,11 @@ Aplicación de escritorio para la gestión integral de la Fase de Formación en 
 9. [Relaciones Alumno-Empresa](#9-relaciones-alumno-empresa)
 10. [Generación de Documentos](#10-generación-de-documentos)
 11. [Correo Electrónico](#11-correo-electrónico)
+    1. [Configuración SMTP](#111-configuración-smtp)
+    2. [Envío de correos](#112-envío-de-correos)
+    3. [Plantillas de correo](#113-plantillas-de-correo)
+    4. [Marcadores](#114-marcadores)
+    5. [Integración con Empresas y Relaciones](#115-integración-con-empresas-y-relaciones)
 12. [Panel de Control](#12-panel-de-control)
 13. [Configuración](#13-configuración)
 14. [Histórico / Auditoría](#14-histórico--auditoría)
@@ -416,12 +421,113 @@ Puedes enviar correos desde varios puntos de la aplicación:
 
 El editor de correo incluye:
 
-- Editor de texto enriquecido.
-- Plantillas predefinidas para empresas y estudiantes.
+- Editor de texto enriquecido (TipTap WYSIWYG) con formato (negrita, cursiva, subrayado, listas, colores, alineación, etc.).
+- **Selector de plantillas:** al iniciar un envío desde Empresas o Relaciones, se muestra un selector con todas las plantillas disponibles para elegir. La plantilla seleccionada se carga en el editor.
 - Adjuntos: sube archivos o selecciona documentos generados por el sistema.
 - Autocompletado de contactos.
 
 > `[IMAGEN: Modal de envío de correo con editor y selección de adjuntos]`
+
+### 11.3 Plantillas de correo
+
+Las plantillas de correo permiten crear mensajes predefinidos reutilizables que incorporan datos dinámicos mediante **marcadores**. Se gestionan desde **Configuración → Correo → Plantillas**.
+
+#### 11.3.1 Gestión de plantillas
+
+Desde la sección Plantillas puedes:
+
+- **Crear plantilla personalizada:** pulsa **Nueva Plantilla**, asigna un nombre, una descripción, un color y el ámbito de aplicación (Empresas / Relaciones / Todos). Las plantillas creadas por el usuario usan siempre el icono `✏️` (PencilRuler) y pueden editarse y eliminarse libremente.
+- **Editar plantilla:** haz clic en una tarjeta o en su icono de lápiz para abrir el editor completo. Las plantillas de sistema (predefinidas) solo pueden visualizarse, no editarse.
+- **Eliminar plantilla:** las plantillas personalizadas pueden eliminarse mediante el botón de papelera, con confirmación previa. Las plantillas de sistema no se pueden eliminar.
+- **Filtrar por ámbito:** usa los filtros superiores para ver plantillas de Empresas, Relaciones o Todos los ámbitos.
+
+#### 11.3.2 Editor WYSIWYG
+
+Al editar una plantilla, se abre un editor visual basado en **TipTap** con las siguientes herramientas:
+
+- Negrita, cursiva, tachado, código en línea.
+- Títulos (H1–H4).
+- Colores de texto y fondo (selector de color hexadecimal).
+- Listas ordenadas y no ordenadas.
+- Alineación (izquierda, centrada, derecha, justificada).
+- Enlaces.
+- Deshacer / Rehacer.
+
+El cuerpo de la plantilla puede incluir **marcadores** (ver sección 11.4) que serán reemplazados por datos reales al enviar el correo.
+
+#### 11.3.3 Tarjetas de plantilla
+
+Cada plantilla se muestra como una tarjeta con:
+- **Icono y color:** las plantillas de sistema tienen icono y color predefinidos. Las personalizadas usan PencilRuler con el color hex seleccionado.
+- **Nombre y descripción.**
+- **Ámbito de aplicación** (Empresas, Relaciones o Todos).
+- **Botón de editar** (lápiz, aparece al hacer hover) — no visible en la plantilla "Otros".
+- **Botón de eliminar** (papelera, aparece al hacer hover) — solo en plantillas personalizadas.
+
+#### 11.3.4 La plantilla "Otros"
+
+La plantilla **"Otros"** es una plantilla de sistema especial:
+- **No tiene contenido editable** — se usa como opción genérica para cualquier situación.
+- **Aparece en todos los ámbitos** (lleva asociado el ámbito "Todos").
+- **Siempre se muestra la última** en el selector de plantillas, tanto en empresa como en relaciones.
+- **No muestra botón de editar** ni se puede eliminar.
+- Se distingue visualmente mostrando "Todos" como ámbito.
+
+### 11.4 Marcadores
+
+Los marcadores son códigos insertados en el cuerpo de las plantillas que se reemplazan automáticamente por datos reales del alumno, empresa o relación al enviar el correo.
+
+#### 11.4.1 Marcadores predefinidos de sistema
+
+| Marcador | Descripción |
+|----------|-------------|
+| `{{profesor.nombre}}` | Nombre del profesor/tutor del centro |
+| `{{profesor.apellidos}}` | Apellidos del profesor/tutor del centro |
+| `{{empresa.nombre}}` | Nombre de la empresa |
+| `{{empresa.direccion}}` | Dirección de la empresa |
+| `{{empresa.personaContacto}}` | Persona de contacto de la empresa |
+| `{{tutor.nombre}}` | Nombre del tutor de empresa |
+| `{{tutor.apellidos}}` | Apellidos del tutor de empresa |
+| `{{centro.nombre}}` | Nombre del centro educativo |
+| `{{curso.descripcion}}` | Descripción del curso académico |
+| `{{nombreApellidosAlumnos}}` | Nombre completo de los alumnos (en envíos desde relaciones) |
+| `{{alumnoTutor}}` | Saludo condicional ("estimado alumno" o "estimado tutor") |
+| `{{destinatario}}` | Dirección de correo del destinatario (solo válido con 1 destinatario en Para) |
+| `{{@contacto}}` | Persona de contacto (se resuelve individualmente por cada destinatario en envíos uno a uno) |
+| `{{@nombreEmpresa}}` | Nombre de la empresa (se resuelve individualmente por cada destinatario) |
+
+#### 11.4.2 Marcadores personalizados
+
+Además de los marcadores de sistema, puedes crear **marcadores personalizados** a tu medida. Se gestionan desde **Configuración → Correo → Marcadores**.
+
+**Crear un marcador personalizado:**
+1. Pulsa **Nuevo Marcador**.
+2. Introduce un **nombre** (sin llaves, p.ej. `telefono_alumno`).
+3. El sistema generará automáticamente el código `{{telefono_alumno}}`.
+4. En **Valor HTML**, escribe el contenido que sustituirá al marcador (texto plano o HTML básico sin etiquetas de párrafo).
+
+Los marcadores personalizados se renderizan con un editor WYSIWYG reducido y se almacenan con limpieza automática de etiquetas no deseadas.
+
+**Editar o eliminar:** usa los iconos de lápiz y papelera en cada tarjeta de marcador. La eliminación requiere confirmación.
+
+#### 11.4.3 Aplicación de marcadores
+
+Cuando envías un correo usando una plantilla desde los módulos de **Empresas** o **Relaciones**:
+
+1. Selecciona la plantilla en el selector.
+2. El sistema carga la plantilla y **reemplaza automáticamente** los marcadores de sistema (`{{profesor.nombre}}`, `{{empresa.nombre}}`, etc.) y personalizados (`{{per_...}}`) con los valores reales del alumno, empresa o relación seleccionados.
+3. Los marcadores **por destinatario** (`{{@contacto}}`, `{{@nombreEmpresa}}`) **no se reemplazan** en el editor, ya que su valor depende de cada destinatario cuando se envía a múltiples empresas.
+4. Pulsa **Enviar** — justo antes del envío, el sistema resuelve los marcadores `{{@...}}` individualmente para cada destinatario.
+
+> ⚠️ Los marcadores con `@` (p.ej. `{{@contacto}}`) se ven en el editor y solo se sustituyen en el momento del envío, permitiendo enviar el mismo correo a varias empresas con los datos personalizados de cada una.
+
+### 11.5 Integración con Empresas y Relaciones
+
+Al enviar un correo desde los módulos de **Empresas** o **Relaciones**:
+1. Se muestra un selector modal con todas las plantillas aplicables al ámbito actual.
+2. Las plantillas aparecen ordenadas, con "Otros" siempre al final.
+3. Cada plantilla se muestra con su icono, color, nombre y descripción.
+4. Al seleccionar una plantilla, se carga en el editor de correo y puedes personalizar el mensaje antes de enviarlo.
 
 ---
 

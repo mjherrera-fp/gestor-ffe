@@ -398,7 +398,7 @@ export default function App() {
             <Title text="Histórico">
               <button
                 onClick={() => setActiveTab('historico')}
-                className="pl-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all"
+                className="p-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all flex items-center justify-center"
               >
                 <History className="h-5 w-5" />
               </button>
@@ -411,7 +411,7 @@ export default function App() {
             <Title text="Configuración">
               <button
                 onClick={() => setActiveTab('configuracion')}
-                className="rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all"
+                className="p-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all flex items-center justify-center"
               >
                 <Settings className="h-5 w-5" />
               </button>
