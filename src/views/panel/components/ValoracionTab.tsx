@@ -28,6 +28,8 @@ export function ValoracionTab({ cursoId }: { cursoId: number }) {
   const conFFE = rows.filter(r => r.relacionId !== null);
   const sinFFE = rows.filter(r => r.relacionId === null);
   const allOK = conFFE.filter(r => r.resultadoFFE === 'Todos los RA superados');
+  const sinEvaluar = conFFE.filter(r => r.resultadoFFE === 'Sin evaluar');
+  const conPendientes = conFFE.filter(r => r.resultadoFFE !== 'Todos los RA superados' && r.resultadoFFE !== 'Sin evaluar' && r.resultadoFFE !== 'FFE No cursada');
 
   return (
     <div className="space-y-4">
@@ -40,6 +42,7 @@ export function ValoracionTab({ cursoId }: { cursoId: number }) {
           <h3 className="text-lg font-bold text-slate-800">Valoración FFE</h3>
         </div>
         <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-slate-600">Fecha de evaluación</span>
           <CalendarDays className="h-4 w-4 text-slate-400" />
           <input
             type="date"
@@ -50,8 +53,8 @@ export function ValoracionTab({ cursoId }: { cursoId: number }) {
         </div>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-4 gap-4">
+      {/* Summary cards row 1 */}
+      <div className="grid grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col items-center text-center">
           <span className="text-2xl font-black text-slate-800">{rows.length}</span>
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Alumnos</span>
@@ -64,9 +67,21 @@ export function ValoracionTab({ cursoId }: { cursoId: number }) {
           <span className="text-2xl font-black text-amber-600">{sinFFE.length}</span>
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">No cursada</span>
         </div>
+      </div>
+
+      {/* Summary cards row 2 */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col items-center text-center">
+          <span className="text-2xl font-black text-slate-500">{sinEvaluar.length}</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Sin evaluar</span>
+        </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col items-center text-center">
           <span className="text-2xl font-black text-blue-600">{allOK.length}</span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">RA superados</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Todos los RA superados</span>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col items-center text-center">
+          <span className="text-2xl font-black text-red-600">{conPendientes.length}</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Con algún RA pendiente</span>
         </div>
       </div>
 
