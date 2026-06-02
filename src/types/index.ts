@@ -298,3 +298,49 @@ export interface Aviso {
   pospuesto_en: string | null;
   created_at: string;
 }
+
+// FFE Evaluation types
+export interface FFEValoracionFinal {
+  id: number;
+  codigo: string;
+  valor: string;
+  orden: number;
+}
+
+export interface FFEMotivoNoRealizacion {
+  id: number;
+  codigo: string;
+  valor: string;
+  orden: number;
+}
+
+export interface FFEEvaluacion {
+  id?: number;
+  alumnoId: number;
+  relacionId?: number;
+  fechaEvaluacion?: string;
+  valoracionFinalId?: number;
+  motivoNoRealizacionId?: number;
+}
+
+export interface FFEResultadoRA {
+  id?: number;
+  alumnoId: number;
+  relacionId: number;
+  modulo: string;
+  codigoRa: string;
+  nombreRa: string;
+  aprobado: boolean;
+}
+
+export interface FFEInformeRow {
+  alumnoId: number;
+  nombre: string;
+  apellidos: string;
+  nivel: string;
+  totalHorasFFE: number;
+  horasRealizadas: number;
+  relacionId: number | null;
+  resultadoFFE: string;
+  notaFinal: string;
+}

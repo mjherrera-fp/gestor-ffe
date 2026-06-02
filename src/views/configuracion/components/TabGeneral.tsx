@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, Trash2, FileDown, FolderOpen, Square, CheckSquare, Circle, CheckCircle2 } from 'lucide-react';
+import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, Trash2, FileDown, FolderOpen, Square, CheckSquare, Circle, CheckCircle2, Pencil, FileBadge, X } from 'lucide-react';
 import { EmpresaFestivosModal } from './EmpresaFestivosModal.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
@@ -181,6 +182,72 @@ export function TabGeneral() {
     } finally {
       setSavingCreacion(false);
     }
+  };
+
+  // ── Estado FFE valoraciones ──
+  const [valoracionesFinales, setValoracionesFinales] = useState<{ id: number; codigo: string; valor: string; orden: number }[]>([]);
+  const [editVF, setEditVF] = useState<{ id: number; codigo: string; valor: string; orden: number } | null>(null);
+  const [savingVF, setSavingVF] = useState(false);
+
+  // ── Estado FFE motivos ──
+  const [motivosNoRealizacion, setMotivosNoRealizacion] = useState<{ id: number; codigo: string; valor: string; orden: number }[]>([]);
+  const [editMN, setEditMN] = useState<{ id: number; codigo: string; valor: string; orden: number } | null>(null);
+  const [savingMN, setSavingMN] = useState(false);
+
+  // ── Confirmación de eliminación FFE ──
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'vf' | 'mn'; id: number; codigo: string } | null>(null);
+
+  const fetchFFEValoraciones = async () => {
+    const r = await fetch('/api/ffe/valoraciones-finales');
+    if (r.ok) setValoracionesFinales(await r.json());
+  };
+  const fetchFFEMotivos = async () => {
+    const r = await fetch('/api/ffe/motivos-no-realizacion');
+    if (r.ok) setMotivosNoRealizacion(await r.json());
+  };
+
+  useEffect(() => { fetchFFEValoraciones(); fetchFFEMotivos(); }, []);
+
+  const handleSaveVF = async () => {
+    if (!editVF) return;
+    setSavingVF(true);
+    const isNew = !editVF.id;
+    try {
+      const r = await fetch(isNew ? '/api/ffe/valoraciones-finales' : `/api/ffe/valoraciones-finales/${editVF.id}`, {
+        method: isNew ? 'POST' : 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo: editVF.codigo, valor: editVF.valor, orden: editVF.orden }),
+      });
+      if (r.ok) { await fetchFFEValoraciones(); setEditVF(null); }
+    } finally { setSavingVF(false); }
+  };
+  const handleDeleteVF = (id: number, codigo: string) => {
+    setDeleteConfirm({ type: 'vf', id, codigo });
+  };
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm) return;
+    if (deleteConfirm.type === 'vf') {
+      await fetch(`/api/ffe/valoraciones-finales/${deleteConfirm.id}`, { method: 'DELETE' });
+      await fetchFFEValoraciones();
+    } else {
+      await fetch(`/api/ffe/motivos-no-realizacion/${deleteConfirm.id}`, { method: 'DELETE' });
+      await fetchFFEMotivos();
+    }
+    setDeleteConfirm(null);
+  };
+
+  const handleSaveMN = async () => {
+    if (!editMN) return;
+    setSavingMN(true);
+    const isNew = !editMN.id;
+    try {
+      const r = await fetch(isNew ? '/api/ffe/motivos-no-realizacion' : `/api/ffe/motivos-no-realizacion/${editMN.id}`, {
+        method: isNew ? 'POST' : 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo: editMN.codigo, valor: editMN.valor, orden: editMN.orden }),
+      });
+      if (r.ok) { await fetchFFEMotivos(); setEditMN(null); }
+    } finally { setSavingMN(false); }
   };
 
   const loading = loadingAvisos || loadingFestivos || loadingCreacion;
@@ -544,6 +611,218 @@ export function TabGeneral() {
         onSave={(festivos) => handleSaveEmpresaFestivos(festivosModalLocalidad || '', festivos)}
         onClose={() => setFestivosModalLocalidad(null)}
       />
+
+      {/* ─── SECCIÓN VALORACIONES FFE ─── */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+              <FileBadge className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">Valoraciones FFE</h3>
+              <p className="text-sm text-slate-500">
+                Gestiona los códigos de valoración final y motivos de no realización de las FFE.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-6 space-y-8">
+
+          {/* Valoración final */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Valoración final</h4>
+              <button
+                type="button"
+                onClick={() => setEditVF({ id: 0, codigo: '', valor: '', orden: valoracionesFinales.length + 1 })}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" /> Añadir
+              </button>
+            </div>
+            <div className="space-y-2">
+              {valoracionesFinales.length === 0 && (
+                <p className="text-xs text-slate-400 italic py-3">No hay valoraciones definidas.</p>
+              )}
+              {valoracionesFinales.map(vf => (
+                <div key={vf.id} className="group flex items-center gap-4 p-3 rounded-xl border border-slate-200 hover:border-purple-200 hover:bg-purple-50/30 transition-all cursor-pointer" onClick={() => setEditVF({ ...vf })}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-700">
+                      <span className="text-purple-600">{vf.codigo}</span>
+                      {vf.valor && <span className="text-slate-400 font-normal"> — {vf.valor}</span>}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); setEditVF({ ...vf }); }}
+                  >
+                    <Pencil className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                  </button>
+                  <button
+                    type="button"
+                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); handleDeleteVF(vf.id, vf.codigo); }}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Motivo no realización */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Motivo por el que no realiza las FFE</h4>
+              <button
+                type="button"
+                onClick={() => setEditMN({ id: 0, codigo: '', valor: '', orden: motivosNoRealizacion.length + 1 })}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" /> Añadir
+              </button>
+            </div>
+            <div className="space-y-2">
+              {motivosNoRealizacion.length === 0 && (
+                <p className="text-xs text-slate-400 italic py-3">No hay motivos definidos.</p>
+              )}
+              {motivosNoRealizacion.map(mn => (
+                <div key={mn.id} className="group flex items-center gap-4 p-3 rounded-xl border border-slate-200 hover:border-purple-200 hover:bg-purple-50/30 transition-all cursor-pointer" onClick={() => setEditMN({ ...mn })}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-700">
+                      <span className="text-purple-600">{mn.codigo}</span>
+                      {mn.valor && <span className="text-slate-400 font-normal"> — {mn.valor}</span>}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); setEditMN({ ...mn }); }}
+                  >
+                    <Pencil className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                  </button>
+                  <button
+                    type="button"
+                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ type: 'mn', id: mn.id, codigo: mn.codigo }); }}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ─── MODAL CONFIRMAR ELIMINACIÓN ─── */}
+      <Modal open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} maxWidth="sm">
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-red-100 text-red-600">
+              <Trash2 className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">Eliminar</h3>
+              <p className="text-sm text-slate-500">
+                {deleteConfirm?.type === 'vf' ? 'Valoración final' : 'Motivo no realización'}: <strong className="text-slate-700">{deleteConfirm?.codigo}</strong>
+              </p>
+            </div>
+          </div>
+          <p className="text-sm text-slate-600 mb-6">¿Estás seguro de que deseas eliminar este elemento? Esta acción no se puede deshacer.</p>
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setDeleteConfirm(null)}
+              className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmDelete}
+              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition-colors"
+            >
+              <Trash2 className="h-4 w-4" /> Eliminar
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ─── MODAL EDITAR VALORACIÓN FINAL ─── */}
+      <Modal open={!!editVF} onClose={() => setEditVF(null)} maxWidth="sm">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-slate-800">
+              {editVF?.id ? 'Editar valoración final' : 'Nueva valoración final'}
+            </h3>
+            <button type="button" onClick={() => setEditVF(null)} className="text-slate-400 hover:text-slate-600">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <form onSubmit={(e) => { e.preventDefault(); handleSaveVF(); }} className="space-y-4">
+            <div>
+              <label className={labelClass}>Código</label>
+              <input className={inputClass} value={editVF?.codigo || ''} onChange={e => setEditVF(prev => prev ? { ...prev, codigo: e.target.value } : null)} placeholder="Ej: APROBADO" />
+            </div>
+            <div>
+              <label className={labelClass}>Valor</label>
+              <input className={inputClass} value={editVF?.valor || ''} onChange={e => setEditVF(prev => prev ? { ...prev, valor: e.target.value } : null)} placeholder="Ej: Aprobado" />
+            </div>
+            <div>
+              <label className={labelClass}>Orden</label>
+              <input className={inputClass} type="number" value={editVF?.orden || 0} onChange={e => setEditVF(prev => prev ? { ...prev, orden: Number(e.target.value) } : null)} />
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button type="submit" disabled={savingVF || !editVF?.codigo} className="px-5 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors">
+                {savingVF ? 'Guardando...' : 'Guardar'}
+              </button>
+              <button type="button" onClick={() => setEditVF(null)} className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
+
+      {/* ─── MODAL EDITAR MOTIVO NO REALIZACIÓN ─── */}
+      <Modal open={!!editMN} onClose={() => setEditMN(null)} maxWidth="sm">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-slate-800">
+              {editMN?.id ? 'Editar motivo' : 'Nuevo motivo'}
+            </h3>
+            <button type="button" onClick={() => setEditMN(null)} className="text-slate-400 hover:text-slate-600">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <form onSubmit={(e) => { e.preventDefault(); handleSaveMN(); }} className="space-y-4">
+            <div>
+              <label className={labelClass}>Código</label>
+              <input className={inputClass} value={editMN?.codigo || ''} onChange={e => setEditMN(prev => prev ? { ...prev, codigo: e.target.value } : null)} placeholder="Ej: Ex-T" />
+            </div>
+            <div>
+              <label className={labelClass}>Valor</label>
+              <textarea className={inputClass} rows={3} value={editMN?.valor || ''} onChange={e => setEditMN(prev => prev ? { ...prev, valor: e.target.value } : null)} placeholder="Ej: Exención total" />
+            </div>
+            <div>
+              <label className={labelClass}>Orden</label>
+              <input className={inputClass} type="number" value={editMN?.orden || 0} onChange={e => setEditMN(prev => prev ? { ...prev, orden: Number(e.target.value) } : null)} />
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button type="submit" disabled={savingMN || !editMN?.codigo} className="px-5 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors">
+                {savingMN ? 'Guardando...' : 'Guardar'}
+              </button>
+              <button type="button" onClick={() => setEditMN(null)} className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
 
     </div>
   );

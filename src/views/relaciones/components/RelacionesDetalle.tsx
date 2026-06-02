@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { FileText, ArrowLeft, Send, Clock, ShieldCheck, CheckCircle2, Calendar, FileDown, Users, CalendarDays, Download, Loader2, FileArchive, Mail } from 'lucide-react';
-import { RelacionAlumno, Alumno, RelacionEstado, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, SelectedDocs, FirmaTipo, FirmaTipoLabels } from '../../../types/index.ts';
+import { FileText, ArrowLeft, Send, Clock, ShieldCheck, CheckCircle2, Calendar, FileDown, Users, CalendarDays, Download, Loader2, FileArchive, Mail, FileBadge, X, CheckSquare } from 'lucide-react';
+import { RelacionAlumno, Alumno, RelacionEstado, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, SelectedDocs, FirmaTipo, FirmaTipoLabels, ResultadoAprendizaje, FFEValoracionFinal } from '../../../types/index.ts';
 import { BotonDescargaPDF } from '../../../components/BotonDescargaPDF.tsx';
 import { BotonDescargaDOCX } from '../../../components/BotonDescargaDOCX.tsx';
+import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { StatusBadge } from './RelacionesListado.tsx';
 import { getAnexoStatusButton, getPlanStatusButton, getSeguimientoStatusButton, getValoracionStatusButton } from '../utils/relacionesUtils.ts';
 import { Title } from '@/src/components/Title.tsx';
+import { Modal } from '../../../components/ui/Modal.tsx';
 
 const FIRMA_CICLO: FirmaTipo[] = [FirmaTipo.SIN_ASIGNAR, FirmaTipo.DIGITAL, FirmaTipo.MANUAL];
 
@@ -90,8 +92,71 @@ export function RelacionDetalle({
   const [isDownloading, setIsDownloading] = useState(false);
   const [sendingEmail, setSendingEmail] = useState<string | null>(null);
   const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
+  const [ffeModalAlumno, setFfeModalAlumno] = useState<Alumno | null>(null);
+  const [ffeRAs, setFfeRAs] = useState<Array<{ modulo: string; codigoRa: string; nombreRa: string; aprobado: boolean }>>([]);
+  const [ffeValoraciones, setFfeValoraciones] = useState<FFEValoracionFinal[]>([]);
+  const [ffeValoracionFinalId, setFfeValoracionFinalId] = useState<number | null>(null);
+  const [loadingFFE, setLoadingFFE] = useState(false);
+  const [savingFFE, setSavingFFE] = useState(false);
   const toggleCard = (key: string) => {
     setCollapsedCards(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleOpenFFE = async (alumno: Alumno) => {
+    setFfeModalAlumno(alumno);
+    setLoadingFFE(true);
+    try {
+      const [detalleRes, valoracionesRes, evRes, raRes] = await Promise.all([
+        fetch(`/api/detalles-academicos`),
+        fetch('/api/ffe/valoraciones-finales'),
+        fetch(`/api/ffe/evaluaciones/${alumno.id}`),
+        alumno.relacionId ? fetch(`/api/ffe/ra-resultados/${alumno.id}/${alumno.relacionId}`) : Promise.resolve(null),
+      ]);
+      const detalles: any[] = await detalleRes.json();
+      const detalle = detalles.find((d: any) => d.id === (alumno as any).detalleAcademicoId);
+      const raList: ResultadoAprendizaje[] = detalle?.resultadosAprendizaje || [];
+      const valoraciones: FFEValoracionFinal[] = await valoracionesRes.json();
+      const evaluacion = evRes.ok ? await evRes.json() : null;
+      const savedRAs = raRes && raRes.ok ? await raRes.json() : [];
+
+      setFfeRAs(raList.map((ra: ResultadoAprendizaje) => {
+        const saved = savedRAs.find((s: any) => s.modulo === ra.modulo && s.codigoRa === (ra.codigo || ra.ra));
+        return {
+          modulo: ra.modulo,
+          codigoRa: ra.codigo || ra.ra,
+          nombreRa: ra.nombre,
+          aprobado: saved ? !!saved.aprobado : true,
+        };
+      }));
+      setFfeValoraciones(valoraciones);
+      setFfeValoracionFinalId(evaluacion?.valoracionFinalId ?? null);
+    } catch {} finally { setLoadingFFE(false); }
+  };
+
+  const handleSaveFFE = async () => {
+    if (!ffeModalAlumno) return;
+    setSavingFFE(true);
+    try {
+      const alumno = ffeModalAlumno;
+      if (alumno.relacionId) {
+        await fetch(`/api/ffe/ra-resultados/${alumno.id}/${alumno.relacionId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entries: ffeRAs }),
+        });
+      }
+      await fetch(`/api/ffe/evaluaciones/${alumno.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          relacionId: alumno.relacionId ?? null,
+          fechaEvaluacion: new Date().toISOString().split('T')[0],
+          valoracionFinalId: ffeValoracionFinalId,
+          motivoNoRealizacionId: null,
+        }),
+      });
+      setFfeModalAlumno(null);
+    } finally { setSavingFFE(false); }
   };
 
   const allPlanesCompleted = selectedRelacion?.alumnos?.every(alumno => {
@@ -480,6 +545,14 @@ export function RelacionDetalle({
                               {sendingEmail === `val-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
                             </button>
                           </Title>
+                          <Title text="Evaluación FFE">
+                            <button
+                              onClick={async () => handleOpenFFE(alumno)}
+                              className="h-8 px-2.5 flex items-center justify-center gap-1 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors border border-purple-100 text-[10px] font-bold uppercase"
+                            >
+                              <FileBadge className="h-3.5 w-3.5" />
+                            </button>
+                          </Title>
                         </div>
 
                         {planBtn ? (
@@ -590,6 +663,110 @@ export function RelacionDetalle({
         </section>
 
       </div>
+
+      {/* ─── MODAL EVALUACIÓN FFE ─── */}
+      <Modal open={!!ffeModalAlumno} onClose={() => setFfeModalAlumno(null)} maxWidth="xl" cardClass="overflow-visible">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+                <FileBadge className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">Evaluación FFE</h3>
+                <p className="text-sm text-slate-500">
+                  {ffeModalAlumno?.nombre} {ffeModalAlumno?.apellidos}
+                </p>
+              </div>
+            </div>
+            <button type="button" onClick={() => setFfeModalAlumno(null)} className="text-slate-400 hover:text-slate-600">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {loadingFFE ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* RA list */}
+              <div>
+                <h4 className="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Resultados de Aprendizaje</h4>
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  {ffeRAs.length === 0 && (
+                    <p className="text-xs text-slate-400 italic">No hay RA definidos para este alumno.</p>
+                  )}
+                  {ffeRAs.map((ra, i) => (
+                    <div key={`${ra.modulo}-${ra.codigoRa}`} className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/50">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-slate-700">
+                          <span className="text-purple-600">{ra.modulo} {ra.codigoRa}</span>
+                          {ra.nombreRa && <span className="text-slate-400 font-normal"> — {ra.nombreRa}</span>}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-3">
+                        <button
+                          type="button"
+                          onClick={() => setFfeRAs(prev => prev.map((r, j) => j === i ? { ...r, aprobado: true } : r))}
+                          className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                            ra.aprobado ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <CheckSquare className="h-3 w-3 inline mr-1" /> Aprobado
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFfeRAs(prev => prev.map((r, j) => j === i ? { ...r, aprobado: false } : r))}
+                          className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                            !ra.aprobado ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <X className="h-3 w-3 inline mr-1" /> Suspendido
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Valoración final */}
+              <div>
+                <h4 className="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Valoración final</h4>
+                <CustomSelect
+                  options={[
+                    { id: '', label: 'Seleccionar valoración final...' },
+                    ...ffeValoraciones.map(vf => ({ id: vf.id, label: `${vf.codigo} — ${vf.valor}` })),
+                  ]}
+                  value={ffeValoracionFinalId ?? ''}
+                  onChange={v => setFfeValoracionFinalId(v === '' ? null : Number(v))}
+                  classListboxButton="text-sm"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setFfeModalAlumno(null)}
+                  className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveFFE}
+                  disabled={savingFFE}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                >
+                  {savingFFE ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileBadge className="h-4 w-4" />}
+                  {savingFFE ? 'Guardando...' : 'Guardar evaluación'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

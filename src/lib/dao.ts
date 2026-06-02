@@ -1,5 +1,5 @@
 import { db, isDbEncrypted, unlockDB, lockDB } from './db.ts';
-import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, EmpresaEstadistica, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData, Aviso } from '../types/index.ts';
+import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, EmpresaEstadistica, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData, Aviso, FFEValoracionFinal, FFEMotivoNoRealizacion, FFEEvaluacion, FFEResultadoRA, FFEInformeRow } from '../types/index.ts';
 import { PlantillaCorreoDB, MarcadorPersonalizado, Contacto, GrupoContacto, GrupoMiembro, GrupoMiembroResolved } from '../types/email.ts';
 
 const safeParse = (str: any, fallback: any) => {
@@ -1268,6 +1268,196 @@ export const AvisosDAO = {
     }
 
     return AvisosDAO.getActivos();
+  },
+};
+
+// ─────────────────────────────────────────
+//  FFE - VALORACIONES FINALES
+// ─────────────────────────────────────────
+
+export const FFEValoracionFinalDAO = {
+  getAll: (): FFEValoracionFinal[] => {
+    return db.prepare('SELECT * FROM ffe_valoraciones_final ORDER BY orden ASC').all() as FFEValoracionFinal[];
+  },
+  create: (data: { codigo: string; valor: string; orden: number }): number => {
+    const info = db.prepare('INSERT INTO ffe_valoraciones_final (codigo, valor, orden) VALUES (?, ?, ?)').run(data.codigo, data.valor, data.orden);
+    return Number(info.lastInsertRowid);
+  },
+  update: (id: number, data: { codigo: string; valor: string; orden: number }): void => {
+    db.prepare('UPDATE ffe_valoraciones_final SET codigo = ?, valor = ?, orden = ? WHERE id = ?').run(data.codigo, data.valor, data.orden, id);
+  },
+  delete: (id: number): void => {
+    db.prepare('DELETE FROM ffe_valoraciones_final WHERE id = ?').run(id);
+  },
+};
+
+// ─────────────────────────────────────────
+//  FFE - MOTIVOS NO REALIZACIÓN
+// ─────────────────────────────────────────
+
+export const FFEMotivoNoRealizacionDAO = {
+  getAll: (): FFEMotivoNoRealizacion[] => {
+    return db.prepare('SELECT * FROM ffe_motivos_no_realizacion ORDER BY orden ASC').all() as FFEMotivoNoRealizacion[];
+  },
+  create: (data: { codigo: string; valor: string; orden: number }): number => {
+    const info = db.prepare('INSERT INTO ffe_motivos_no_realizacion (codigo, valor, orden) VALUES (?, ?, ?)').run(data.codigo, data.valor, data.orden);
+    return Number(info.lastInsertRowid);
+  },
+  update: (id: number, data: { codigo: string; valor: string; orden: number }): void => {
+    db.prepare('UPDATE ffe_motivos_no_realizacion SET codigo = ?, valor = ?, orden = ? WHERE id = ?').run(data.codigo, data.valor, data.orden, id);
+  },
+  delete: (id: number): void => {
+    db.prepare('DELETE FROM ffe_motivos_no_realizacion WHERE id = ?').run(id);
+  },
+};
+
+// ─────────────────────────────────────────
+//  FFE - EVALUACIONES
+// ─────────────────────────────────────────
+
+export const FFEEvaluacionDAO = {
+  getByAlumno: (alumnoId: number): FFEEvaluacion | undefined => {
+    return db.prepare('SELECT * FROM ffe_evaluaciones WHERE alumnoId = ?').get(alumnoId) as FFEEvaluacion | undefined;
+  },
+  getByAlumnoAndRelacion: (alumnoId: number, relacionId: number): FFEEvaluacion | undefined => {
+    return db.prepare('SELECT * FROM ffe_evaluaciones WHERE alumnoId = ? AND relacionId = ?').get(alumnoId, relacionId) as FFEEvaluacion | undefined;
+  },
+  upsert: (alumnoId: number, relacionId: number | null, fechaEvaluacion: string | null, valoracionFinalId: number | null, motivoNoRealizacionId: number | null): void => {
+    const existing = db.prepare('SELECT id FROM ffe_evaluaciones WHERE alumnoId = ? AND relacionId IS ?').get(alumnoId, relacionId ?? null) as { id: number } | undefined;
+    if (existing) {
+      db.prepare('UPDATE ffe_evaluaciones SET fechaEvaluacion = ?, valoracionFinalId = ?, motivoNoRealizacionId = ? WHERE id = ?').run(fechaEvaluacion, valoracionFinalId, motivoNoRealizacionId, existing.id);
+    } else {
+      db.prepare('INSERT INTO ffe_evaluaciones (alumnoId, relacionId, fechaEvaluacion, valoracionFinalId, motivoNoRealizacionId) VALUES (?, ?, ?, ?, ?)').run(alumnoId, relacionId, fechaEvaluacion, valoracionFinalId, motivoNoRealizacionId);
+    }
+  },
+};
+
+// ─────────────────────────────────────────
+//  FFE - RA RESULTADOS
+// ─────────────────────────────────────────
+
+export const FFEResultadoRADAO = {
+  getByAlumnoAndRelacion: (alumnoId: number, relacionId: number): FFEResultadoRA[] => {
+    return db.prepare('SELECT * FROM ffe_ra_resultados WHERE alumnoId = ? AND relacionId = ?').all(alumnoId, relacionId) as FFEResultadoRA[];
+  },
+  batchSave: (alumnoId: number, relacionId: number, entries: Array<{ modulo: string; codigoRa: string; nombreRa: string; aprobado: boolean }>): void => {
+    const del = db.prepare('DELETE FROM ffe_ra_resultados WHERE alumnoId = ? AND relacionId = ?');
+    const ins = db.prepare('INSERT INTO ffe_ra_resultados (alumnoId, relacionId, modulo, codigoRa, nombreRa, aprobado) VALUES (?, ?, ?, ?, ?, ?)');
+    const tx = db.transaction(() => {
+      del.run(alumnoId, relacionId);
+      for (const e of entries) {
+        ins.run(alumnoId, relacionId, e.modulo, e.codigoRa, e.nombreRa, e.aprobado ? 1 : 0);
+      }
+    });
+    tx();
+  },
+};
+
+// ─────────────────────────────────────────
+//  FFE - INFORME DE VALORACIÓN
+// ─────────────────────────────────────────
+
+export const FFEInformeDAO = {
+  getInforme: (cursoId: number, fechaEvaluacion: string): FFEInformeRow[] => {
+    const evalDate = fechaEvaluacion ? new Date(fechaEvaluacion) : new Date();
+    const rows = db.prepare(`
+      SELECT
+        a.id as alumnoId,
+        a.nombre,
+        a.apellidos,
+        COALESCE(da.nivel, '') as nivel,
+        a.totalHorasFFE,
+        a.fechaInicio,
+        a.fechaFin,
+        a.relacionId
+      FROM alumnos a
+      LEFT JOIN detalles_academicos da ON da.id = a.detalleAcademicoId
+      WHERE a.cursoId = ?
+      ORDER BY a.apellidos ASC, a.nombre ASC
+    `).all(cursoId) as any[];
+
+    return rows.map(r => {
+      let resultadoFFE: string;
+      let notaFinal: string;
+
+      // Calculate horasRealizadas up to evalDate
+      let horasRealizadas = 0;
+      const total = Number(r.totalHorasFFE) || 0;
+      const startDate = r.fechaInicio ? new Date(r.fechaInicio) : null;
+      const endDate = r.fechaFin ? new Date(r.fechaFin) : null;
+
+      if (startDate && endDate && endDate > startDate && total > 0) {
+        const totalDays = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+        let daysElapsed = 0;
+        if (evalDate > startDate) {
+          daysElapsed = Math.min(
+            (evalDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+            totalDays
+          );
+        }
+        const progress = daysElapsed / totalDays;
+        const hoursInLevel = Math.round(total * progress);
+        const isSecondYear = r.nivel === '2º';
+        if (isSecondYear) {
+          // 2nd year: total must sum to 500h; (500 - total) were done in 1st year
+          const firstYearHours = Math.max(0, 500 - total);
+          horasRealizadas = firstYearHours + hoursInLevel;
+        } else {
+          horasRealizadas = hoursInLevel;
+        }
+      } else {
+        horasRealizadas = 0;
+      }
+
+      const evaluacion = db.prepare('SELECT * FROM ffe_evaluaciones WHERE alumnoId = ?').get(r.alumnoId) as FFEEvaluacion | undefined;
+
+      if (evaluacion?.motivoNoRealizacionId) {
+        const motivo = db.prepare('SELECT codigo FROM ffe_motivos_no_realizacion WHERE id = ?').get(evaluacion.motivoNoRealizacionId) as { codigo: string } | undefined;
+        resultadoFFE = 'FFE No cursada';
+        notaFinal = motivo?.codigo || '';
+      } else if (r.relacionId) {
+        const raResults = db.prepare('SELECT * FROM ffe_ra_resultados WHERE alumnoId = ? AND relacionId = ?').all(r.alumnoId, r.relacionId) as FFEResultadoRA[];
+        const pendingRAs = raResults.filter(ra => !ra.aprobado);
+        if (pendingRAs.length > 0) {
+          const byModule = new Map<string, string[]>();
+          for (const ra of pendingRAs) {
+            const list = byModule.get(ra.modulo) || [];
+            list.push(ra.codigoRa);
+            byModule.set(ra.modulo, list);
+          }
+          resultadoFFE = Array.from(byModule.entries())
+            .map(([modulo, ras]) => `${modulo} - ${ras.join(', ')}`)
+            .join('\n');
+        } else if (raResults.length > 0) {
+          resultadoFFE = 'Todos los RA superados';
+        } else {
+          resultadoFFE = 'Sin evaluar';
+        }
+        if (evaluacion?.valoracionFinalId) {
+          const vf = db.prepare('SELECT codigo FROM ffe_valoraciones_final WHERE id = ?').get(evaluacion.valoracionFinalId) as { codigo: string } | undefined;
+          notaFinal = vf?.codigo || '';
+        } else {
+          notaFinal = '';
+        }
+      } else {
+        resultadoFFE = 'FFE No cursada';
+        notaFinal = evaluacion?.motivoNoRealizacionId
+          ? (db.prepare('SELECT codigo FROM ffe_motivos_no_realizacion WHERE id = ?').get(evaluacion.motivoNoRealizacionId) as { codigo: string } | undefined)?.codigo || ''
+          : '';
+      }
+
+      return {
+        alumnoId: r.alumnoId,
+        nombre: r.nombre,
+        apellidos: r.apellidos,
+        nivel: r.nivel,
+        totalHorasFFE: r.totalHorasFFE,
+        horasRealizadas,
+        relacionId: r.relacionId,
+        resultadoFFE,
+        notaFinal,
+      };
+    });
   },
 };
 
