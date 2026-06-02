@@ -218,8 +218,50 @@ function setupTables() {
     valor TEXT,
     FOREIGN KEY(profesorId) REFERENCES profesores(id) ON DELETE CASCADE,
     UNIQUE(profesorId, tipo, clave)
-  );
-`);
+    );
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS ffe_valoraciones_final (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      codigo TEXT NOT NULL,
+      valor TEXT NOT NULL,
+      orden INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS ffe_motivos_no_realizacion (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      codigo TEXT NOT NULL,
+      valor TEXT NOT NULL,
+      orden INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS ffe_evaluaciones (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      alumnoId INTEGER NOT NULL,
+      relacionId INTEGER,
+      fechaEvaluacion TEXT,
+      valoracionFinalId INTEGER,
+      motivoNoRealizacionId INTEGER,
+      FOREIGN KEY(alumnoId) REFERENCES alumnos(id) ON DELETE CASCADE,
+      FOREIGN KEY(valoracionFinalId) REFERENCES ffe_valoraciones_final(id),
+      FOREIGN KEY(motivoNoRealizacionId) REFERENCES ffe_motivos_no_realizacion(id),
+      UNIQUE(alumnoId, relacionId)
+    );
+
+    CREATE TABLE IF NOT EXISTS ffe_ra_resultados (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      alumnoId INTEGER NOT NULL,
+      relacionId INTEGER NOT NULL,
+      modulo TEXT NOT NULL,
+      codigoRa TEXT NOT NULL,
+      nombreRa TEXT NOT NULL,
+      aprobado INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY(alumnoId) REFERENCES alumnos(id) ON DELETE CASCADE,
+      FOREIGN KEY(relacionId) REFERENCES relaciones(id) ON DELETE CASCADE,
+      UNIQUE(alumnoId, relacionId, modulo, codigoRa)
+    );
+  `);
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS historico_comunicaciones (
@@ -404,6 +446,27 @@ function setupTables() {
     console.log("Seed: plantillas_correo migradas a DB");
   }
   db.prepare("UPDATE plantillas_correo SET place = '' WHERE plantillaId = 'otros' AND place != ''").run();
+
+  // Seed: valoraciones finales FFE
+  const vfCount = db.prepare("SELECT COUNT(*) as count FROM ffe_valoraciones_final").get() as any;
+  if (vfCount.count === 0) {
+    const vfStmt = db.prepare("INSERT INTO ffe_valoraciones_final (codigo, valor, orden) VALUES (?, ?, ?)");
+    vfStmt.run('APROBADO', 'Aprobado', 1);
+    vfStmt.run('R-FFE1', 'Repite FFE 1º', 2);
+    vfStmt.run('R-FFE2', 'Repite la FFE 2º', 3);
+    console.log("Seed: ffe_valoraciones_final");
+  }
+
+  // Seed: motivos no realización FFE
+  const mnCount = db.prepare("SELECT COUNT(*) as count FROM ffe_motivos_no_realizacion").get() as any;
+  if (mnCount.count === 0) {
+    const mnStmt = db.prepare("INSERT INTO ffe_motivos_no_realizacion (codigo, valor, orden) VALUES (?, ?, ?)");
+    mnStmt.run('Ex-T', 'Exención total', 1);
+    mnStmt.run('0A', 'No promocionó a FFE', 2);
+    mnStmt.run('0B', 'No ha cursado FFE, por causa justificada (los aplazamientos deben estar solicitados y justificados debidamente por el propio alumno)', 3);
+    mnStmt.run('0C', 'No ha cursado FFE por falta de puestos formativos', 4);
+    console.log("Seed: ffe_motivos_no_realizacion");
+  }
 }
 
 // Ejecutamos el intento inicial al importar el módulo

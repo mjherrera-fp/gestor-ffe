@@ -4,12 +4,14 @@ import { ResumenTab } from './components/ResumenTab.tsx';
 import { EstadisticasTab } from './components/EstadisticasTab.tsx';
 import { SeguridadSocialTab } from './components/SeguridadSocialTab.tsx';
 import { FirmasTab } from './components/FirmasTab.tsx';
+import { ValoracionTab } from './components/ValoracionTab.tsx';
 
 const tabs = [
   { id: 'resumen', label: 'Resumen' },
   { id: 'estadisticas', label: 'Estadísticas' },
   { id: 'seguridad-social', label: 'Seguridad Social' },
   { id: 'firmas', label: 'Firmas' },
+  { id: 'valoracion', label: 'Valoración' },
 ];
 
 interface Props {
@@ -94,6 +96,7 @@ export default function PanelView({ cursoId, detalleAcademicoId }: Props) {
       {activeTab === 'estadisticas' && <EstadisticasTab ctx={ctx} />}
       {activeTab === 'seguridad-social' && <SeguridadSocialTab ctx={ctx} />}
       {activeTab === 'firmas' && <FirmasTab ctx={ctx} />}
+      {activeTab === 'valoracion' && <ValoracionTab cursoId={cursoId} />}
     </div>
   );
 }

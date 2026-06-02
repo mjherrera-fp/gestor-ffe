@@ -9,7 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { db } from './src/lib/db.ts';
-import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, EmpresaFestivosDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, PlantillaCorreoDAO, MarcadorPersonalizadoDAO, ContactoDAO, GrupoContactoDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
+import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, EmpresaFestivosDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, PlantillaCorreoDAO, MarcadorPersonalizadoDAO, ContactoDAO, GrupoContactoDAO, FFEValoracionFinalDAO, FFEMotivoNoRealizacionDAO, FFEEvaluacionDAO, FFEResultadoRADAO, FFEInformeDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
 import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
 import { fileURLToPath } from 'url';
 
@@ -2077,6 +2077,50 @@ async function startServer() {
       cursoId,
       req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
     ));
+  });
+
+  // FFE - Valoraciones finales
+  app.get('/api/ffe/valoraciones-finales', (_req, res) => res.json(FFEValoracionFinalDAO.getAll()));
+  app.post('/api/ffe/valoraciones-finales', (req, res) => res.json(FFEValoracionFinalDAO.create(req.body)));
+  app.put('/api/ffe/valoraciones-finales/:id', (req, res) => { FFEValoracionFinalDAO.update(Number(req.params.id), req.body); res.json({ ok: true }); });
+  app.delete('/api/ffe/valoraciones-finales/:id', (req, res) => { FFEValoracionFinalDAO.delete(Number(req.params.id)); res.json({ ok: true }); });
+
+  // FFE - Motivos no realización
+  app.get('/api/ffe/motivos-no-realizacion', (_req, res) => res.json(FFEMotivoNoRealizacionDAO.getAll()));
+  app.post('/api/ffe/motivos-no-realizacion', (req, res) => res.json(FFEMotivoNoRealizacionDAO.create(req.body)));
+  app.put('/api/ffe/motivos-no-realizacion/:id', (req, res) => { FFEMotivoNoRealizacionDAO.update(Number(req.params.id), req.body); res.json({ ok: true }); });
+  app.delete('/api/ffe/motivos-no-realizacion/:id', (req, res) => { FFEMotivoNoRealizacionDAO.delete(Number(req.params.id)); res.json({ ok: true }); });
+
+  // FFE - Evaluaciones por alumno
+  app.get('/api/ffe/evaluaciones/:alumnoId', (req, res) => {
+    const ev = FFEEvaluacionDAO.getByAlumno(Number(req.params.alumnoId));
+    res.json(ev ?? null);
+  });
+  app.put('/api/ffe/evaluaciones/:alumnoId', (req, res) => {
+    FFEEvaluacionDAO.upsert(
+      Number(req.params.alumnoId),
+      req.body.relacionId ?? null,
+      req.body.fechaEvaluacion ?? null,
+      req.body.valoracionFinalId ?? null,
+      req.body.motivoNoRealizacionId ?? null
+    );
+    res.json({ ok: true });
+  });
+
+  // FFE - RA resultados por alumno + relación
+  app.get('/api/ffe/ra-resultados/:alumnoId/:relacionId', (req, res) => {
+    res.json(FFEResultadoRADAO.getByAlumnoAndRelacion(Number(req.params.alumnoId), Number(req.params.relacionId)));
+  });
+  app.put('/api/ffe/ra-resultados/:alumnoId/:relacionId', (req, res) => {
+    FFEResultadoRADAO.batchSave(Number(req.params.alumnoId), Number(req.params.relacionId), req.body.entries || []);
+    res.json({ ok: true });
+  });
+
+  // FFE - Informe de valoración
+  app.get('/api/ffe/informe', (req, res) => {
+    const cursoId = Number(req.query.cursoId);
+    if (!cursoId) return res.status(400).json({ error: 'cursoId es requerido' });
+    res.json(FFEInformeDAO.getInforme(cursoId, (req.query.fechaEvaluacion as string) || ''));
   });
 
   app.get('/api/festivos/obtener', async (req, res) => {
