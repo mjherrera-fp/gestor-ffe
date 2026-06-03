@@ -460,7 +460,17 @@ export const AlumnoDAO = {
     db.prepare('UPDATE alumnos SET detalleAcademicoId = ? WHERE id = ?').run(detalleId, alumnoId);
   },
   delete: (id: number) => db.prepare('DELETE FROM alumnos WHERE id = ?').run(id),
-  updateCV: (id: number, cvPath: string | null) => db.prepare('UPDATE alumnos SET cvPath = ? WHERE id = ?').run(cvPath, id)
+  updateCV: (id: number, cvPath: string | null) => db.prepare('UPDATE alumnos SET cvPath = ? WHERE id = ?').run(cvPath, id),
+  findByDNIEmailPhone: (dni: string, emailEduca: string, emailPersonal: string, tlfn: string, excludeId?: number) => {
+    const stmt = db.prepare(`
+      SELECT id, nombre, apellidos, dni, emailEduca, emailPersonal, tlfn FROM alumnos
+      WHERE (dni = ? OR emailEduca = ? OR emailPersonal = ? OR tlfn = ?)
+      ${excludeId ? 'AND id != ?' : ''}
+    `);
+    const params = [dni, emailEduca, emailPersonal, tlfn];
+    if (excludeId) params.push(String(excludeId));
+    return stmt.all(...params) as { id: number; nombre: string; apellidos: string; dni: string; emailEduca: string; emailPersonal: string; tlfn: string }[];
+  }
 };
 
 export const EmailContactsDAO = {
@@ -1358,7 +1368,7 @@ export const FFEResultadoRADAO = {
 // ─────────────────────────────────────────
 
 export const FFEInformeDAO = {
-  getInforme: (cursoId: number, fechaEvaluacion: string): FFEInformeRow[] => {
+  getInforme: (cursoId: number, fechaEvaluacion: string, detalleAcademicoId?: number): FFEInformeRow[] => {
     const evalDate = fechaEvaluacion ? new Date(fechaEvaluacion) : new Date();
     const rows = db.prepare(`
       SELECT
@@ -1373,8 +1383,9 @@ export const FFEInformeDAO = {
       FROM alumnos a
       LEFT JOIN detalles_academicos da ON da.id = a.detalleAcademicoId
       WHERE a.cursoId = ?
+      ${detalleAcademicoId ? 'AND a.detalleAcademicoId = ?' : ''}
       ORDER BY a.apellidos ASC, a.nombre ASC
-    `).all(cursoId) as any[];
+    `).all(cursoId, ...(detalleAcademicoId ? [detalleAcademicoId] : [])) as any[];
 
     return rows.map(r => {
       let resultadoFFE: string;

@@ -54,7 +54,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
 
   // ── Importación Excel ──
   const [isImporting,  setIsImporting]  = useState(false);
-  const [importResult, setImportResult] = useState<{ success: number; updated: number } | null>(null);
+  const [importResult, setImportResult] = useState<{ success: number; updated: number; errors?: string[] } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [modoCreacion, setModoCreacion] = useState('descargar');
 
@@ -262,7 +262,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
         const data = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false }) as any[];
 
         let successCount = 0;
-        let updateCount  = 0;
+        const errors: string[] = [];
 
         for (const row of data) {
           const dni            = (row['DNI/Pasaporte'] || '').toString().trim();
@@ -280,7 +280,6 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
             fechaNacimiento = `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
           }
 
-          const existingAlumno = alumnos.find(a => a.dni.trim().toLowerCase() === dni.toLowerCase());
           const studentData = {
             nombre,
             apellidos:          `${primerApellido} ${segundoApellido}`.trim(),
@@ -298,26 +297,27 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
             estadoSeguimiento:  'PENDIENTE',
             estadoValoracion:   'PENDIENTE',
             detalleAcademicoId: detalles.find(d => d.codigoGrupo === row['Código Grupo'])?.id
-              || existingAlumno?.detalleAcademicoId
               || (detalles.length > 0 ? detalles[0].id : null),
           };
 
-          const method = existingAlumno ? 'PUT' : 'POST';
-          const url    = existingAlumno ? `/api/alumnos/${existingAlumno.id}` : '/api/alumnos';
           try {
-            const res = await fetch(url, {
-              method,
+            const res = await fetch('/api/alumnos', {
+              method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(studentData),
             });
-            if (res.ok) existingAlumno ? updateCount++ : successCount++;
+            if (res.ok) successCount++;
+            else if (res.status === 409) {
+              const errData = await res.json();
+              errors.push(`${studentData.apellidos}, ${studentData.nombre}: ${errData.error}`);
+            }
           } catch (err) {
             console.error('Error al procesar alumno:', studentData.nombre, err);
           }
         }
 
         fetchAlumnos();
-        setImportResult({ success: successCount, updated: updateCount });
+        setImportResult({ success: successCount, updated: 0, errors });
       } catch {
         alert('Hubo un error al procesar el archivo Excel.');
       } finally {

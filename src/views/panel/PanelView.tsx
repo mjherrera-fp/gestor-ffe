@@ -54,7 +54,7 @@ export default function PanelView({ cursoId, detalleAcademicoId }: Props) {
     );
   }
 
-  if (!ctx.loading && ctx.resumenTotal.length === 0) {
+  if (!ctx.loading && ctx.resumenTotal.length === 0 && activeTab !== 'valoracion') {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 w-full max-w-md p-8 text-center">
@@ -96,7 +96,7 @@ export default function PanelView({ cursoId, detalleAcademicoId }: Props) {
       {activeTab === 'estadisticas' && <EstadisticasTab ctx={ctx} />}
       {activeTab === 'seguridad-social' && <SeguridadSocialTab ctx={ctx} />}
       {activeTab === 'firmas' && <FirmasTab ctx={ctx} />}
-      {activeTab === 'valoracion' && <ValoracionTab cursoId={cursoId} />}
+      {activeTab === 'valoracion' && <ValoracionTab cursoId={cursoId} detalleAcademicoId={detalleAcademicoId} />}
     </div>
   );
 }

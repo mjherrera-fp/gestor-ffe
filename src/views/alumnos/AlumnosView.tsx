@@ -138,18 +138,27 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
       />
 
       {/* ── MODAL: Resultado importación ── */}
-      <Modal open={!!ctx.importResult} onClose={() => ctx.setImportResult(null)} maxWidth="sm">
-        <div className="p-6 text-center">
+      <Modal open={!!ctx.importResult} onClose={() => ctx.setImportResult(null)} maxWidth="md">
+        <div className="p-6">
           <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
             <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-slate-800 mb-4">Importación finalizada</h3>
-          <div className="space-y-2 text-sm text-slate-600">
-            <p><span className="font-bold text-emerald-600">{ctx.importResult?.success}</span> alumnos nuevos</p>
-            <p><span className="font-bold text-blue-600">{ctx.importResult?.updated}</span> alumnos actualizados</p>
+          <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">Importación finalizada</h3>
+          <div className="space-y-2 text-sm text-slate-600 text-center">
+            <p><span className="font-bold text-emerald-600">{ctx.importResult?.success}</span> alumnos importados</p>
           </div>
+          {ctx.importResult?.errors && ctx.importResult.errors.length > 0 && (
+            <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100">
+              <p className="text-sm font-bold text-red-700 mb-2">Errores ({ctx.importResult.errors.length}):</p>
+              <ul className="space-y-1 max-h-40 overflow-y-auto">
+                {ctx.importResult.errors.map((err, i) => (
+                  <li key={i} className="text-xs text-red-600 leading-relaxed">• {err}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <button
             onClick={() => ctx.setImportResult(null)}
             className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
