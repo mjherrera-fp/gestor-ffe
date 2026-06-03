@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FFEInformeRow } from '../../../types/index.ts';
 import { CalendarDays, FileBadge, Loader2 } from 'lucide-react';
 
-export function ValoracionTab({ cursoId }: { cursoId: number }) {
+export function ValoracionTab({ cursoId, detalleAcademicoId }: { cursoId: number; detalleAcademicoId?: number }) {
   const today = new Date();
   const [fecha, setFecha] = useState(today.toISOString().slice(0, 10));
   const [rows, setRows] = useState<FFEInformeRow[]>([]);
@@ -14,7 +14,9 @@ export function ValoracionTab({ cursoId }: { cursoId: number }) {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/ffe/informe?cursoId=${cursoId}&fechaEvaluacion=${fecha}`);
+        const params = new URLSearchParams({ cursoId: String(cursoId), fechaEvaluacion: fecha });
+        if (detalleAcademicoId) params.set('detalleAcademicoId', String(detalleAcademicoId));
+        const res = await fetch(`/api/ffe/informe?${params}`);
         if (!res.ok) throw new Error('Error al cargar el informe');
         setRows(await res.json());
       } catch (e) {
@@ -23,7 +25,7 @@ export function ValoracionTab({ cursoId }: { cursoId: number }) {
         setLoading(false);
       }
     })();
-  }, [cursoId, fecha]);
+  }, [cursoId, detalleAcademicoId, fecha]);
 
   const conFFE = rows.filter(r => r.relacionId !== null);
   const sinFFE = rows.filter(r => r.relacionId === null);

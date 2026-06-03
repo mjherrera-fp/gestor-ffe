@@ -505,9 +505,38 @@ async function startServer() {
     req.query.cursoId ? Number(req.query.cursoId) : undefined,
     req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
   )));
-  app.post('/api/alumnos', (req, res) => res.json({ id: AlumnoDAO.create(req.body) }));
+  app.post('/api/alumnos', (req, res) => {
+    const { dni, emailEduca, emailPersonal, tlfn } = req.body;
+    const dups = AlumnoDAO.findByDNIEmailPhone(dni, emailEduca, emailPersonal, tlfn);
+    if (dups.length > 0) {
+      const fields = dups.map(d => {
+        const matches: string[] = [];
+        if (d.dni === dni) matches.push('DNI');
+        if (d.emailEduca === emailEduca) matches.push('email educamadrid');
+        if (d.emailPersonal === emailPersonal) matches.push('email personal');
+        if (d.tlfn === tlfn) matches.push('teléfono');
+        return `${d.nombre} ${d.apellidos} (${matches.join(', ')})`;
+      });
+      return res.status(409).json({ error: `Ya existe${dups.length > 1 ? 'n' : ''} alumno${dups.length > 1 ? 's' : ''} con los mismos datos: ${fields.join('; ')}` });
+    }
+    res.json({ id: AlumnoDAO.create(req.body) });
+  });
   app.put('/api/alumnos/:id', (req, res) => {
-    AlumnoDAO.update(Number(req.params.id), req.body);
+    const id = Number(req.params.id);
+    const { dni, emailEduca, emailPersonal, tlfn } = req.body;
+    const dups = AlumnoDAO.findByDNIEmailPhone(dni, emailEduca, emailPersonal, tlfn, id);
+    if (dups.length > 0) {
+      const fields = dups.map(d => {
+        const matches: string[] = [];
+        if (d.dni === dni) matches.push('DNI');
+        if (d.emailEduca === emailEduca) matches.push('email educamadrid');
+        if (d.emailPersonal === emailPersonal) matches.push('email personal');
+        if (d.tlfn === tlfn) matches.push('teléfono');
+        return `${d.nombre} ${d.apellidos} (${matches.join(', ')})`;
+      });
+      return res.status(409).json({ error: `Ya existe${dups.length > 1 ? 'n' : ''} alumno${dups.length > 1 ? 's' : ''} con los mismos datos: ${fields.join('; ')}` });
+    }
+    AlumnoDAO.update(id, req.body);
     res.json({ success: true });
   });
   app.put('/api/alumnos/:id/estado-plan-formativo', (req, res) => {
@@ -2120,7 +2149,7 @@ async function startServer() {
   app.get('/api/ffe/informe', (req, res) => {
     const cursoId = Number(req.query.cursoId);
     if (!cursoId) return res.status(400).json({ error: 'cursoId es requerido' });
-    res.json(FFEInformeDAO.getInforme(cursoId, (req.query.fechaEvaluacion as string) || ''));
+    res.json(FFEInformeDAO.getInforme(cursoId, (req.query.fechaEvaluacion as string) || '', req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined));
   });
 
   app.get('/api/festivos/obtener', async (req, res) => {
