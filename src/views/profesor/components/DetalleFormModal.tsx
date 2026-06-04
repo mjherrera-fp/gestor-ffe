@@ -117,6 +117,16 @@ export function DetalleFormModal({
                 />
               </div>
             </div>
+
+            <div className="md:col-span-2">
+              <label className={labelClass}>Nombre Corto</label>
+              <input
+                className={inputClass}
+                value={formData.nombreCorto || ''}
+                onChange={update('nombreCorto')}
+                placeholder="Ej: 2º C.F.G.S. DAM"
+              />
+            </div>
           </div>
 
           {/* ── Tutorías ── */}

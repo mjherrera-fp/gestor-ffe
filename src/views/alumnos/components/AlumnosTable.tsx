@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Phone, GraduationCap, Edit2, Trash2, Send, CheckCircle, Clock, Search, Mail, BadgeX, Loader2, X } from 'lucide-react';
+import { User, Phone, GraduationCap, Edit2, Trash2, Send, CheckCircle, Clock, Search, Mail, BadgeX, Loader2, X, FileText, Upload } from 'lucide-react';
 import { Alumno, FFEMotivoNoRealizacion } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
@@ -10,9 +10,12 @@ interface AlumnosTableProps {
   onDelete: (id: number) => void;
   onAcademicDetail: (a: Alumno) => void;
   onEmail: (a: Alumno) => void;
+  onFileUpload: (id: number, file: File) => void;
+  onFileDelete: (id: number) => void;
+  onViewCV: (a: Alumno) => void;
 }
 
-export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEmail }: AlumnosTableProps) {
+export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV }: AlumnosTableProps) {
   const [ffeModalAlumnoId, setFfeModalAlumnoId] = useState<number | null>(null);
   const [ffeMotivos, setFfeMotivos] = useState<FFEMotivoNoRealizacion[]>([]);
   const [ffeMotivoSelected, setFfeMotivoSelected] = useState<number | null>(null);
@@ -34,7 +37,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
       } else {
         setFfeMotivoSelected(null);
       }
-    } catch {} finally { setLoadingFFEMotivos(false); }
+    } catch { } finally { setLoadingFFEMotivos(false); }
   };
 
   const handleSaveFFEMotivo = async () => {
@@ -52,6 +55,11 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
       });
       setFfeModalAlumnoId(null);
     } finally { setSavingFFEMotivo(false); }
+  };
+
+  const handleDeleteCV = async (alumno: Alumno) => {
+    if (!window.confirm('¿Eliminar el CV de este alumno?')) return;
+    await onFileDelete(alumno.id!);
   };
 
   const modalAlumno = ffeModalAlumnoId ? alumnos.find(a => a.id === ffeModalAlumnoId) : null;
@@ -135,7 +143,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-1">
                     {!isAssigned && (
-                      <Title text="FFE No cursada">
+                      <Title text="Seleciona motivo para la no realización de las FFE">
                         <button
                           onClick={() => handleOpenFFEMotivo(alumno.id!)}
                           className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
@@ -144,6 +152,24 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                         </button>
                       </Title>
                     )}
+                    <Title text={alumno.cvPath ? 'Ver CV' : 'Subir CV'}>
+                      <button
+                        onClick={() => alumno.cvPath ? onViewCV(alumno) : document.getElementById(`cv-upload-${alumno.id}`)?.click()}
+                        className={`p-2 rounded-lg transition-all ${alumno.cvPath
+                            ? 'text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50'
+                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                          }`}
+                      >
+                        {alumno.cvPath ? <FileText className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                      </button>
+                    </Title>
+                    <input
+                      id={`cv-upload-${alumno.id}`}
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      onChange={e => e.target.files && onFileUpload(alumno.id!, e.target.files[0])}
+                    />
                     <Title text="Enviar correo">
                       <button
                         onClick={() => onEmail(alumno)}
@@ -152,18 +178,22 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                         <Mail className="h-4 w-4" />
                       </button>
                     </Title>
-                    <button
-                      onClick={() => onEdit(alumno)}
-                      className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(alumno.id!)}
-                      className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <Title text="Editar estudiante">
+                      <button
+                        onClick={() => onEdit(alumno)}
+                        className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                    </Title>
+                    <Title text="Eliminar estudiante">
+                      <button
+                        onClick={() => onDelete(alumno.id!)}
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </Title>
                   </div>
                 </td>
               </tr>
@@ -182,78 +212,77 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
       )}
     </div>
 
-      {/* ─── MODAL MOTIVO FFE ─── */}
-      <Modal open={ffeModalAlumnoId !== null} onClose={() => setFfeModalAlumnoId(null)} maxWidth="sm">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
-                <BadgeX className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-800">Sin relación</h3>
-                <p className="text-sm text-slate-500">
-                  {modalAlumno?.nombre} {modalAlumno?.apellidos}
-                </p>
-              </div>
+    {/* ─── MODAL MOTIVO FFE ─── */}
+    <Modal open={ffeModalAlumnoId !== null} onClose={() => setFfeModalAlumnoId(null)} maxWidth="sm">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
+              <BadgeX className="h-5 w-5" />
             </div>
-            <button type="button" onClick={() => setFfeModalAlumnoId(null)} className="text-slate-400 hover:text-slate-600">
-              <X className="h-5 w-5" />
-            </button>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">Sin relación</h3>
+              <p className="text-sm text-slate-500">
+                {modalAlumno?.nombre} {modalAlumno?.apellidos}
+              </p>
+            </div>
           </div>
-
-          {loadingFFEMotivos ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-xs text-slate-500">Selecciona el motivo por el que el alumno no cursa FFE:</p>
-              <div className="space-y-2">
-                {ffeMotivos.map(m => (
-                  <label
-                    key={m.id}
-                    className={`block p-3 rounded-xl border cursor-pointer transition-all ${
-                      ffeMotivoSelected === m.id
-                        ? 'border-amber-400 bg-amber-50'
-                        : 'border-slate-200 bg-white hover:bg-slate-50'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="ffeMotivo"
-                      value={m.id}
-                      checked={ffeMotivoSelected === m.id}
-                      onChange={() => setFfeMotivoSelected(m.id)}
-                      className="sr-only"
-                    />
-                    <span className="text-sm font-semibold text-slate-800">{m.codigo}</span>
-                    <span className="text-sm text-slate-500 ml-2">— {m.valor}</span>
-                  </label>
-                ))}
-              </div>
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setFfeModalAlumnoId(null)}
-                  className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveFFEMotivo}
-                  disabled={savingFFEMotivo || ffeMotivoSelected === null}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 text-white text-sm font-semibold rounded-xl hover:bg-amber-700 disabled:opacity-50 transition-colors"
-                >
-                  {savingFFEMotivo ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeX className="h-4 w-4" />}
-                  {savingFFEMotivo ? 'Guardando...' : 'Guardar motivo'}
-                </button>
-              </div>
-            </div>
-          )}
+          <button type="button" onClick={() => setFfeModalAlumnoId(null)} className="text-slate-400 hover:text-slate-600">
+            <X className="h-5 w-5" />
+          </button>
         </div>
-      </Modal>
-    </>
+
+        {loadingFFEMotivos ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-xs text-slate-500">Selecciona el motivo por el que el alumno no cursa FFE:</p>
+            <div className="space-y-2">
+              {ffeMotivos.map(m => (
+                <label
+                  key={m.id}
+                  className={`block p-3 rounded-xl border cursor-pointer transition-all ${ffeMotivoSelected === m.id
+                      ? 'border-amber-400 bg-amber-50'
+                      : 'border-slate-200 bg-white hover:bg-slate-50'
+                    }`}
+                >
+                  <input
+                    type="radio"
+                    name="ffeMotivo"
+                    value={m.id}
+                    checked={ffeMotivoSelected === m.id}
+                    onChange={() => setFfeMotivoSelected(m.id)}
+                    className="sr-only"
+                  />
+                  <span className="text-sm font-semibold text-slate-800">{m.codigo}</span>
+                  <span className="text-sm text-slate-500 ml-2">— {m.valor}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setFfeModalAlumnoId(null)}
+                className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveFFEMotivo}
+                disabled={savingFFEMotivo || ffeMotivoSelected === null}
+                className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 text-white text-sm font-semibold rounded-xl hover:bg-amber-700 disabled:opacity-50 transition-colors"
+              >
+                {savingFFEMotivo ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeX className="h-4 w-4" />}
+                {savingFFEMotivo ? 'Guardando...' : 'Guardar motivo'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  </>
   );
 }

@@ -111,6 +111,7 @@ function setupTables() {
     grado TEXT NOT NULL,
     regimen TEXT NOT NULL,
     codigoGrupo TEXT NOT NULL,
+    nombreCorto TEXT,
     resultadosAprendizaje TEXT,
     FOREIGN KEY(centroId) REFERENCES centros_educativos(id) ON DELETE CASCADE
   );
@@ -381,6 +382,7 @@ function setupTables() {
   // Migración: añadir festivos a centros_educativos y tutorias a detalles_academicos
   try { db.exec("ALTER TABLE centros_educativos ADD COLUMN festivos TEXT"); } catch {}
   try { db.exec("ALTER TABLE detalles_academicos ADD COLUMN tutorias TEXT"); } catch {}
+  try { db.exec("ALTER TABLE detalles_academicos ADD COLUMN nombreCorto TEXT"); } catch {}
   // Migración: eliminar festivos y tutorias de cursos
   try { db.exec("ALTER TABLE cursos DROP COLUMN festivos"); } catch {}
   try { db.exec("ALTER TABLE cursos DROP COLUMN tutorias"); } catch {}
@@ -437,6 +439,7 @@ function setupTables() {
       { plantillaId: 'val', name: 'Envío de valoración', description: 'Valoración → Tutor de la empresa', subject: 'Valoración FFE', body: '<p>Estimado/a, {{empresa.personaContacto}}</p>\n<p>Adjuntamos la ficha de valoración correspondiente a la fase de formación en empresa.</p>\n<p>Rogamos revisen el documento detenidamente y si todo está en orden, nos lo devuelvan firmado.</p>\n<p>Con respecto a la firma, tenga en cuenta que:</p>\n<ul>\n<li>Si la <strong>firma es manual</strong>, se debe imprimir el documento, firmarlo y a poder ser sellarlo y entregárselo al alumno/a antes de la finalización de las prácticas para que nos lo entregue cuando venga al centro.</li>\n<li>Si la <strong>firma es mediante certificado digital</strong>, bastaría con firmar el documento y enviármelo a mi por correo.</li>\n</ul>\n<p>Agradecemos de antemano su colaboración.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['valoracion']), recipientTarget: 'tutor', icon: 'valoracion', color: 'purple', place: 'relaciones', tipo: 'sistema', grupo: 'registro-individual' },
       { plantillaId: 'carta-inicio', name: 'Envío de carta de inicio', description: 'Carta de inicio → Empresa', subject: 'Carta de inicio de las FFE', body: '<p>Estimado/a, {{empresa.personaContacto}}</p>\n<p>Adjuntamos la carta de inicio correspondiente a la fase de formación en empresa.</p>\n<p>En esta carta se especifican aspectos importantes relacionados con el inicio de las FFE, por lo que rogamos revisen el documento detenidamente.</p>\n<p>Agradecemos de antemano su colaboración.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['carta']), recipientTarget: 'empresa', icon: 'carta', color: 'amber', place: 'relaciones', tipo: 'sistema', grupo: 'registro-individual' },
       { plantillaId: 'cal', name: 'Envío de calendario', description: 'Calendario → Estudiante', subject: 'Calendario FFE', body: '<p>Estimado/a, {{empresa.personaContacto}}</p>\n<p>Adjuntamos el calendario correspondiente a la fase de formación en empresa.</p>\n<p>Rogamos revisen el documento detenidamente.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['calendario']), recipientTarget: 'estudiante_conditional', icon: 'calendario', color: 'green', place: 'relaciones', tipo: 'sistema', grupo: 'registro-individual' },
+      { plantillaId: 'envio-cv', name: 'Envío de CV', description: 'Adjuntar CV del alumno a la empresa', subject: 'Candidatura para prácticas en empresa', body: '<p>Estimados señores:</p><p>Adjunto les remito mi currículum vitae para su consideración.</p><p>Quedo a su disposición para cualquier aclaración.</p><p>Atentamente,</p>', documents: JSON.stringify([]), recipientTarget: 'empresa', icon: 'send', color: 'blue', place: 'alumno', tipo: 'sistema', grupo: 'varios-registros' },
       { plantillaId: 'otros', name: 'Otros', description: 'Correo libre sin plantilla predefinida ni documentos adjuntos', subject: '', body: '', documents: JSON.stringify([]), recipientTarget: 'ninguno', icon: 'otros', color: 'slate', place: '', tipo: 'sistema', grupo: 'varios-registros' },
     ];
     const stmt = db.prepare(`INSERT INTO plantillas_correo (plantillaId, name, description, subject, body, documents, recipientTarget, icon, color, place, tipo, grupo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
@@ -446,6 +449,10 @@ function setupTables() {
     console.log("Seed: plantillas_correo migradas a DB");
   }
   db.prepare("UPDATE plantillas_correo SET place = '' WHERE plantillaId = 'otros' AND place != ''").run();
+
+  // Asegurar que la plantilla Envío de CV existe (migración para instalaciones existentes)
+  db.prepare(`INSERT OR IGNORE INTO plantillas_correo (plantillaId, name, description, subject, body, documents, recipientTarget, icon, color, place, tipo, grupo)
+    VALUES ('envio-cv', 'Envío de CV', 'Adjuntar CV del alumno a la empresa', 'Candidatura para prácticas en empresa', '<p>Estimados señores:</p><p>Adjunto les remito mi currículum vitae para su consideración.</p><p>Quedo a su disposición para cualquier aclaración.</p><p>Atentamente,</p>', '[]', 'empresa', 'send', 'blue', 'alumno', 'sistema', 'varios-registros')`).run();
 
   // Seed: valoraciones finales FFE
   const vfCount = db.prepare("SELECT COUNT(*) as count FROM ffe_valoraciones_final").get() as any;

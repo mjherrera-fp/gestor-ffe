@@ -33,6 +33,7 @@ export interface DetalleAcademico {
   grado: string;
   regimen: string;
   codigoGrupo: string;
+  nombreCorto?: string;
   resultadosAprendizaje?: ResultadoAprendizaje[];
   tutorias?: string[];
 }
@@ -90,6 +91,9 @@ export interface Alumno {
   estadoPlanFormativo: PlanFormativoEstado;
   estadoSeguimiento: SeguimientoEstado;
   estadoValoracion: ValoracionEstado;
+  cvEnvioCount?: number;
+  empresasInteresadasCount?: number;
+  tieneMatch?: number;
 }
 
 export interface RelacionAlumno {

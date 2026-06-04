@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Alumno, Empresa, InteresAlumnoEmpresa } from '../../../types/index.ts';
 
 // ─────────────────────────────────────────
@@ -11,6 +11,22 @@ export interface MatchResult {
   iA: boolean;
   iE: boolean;
   fullyMatched: boolean;
+}
+
+export interface CVAttachment {
+  filename: string;
+  path: string;
+  size: number;
+}
+
+export type SortField = 'nombre' | 'apellidos';
+export type SortOrder = 'asc' | 'desc';
+export type FilterMatchStatus = 'all' | 'con_match_y_relacion' | 'con_match_sin_relacion' | 'sin_match';
+
+export interface EmailCVData {
+  empresa: Empresa;
+  alumnoIds: number[];
+  attachments: CVAttachment[];
 }
 
 // ─────────────────────────────────────────
@@ -26,14 +42,20 @@ export function useIntereses(cursoId: number, detalleAcademicoId?: number) {
 
   // ── UI ──
   const [selectedAlumno, setSelectedAlumno] = useState<Alumno | null>(null);
+  const [selectedAlumnoIds, setSelectedAlumnoIds] = useState<number[]>([]);
   const [searchAlumno,   setSearchAlumno]   = useState('');
   const [searchEmpresa,  setSearchEmpresa]  = useState('');
+  const [sortBy, setSortBy] = useState<SortField>('apellidos');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [filterMinCVEnvios, setFilterMinCVEnvios] = useState<number>(0);
+  const [filterEmpresasInteresadas, setFilterEmpresasInteresadas] = useState<'all' | 'con' | 'sin'>('all');
+  const [filterMatchStatus, setFilterMatchStatus] = useState<FilterMatchStatus>('all');
 
   // ─────────────────────────────────────────
   //  FETCH
   // ─────────────────────────────────────────
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const params = new URLSearchParams({ cursoId: String(cursoId) });
     if (detalleAcademicoId) params.set('detalleAcademicoId', String(detalleAcademicoId));
     const intParams = new URLSearchParams();
@@ -46,9 +68,28 @@ export function useIntereses(cursoId: number, detalleAcademicoId?: number) {
     setAlumnos(await alRes.json());
     setEmpresas(await emRes.json());
     setIntereses(await intRes.json());
+  }, [cursoId, detalleAcademicoId]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // ─────────────────────────────────────────
+  //  SELECTION
+  // ─────────────────────────────────────────
+
+  const toggleSelection = (alumnoId: number) => {
+    setSelectedAlumnoIds(prev => {
+      const exists = prev.includes(alumnoId);
+      if (exists) return prev.filter(id => id !== alumnoId);
+      return [...prev, alumnoId];
+    });
   };
 
-  useEffect(() => { fetchData(); }, [cursoId, detalleAcademicoId]);
+  const clearSelection = () => setSelectedAlumnoIds([]);
+
+  const selectOnly = (alumno: Alumno) => {
+    setSelectedAlumno(alumno);
+    setSelectedAlumnoIds([]);
+  };
 
   // ─────────────────────────────────────────
   //  HANDLERS
@@ -81,10 +122,41 @@ export function useIntereses(cursoId: number, detalleAcademicoId?: number) {
     solicitudes: intereses.filter(i => i.alumnoId === alumnoId && i.interesado === 'empresa').length,
   });
 
-  const filteredAlumnos = alumnos.filter(al =>
-    al.nombre.toLowerCase().includes(searchAlumno.toLowerCase()) ||
-    al.apellidos.toLowerCase().includes(searchAlumno.toLowerCase())
-  );
+  const filteredAlumnos = useMemo(() => {
+    const filtered = alumnos.filter(al => {
+      if (!al.nombre.toLowerCase().includes(searchAlumno.toLowerCase()) &&
+          !al.apellidos.toLowerCase().includes(searchAlumno.toLowerCase()))
+        return false;
+
+      const envios = intereses.filter(i => i.alumnoId === al.id && i.interesado === 'alumno').length;
+      if (filterMinCVEnvios > 0 && envios < filterMinCVEnvios) return false;
+
+      const solicitudes = intereses.filter(i => i.alumnoId === al.id && i.interesado === 'empresa').length;
+      if (filterEmpresasInteresadas === 'con' && solicitudes === 0) return false;
+      if (filterEmpresasInteresadas === 'sin' && solicitudes > 0) return false;
+
+      const empresasConAlumno = new Set(intereses.filter(i => i.alumnoId === al.id && i.interesado === 'alumno').map(i => i.empresaId));
+      const empresasConEmpresa = new Set(intereses.filter(i => i.alumnoId === al.id && i.interesado === 'empresa').map(i => i.empresaId));
+      const tieneMatch = [...empresasConAlumno].some(eId => empresasConEmpresa.has(eId));
+      const isAssigned = al.relacionId !== null;
+      const matchStatus = !tieneMatch ? 'sin_match' : isAssigned ? 'con_match_y_relacion' : 'con_match_sin_relacion';
+      if (filterMatchStatus !== 'all' && matchStatus !== filterMatchStatus) return false;
+
+      return true;
+    });
+    filtered.sort((a, b) => {
+      const aVal = sortBy === 'nombre' ? a.nombre : a.apellidos;
+      const bVal = sortBy === 'nombre' ? b.nombre : b.apellidos;
+      const cmp = aVal.localeCompare(bVal);
+      return sortOrder === 'asc' ? cmp : -cmp;
+    });
+    return filtered;
+  }, [alumnos, searchAlumno, filterMinCVEnvios, filterEmpresasInteresadas, filterMatchStatus, sortBy, sortOrder, intereses]);
+
+  const toggleSort = (field: SortField) => {
+    if (sortBy === field) setSortOrder(o => o === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(field); setSortOrder('asc'); }
+  };
 
   const filteredEmpresas = empresas.filter(em =>
     em.nombre.toLowerCase().includes(searchEmpresa.toLowerCase()) ||
@@ -97,12 +169,17 @@ export function useIntereses(cursoId: number, detalleAcademicoId?: number) {
 
   return {
     // Datos derivados
-    filteredAlumnos, filteredEmpresas,
+    filteredAlumnos, filteredEmpresas, empresas,
     // UI
     selectedAlumno, setSelectedAlumno,
+    selectedAlumnoIds, toggleSelection, clearSelection, selectOnly,
     searchAlumno, setSearchAlumno,
     searchEmpresa, setSearchEmpresa,
+    sortBy, sortOrder, toggleSort,
+    filterMinCVEnvios, setFilterMinCVEnvios,
+    filterEmpresasInteresadas, setFilterEmpresasInteresadas,
+    filterMatchStatus, setFilterMatchStatus,
     // Helpers
-    toggleInteres, isMatched, getAlumnoStats,
+    toggleInteres, isMatched, getAlumnoStats, fetchData,
   };
 }

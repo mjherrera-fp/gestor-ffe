@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Download, FileSpreadsheet, Search, LayoutGrid, List, ArrowUpDown,
-  GraduationCap, Mail,
-  Plus,
+  GraduationCap, Mail, FileArchive, X,
+  Plus, Send, Building2, GitPullRequest,
 } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { Title } from '../../../components/Title.tsx';
-import { SortField, SortOrder, FilterStatus, ViewMode } from '../hooks/useAlumnos.ts';
+import { Modal } from '../../../components/ui/Modal.tsx';
+import { SortField, SortOrder, FilterStatus, FilterRelacionStatus, ViewMode } from '../hooks/useAlumnos.ts';
 
 const FILTER_OPTIONS = [
   { id: 'all',      label: 'Todos los Estudiantes' },
@@ -20,6 +21,18 @@ const SORT_OPTIONS: { id: SortField; label: string }[] = [
   { id: 'horas',     label: 'Horas FFE' },
 ];
 
+const EMPRESAS_INTERESADAS_OPTIONS = [
+  { id: 'all' as const, label: 'Todas' },
+  { id: 'con' as const, label: 'Con interés' },
+  { id: 'sin' as const, label: 'Sin interés' },
+];
+
+const RELACION_STATUS_OPTIONS: { id: FilterRelacionStatus; label: string }[] = [
+  { id: 'all',           label: 'Todos' },
+  { id: 'con_relacion',   label: 'Con relación' },
+  { id: 'sin_relacion',   label: 'Sin relación' },
+];
+
 interface AlumnosToolbarProps {
   searchTerm: string;
   onSearchChange: (v: string) => void;
@@ -30,9 +43,17 @@ interface AlumnosToolbarProps {
   sortBy: SortField;
   sortOrder: SortOrder;
   onToggleSort: (field: SortField) => void;
+  filterMinCVEnvios: number;
+  onFilterMinCVEnviosChange: (v: number) => void;
+  filterEmpresasInteresadas: 'all' | 'con' | 'sin';
+  onFilterEmpresasInteresadasChange: (v: 'all' | 'con' | 'sin') => void;
+  filterRelacionStatus: FilterRelacionStatus;
+  onFilterRelacionStatusChange: (v: FilterRelacionStatus) => void;
   isImporting: boolean;
+  isImportingZip: boolean;
   onDownloadTemplate: () => void | Promise<void>;
   onImportClick: () => void;
+  onImportZipClick: () => void;
   onNewAlumno: () => void;
   onBulkEmail: () => void;
 }
@@ -42,9 +63,13 @@ export function AlumnosToolbar({
   viewMode, onViewModeChange,
   filterStatus, onFilterStatusChange,
   sortBy, sortOrder, onToggleSort,
-  isImporting, onDownloadTemplate, onImportClick, onNewAlumno,
+  filterMinCVEnvios, onFilterMinCVEnviosChange,
+  filterEmpresasInteresadas, onFilterEmpresasInteresadasChange,
+  filterRelacionStatus, onFilterRelacionStatusChange,
+  isImporting, isImportingZip, onDownloadTemplate, onImportClick, onImportZipClick, onNewAlumno,
   onBulkEmail,
 }: AlumnosToolbarProps) {
+  const [showImportCVModal, setShowImportCVModal] = useState(false);
   return (
     <div className="space-y-4">
 
@@ -70,6 +95,15 @@ export function AlumnosToolbar({
             >
               <FileSpreadsheet className="h-4 w-4" />
               {isImporting ? 'Importando...' : 'Importar Excel'}
+            </button>
+          </Title>
+          <Title text="Instrucciones para importar CVs">
+            <button
+              onClick={() => setShowImportCVModal(true)}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-purple-50 text-purple-700 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-purple-100 transition-all border border-purple-100"
+            >
+              <FileArchive className="h-4 w-4" />
+              Importar CVs
             </button>
           </Title>
           <Title text="Enviar correo a alumnos filtrados">
@@ -164,7 +198,128 @@ export function AlumnosToolbar({
             </button>
           ))}
         </div>
+
+        {/* Filtros avanzados: envíos CV, empresas interesadas, match */}
+        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
+          <span className="text-[10px] flex items-center uppercase tracking-wider text-slate-500 font-bold mr-1">
+            Filtrar por:
+          </span>
+
+          {/* Más de X envíos */}
+          <div className="flex items-center gap-1">
+            <Send className="h-3.5 w-3.5 text-slate-400" />
+            <span className="text-[11px] text-slate-500 font-semibold whitespace-nowrap">+ de</span>
+            <input
+              type="number"
+              min={0}
+              value={filterMinCVEnvios}
+              onChange={e => onFilterMinCVEnviosChange(Math.max(0, Number(e.target.value)))}
+              className="w-14 px-2 py-1 text-xs font-bold text-center bg-slate-50 border border-slate-200 rounded-md focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+            />
+            <span className="text-[11px] text-slate-500 font-semibold whitespace-nowrap">envíos</span>
+          </div>
+
+          <span className="text-slate-200 select-none">|</span>
+
+          {/* Empresas interesadas */}
+          <div className="flex items-center gap-1">
+            <Building2 className="h-3.5 w-3.5 text-slate-400" />
+            {EMPRESAS_INTERESADAS_OPTIONS.map(opt => (
+              <button
+                key={opt.id}
+                onClick={() => onFilterEmpresasInteresadasChange(opt.id)}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border ${
+                  filterEmpresasInteresadas === opt.id
+                    ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
+                    : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          <span className="text-slate-200 select-none">|</span>
+
+          {/* Relación */}
+          <div className="flex items-center gap-1">
+            <GitPullRequest className="h-3.5 w-3.5 text-slate-400" />
+            {RELACION_STATUS_OPTIONS.map(opt => (
+              <button
+                key={opt.id}
+                onClick={() => onFilterRelacionStatusChange(opt.id)}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border ${
+                  filterRelacionStatus === opt.id
+                    ? 'bg-amber-50 text-amber-600 border-amber-200'
+                    : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Indicador de filtros activos */}
+          {(filterMinCVEnvios > 0 || filterEmpresasInteresadas !== 'all' || filterRelacionStatus !== 'all') && (
+            <button
+              onClick={() => {
+                onFilterMinCVEnviosChange(0);
+                onFilterEmpresasInteresadasChange('all');
+                onFilterRelacionStatusChange('all');
+              }}
+              className="ml-auto px-2.5 py-1 rounded-md text-[11px] font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 transition-all"
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* ── Modal instrucciones importación CVs ── */}
+      <Modal open={showImportCVModal} onClose={() => setShowImportCVModal(false)} maxWidth="md">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-100 text-purple-700">
+                <FileArchive className="h-5 w-5" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800">Importar CVs</h3>
+            </div>
+            <button onClick={() => setShowImportCVModal(false)} className="text-slate-400 hover:text-slate-600 p-1">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="space-y-4 text-sm text-slate-600">
+            <p>Para importar los CVs de los alumnos, sigue estos pasos:</p>
+            <ol className="list-decimal list-inside space-y-2 pl-2">
+              <li>Prepara un archivo <strong>.zip</strong> con los CVs en formato <strong>PDF</strong>.</li>
+              <li>Cada archivo PDF debe nombrarse con el <strong>DNI</strong> del alumno (ej: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono">12345678X.pdf</code>).</li>
+              <li>El sistema buscará al alumno por su DNI y le asignará el CV automáticamente.</li>
+            </ol>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+              <strong>Nota:</strong> Los DNI deben coincidir exactamente con los registrados en el sistema (incluyendo letra).
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mt-6">
+            <button
+              onClick={() => { setShowImportCVModal(false); onImportZipClick(); }}
+              disabled={isImportingZip}
+              className="flex-1 flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-purple-700 transition-all disabled:opacity-50"
+            >
+              <FileArchive className="h-4 w-4" />
+              {isImportingZip ? 'Procesando...' : 'Seleccionar archivo ZIP'}
+            </button>
+            <button
+              onClick={() => setShowImportCVModal(false)}
+              className="px-4 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition-all"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -107,7 +107,7 @@ export function AlumnoFormModal({
             <CustomSelect
               options={detalles.map(d => ({
                 id: d.id,
-                label: `${d.ciclo} - ${(d as any).centroNombre} (${d.grado})`,
+                label: `${(d as any).nombreCorto || d.codigoGrupo} - ${(d as any).centroNombre || ''}`,
               }))}
               value={formData.detalleAcademicoId || ''}
               onChange={val => setFormData(prev => ({ ...prev, detalleAcademicoId: Number(val) }))}

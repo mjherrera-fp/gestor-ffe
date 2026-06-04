@@ -11,6 +11,7 @@ import { mostrarToast } from '../../../utils/toast.ts';
 export type SortField   = 'nombre' | 'apellidos' | 'horas';
 export type SortOrder   = 'asc' | 'desc';
 export type FilterStatus = 'all' | 'pending' | 'assigned';
+export type FilterRelacionStatus = 'all' | 'con_relacion' | 'sin_relacion';
 export type ViewMode    = 'grid' | 'table';
 
 // ─────────────────────────────────────────
@@ -33,6 +34,9 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
   const [sortBy,       setSortBy]       = useState<SortField>('apellidos');
   const [sortOrder,    setSortOrder]    = useState<SortOrder>('asc');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const [filterMinCVEnvios, setFilterMinCVEnvios] = useState<number>(0);
+  const [filterEmpresasInteresadas, setFilterEmpresasInteresadas] = useState<'all' | 'con' | 'sin'>('all');
+  const [filterRelacionStatus, setFilterRelacionStatus] = useState<FilterRelacionStatus>('all');
 
   // ── Modal alumno ──
   const [showForm,   setShowForm]   = useState(false);
@@ -57,6 +61,11 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
   const [importResult, setImportResult] = useState<{ success: number; updated: number; errors?: string[] } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [modoCreacion, setModoCreacion] = useState('descargar');
+
+  // ── Importación ZIP CVs ──
+  const [isImportingZip, setIsImportingZip] = useState(false);
+  const [zipResult, setZipResult] = useState<{ total: number; procesados: number; errores: number; results: { dni: string; nombre: string; ok: boolean; error?: string }[] } | null>(null);
+  const zipFileInputRef = useRef<HTMLInputElement>(null);
 
   // ─────────────────────────────────────────
   //  EFECTOS
@@ -109,7 +118,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
       setFormData({
         nombre: '', apellidos: '', dni: '', numSS: '', tlfn: '',
         emailEduca: '', emailPersonal: '', fechaNacimiento: '', cursoId,
-        detalleAcademicoId: detalles.length > 0 ? detalles[0].id : undefined,
+        detalleAcademicoId: detalleAcademicoId ?? (detalles.length > 0 ? detalles[0].id : undefined),
         totalHorasFFE: 0,
       });
     }
@@ -328,6 +337,30 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     reader.readAsBinaryString(file);
   };
 
+  const handleImportCVZip = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsImportingZip(true);
+    const fd = new FormData();
+    fd.append('zip', file);
+    try {
+      const res = await fetch('/api/alumnos/cv/zip', { method: 'POST', body: fd });
+      if (res.ok) {
+        const data = await res.json();
+        setZipResult(data);
+        fetchAlumnos();
+      } else {
+        const err = await res.json();
+        setZipResult({ total: 0, procesados: 0, errores: 1, results: [{ dni: '', nombre: '', ok: false, error: err.error || 'Error al procesar ZIP' }] });
+      }
+    } catch {
+      setZipResult({ total: 0, procesados: 0, errores: 1, results: [{ dni: '', nombre: '', ok: false, error: 'Error de conexión' }] });
+    } finally {
+      setIsImportingZip(false);
+      if (zipFileInputRef.current) zipFileInputRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────────────────
   //  ORDENACIÓN Y FILTRADO
   // ─────────────────────────────────────────
@@ -351,7 +384,18 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
         filterStatus === 'all' ||
         (filterStatus === 'pending'  && !isAssigned) ||
         (filterStatus === 'assigned' && isAssigned);
-      return matchesSearch && matchesStatus;
+      const cvCount = alumno.cvEnvioCount ?? 0;
+      const matchesMinCV = filterMinCVEnvios === 0 || cvCount >= filterMinCVEnvios;
+      const empInteresadas = alumno.empresasInteresadasCount ?? 0;
+      const matchesEmpInteresadas =
+        filterEmpresasInteresadas === 'all' ||
+        (filterEmpresasInteresadas === 'con' && empInteresadas > 0) ||
+        (filterEmpresasInteresadas === 'sin' && empInteresadas === 0);
+      const matchesRelacionStatus =
+        filterRelacionStatus === 'all' ||
+        (filterRelacionStatus === 'con_relacion' && isAssigned) ||
+        (filterRelacionStatus === 'sin_relacion' && !isAssigned);
+      return matchesSearch && matchesStatus && matchesMinCV && matchesEmpInteresadas && matchesRelacionStatus;
     })
     .sort((a, b) => {
       let cmp = 0;
@@ -359,7 +403,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
       if (sortBy === 'apellidos') cmp = a.apellidos.localeCompare(b.apellidos);
       if (sortBy === 'horas')     cmp = (a.totalHorasFFE || 0) - (b.totalHorasFFE || 0);
       return sortOrder === 'asc' ? cmp : -cmp;
-    }), [alumnos, searchTerm, filterStatus, sortBy, sortOrder]);
+    }), [alumnos, searchTerm, filterStatus, filterMinCVEnvios, filterEmpresasInteresadas, filterRelacionStatus, sortBy, sortOrder]);
 
   // ─────────────────────────────────────────
   //  EMAIL
@@ -435,6 +479,9 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     viewMode, setViewMode,
     searchTerm, setSearchTerm,
     sortBy, sortOrder, filterStatus, setFilterStatus,
+    filterMinCVEnvios, setFilterMinCVEnvios,
+    filterEmpresasInteresadas, setFilterEmpresasInteresadas,
+    filterRelacionStatus, setFilterRelacionStatus,
     toggleSort,
     filteredAndSortedAlumnos,
     // Formulario
@@ -459,6 +506,11 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     fileInputRef,
     downloadTemplate,
     handleImportExcel,
+    // ZIP CVs
+    isImportingZip,
+    zipResult, setZipResult,
+    zipFileInputRef,
+    handleImportCVZip,
     // Email
     showEmailTypeSelector, setShowEmailTypeSelector,
     pendingEmailTarget, setPendingEmailTarget,

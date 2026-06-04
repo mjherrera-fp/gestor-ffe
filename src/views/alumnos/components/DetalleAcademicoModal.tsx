@@ -76,7 +76,7 @@ export default function DetalleAcademicoModal({ open, alumno, onClose }: Props) 
                 onChange={setSelectedId}
                 options={detalles.map(d => ({
                   id: d.id,
-                  label: `${d.ciclo} - ${(d as any).centroNombre} (${d.codigoGrupo})`
+                  label: `${(d as any).nombreCorto || d.codigoGrupo} - ${(d as any).centroNombre || ''}`
                 }))}
                 classListboxButton="py-3"
               />

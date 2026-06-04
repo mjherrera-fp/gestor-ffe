@@ -1,21 +1,33 @@
 import React from 'react';
-import { Search, X, Send, Briefcase, Trophy, CheckCircle2 } from 'lucide-react';
+import { Search, X, Send, Briefcase, Trophy, CheckCircle2, Minus } from 'lucide-react';
 import { Alumno, Empresa } from '../../../types/index.ts';
 import { Interesado, MatchResult } from '../hooks/useIntereses.ts';
 import { InteresesEmptyState } from './InteresesEmptyState.tsx';
 
 // ─────────────────────────────────────────
-//  SUBCOMPONENTE: fila mobile
+//  TIPOS
 // ─────────────────────────────────────────
+
+interface BatchMatchResult extends MatchResult {
+  partialIA: boolean;
+  partialIE: boolean;
+}
 
 interface EmpresaRowProps {
   empresa: Empresa;
-  match: MatchResult;
+  match: BatchMatchResult;
   onToggle: (empresaId: number, interesado: Interesado) => void;
+  onCreateRelacion?: (empresaId: number) => void;
 }
 
-function EmpresaMobileRow({ empresa, match, onToggle }: EmpresaRowProps) {
-  const { iA, iE, fullyMatched } = match;
+// ─────────────────────────────────────────
+//  SUBCOMPONENTE: fila mobile
+// ─────────────────────────────────────────
+
+function EmpresaMobileRow({ empresa, match, onToggle, onCreateRelacion }: EmpresaRowProps) {
+  const { iA, iE, fullyMatched, partialIA, partialIE } = match;
+  const showPartialA = partialIA && !iA;
+  const showPartialE = partialIE && !iE;
   return (
     <div className={`p-4 flex items-center justify-between gap-4 ${fullyMatched ? 'bg-emerald-50/30' : ''}`}>
       <div className="min-w-0">
@@ -25,19 +37,36 @@ function EmpresaMobileRow({ empresa, match, onToggle }: EmpresaRowProps) {
       <div className="flex items-center gap-3 shrink-0">
         <button
           onClick={() => onToggle(empresa.id!, 'alumno')}
-          className={`p-2 rounded-lg transition-all ${iA ? 'bg-primary text-white shadow-md' : 'text-text-muted bg-slate-50'}`}
+          className={`p-2 rounded-lg transition-all ${
+            iA ? 'bg-primary text-white shadow-md' :
+            showPartialA ? 'bg-primary/30 text-primary border border-primary/40' :
+            'text-text-muted bg-slate-50'
+          }`}
         >
-          <Send className={`h-4 w-4 ${iA ? 'fill-current' : ''}`} />
+          {showPartialA ? <Minus className="h-4 w-4" /> : <Send className={`h-4 w-4 ${iA ? 'fill-current' : ''}`} />}
         </button>
         <button
           onClick={() => onToggle(empresa.id!, 'empresa')}
-          className={`p-2 rounded-lg transition-all ${iE ? 'bg-emerald-600 text-white shadow-md' : 'text-text-muted bg-slate-50'}`}
+          className={`p-2 rounded-lg transition-all ${
+            iE ? 'bg-emerald-600 text-white shadow-md' :
+            showPartialE ? 'bg-emerald-600/30 text-emerald-700 border border-emerald-400' :
+            'text-text-muted bg-slate-50'
+          }`}
         >
-          <Briefcase className="h-4 w-4" />
+          {showPartialE ? <Minus className="h-4 w-4" /> : <Briefcase className="h-4 w-4" />}
         </button>
-        <div className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${fullyMatched ? 'bg-emerald-100 text-emerald-700 animate-pulse' : 'bg-slate-100 text-slate-300'}`}>
+        <button
+          onClick={() => onCreateRelacion?.(empresa.id!)}
+          disabled={!fullyMatched}
+          className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
+            fullyMatched
+              ? 'bg-emerald-100 text-emerald-700 animate-pulse cursor-pointer hover:bg-emerald-200'
+              : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+          }`}
+          title={fullyMatched ? 'Crear relación con alumnos seleccionados' : 'Sin match completo'}
+        >
           {fullyMatched ? <Trophy className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-        </div>
+        </button>
       </div>
     </div>
   );
@@ -47,8 +76,10 @@ function EmpresaMobileRow({ empresa, match, onToggle }: EmpresaRowProps) {
 //  SUBCOMPONENTE: fila desktop
 // ─────────────────────────────────────────
 
-function EmpresaTableRow({ empresa, match, onToggle }: EmpresaRowProps) {
-  const { iA, iE, fullyMatched } = match;
+function EmpresaTableRow({ empresa, match, onToggle, onCreateRelacion }: EmpresaRowProps) {
+  const { iA, iE, fullyMatched, partialIA, partialIE } = match;
+  const showPartialA = partialIA && !iA;
+  const showPartialE = partialIE && !iE;
   return (
     <tr className={`transition-colors ${fullyMatched ? 'bg-emerald-50/50' : 'hover:bg-slate-50'}`}>
       <td className="px-6 py-4">
@@ -58,32 +89,73 @@ function EmpresaTableRow({ empresa, match, onToggle }: EmpresaRowProps) {
       <td className="px-6 py-4 text-center">
         <button
           onClick={() => onToggle(empresa.id!, 'alumno')}
-          className={`p-2 rounded-lg transition-all ${iA ? 'bg-primary text-white shadow-md shadow-primary/20 scale-110' : 'text-text-muted hover:bg-slate-100'}`}
+          className={`p-2 rounded-lg transition-all ${
+            iA ? 'bg-primary text-white shadow-md shadow-primary/20 scale-110' :
+            showPartialA ? 'bg-primary/30 text-primary border border-primary/40' :
+            'text-text-muted hover:bg-slate-100'
+          }`}
         >
-          <Send className={`h-5 w-5 ${iA ? 'fill-current' : ''}`} />
+          {showPartialA ? <Minus className="h-5 w-5" /> : <Send className={`h-5 w-5 ${iA ? 'fill-current' : ''}`} />}
         </button>
       </td>
       <td className="px-6 py-4 text-center">
         <button
           onClick={() => onToggle(empresa.id!, 'empresa')}
-          className={`p-2 rounded-lg transition-all ${iE ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 scale-110' : 'text-text-muted hover:bg-slate-100'}`}
+          className={`p-2 rounded-lg transition-all ${
+            iE ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 scale-110' :
+            showPartialE ? 'bg-emerald-600/30 text-emerald-700 border border-emerald-400' :
+            'text-text-muted hover:bg-slate-100'
+          }`}
         >
-          <Briefcase className="h-5 w-5" />
+          {showPartialE ? <Minus className="h-5 w-5" /> : <Briefcase className="h-5 w-5" />}
         </button>
       </td>
       <td className="px-6 py-4 text-center">
-        {fullyMatched ? (
-          <div className="inline-flex h-8 w-8 rounded-full bg-emerald-100 text-emerald-700 items-center justify-center animate-bounce">
-            <Trophy className="h-4 w-4" />
-          </div>
-        ) : (
-          <div className="inline-flex h-8 w-8 rounded-full bg-slate-50 text-slate-200 items-center justify-center">
-            <CheckCircle2 className="h-4 w-4" />
-          </div>
-        )}
+        <button
+          onClick={() => onCreateRelacion?.(empresa.id!)}
+          disabled={!fullyMatched}
+          className={`inline-flex h-8 w-8 rounded-full items-center justify-center transition-all ${
+            fullyMatched
+              ? 'bg-emerald-100 text-emerald-700 animate-bounce cursor-pointer hover:bg-emerald-200'
+              : 'bg-slate-50 text-slate-200 cursor-not-allowed'
+          }`}
+          title={fullyMatched ? 'Crear relación con alumnos seleccionados' : 'Sin match completo'}
+        >
+          {fullyMatched ? <Trophy className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+        </button>
       </td>
     </tr>
   );
+}
+
+// ─────────────────────────────────────────
+//  HELPERS DE BATCH
+// ─────────────────────────────────────────
+
+function getBatchMatch(
+  empresaId: number,
+  selectedAlumnoIds: number[],
+  selectedAlumno: Alumno | null,
+  isMatched: (alId: number, emId: number) => MatchResult
+): BatchMatchResult {
+  const ids = selectedAlumnoIds.length > 0
+    ? selectedAlumnoIds
+    : (selectedAlumno?.id ? [selectedAlumno.id] : []);
+  let countA = 0;
+  let countE = 0;
+  for (const id of ids) {
+    const m = isMatched(id, empresaId);
+    if (m.iA) countA++;
+    if (m.iE) countE++;
+  }
+  const total = ids.length;
+  return {
+    iA: countA === total,
+    iE: countE === total,
+    fullyMatched: countA === total && countE === total,
+    partialIA: countA > 0 && countA < total,
+    partialIE: countE > 0 && countE < total,
+  };
 }
 
 // ─────────────────────────────────────────
@@ -92,23 +164,28 @@ function EmpresaTableRow({ empresa, match, onToggle }: EmpresaRowProps) {
 
 interface InteresesGridProps {
   selectedAlumno: Alumno | null;
+  selectedAlumnoIds: number[];
   empresas: Empresa[];
   searchEmpresa: string;
   onSearchEmpresaChange: (v: string) => void;
   isMatched: (alId: number, emId: number) => MatchResult;
-  onToggle: (alumnoId: number, empresaId: number, interesado: Interesado) => void;
+  onToggle: (empresaId: number, interesado: Interesado) => void;
+  onCreateRelacion?: (empresaId: number) => void;
 }
 
 export function InteresesGrid({
-  selectedAlumno, empresas,
+  selectedAlumno, selectedAlumnoIds, empresas,
   searchEmpresa, onSearchEmpresaChange,
-  isMatched, onToggle,
+  isMatched, onToggle, onCreateRelacion,
 }: InteresesGridProps) {
 
-  if (!selectedAlumno) return <InteresesEmptyState />;
+  if (!selectedAlumno && selectedAlumnoIds.length === 0) return <InteresesEmptyState />;
+
+  const getMatch = (empresaId: number) =>
+    getBatchMatch(empresaId, selectedAlumnoIds, selectedAlumno, isMatched);
 
   const handleToggle = (empresaId: number, interesado: Interesado) =>
-    onToggle(selectedAlumno.id!, empresaId, interesado);
+    onToggle(empresaId, interesado);
 
   const emptySearch = (
     <div className="p-20 text-center">
@@ -117,28 +194,53 @@ export function InteresesGrid({
     </div>
   );
 
+  const leyenda = selectedAlumnoIds.length > 0 ? (
+    <div className="flex gap-4">
+      <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
+        <Send className="h-3 w-3 text-primary" /> Envío de CV
+      </div>
+      <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
+        <Briefcase className="h-3 w-3 text-emerald-500" /> Empresa
+      </div>
+    </div>
+  ) : (
+    <div className="flex gap-4">
+      <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
+        <Send className="h-3 w-3 text-primary" /> Envío de CV del alumno
+      </div>
+      <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
+        <Briefcase className="h-3 w-3 text-emerald-500" /> Empresa
+      </div>
+    </div>
+  );
+
   return (
     <>
       {/* Cabecera */}
       <div className="p-6 border-b border-border-base bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold text-text-main leading-tight">
-            {selectedAlumno.nombre} {selectedAlumno.apellidos}
-          </h2>
-          <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
-            Interacción Alumno-Empresa
-          </p>
+          {selectedAlumno ? (
+            <>
+              <h2 className="text-lg font-bold text-text-main leading-tight">
+                {selectedAlumno.nombre} {selectedAlumno.apellidos}
+              </h2>
+              <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
+                Interacción Alumno-Empresa
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-lg font-bold text-text-main leading-tight">
+                {selectedAlumnoIds.length} alumnos seleccionados
+              </h2>
+              <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
+                Interacción masiva Alumno-Empresa
+              </p>
+            </>
+          )}
         </div>
         <div className="flex flex-col sm:items-end gap-3">
-          {/* Leyenda */}
-          <div className="flex gap-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
-              <Send className="h-3 w-3 text-primary" /> Envío de CV del alumno
-            </div>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
-              <Briefcase className="h-3 w-3 text-emerald-500" /> Empresa
-            </div>
-          </div>
+          {leyenda}
           {/* Buscador empresa */}
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -171,8 +273,9 @@ export function InteresesGrid({
                 <EmpresaMobileRow
                   key={empresa.id}
                   empresa={empresa}
-                  match={isMatched(selectedAlumno.id!, empresa.id!)}
+                  match={getMatch(empresa.id!)}
                   onToggle={handleToggle}
+                  onCreateRelacion={onCreateRelacion}
                 />
               ))
             : emptySearch}
@@ -194,8 +297,9 @@ export function InteresesGrid({
                 <EmpresaTableRow
                   key={empresa.id}
                   empresa={empresa}
-                  match={isMatched(selectedAlumno.id!, empresa.id!)}
+                  match={getMatch(empresa.id!)}
                   onToggle={handleToggle}
+                  onCreateRelacion={onCreateRelacion}
                 />
               ))}
             </tbody>

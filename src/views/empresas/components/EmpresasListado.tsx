@@ -2,6 +2,7 @@ import React from 'react';
 import { Building, Hash, Plus, Edit2, Trash2, Mail, Phone, X, Star, Filter, Download, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { Empresa } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
+import { CustomSelect } from '../../../components/CustomSelect.tsx';
 
 interface EmpresasListadoProps {
   empresas: Empresa[];
@@ -127,40 +128,48 @@ export function EmpresasListado({
             Filtros
           </div>
 
-          <select
-            className="text-[10px] bg-white border border-border-base rounded-lg px-2 py-1.5 font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
-            value={filterColaboracion}
-            onChange={e => onFilterColaboracionChange(e.target.value as 'todas' | 'con' | 'sin' | 'sin_convenio')}
-          >
-            <option value="todas">Todas las empresas</option>
-            <option value="con">Con colaboración</option>
-            <option value="sin">Sin colaboración</option>
-            <option value="sin_convenio">Sin convenio</option>
-          </select>
+          <div className="w-40">
+            <CustomSelect
+              options={[
+                { id: 'todas', label: 'Todas las empresas' },
+                { id: 'con', label: 'Con relaciones' },
+                { id: 'sin', label: 'Sin relaciones' },
+                { id: 'sin_convenio', label: 'Sin convenio' },
+              ]}
+              value={filterColaboracion}
+              onChange={v => onFilterColaboracionChange(v as 'todas' | 'con' | 'sin' | 'sin_convenio')}
+              classListboxButton="text-[10px] border-border-base rounded-lg px-2 py-1.5 font-medium"
+            />
+          </div>
 
-          <select
-            className="text-[10px] bg-white border border-border-base rounded-lg px-2 py-1.5 font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
-            value={filterContactado}
-            onChange={e => onFilterContactadoChange(e.target.value as 'todas' | 'contactada' | 'no_contactada')}
-          >
-            <option value="todas">Cualquier contacto</option>
-            <option value="contactada">Contactada</option>
-            <option value="no_contactada">No contactada</option>
-          </select>
+          <div className="w-40">
+            <CustomSelect
+              options={[
+                { id: 'todas', label: 'Cualquier contacto' },
+                { id: 'contactada', label: 'Contactada' },
+                { id: 'no_contactada', label: 'No contactada' },
+              ]}
+              value={filterContactado}
+              onChange={v => onFilterContactadoChange(v as 'todas' | 'contactada' | 'no_contactada')}
+              classListboxButton="text-[10px] border-border-base rounded-lg px-2 py-1.5 font-medium"
+            />
+          </div>
 
           {cursosUnicos.length > 0 && (
-            <select
-              className="text-[10px] bg-white border border-border-base rounded-lg px-2 py-1.5 font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
-              value={filterUltimosCursos}
-              onChange={e => onFilterUltimosCursosChange(Number(e.target.value))}
-            >
-              <option value={0}>Cualquier curso</option>
-              {cursosUnicos.slice(0, 5).map((_, i) => (
-                <option key={i} value={i + 1}>
-                  {cursosUnicos.slice(0, i + 1).join(', ')}
-                </option>
-              ))}
-            </select>
+            <div className="w-44">
+              <CustomSelect
+                options={[
+                  { id: 0, label: 'Cualquier curso' },
+                  ...cursosUnicos.slice(0, 5).map((_, i) => ({
+                    id: i + 1,
+                    label: cursosUnicos.slice(0, i + 1).join(', '),
+                  })),
+                ]}
+                value={filterUltimosCursos}
+                onChange={v => onFilterUltimosCursosChange(Number(v))}
+                classListboxButton="text-[10px] border-border-base rounded-lg px-2 py-1.5 font-medium"
+              />
+            </div>
           )}
 
           <div className="flex items-center gap-1">
