@@ -328,6 +328,7 @@ export const HistoricoDAO = {
 export const CentroDAO = {
   getAllByProfesor: (profesorId: number) => (db.prepare('SELECT * FROM centros_educativos WHERE profesorId = ?').all(profesorId) as any[]).map(c => ({
     ...c,
+    codigoCentro: c.codigo_centro,
     festivos: c.festivos ? JSON.parse(c.festivos) : []
   })) as CentroEducativo[],
   getById: (id: number) => {
@@ -335,24 +336,25 @@ export const CentroDAO = {
     if (!c) return undefined;
     return {
       ...c,
+      codigoCentro: c.codigo_centro,
       festivos: c.festivos ? JSON.parse(c.festivos) : []
     } as CentroEducativo;
   },
   create: (centro: CentroEducativo) => {
     const stmt = db.prepare(`
-      INSERT INTO centros_educativos (profesorId, nombre, ciudad, telefono, email, festivos)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO centros_educativos (profesorId, nombre, ciudad, telefono, email, codigo_centro, festivos)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
-    const info = stmt.run(centro.profesorId, centro.nombre, centro.ciudad, centro.telefono, centro.email, JSON.stringify(centro.festivos || []));
+    const info = stmt.run(centro.profesorId, centro.nombre, centro.ciudad, centro.telefono, centro.email, centro.codigoCentro || null, JSON.stringify(centro.festivos || []));
     return info.lastInsertRowid;
   },
   update: (id: number, centro: CentroEducativo) => {
     const stmt = db.prepare(`
       UPDATE centros_educativos SET 
-        nombre = ?, ciudad = ?, telefono = ?, email = ?, festivos = ?
+        nombre = ?, ciudad = ?, telefono = ?, email = ?, codigo_centro = ?, festivos = ?
       WHERE id = ?
     `);
-    stmt.run(centro.nombre, centro.ciudad, centro.telefono, centro.email, JSON.stringify(centro.festivos || []), id);
+    stmt.run(centro.nombre, centro.ciudad, centro.telefono, centro.email, centro.codigoCentro || null, JSON.stringify(centro.festivos || []), id);
   },
   delete: (id: number) => db.prepare('DELETE FROM centros_educativos WHERE id = ?').run(id)
 };

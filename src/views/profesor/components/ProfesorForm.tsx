@@ -1,9 +1,21 @@
 import React from 'react';
 import { Save, User, Mail, Phone, Hash } from 'lucide-react';
 import { Profesor } from '../../../types/index.ts';
+import { useFormValidation } from '../../../hooks/useFormValidation.ts';
+import { required, email, compose } from '../../../utils/validation.ts';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+const inputErrorClass = 'border-red-400 ring-2 ring-red-200';
+const errorMsgClass = 'text-red-500 text-xs mt-1 italic font-medium';
+
+const RULES = {
+  nombre: [required('Nombre')],
+  apellidos: [required('Apellidos')],
+  nif: [required('NIF')],
+  email: [compose(required('Email'), email('Email'))],
+  telefono: [required('Teléfono')],
+};
 
 const FormSection = ({ title, icon: Icon, children }: {
   title: string;
@@ -43,11 +55,19 @@ interface ProfesorFormProps {
 }
 
 export function ProfesorForm({ formData, setFormData, saving, success, onSubmit }: ProfesorFormProps) {
+  const { errors, onBlur, validateAll } = useFormValidation(RULES);
+
   const update = (field: keyof Profesor) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData({ ...formData, [field]: e.target.value });
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateAll(formData)) return;
+    onSubmit(e);
+  };
+
   return (
-    <form onSubmit={onSubmit} >
+    <form onSubmit={handleSubmit} >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-xl lg:text-2xl font-bold font-sans text-text-main tracking-tight">
@@ -68,24 +88,55 @@ export function ProfesorForm({ formData, setFormData, saving, success, onSubmit 
 
       <FormSection title="Información Personal" icon={User}>
         <div>
-          <label className={labelClass}>Nombre</label>
-          <input required className={inputClass} value={formData.nombre} onChange={update('nombre')} />
+          <label className={labelClass}>Nombre<span className="text-red-500 ml-0.5">*</span></label>
+          <input
+            className={`${inputClass} ${errors.nombre ? inputErrorClass : ''}`}
+            value={formData.nombre}
+            onChange={update('nombre')}
+            onBlur={() => onBlur('nombre', formData.nombre)}
+          />
+          {errors.nombre && <p className={errorMsgClass}>{errors.nombre}</p>}
         </div>
         <div>
-          <label className={labelClass}>Apellidos</label>
-          <input required className={inputClass} value={formData.apellidos} onChange={update('apellidos')} />
+          <label className={labelClass}>Apellidos<span className="text-red-500 ml-0.5">*</span></label>
+          <input
+            className={`${inputClass} ${errors.apellidos ? inputErrorClass : ''}`}
+            value={formData.apellidos}
+            onChange={update('apellidos')}
+            onBlur={() => onBlur('apellidos', formData.apellidos)}
+          />
+          {errors.apellidos && <p className={errorMsgClass}>{errors.apellidos}</p>}
         </div>
         <div>
-          <label className={labelClass}>NIF</label>
-          <input required className={inputClass} value={formData.nif} onChange={update('nif')} />
+          <label className={labelClass}>NIF<span className="text-red-500 ml-0.5">*</span></label>
+          <input
+            className={`${inputClass} ${errors.nif ? inputErrorClass : ''}`}
+            value={formData.nif}
+            onChange={update('nif')}
+            onBlur={() => onBlur('nif', formData.nif)}
+          />
+          {errors.nif && <p className={errorMsgClass}>{errors.nif}</p>}
         </div>
         <div>
-          <label className={labelClass}>Email</label>
-          <input required type="email" className={inputClass} value={formData.email} onChange={update('email')} />
+          <label className={labelClass}>Email<span className="text-red-500 ml-0.5">*</span></label>
+          <input
+            type="email"
+            className={`${inputClass} ${errors.email ? inputErrorClass : ''}`}
+            value={formData.email}
+            onChange={update('email')}
+            onBlur={() => onBlur('email', formData.email)}
+          />
+          {errors.email && <p className={errorMsgClass}>{errors.email}</p>}
         </div>
         <div>
-          <label className={labelClass}>Teléfono</label>
-          <input required className={inputClass} value={formData.telefono} onChange={update('telefono')} />
+          <label className={labelClass}>Teléfono<span className="text-red-500 ml-0.5">*</span></label>
+          <input
+            className={`${inputClass} ${errors.telefono ? inputErrorClass : ''}`}
+            value={formData.telefono}
+            onChange={update('telefono')}
+            onBlur={() => onBlur('telefono', formData.telefono)}
+          />
+          {errors.telefono && <p className={errorMsgClass}>{errors.telefono}</p>}
         </div>
         <div className="col-span-1 md:col-span-2 lg:col-span-3 mt-2 pt-4 border-t border-slate-100">
           <button

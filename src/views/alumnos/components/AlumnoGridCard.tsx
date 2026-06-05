@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  User, Mail, Phone, GraduationCap, Edit2, Trash2, Send,
+  User, Mail, Phone, Edit2, Trash2, Send,
   FileUp, CheckCircle, Clock, Eye, BadgeX, Loader2, X
 } from 'lucide-react';
 import { Alumno, FFEMotivoNoRealizacion } from '../../../types/index.ts';
@@ -73,17 +73,6 @@ export function AlumnoGridCard({
             <User className="h-6 w-6 text-slate-400 group-hover:text-primary transition-colors" />
           </div>
           <div className="flex gap-1.5">
-            <Title text="Detalles Académicos">
-              <button
-                onClick={() => onAcademicDetail(alumno)}
-                className={`p-1.5 transition-colors rounded-md ${alumno.detalleAcademicoId
-                  ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
-                  : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-50'
-                  }`}
-              >
-                <GraduationCap className="h-4 w-4" />
-              </button>
-            </Title>
             {!isAssigned && (
               <Title text="Seleciona motivo para la no realización de las FFE">
                 <button

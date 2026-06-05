@@ -3,9 +3,23 @@ import { Plus, Trash2, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { DetalleAcademico, ResultadoAprendizaje } from '../../../types/index.ts';
 import { DateList } from '../../../components/ui/DateList.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
+import { useFormValidation } from '../../../hooks/useFormValidation.ts';
+import { required } from '../../../utils/validation.ts';
 
 const labelClass = 'block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+const inputErrCls = 'border-red-400 ring-2 ring-red-200';
+const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
+
+const RULES = {
+  ciclo: [required('Nombre del Ciclo')],
+  codigo: [required('Código')],
+  codigoGrupo: [required('Grupo')],
+  nivel: [required('Nivel')],
+  grado: [required('Grado')],
+  regimen: [required('Régimen')],
+  nombreCorto: [required('Nombre Corto')],
+};
 
 interface DetalleFormModalProps {
   open: boolean;
@@ -30,8 +44,16 @@ export function DetalleFormModal({
   newTutoria, setNewTutoria, onAddTutoria, onRemoveTutoria,
   onSubmit, onClose,
 }: DetalleFormModalProps) {
+  const { errors, onBlur, validateAll } = useFormValidation(RULES);
+
   const update = (field: keyof DetalleAcademico) => (e: React.ChangeEvent<HTMLInputElement>) =>
     onChange({ ...formData, [field]: e.target.value });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateAll(formData)) return;
+    onSubmit(e);
+  };
 
   return (
     <Modal open={open} onClose={onClose} maxWidth="2xl" backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl">
@@ -47,85 +69,93 @@ export function DetalleFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)] custom-scrollbar flex-1">
+        <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)] custom-scrollbar flex-1">
 
           {/* ── Datos del ciclo ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className={labelClass}>Nombre del Ciclo</label>
+              <label className={labelClass}>Nombre del Ciclo<span className="text-red-500 ml-0.5">*</span></label>
               <input
-                required
-                className={inputClass}
+                className={`${inputClass} ${errors.ciclo ? inputErrCls : ''}`}
                 value={formData.ciclo || ''}
                 onChange={update('ciclo')}
                 placeholder="Ej: Desarrollo de Aplicaciones Multiplataforma"
+                onBlur={() => onBlur('ciclo', formData.ciclo)}
               />
+              {errors.ciclo && <p className={errMsgCls}>{errors.ciclo}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4 md:col-span-2">
               <div>
-                <label className={labelClass}>Código</label>
+                <label className={labelClass}>Código<span className="text-red-500 ml-0.5">*</span></label>
                 <input
-                  required
-                  className={inputClass}
+                  className={`${inputClass} ${errors.codigo ? inputErrCls : ''}`}
                   value={formData.codigo || ''}
                   onChange={update('codigo')}
                   placeholder="Ej: IFC303"
+                  onBlur={() => onBlur('codigo', formData.codigo)}
                 />
+                {errors.codigo && <p className={errMsgCls}>{errors.codigo}</p>}
               </div>
               <div>
-                <label className={labelClass}>Grupo</label>
+                <label className={labelClass}>Grupo<span className="text-red-500 ml-0.5">*</span></label>
                 <input
-                  required
-                  className={inputClass}
+                  className={`${inputClass} ${errors.codigoGrupo ? inputErrCls : ''}`}
                   value={formData.codigoGrupo || ''}
                   onChange={update('codigoGrupo')}
                   placeholder="Ej: 2IFCS02DA"
+                  onBlur={() => onBlur('codigoGrupo', formData.codigoGrupo)}
                 />
+                {errors.codigoGrupo && <p className={errMsgCls}>{errors.codigoGrupo}</p>}
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3 md:col-span-2">
               <div>
-                <label className={labelClass}>Nivel</label>
+                <label className={labelClass}>Nivel<span className="text-red-500 ml-0.5">*</span></label>
                 <input
-                  required
-                  className={inputClass}
+                  className={`${inputClass} ${errors.nivel ? inputErrCls : ''}`}
                   value={formData.nivel || ''}
                   onChange={update('nivel')}
                   placeholder="Ej: 2º"
+                  onBlur={() => onBlur('nivel', formData.nivel)}
                 />
+                {errors.nivel && <p className={errMsgCls}>{errors.nivel}</p>}
               </div>
               <div>
-                <label className={labelClass}>Grado</label>
+                <label className={labelClass}>Grado<span className="text-red-500 ml-0.5">*</span></label>
                 <input
-                  required
-                  className={inputClass}
+                  className={`${inputClass} ${errors.grado ? inputErrCls : ''}`}
                   value={formData.grado || ''}
                   onChange={update('grado')}
                   placeholder="Ej: Superior"
+                  onBlur={() => onBlur('grado', formData.grado)}
                 />
+                {errors.grado && <p className={errMsgCls}>{errors.grado}</p>}
               </div>
               <div>
-                <label className={labelClass}>Régimen</label>
+                <label className={labelClass}>Régimen<span className="text-red-500 ml-0.5">*</span></label>
                 <input
-                  required
-                  className={inputClass}
+                  className={`${inputClass} ${errors.regimen ? inputErrCls : ''}`}
                   value={formData.regimen || ''}
                   onChange={update('regimen')}
                   placeholder="Ej: General"
+                  onBlur={() => onBlur('regimen', formData.regimen)}
                 />
+                {errors.regimen && <p className={errMsgCls}>{errors.regimen}</p>}
               </div>
             </div>
 
             <div className="md:col-span-2">
-              <label className={labelClass}>Nombre Corto</label>
+              <label className={labelClass}>Nombre Corto<span className="text-red-500 ml-0.5">*</span></label>
               <input
-                className={inputClass}
+                className={`${inputClass} ${errors.nombreCorto ? inputErrCls : ''}`}
                 value={formData.nombreCorto || ''}
                 onChange={update('nombreCorto')}
                 placeholder="Ej: 2º C.F.G.S. DAM"
+                onBlur={() => onBlur('nombreCorto', formData.nombreCorto)}
               />
+              {errors.nombreCorto && <p className={errMsgCls}>{errors.nombreCorto}</p>}
             </div>
           </div>
 

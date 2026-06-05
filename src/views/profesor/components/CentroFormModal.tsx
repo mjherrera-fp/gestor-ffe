@@ -4,9 +4,20 @@ import { CentroEducativo } from '../../../types/index.ts';
 import { DateList } from '../../../components/ui/DateList.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import localidades from '../../../data/geo/localidades-madrid.json';
+import { useFormValidation } from '../../../hooks/useFormValidation.ts';
+import { required, email, compose } from '../../../utils/validation.ts';
 
 const labelClass = 'block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+const inputErrCls = 'border-red-400 ring-2 ring-red-200';
+const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
+
+const RULES = {
+  nombre: [required('Nombre del Centro')],
+  ciudad: [required('Ciudad')],
+  telefono: [required('Teléfono')],
+  email: [compose(required('Email'), email('Email'))],
+};
 
 interface CentroFormModalProps {
   open: boolean;
@@ -110,6 +121,14 @@ export function CentroFormModal({
     }
   };
 
+  const { errors, onBlur, validateAll } = useFormValidation(RULES);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateAll(formData)) return;
+    onSubmit(e);
+  };
+
   return (
     <Modal open={open} onClose={onClose} maxWidth="lg" backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl">
 
@@ -124,22 +143,31 @@ export function CentroFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-8 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)] flex-1">
+        <form onSubmit={handleSubmit} className="p-8 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)] flex-1">
           <div>
-            <label className={labelClass}>Nombre del Centro</label>
+            <label className={labelClass}>Nombre del Centro<span className="text-red-500 ml-0.5">*</span></label>
             <input
-              required
-              className={inputClass}
+              className={`${inputClass} ${errors.nombre ? inputErrCls : ''}`}
               value={formData.nombre || ''}
               onChange={update('nombre')}
+              onBlur={() => onBlur('nombre', formData.nombre)}
+            />
+            {errors.nombre && <p className={errMsgCls}>{errors.nombre}</p>}
+          </div>
+          <div>
+            <label className={labelClass}>Código de Centro</label>
+            <input
+              className={inputClass}
+              value={formData.codigoCentro || ''}
+              onChange={update('codigoCentro')}
+              placeholder="Ej: 12345678"
             />
           </div>
           <div ref={ciudadRef}>
-            <label className={labelClass}>Ciudad</label>
+            <label className={labelClass}>Ciudad<span className="text-red-500 ml-0.5">*</span></label>
             <div className="relative">
               <input
-                required
-                className={inputClass}
+                className={`${inputClass} ${errors.ciudad ? inputErrCls : ''}`}
                 value={formData.ciudad || ''}
                 onChange={handleCiudadChange}
                 onFocus={() => setCiudadFocused(true)}
@@ -170,23 +198,24 @@ export function CentroFormModal({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Teléfono</label>
+              <label className={labelClass}>Teléfono<span className="text-red-500 ml-0.5">*</span></label>
               <input
-                required
-                className={inputClass}
+                className={`${inputClass} ${errors.telefono ? inputErrCls : ''}`}
                 value={formData.telefono || ''}
                 onChange={update('telefono')}
+                onBlur={() => onBlur('telefono', formData.telefono)}
               />
+              {errors.telefono && <p className={errMsgCls}>{errors.telefono}</p>}
             </div>
             <div>
-              <label className={labelClass}>Email</label>
+              <label className={labelClass}>Email<span className="text-red-500 ml-0.5">*</span></label>
               <input
-                required
-                type="email"
-                className={inputClass}
+                className={`${inputClass} ${errors.email ? inputErrCls : ''}`}
                 value={formData.email || ''}
                 onChange={update('email')}
+                onBlur={() => onBlur('email', formData.email)}
               />
+              {errors.email && <p className={errMsgCls}>{errors.email}</p>}
             </div>
           </div>
 

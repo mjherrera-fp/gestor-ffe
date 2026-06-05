@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { X, Search, Building2, CheckCircle2 } from 'lucide-react';
 import { Empresa, CentroEducativo } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { ConvenioFormState } from '../hooks/useConvenios.ts';
+import { useFormValidation } from '../../../hooks/useFormValidation.ts';
+import { required } from '../../../utils/validation.ts';
 
 interface ConvenioFormModalProps {
   open: boolean;
@@ -27,6 +29,15 @@ interface ConvenioFormModalProps {
   onClose: () => void;
 }
 
+const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium transition-all';
+const inputErrCls = 'border-red-400 ring-2 ring-red-200';
+const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
+
+const RULES = {
+  fechaConvenio: [required('Fecha del Convenio')],
+  numConvenio: [required('Nº Convenio')],
+};
+
 export function ConvenioFormModal({
   open, isEditing, formData, setFormData,
   empresas, filteredEmpresas, selectedEmpresa, searchTermEmpresa,
@@ -34,6 +45,53 @@ export function ConvenioFormModal({
   centros, selectedCentro, onCentroChange,
   onSubmit, onClose,
 }: ConvenioFormModalProps) {
+  const { errors, onBlur, validateAll, setFieldError } = useFormValidation(RULES);
+
+  const openRef = useRef(false);
+  const prevCentroRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (open && !openRef.current) {
+      prevCentroRef.current = null;
+    }
+    openRef.current = open;
+  }, [open]);
+
+  useEffect(() => {
+    if (selectedCentro === prevCentroRef.current) return;
+    prevCentroRef.current = selectedCentro;
+    if (!selectedCentro) return;
+    const centro = centros.find(c => c.id === selectedCentro);
+    if (!centro?.codigoCentro) return;
+    setFormData(prev => {
+      if (prev.numConvenio) return prev;
+      return { ...prev, numConvenio: `${centro.codigoCentro} / ` };
+    });
+  }, [selectedCentro, centros, setFormData]);
+
+  const validateSelectedFields = () => {
+    let valid = true;
+    if (!selectedCentro) {
+      setFieldError('selectedCentro', 'Centro Educativo es obligatorio');
+      valid = false;
+    } else {
+      setFieldError('selectedCentro', null);
+    }
+    if (!selectedEmpresa) {
+      setFieldError('selectedEmpresa', 'Empresa Supervisora es obligatoria');
+      valid = false;
+    } else {
+      setFieldError('selectedEmpresa', null);
+    }
+    return valid;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateAll(formData)) return;
+    if (!validateSelectedFields()) return;
+    onSubmit(e);
+  };
   return (
     <Modal open={open} onClose={onClose} maxWidth="3xl" cardClass="rounded-4xl">
 
@@ -55,25 +113,27 @@ export function ConvenioFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-10 space-y-8 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-10 space-y-8 overflow-y-auto flex-1">
 
           {/* Centro Educativo */}
           <div>
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-              Centro Educativo
+              Centro Educativo<span className="text-red-500 ml-0.5">*</span>
             </label>
             <CustomSelect
               options={centros.map(c => ({ id: c.id!, label: c.nombre }))}
               value={selectedCentro || ''}
               onChange={val => onCentroChange(Number(val))}
               name="centroId"
+              required
+              error={errors.selectedCentro}
             />
           </div>
 
           {/* Empresa Supervisora */}
           <div>
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-              Empresa Supervisora
+              Empresa Supervisora<span className="text-red-500 ml-0.5">*</span>
             </label>
             <div className="relative">
               <div className="relative mb-3">
@@ -81,7 +141,7 @@ export function ConvenioFormModal({
                 <input
                   type="text"
                   placeholder="Escribe para buscar empresa..."
-                  className="w-full bg-slate-100/50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium transition-all"
+                  className={`w-full bg-slate-100/50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium transition-all ${errors.selectedEmpresa ? inputErrCls : ''}`}
                   value={searchTermEmpresa}
                   onChange={e => onSearchEmpresaChange(e.target.value)}
                 />
@@ -126,33 +186,36 @@ export function ConvenioFormModal({
                 </button>
               </div>
             )}
+            {errors.selectedEmpresa && <p className={errMsgCls}>{errors.selectedEmpresa}</p>}
           </div>
 
           {/* Fecha y número */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-                Fecha del Convenio
+                Fecha del Convenio<span className="text-red-500 ml-0.5">*</span>
               </label>
               <input
                 type="date"
-                required
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium transition-all"
+                className={`${inputCls} ${errors.fechaConvenio ? inputErrCls : ''}`}
                 value={formData.fechaConvenio}
                 onChange={e => setFormData(prev => ({ ...prev, fechaConvenio: e.target.value }))}
+                onBlur={() => onBlur('fechaConvenio', formData.fechaConvenio)}
               />
+              {errors.fechaConvenio && <p className={errMsgCls}>{errors.fechaConvenio}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-                Nº Convenio
+                Nº Convenio<span className="text-red-500 ml-0.5">*</span>
               </label>
               <input
                 placeholder="Ej: 28074852 / 0000"
-                required
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium transition-all"
+                className={`${inputCls} ${errors.numConvenio ? inputErrCls : ''}`}
                 value={formData.numConvenio}
                 onChange={e => setFormData(prev => ({ ...prev, numConvenio: e.target.value }))}
+                onBlur={() => onBlur('numConvenio', formData.numConvenio)}
               />
+              {errors.numConvenio && <p className={errMsgCls}>{errors.numConvenio}</p>}
             </div>
           </div>
 
@@ -188,8 +251,7 @@ export function ConvenioFormModal({
             </button>
             <button
               type="submit"
-              disabled={!selectedEmpresa}
-              className="flex-1 py-4 bg-blue-600 text-white text-sm font-black rounded-2xl shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all disabled:opacity-30 uppercase tracking-widest"
+              className="flex-1 py-4 bg-blue-600 text-white text-sm font-black rounded-2xl shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all uppercase tracking-widest"
             >
               {isEditing ? 'Guardar Cambios' : 'Generar Convenio'}
             </button>

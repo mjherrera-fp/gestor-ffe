@@ -175,17 +175,18 @@ export function EmpresasListado({
           <div className="flex items-center gap-1">
             <Star className="h-3 w-3 text-amber-400" />
             {[0, 1, 2, 3, 4, 5].map(v => (
-              <button
-                key={v}
-                onClick={() => onFilterValoracionChange(filterValoracion === v ? 0 : v)}
-                className={`text-[10px] font-bold px-2 py-1 rounded-md transition-all ${
-                  filterValoracion === v
+              <Title text={`Filtrar por valoración ${v === 0 ? 'sin valorar' : v + ' estrellas'}`}>
+                <button
+                  key={v}
+                  onClick={() => onFilterValoracionChange(filterValoracion === v ? 0 : v)}
+                  className={`text-[10px] font-bold px-2 py-1 rounded-md transition-all ${filterValoracion === v
                     ? 'bg-amber-100 text-amber-700 border border-amber-300'
                     : 'text-text-muted hover:bg-slate-100 border border-transparent'
-                }`}
-              >
-                {v === 0 ? '★' : v}
-              </button>
+                    }`}
+                >
+                  {v === 0 ? '★' : v}
+                </button>
+              </Title>
             ))}
           </div>
 
@@ -286,18 +287,22 @@ export function EmpresasListado({
                         <Mail className="h-4 w-4" />
                       </button>
                     </Title>
-                    <button
-                      onClick={e => { e.stopPropagation(); onEdit(emp); }}
-                      className="p-1.5 text-text-muted hover:text-primary transition-colors"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={e => { e.stopPropagation(); onDeleteRequest(emp.id!); }}
-                      className="p-1.5 text-text-muted hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <Title text="Editar empresa">
+                      <button
+                        onClick={e => { e.stopPropagation(); onEdit(emp); }}
+                        className="p-1.5 text-text-muted hover:text-primary transition-colors"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                    </Title>
+                    <Title text="Eliminar empresa">
+                      <button
+                        onClick={e => { e.stopPropagation(); onDeleteRequest(emp.id!); }}
+                        className="p-1.5 text-text-muted hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </Title>
                   </div>
                 </td>
               </tr>

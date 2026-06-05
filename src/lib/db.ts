@@ -92,6 +92,7 @@ function setupTables() {
     ciudad TEXT NOT NULL,
     telefono TEXT NOT NULL,
     email TEXT NOT NULL,
+    codigo_centro TEXT,
     FOREIGN KEY(profesorId) REFERENCES profesores(id) ON DELETE CASCADE
   );
 
@@ -379,10 +380,11 @@ function setupTables() {
   try { db.exec("UPDATE plantillas_correo SET grupo = 'varios-registros' WHERE grupo = 'enviar-todo'"); } catch {}
   try { db.exec("UPDATE plantillas_correo SET grupo = 'registro-individual' WHERE grupo = 'documento'"); } catch {}
 
-  // Migración: añadir festivos a centros_educativos y tutorias a detalles_academicos
+  // Migración: añadir festivos a centros_educativos, tutorias a detalles_academicos y codigo_centro
   try { db.exec("ALTER TABLE centros_educativos ADD COLUMN festivos TEXT"); } catch {}
   try { db.exec("ALTER TABLE detalles_academicos ADD COLUMN tutorias TEXT"); } catch {}
   try { db.exec("ALTER TABLE detalles_academicos ADD COLUMN nombreCorto TEXT"); } catch {}
+  try { db.exec("ALTER TABLE centros_educativos ADD COLUMN codigo_centro TEXT"); } catch {}
   // Migración: eliminar festivos y tutorias de cursos
   try { db.exec("ALTER TABLE cursos DROP COLUMN festivos"); } catch {}
   try { db.exec("ALTER TABLE cursos DROP COLUMN tutorias"); } catch {}

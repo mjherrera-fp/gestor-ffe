@@ -4,9 +4,25 @@ import { Alumno, DetalleAcademico } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { HorasWarningModal } from './HorasWarningModal.tsx';
+import { useFormValidation } from '../../../hooks/useFormValidation.ts';
+import { required, email, isNumber, compose } from '../../../utils/validation.ts';
 
 const inputClass = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
+const inputErrorClass = 'border-red-400 ring-2 ring-red-200';
 const labelClass = 'block text-sm font-medium text-slate-700 mb-1';
+const errorMsgClass = 'text-red-500 text-xs mt-1 italic font-medium';
+
+const RULES = {
+  nombre: [required('Nombre')],
+  apellidos: [required('Apellidos')],
+  dni: [required('DNI / Pasaporte')],
+  numSS: [required('Número Seguridad Social')],
+  tlfn: [required('Teléfono')],
+  fechaNacimiento: [required('Fecha Nacimiento')],
+  emailEduca: [compose(required('Email EducaMadrid'), email('Email EducaMadrid'))],
+  emailPersonal: [compose(required('Email Personal'), email('Email Personal'))],
+  totalHorasFFE: [required('Horas Totales FFE'), isNumber('Horas Totales FFE')],
+};
 
 interface AlumnoFormModalProps {
   open: boolean;
@@ -26,8 +42,16 @@ export function AlumnoFormModal({
   detalles, pendingSubmitData,
   onSubmit, onConfirmClearDates, onCancelWarning, onClose,
 }: AlumnoFormModalProps) {
+  const { errors, onBlur, validateAll } = useFormValidation(RULES);
+
   const update = (field: keyof Alumno) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData(prev => ({ ...prev, [field]: e.target.value }));
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateAll(formData)) return;
+    onSubmit(e);
+  };
 
   return (
     <Modal open={open} onClose={onClose} maxWidth="2xl">
@@ -52,55 +76,100 @@ export function AlumnoFormModal({
         )}
 
         {/* Formulario */}
-        <form onSubmit={onSubmit} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto flex-1">
           <div>
-            <label className={labelClass}>Nombre</label>
-            <input required className={inputClass} value={formData.nombre || ''} onChange={update('nombre')} />
-          </div>
-          <div>
-            <label className={labelClass}>Apellidos</label>
-            <input required className={inputClass} value={formData.apellidos || ''} onChange={update('apellidos')} />
-          </div>
-          <div>
-            <label className={labelClass}>DNI / Pasaporte</label>
-            <input required className={inputClass} value={formData.dni || ''} onChange={update('dni')} />
-          </div>
-          <div>
-            <label className={labelClass}>Número Seguridad Social</label>
-            <input required className={inputClass} value={formData.numSS || ''} onChange={update('numSS')} />
-          </div>
-          <div>
-            <label className={labelClass}>Teléfono</label>
-            <input required className={inputClass} value={formData.tlfn || ''} onChange={update('tlfn')} />
-          </div>
-          <div>
-            <label className={labelClass}>Fecha Nacimiento</label>
+            <label className={labelClass}>Nombre<span className="text-red-500 ml-0.5">*</span></label>
             <input
-              required
+              className={`${inputClass} ${errors.nombre ? inputErrorClass : ''}`}
+              value={formData.nombre || ''}
+              onChange={update('nombre')}
+              onBlur={() => onBlur('nombre', formData.nombre)}
+            />
+            {errors.nombre && <p className={errorMsgClass}>{errors.nombre}</p>}
+          </div>
+          <div>
+            <label className={labelClass}>Apellidos<span className="text-red-500 ml-0.5">*</span></label>
+            <input
+              className={`${inputClass} ${errors.apellidos ? inputErrorClass : ''}`}
+              value={formData.apellidos || ''}
+              onChange={update('apellidos')}
+              onBlur={() => onBlur('apellidos', formData.apellidos)}
+            />
+            {errors.apellidos && <p className={errorMsgClass}>{errors.apellidos}</p>}
+          </div>
+          <div>
+            <label className={labelClass}>DNI / Pasaporte<span className="text-red-500 ml-0.5">*</span></label>
+            <input
+              className={`${inputClass} ${errors.dni ? inputErrorClass : ''}`}
+              value={formData.dni || ''}
+              onChange={update('dni')}
+              onBlur={() => onBlur('dni', formData.dni)}
+            />
+            {errors.dni && <p className={errorMsgClass}>{errors.dni}</p>}
+          </div>
+          <div>
+            <label className={labelClass}>Número Seguridad Social<span className="text-red-500 ml-0.5">*</span></label>
+            <input
+              className={`${inputClass} ${errors.numSS ? inputErrorClass : ''}`}
+              value={formData.numSS || ''}
+              onChange={update('numSS')}
+              onBlur={() => onBlur('numSS', formData.numSS)}
+            />
+            {errors.numSS && <p className={errorMsgClass}>{errors.numSS}</p>}
+          </div>
+          <div>
+            <label className={labelClass}>Teléfono<span className="text-red-500 ml-0.5">*</span></label>
+            <input
+              className={`${inputClass} ${errors.tlfn ? inputErrorClass : ''}`}
+              value={formData.tlfn || ''}
+              onChange={update('tlfn')}
+              onBlur={() => onBlur('tlfn', formData.tlfn)}
+            />
+            {errors.tlfn && <p className={errorMsgClass}>{errors.tlfn}</p>}
+          </div>
+          <div>
+            <label className={labelClass}>Fecha Nacimiento<span className="text-red-500 ml-0.5">*</span></label>
+            <input
               type="date"
-              className={inputClass}
+              className={`${inputClass} ${errors.fechaNacimiento ? inputErrorClass : ''}`}
               value={formData.fechaNacimiento || ''}
               onChange={update('fechaNacimiento')}
+              onBlur={() => onBlur('fechaNacimiento', formData.fechaNacimiento)}
             />
+            {errors.fechaNacimiento && <p className={errorMsgClass}>{errors.fechaNacimiento}</p>}
           </div>
           <div className="md:col-span-2">
-            <label className={labelClass}>Email EducaMadrid</label>
-            <input required type="email" className={inputClass} value={formData.emailEduca || ''} onChange={update('emailEduca')} />
+            <label className={labelClass}>Email EducaMadrid<span className="text-red-500 ml-0.5">*</span></label>
+            <input
+              type="email"
+              className={`${inputClass} ${errors.emailEduca ? inputErrorClass : ''}`}
+              value={formData.emailEduca || ''}
+              onChange={update('emailEduca')}
+              onBlur={() => onBlur('emailEduca', formData.emailEduca)}
+            />
+            {errors.emailEduca && <p className={errorMsgClass}>{errors.emailEduca}</p>}
           </div>
           <div className="md:col-span-2">
-            <label className={labelClass}>Email Personal</label>
-            <input required type="email" className={inputClass} value={formData.emailPersonal || ''} onChange={update('emailPersonal')} />
+            <label className={labelClass}>Email Personal<span className="text-red-500 ml-0.5">*</span></label>
+            <input
+              type="email"
+              className={`${inputClass} ${errors.emailPersonal ? inputErrorClass : ''}`}
+              value={formData.emailPersonal || ''}
+              onChange={update('emailPersonal')}
+              onBlur={() => onBlur('emailPersonal', formData.emailPersonal)}
+            />
+            {errors.emailPersonal && <p className={errorMsgClass}>{errors.emailPersonal}</p>}
           </div>
           <div>
-            <label className={labelClass}>Horas Totales FFE</label>
+            <label className={labelClass}>Horas Totales FFE<span className="text-red-500 ml-0.5">*</span></label>
             <input
-              required
               type="number"
-              min="0"
-              className={inputClass}
+              className={`${inputClass} ${errors.totalHorasFFE ? inputErrorClass : ''}`}
               value={formData.totalHorasFFE ?? 0}
               onChange={e => setFormData(prev => ({ ...prev, totalHorasFFE: Number(e.target.value) }))}
+              onBlur={() => onBlur('totalHorasFFE', formData.totalHorasFFE)}
             />
+            {errors.totalHorasFFE && <p className={errorMsgClass}>{errors.totalHorasFFE}</p>}
           </div>
           <div className="md:col-span-2">
             <label className={labelClass}>Detalle Académico Asignado</label>

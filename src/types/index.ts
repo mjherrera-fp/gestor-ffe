@@ -21,6 +21,7 @@ export interface CentroEducativo {
   ciudad: string;
   telefono: string;
   email: string;
+  codigoCentro?: string;
   festivos?: string[];
 }
 

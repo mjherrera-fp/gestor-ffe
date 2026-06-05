@@ -11,6 +11,18 @@ import { Modal } from '../../../components/ui/Modal.tsx';
 import { DEFAULT_HORARIO, getDayName } from '../utils/relacionesUtils.ts';
 import { BulkHorario } from '../hooks/useRelaciones.ts';
 import { formatDate } from '../../../lib/dateUtils.ts';
+import { useFormValidation } from '../../../hooks/useFormValidation.ts';
+import { required } from '../../../utils/validation.ts';
+
+const inputCls = 'w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none';
+const inputErrCls = 'border-red-400 ring-2 ring-red-200';
+const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
+
+const RULES = {
+  numRelacion: [required('Relación Nº')],
+  tutorEmpresaId: [required('Tutor Empresa')],
+  estado: [required('Estado de Tramitación')],
+};
 
 interface RelacionFormModalProps {
   open: boolean;
@@ -63,6 +75,13 @@ export function RelacionFormModal({
   tutores, bulkHorario, setBulkHorario, onApplyBulkHorario,
   onSubmit, onClose,
 }: RelacionFormModalProps) {
+  const { errors, onBlur, validateAll } = useFormValidation(RULES);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateAll(formData)) return;
+    onSubmit(e);
+  };
 
   const estadosOptions = Object.values(RelacionEstado).map(e => ({
     id: e,
@@ -98,7 +117,7 @@ export function RelacionFormModal({
         </div>
 
         {/* Formulario */}
-        <form onSubmit={onSubmit} className="flex flex-col flex-1 overflow-hidden">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="p-8 overflow-y-auto flex-1">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
 
@@ -255,13 +274,14 @@ export function RelacionFormModal({
 
                   <div className="space-y-4">
                     <div>
-                      <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Relación Nº</label>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Relación Nº<span className="text-red-500 ml-0.5">*</span></label>
                       <input
-                        required
-                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                        className={`${inputCls} ${errors.numRelacion ? inputErrCls : ''}`}
                         value={formData.numRelacion}
                         onChange={e => setFormData(prev => ({ ...prev, numRelacion: e.target.value }))}
+                        onBlur={() => onBlur('numRelacion', formData.numRelacion)}
                       />
+                      {errors.numRelacion && <p className={errMsgCls}>{errors.numRelacion}</p>}
                     </div>
 
                     {/* Buscador de convenio */}
@@ -307,6 +327,16 @@ export function RelacionFormModal({
                       onChange={val => setFormData(prev => ({ ...prev, tutorEmpresaId: Number(val) }))}
                       required
                       name="tutorEmpresaId"
+                      error={errors.tutorEmpresaId}
+                    />
+                    <CustomSelect
+                      label="Estado de Tramitación"
+                      options={estadosOptions}
+                      value={formData.estado || ''}
+                      onChange={val => setFormData(prev => ({ ...prev, estado: val as RelacionEstado }))}
+                      required
+                      name="estado"
+                      error={errors.estado}
                     />
 
                     <CustomSelect
