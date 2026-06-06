@@ -224,35 +224,34 @@ export function RelacionesListado({
           {filterOpen && (
             <div className="space-y-3 pt-1">
               {/* Fila 1: Filtros de estado por tipo de documento */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-0.5">
                 {(['relacion', 'plan', 'seguimiento', 'valoracion'] as const).map(tipo => {
                   const f = statusFilters[tipo];
                   const options = getEstadoOptions(tipo);
                   return (
-                    <div key={tipo} className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">{tipoLabels[tipo]}:</span>
-                      <select
+                    <div key={tipo} className="bg-white border border-slate-200 rounded-lg px-1.5 py-0.5">
+                      <CustomSelect
+                        prefix={tipoLabels[tipo]}
                         value={f.value}
-                        onChange={e => onStatusFilterChange(tipo, e.target.value)}
-                        className="text-[10px] font-semibold text-slate-700 bg-transparent border-none outline-none py-0.5 pr-4 cursor-pointer appearance-none"
-                        style={{ backgroundImage: 'none' }}
-                      >
-                        {options.map(o => (
-                          <option key={o.id} value={o.id}>{o.label}</option>
-                        ))}
-                      </select>
-                      <Title text={f.negate ? 'Excluir este estado' : 'Incluir este estado'}>
-                        <button
-                          onClick={() => onStatusFilterChange(tipo, f.value, !f.negate)}
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all ${
-                            f.negate
-                              ? 'bg-red-50 text-red-500 border border-red-200'
-                              : 'bg-blue-50 text-blue-500 border border-blue-200'
-                          }`}
-                        >
-                          {f.negate ? '≠' : '='}
-                        </button>
-                      </Title>
+                        onChange={(val) => onStatusFilterChange(tipo, val as string)}
+                        options={options}
+                        wrapperClassName="w-auto"
+                        classListboxButton="!rounded-md !py-0 !pl-1.5 !pr-6 !text-[10px] !font-semibold !border-0 !focus:ring-0"
+                        suffix={
+                          <Title text={f.negate ? 'Excluir este estado' : 'Incluir este estado'}>
+                            <button
+                              onClick={() => onStatusFilterChange(tipo, f.value, !f.negate)}
+                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all ${
+                                f.negate
+                                  ? 'bg-red-50 text-red-500 border border-red-200'
+                                  : 'bg-blue-50 text-blue-500 border border-blue-200'
+                              }`}
+                            >
+                              {f.negate ? '≠' : '='}
+                            </button>
+                          </Title>
+                        }
+                      />
                     </div>
                   );
                 })}
@@ -295,23 +294,29 @@ export function RelacionesListado({
                   onChange={e => onDateFilterChange({ especificaDate: e.target.value })}
                   className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none focus:ring-2 focus:ring-primary/20"
                 />
-                <select
-                  value={dateFilters.especificaField}
-                  onChange={e => onDateFilterChange({ especificaField: e.target.value as any })}
-                  className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none"
-                >
-                  <option value="inicio">Inicio</option>
-                  <option value="fin">Fin</option>
-                </select>
-                <select
-                  value={dateFilters.especificaOp}
-                  onChange={e => onDateFilterChange({ especificaOp: e.target.value as any })}
-                  className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none"
-                >
-                  <option value="on">en</option>
-                  <option value="before">antes de</option>
-                  <option value="after">después de</option>
-                </select>
+                <div className="w-20">
+                  <CustomSelect
+                    options={[
+                      { id: 'inicio', label: 'Inicio' },
+                      { id: 'fin', label: 'Fin' },
+                    ]}
+                    value={dateFilters.especificaField}
+                    onChange={(val) => onDateFilterChange({ especificaField: val })}
+                    classListboxButton="!rounded-lg !py-1 !pl-2 !pr-8 !text-[10px] !font-semibold"
+                  />
+                </div>
+                <div className="w-28">
+                  <CustomSelect
+                    options={[
+                      { id: 'on', label: 'en' },
+                      { id: 'before', label: 'antes de' },
+                      { id: 'after', label: 'después de' },
+                    ]}
+                    value={dateFilters.especificaOp}
+                    onChange={(val) => onDateFilterChange({ especificaOp: val })}
+                    classListboxButton="!rounded-lg !py-1 !pl-2 !pr-8 !text-[10px] !font-semibold"
+                  />
+                </div>
               </div>
             </div>
           )}
