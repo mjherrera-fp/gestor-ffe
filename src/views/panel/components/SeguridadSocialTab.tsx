@@ -74,8 +74,12 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
       <div>
         <h3 className="text-lg font-bold text-slate-900">Seguridad Social</h3>
         <p className="text-xs text-slate-500 mt-1">
-          Días trabajados por alumno en cada mes del período de prácticas. No se contabilizan festivos ni fines de semana.
+          Días trabajados por alumno en cada mes del período de prácticas.
         </p>
+        <ul className="text-xs text-slate-500 mt-1 checklist list-emerald-600 pl-5">
+          <li>Sólo se contabilizan los días según lo establecido en la relación de alumnos.</li>
+          <li>Se contabilizarán o no los días festivos según la configuración establecida.</li>
+        </ul>
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -99,11 +103,10 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
             <button
               key={opt.id}
               onClick={() => setFilterType(opt.id)}
-              className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
-                filterType === opt.id
+              className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${filterType === opt.id
                   ? 'bg-white text-slate-900 shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
-              }`}
+                }`}
             >
               {opt.label}
             </button>

@@ -231,18 +231,22 @@ export function EmpresasListado({
                     <Mail className="h-4 w-4" />
                   </button>
                 </Title>
-                <button
-                  onClick={e => { e.stopPropagation(); onEdit(emp); }}
-                  className="p-2 text-text-muted hover:text-primary"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={e => { e.stopPropagation(); onDeleteRequest(emp.id!); }}
-                  className="p-2 text-text-muted hover:text-red-500"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <Title text="Editar empresa">
+                  <button
+                    onClick={e => { e.stopPropagation(); onEdit(emp); }}
+                    className="p-2 text-text-muted hover:text-primary"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                </Title>
+                <Title text="Eliminar empresa">
+                  <button
+                    onClick={e => { e.stopPropagation(); onDeleteRequest(emp.id!); }}
+                    className="p-2 text-text-muted hover:text-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </Title>
               </div>
             </div>
           </div>
