@@ -2,9 +2,18 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Lock, ShieldCheck, RefreshCw, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { required } from '../../../utils/validation.ts';
+import { useFormValidation } from '../../../hooks/useFormValidation.ts';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+const inputErrCls = 'border-red-400 ring-2 ring-red-200';
+const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
+
+const RULES = {
+  newPassword: [required('Contraseña')],
+  confirmPassword: [required('Confirmar Contraseña')],
+};
 
 interface Message {
   type: 'success' | 'error' | '';
@@ -34,6 +43,12 @@ export function TabSeguridad({
 }: TabSeguridadProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { errors, onBlur, validateAll } = useFormValidation(RULES);
+
+  const handleEncrypt = () => {
+    if (!validateAll({ newPassword, confirmPassword })) return;
+    onEncrypt();
+  };
   return (
     <>
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -82,15 +97,16 @@ export function TabSeguridad({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
               <label className={labelClass}>
-                {isEncrypted ? 'Nueva Contraseña' : 'Establecer Contraseña'}
+                {isEncrypted ? 'Nueva Contraseña' : 'Establecer Contraseña'}<span className="text-red-500 ml-0.5">*</span>
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={e => onNewPasswordChange(e.target.value)}
-                  className={`${inputClass} pr-10`}
+                  className={`${inputClass} pr-10 ${errors.newPassword ? inputErrCls : ''}`}
                   placeholder="Escribe la clave..."
+                  onBlur={() => onBlur('newPassword', newPassword)}
                 />
                 <button
                   type="button"
@@ -101,16 +117,18 @@ export function TabSeguridad({
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {errors.newPassword && <p className={errMsgCls}>{errors.newPassword}</p>}
             </div>
             <div>
-              <label className={labelClass}>Confirmar Contraseña</label>
+              <label className={labelClass}>Confirmar Contraseña<span className="text-red-500 ml-0.5">*</span></label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={e => onConfirmPasswordChange(e.target.value)}
-                  className={`${inputClass} pr-10`}
+                  className={`${inputClass} pr-10 ${errors.confirmPassword ? inputErrCls : ''}`}
                   placeholder="Repite la clave..."
+                  onBlur={() => onBlur('confirmPassword', confirmPassword)}
                 />
                 <button
                   type="button"
@@ -121,12 +139,13 @@ export function TabSeguridad({
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {errors.confirmPassword && <p className={errMsgCls}>{errors.confirmPassword}</p>}
             </div>
           </div>
 
           <div className="flex justify-start pt-4 border-t border-slate-100">
             <button
-              onClick={onEncrypt}
+              onClick={handleEncrypt}
               disabled={isEncrypting || !newPassword}
               className={`flex items-center justify-center gap-2 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed ${isEncrypted ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'
                 }`}

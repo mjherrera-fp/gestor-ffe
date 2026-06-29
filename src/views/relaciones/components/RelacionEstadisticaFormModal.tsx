@@ -2,9 +2,17 @@ import React from 'react';
 import { X, TrendingUp } from 'lucide-react';
 import { StarRating } from '../../../components/StarRating.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
+import { required, isNumber, compose } from '../../../utils/validation.ts';
+import { useFormValidation } from '../../../hooks/useFormValidation.ts';
 
 const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
+const inputErrCls = 'border-red-400 ring-2 ring-red-200';
 const labelCls = 'block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1';
+const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
+
+const RULES = {
+  contratados: [compose(required('Nº Contratados tras FFE'), isNumber('Nº Contratados tras FFE'))],
+};
 
 interface RelacionEstadisticaFormModalProps {
   open: boolean;
@@ -25,6 +33,13 @@ export function RelacionEstadisticaFormModal({
   onContratadosChange, onValoracionChange,
   onSubmit, onClose,
 }: RelacionEstadisticaFormModalProps) {
+  const { errors, onBlur, validateAll } = useFormValidation(RULES);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateAll({ contratados })) return;
+    onSubmit(e);
+  };
 
   return (
     <Modal open={open} onClose={onClose} maxWidth="md" cardClass="rounded-3xl">
@@ -38,7 +53,7 @@ export function RelacionEstadisticaFormModal({
           </button>
         </div>
 
-        <form onSubmit={onSubmit} className="p-8 space-y-5 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-8 space-y-5 overflow-y-auto flex-1">
           <div className="space-y-2">
             <p className="text-sm font-bold text-text-main">{empresaNombre}</p>
             <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{curso}</p>
@@ -50,16 +65,15 @@ export function RelacionEstadisticaFormModal({
           </div>
 
           <div>
-            <label className={labelCls}>Nº Contratados tras FFE</label>
+            <label className={labelCls}>Nº Contratados tras FFE<span className="text-red-500 ml-0.5">*</span></label>
             <input
-              required
               type="number"
-              min="0"
-              max={numAlumnos}
-              className={inputCls}
+              className={`${inputCls} ${errors.contratados ? inputErrCls : ''}`}
               value={contratados ?? ''}
               onChange={e => onContratadosChange(Number(e.target.value))}
+              onBlur={() => onBlur('contratados', contratados)}
             />
+            {errors.contratados && <p className={errMsgCls}>{errors.contratados}</p>}
             {numAlumnos > 0 && (
               <div className="flex items-center gap-1.5 mt-1.5 text-xs text-text-muted">
                 <TrendingUp className="h-3.5 w-3.5 text-green-500" />

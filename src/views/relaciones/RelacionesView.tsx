@@ -16,10 +16,11 @@ interface Props {
   detalleAcademicoId?: number;
   onGoToConfig?: () => void;
   profesor?: import('../../types/index.ts').Profesor;
+  preloadRelacion?: { empresaId: number; alumnoIds: number[] } | null;
 }
 
-export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConfig, profesor }: Props) {
-  const ctx = useRelaciones(cursoId, detalleAcademicoId, profesor);
+export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConfig, profesor, preloadRelacion }: Props) {
+  const ctx = useRelaciones(cursoId, detalleAcademicoId, profesor, preloadRelacion);
   const [plantillas, setPlantillas] = useState<any[]>([]);
 
   useEffect(() => {

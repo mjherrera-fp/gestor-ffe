@@ -328,6 +328,7 @@ export const HistoricoDAO = {
 export const CentroDAO = {
   getAllByProfesor: (profesorId: number) => (db.prepare('SELECT * FROM centros_educativos WHERE profesorId = ?').all(profesorId) as any[]).map(c => ({
     ...c,
+    codigoCentro: c.codigo_centro,
     festivos: c.festivos ? JSON.parse(c.festivos) : []
   })) as CentroEducativo[],
   getById: (id: number) => {
@@ -335,24 +336,25 @@ export const CentroDAO = {
     if (!c) return undefined;
     return {
       ...c,
+      codigoCentro: c.codigo_centro,
       festivos: c.festivos ? JSON.parse(c.festivos) : []
     } as CentroEducativo;
   },
   create: (centro: CentroEducativo) => {
     const stmt = db.prepare(`
-      INSERT INTO centros_educativos (profesorId, nombre, ciudad, telefono, email, festivos)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO centros_educativos (profesorId, nombre, ciudad, telefono, email, codigo_centro, festivos)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
-    const info = stmt.run(centro.profesorId, centro.nombre, centro.ciudad, centro.telefono, centro.email, JSON.stringify(centro.festivos || []));
+    const info = stmt.run(centro.profesorId, centro.nombre, centro.ciudad, centro.telefono, centro.email, centro.codigoCentro || null, JSON.stringify(centro.festivos || []));
     return info.lastInsertRowid;
   },
   update: (id: number, centro: CentroEducativo) => {
     const stmt = db.prepare(`
       UPDATE centros_educativos SET 
-        nombre = ?, ciudad = ?, telefono = ?, email = ?, festivos = ?
+        nombre = ?, ciudad = ?, telefono = ?, email = ?, codigo_centro = ?, festivos = ?
       WHERE id = ?
     `);
-    stmt.run(centro.nombre, centro.ciudad, centro.telefono, centro.email, JSON.stringify(centro.festivos || []), id);
+    stmt.run(centro.nombre, centro.ciudad, centro.telefono, centro.email, centro.codigoCentro || null, JSON.stringify(centro.festivos || []), id);
   },
   delete: (id: number) => db.prepare('DELETE FROM centros_educativos WHERE id = ?').run(id)
 };
@@ -383,19 +385,19 @@ export const DetalleAcademicoDAO = {
   },
   create: (detalle: DetalleAcademico) => {
     const stmt = db.prepare(`
-      INSERT INTO detalles_academicos (centroId, ciclo, codigo, nivel, grado, regimen, codigoGrupo, resultadosAprendizaje, tutorias)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO detalles_academicos (centroId, ciclo, codigo, nivel, grado, regimen, codigoGrupo, nombreCorto, resultadosAprendizaje, tutorias)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    const info = stmt.run(detalle.centroId, detalle.ciclo, detalle.codigo, detalle.nivel, detalle.grado, detalle.regimen, detalle.codigoGrupo, JSON.stringify(detalle.resultadosAprendizaje || []), JSON.stringify(detalle.tutorias || []));
+    const info = stmt.run(detalle.centroId, detalle.ciclo, detalle.codigo, detalle.nivel, detalle.grado, detalle.regimen, detalle.codigoGrupo, detalle.nombreCorto || null, JSON.stringify(detalle.resultadosAprendizaje || []), JSON.stringify(detalle.tutorias || []));
     return info.lastInsertRowid;
   },
   update: (id: number, detalle: DetalleAcademico) => {
     const stmt = db.prepare(`
       UPDATE detalles_academicos SET 
-        ciclo = ?, codigo = ?, nivel = ?, grado = ?, regimen = ?, codigoGrupo = ?, resultadosAprendizaje = ?, tutorias = ?
+        ciclo = ?, codigo = ?, nivel = ?, grado = ?, regimen = ?, codigoGrupo = ?, nombreCorto = ?, resultadosAprendizaje = ?, tutorias = ?
       WHERE id = ?
     `);
-    stmt.run(detalle.ciclo, detalle.codigo, detalle.nivel, detalle.grado, detalle.regimen, detalle.codigoGrupo, JSON.stringify(detalle.resultadosAprendizaje || []), JSON.stringify(detalle.tutorias || []), id);
+    stmt.run(detalle.ciclo, detalle.codigo, detalle.nivel, detalle.grado, detalle.regimen, detalle.codigoGrupo, detalle.nombreCorto || null, JSON.stringify(detalle.resultadosAprendizaje || []), JSON.stringify(detalle.tutorias || []), id);
   },
   delete: (id: number) => db.prepare('DELETE FROM detalles_academicos WHERE id = ?').run(id)
 };
@@ -428,10 +430,20 @@ export const CursoDAO = {
 
 export const AlumnoDAO = {
   getAll: (cursoId?: number, detalleAcademicoId?: number) => {
-    if (cursoId && detalleAcademicoId) return db.prepare('SELECT * FROM alumnos WHERE cursoId = ? AND detalleAcademicoId = ?').all(cursoId, detalleAcademicoId) as Alumno[];
-    if (cursoId) return db.prepare('SELECT * FROM alumnos WHERE cursoId = ?').all(cursoId) as Alumno[];
-    if (detalleAcademicoId) return db.prepare('SELECT * FROM alumnos WHERE detalleAcademicoId = ?').all(detalleAcademicoId) as Alumno[];
-    return db.prepare('SELECT * FROM alumnos').all() as Alumno[];
+    const subqueries = `
+      (SELECT COUNT(*) FROM intereses i WHERE i.alumnoId = a.id AND i.interesado = 'alumno') as cvEnvioCount,
+      (SELECT COUNT(*) FROM intereses i WHERE i.alumnoId = a.id AND i.interesado = 'empresa') as empresasInteresadasCount,
+      EXISTS(
+        SELECT 1 FROM intereses i1
+        JOIN intereses i2 ON i1.alumnoId = i2.alumnoId AND i1.empresaId = i2.empresaId
+        WHERE i1.alumnoId = a.id AND i1.interesado = 'alumno' AND i2.interesado = 'empresa'
+      ) as tieneMatch
+    `;
+    const base = `SELECT a.*, ${subqueries} FROM alumnos a`;
+    if (cursoId && detalleAcademicoId) return db.prepare(`${base} WHERE a.cursoId = ? AND a.detalleAcademicoId = ?`).all(cursoId, detalleAcademicoId) as Alumno[];
+    if (cursoId) return db.prepare(`${base} WHERE a.cursoId = ?`).all(cursoId) as Alumno[];
+    if (detalleAcademicoId) return db.prepare(`${base} WHERE a.detalleAcademicoId = ?`).all(detalleAcademicoId) as Alumno[];
+    return db.prepare(base).all() as Alumno[];
   },
   getById: (id: number) => db.prepare('SELECT * FROM alumnos WHERE id = ?').get(id) as Alumno,
   getByRelacionId: (id: number) => db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').get(id) as Alumno[],

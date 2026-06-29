@@ -45,6 +45,32 @@
   }
 }
 
+/*
+Source - https://stackoverflow.com/a/34141979
+Posted by Josh Crozier, modified by community. See post 'Timeline' for change history
+Retrieved 2026-06-06, License - CC BY-SA 3.0
+*/
+
+ul.checklist {
+  list-style: none;
+}
+
+ul.checklist li:before {
+  content: '✓';
+  display: inline-block;
+  padding-right: 0.5em;
+}
+
+ul.checklist li:before {
+  content: '✓';
+  display: inline-block;
+  padding-right: 0.5em;
+}
+
+.list-emerald-600 li:before {
+    color: var(--color-emerald-600) /* oklch(84.5% 0.143 164.978) = #5ee9b5 */;
+}
+
 .ProseMirror-trailingBreak {
   display: none !important;
 }

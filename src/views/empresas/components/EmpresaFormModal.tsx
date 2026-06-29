@@ -1,13 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, MapPin } from 'lucide-react';
-import { Empresa } from '../../../types/index.ts';
+import { Empresa, CentroEducativo } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { ConvenioRapidoState } from '../hooks/useEmpresas.ts';
 import { comunidades, allProvincias, searchProvincias, searchLocalidades, getComunidadBySlug } from '../../../data/geo/geoData.ts';
+import { useFormValidation } from '../../../hooks/useFormValidation.ts';
+import { required, email, phone, compose } from '../../../utils/validation.ts';
 
 const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
+const inputErrCls = 'border-red-400 ring-2 ring-red-200';
 const labelCls = 'block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1';
+const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
+
+const RULES = {
+  nombre: [required('Nombre Comercial')],
+  cif: [required('CIF')],
+  direccion: [required('Dirección Principal')],
+  comunidad: [required('Comunidad')],
+  provincia: [required('Provincia')],
+  ciudad: [required('Localidad')],
+  tlfn: [compose(required('Teléfono'), phone('Teléfono'))],
+  email: [compose(required('Email de Contacto'), email('Email de Contacto'))],
+};
 
 interface EmpresaFormModalProps {
   open: boolean;
@@ -16,7 +31,7 @@ interface EmpresaFormModalProps {
   onChange: (data: Partial<Empresa>) => void;
   convenioRapido: ConvenioRapidoState;
   onConvenioRapidoChange: (data: ConvenioRapidoState) => void;
-  centros: any[];
+  centros: CentroEducativo[];
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }
@@ -39,9 +54,23 @@ export function EmpresaFormModal({
   const localidadRef = useRef<HTMLDivElement>(null);
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  const prevCentroRef = useRef<number | string>('');
+
   useEffect(() => {
     return () => { if (blurTimerRef.current) clearTimeout(blurTimerRef.current); };
   }, []);
+
+  useEffect(() => {
+    if (!convenioRapido.tieneConvenio) { prevCentroRef.current = ''; return; }
+    const centroId = convenioRapido.centroId;
+    if (!centroId || centroId === prevCentroRef.current) return;
+    prevCentroRef.current = centroId;
+    const centro = centros.find(c => c.id === Number(centroId));
+    if (!centro?.codigoCentro) return;
+    if (!convenioRapido.numConvenio) {
+      onConvenioRapidoChange({ ...convenioRapido, numConvenio: `${centro.codigoCentro} / ` });
+    }
+  }, [convenioRapido.centroId, convenioRapido.tieneConvenio, centros]);
 
   useEffect(() => {
     if (formData.comunidad) {
@@ -165,6 +194,44 @@ export function EmpresaFormModal({
     else if (e.key === 'Escape') setLocalidadFocused(false);
   };
 
+  const { errors, onBlur, validateAll, setFieldError } = useFormValidation(RULES);
+
+  const validateConvenioFields = () => {
+    if (!convenioRapido.tieneConvenio) {
+      setFieldError('centroId', null);
+      setFieldError('numConvenio', null);
+      setFieldError('fechaConvenio', null);
+      return true;
+    }
+    let valid = true;
+    if (!convenioRapido.centroId) {
+      setFieldError('centroId', 'Centro Educativo es obligatorio');
+      valid = false;
+    } else {
+      setFieldError('centroId', null);
+    }
+    if (!convenioRapido.numConvenio?.trim()) {
+      setFieldError('numConvenio', 'Número de Convenio es obligatorio');
+      valid = false;
+    } else {
+      setFieldError('numConvenio', null);
+    }
+    if (!convenioRapido.fechaConvenio) {
+      setFieldError('fechaConvenio', 'Fecha del Convenio es obligatorio');
+      valid = false;
+    } else {
+      setFieldError('fechaConvenio', null);
+    }
+    return valid;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateAll(formData)) return;
+    if (!validateConvenioFields()) return;
+    onSubmit(e);
+  };
+
   return (
     <Modal open={open} onClose={onClose} maxWidth="2xl" cardClass="rounded-3xl">
 
@@ -179,32 +246,50 @@ export function EmpresaFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-8 space-y-4 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-8 space-y-4 overflow-y-auto flex-1">
           <div>
-            <label className={labelCls}>Nombre Comercial</label>
-            <input required className={inputCls} value={formData.nombre || ''} onChange={update('nombre')} />
+            <label className={labelCls}>Nombre Comercial<span className="text-red-500 ml-0.5">*</span></label>
+            <input
+              className={`${inputCls} ${errors.nombre ? inputErrCls : ''}`}
+              value={formData.nombre || ''}
+              onChange={update('nombre')}
+              onBlur={() => onBlur('nombre', formData.nombre)}
+            />
+            {errors.nombre && <p className={errMsgCls}>{errors.nombre}</p>}
           </div>
           <div>
-            <label className={labelCls}>CIF</label>
-            <input required className={inputCls} value={formData.cif || ''} onChange={update('cif')} />
+            <label className={labelCls}>CIF<span className="text-red-500 ml-0.5">*</span></label>
+            <input
+              className={`${inputCls} ${errors.cif ? inputErrCls : ''}`}
+              value={formData.cif || ''}
+              onChange={update('cif')}
+              onBlur={() => onBlur('cif', formData.cif)}
+            />
+            {errors.cif && <p className={errMsgCls}>{errors.cif}</p>}
           </div>
           <div>
-            <label className={labelCls}>Dirección Principal</label>
-            <input required className={inputCls} value={formData.direccion || ''} onChange={update('direccion')} />
+            <label className={labelCls}>Dirección Principal<span className="text-red-500 ml-0.5">*</span></label>
+            <input
+              className={`${inputCls} ${errors.direccion ? inputErrCls : ''}`}
+              value={formData.direccion || ''}
+              onChange={update('direccion')}
+              onBlur={() => onBlur('direccion', formData.direccion)}
+            />
+            {errors.direccion && <p className={errMsgCls}>{errors.direccion}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div ref={comunidadRef}>
-              <label className={labelCls}>Comunidad</label>
+              <label className={labelCls}>Comunidad<span className="text-red-500 ml-0.5">*</span></label>
               <div className="relative">
                 <input
-                  required
-                  className={inputCls}
+                  className={`${inputCls} ${errors.comunidad ? inputErrCls : ''}`}
                   value={formData.comunidad || ''}
                   onChange={handleComunidadChange}
                   onFocus={() => setComunidadFocused(true)}
                   onBlur={() => { blurTimerRef.current = setTimeout(() => setComunidadFocused(false), 200); }}
                   onKeyDown={handleComunidadKeyDown}
                 />
+                {errors.comunidad && <p className={errMsgCls}>{errors.comunidad}</p>}
                 {showComunidadDropdown && (
                   <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
                     {filteredComunidades.map((c, i) => (
@@ -224,17 +309,17 @@ export function EmpresaFormModal({
               </div>
             </div>
             <div ref={provinciaRef}>
-              <label className={labelCls}>Provincia</label>
+              <label className={labelCls}>Provincia<span className="text-red-500 ml-0.5">*</span></label>
               <div className="relative">
                 <input
-                  required
-                  className={inputCls}
+                  className={`${inputCls} ${errors.provincia ? inputErrCls : ''}`}
                   value={formData.provincia || ''}
                   onChange={handleProvinciaChange}
                   onFocus={() => setProvinciaFocused(true)}
                   onBlur={() => { blurTimerRef.current = setTimeout(() => setProvinciaFocused(false), 200); }}
                   onKeyDown={handleProvinciaKeyDown}
                 />
+                {errors.provincia && <p className={errMsgCls}>{errors.provincia}</p>}
                 {showProvinciaDropdown && (
                   <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
                     {filteredProvincias.map((p, i) => (
@@ -256,17 +341,17 @@ export function EmpresaFormModal({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div ref={localidadRef}>
-              <label className={labelCls}>Localidad</label>
+              <label className={labelCls}>Localidad<span className="text-red-500 ml-0.5">*</span></label>
               <div className="relative">
                 <input
-                  required
-                  className={inputCls}
+                  className={`${inputCls} ${errors.ciudad ? inputErrCls : ''}`}
                   value={formData.ciudad || ''}
                   onChange={handleLocalidadChange}
                   onFocus={() => setLocalidadFocused(true)}
                   onBlur={() => { blurTimerRef.current = setTimeout(() => setLocalidadFocused(false), 200); }}
                   onKeyDown={handleLocalidadKeyDown}
                 />
+                {errors.ciudad && <p className={errMsgCls}>{errors.ciudad}</p>}
                 {showLocalidadDropdown && (
                   <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
                     {filteredLocalidades.map((l, i) => (
@@ -289,8 +374,14 @@ export function EmpresaFormModal({
               </div>
             </div>
             <div>
-              <label className={labelCls}>Teléfono</label>
-              <input required className={inputCls} value={formData.tlfn || ''} onChange={update('tlfn')} />
+              <label className={labelCls}>Teléfono<span className="text-red-500 ml-0.5">*</span></label>
+              <input
+                className={`${inputCls} ${errors.tlfn ? inputErrCls : ''}`}
+                value={formData.tlfn || ''}
+                onChange={update('tlfn')}
+                onBlur={() => onBlur('tlfn', formData.tlfn)}
+              />
+              {errors.tlfn && <p className={errMsgCls}>{errors.tlfn}</p>}
             </div>
           </div>
           <div>
@@ -298,8 +389,14 @@ export function EmpresaFormModal({
             <input className={inputCls} value={formData.personaContacto || ''} onChange={update('personaContacto')} />
           </div>
           <div>
-            <label className={labelCls}>Email de Contacto</label>
-            <input required type="email" className={inputCls} value={formData.email || ''} onChange={update('email')} />
+            <label className={labelCls}>Email de Contacto<span className="text-red-500 ml-0.5">*</span></label>
+            <input
+              className={`${inputCls} ${errors.email ? inputErrCls : ''}`}
+              value={formData.email || ''}
+              onChange={update('email')}
+              onBlur={() => onBlur('email', formData.email)}
+            />
+            {errors.email && <p className={errMsgCls}>{errors.email}</p>}
           </div>
           <div>
             <label className={labelCls}>Comentarios (opcional)</label>
@@ -319,7 +416,14 @@ export function EmpresaFormModal({
                 <input
                   type="checkbox"
                   checked={convenioRapido.tieneConvenio}
-                  onChange={e => onConvenioRapidoChange({ ...convenioRapido, tieneConvenio: e.target.checked })}
+                  onChange={e => {
+                    onConvenioRapidoChange({ ...convenioRapido, tieneConvenio: e.target.checked });
+                    if (!e.target.checked) {
+                      setFieldError('centroId', null);
+                      setFieldError('numConvenio', null);
+                      setFieldError('fechaConvenio', null);
+                    }
+                  }}
                   className="rounded text-blue-600 focus:ring-blue-600 w-4 h-4 cursor-pointer"
                 />
                 <span className="text-sm font-bold text-slate-700">
@@ -332,32 +436,35 @@ export function EmpresaFormModal({
                   <div className="sm:col-span-2">
                     <CustomSelect
                       label="Centro Educativo"
-                      required={convenioRapido.tieneConvenio}
+                      required
                       value={convenioRapido.centroId}
                       onChange={val => onConvenioRapidoChange({ ...convenioRapido, centroId: Number(val) })}
                       options={centros.map(c => ({ id: c.id, label: c.nombre }))}
+                      error={errors.centroId}
                     />
                   </div>
                   <div>
-                    <label className={labelCls}>Número de Convenio</label>
+                    <label className={labelCls}>Número de Convenio<span className="text-red-500 ml-0.5">*</span></label>
                     <input
-                      required={convenioRapido.tieneConvenio}
                       type="text"
                       value={convenioRapido.numConvenio}
                       onChange={e => onConvenioRapidoChange({ ...convenioRapido, numConvenio: e.target.value })}
-                      className={inputCls}
+                      className={`${inputCls} ${errors.numConvenio ? inputErrCls : ''}`}
                       placeholder="Ej: 28074852 / 0000"
+                      onBlur={() => onBlur('numConvenio', convenioRapido.numConvenio)}
                     />
+                    {errors.numConvenio && <p className={errMsgCls}>{errors.numConvenio}</p>}
                   </div>
                   <div>
-                    <label className={labelCls}>Fecha del Convenio</label>
+                    <label className={labelCls}>Fecha del Convenio<span className="text-red-500 ml-0.5">*</span></label>
                     <input
-                      required={convenioRapido.tieneConvenio}
                       type="date"
                       value={convenioRapido.fechaConvenio}
                       onChange={e => onConvenioRapidoChange({ ...convenioRapido, fechaConvenio: e.target.value })}
-                      className={inputCls}
+                      className={`${inputCls} ${errors.fechaConvenio ? inputErrCls : ''}`}
+                      onBlur={() => onBlur('fechaConvenio', convenioRapido.fechaConvenio)}
                     />
+                    {errors.fechaConvenio && <p className={errMsgCls}>{errors.fechaConvenio}</p>}
                   </div>
                 </div>
               )}

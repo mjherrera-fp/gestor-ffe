@@ -57,6 +57,7 @@ export default function App() {
   const [showTerms, setShowTerms] = useState(false);
   const [avisos, setAvisos] = useState<Aviso[]>([]);
   const [showCreateNotification, setShowCreateNotification] = useState(false);
+  const [preloadRelacion, setPreloadRelacion] = useState<{ empresaId: number; alumnoIds: number[] } | null>(null);
 
   const [isLocked, setIsLocked] = useState(false);
   const [isEncrypted, setIsEncrypted] = useState(false);
@@ -346,8 +347,8 @@ export default function App() {
                   {activeCurso && (
                     <span className="uppercase hidden md:inline">{activeCurso.descripcion}:</span>
                   )}
-                  <span className="max-w-32 truncate">
-                    {activeDetalle.ciclo} {activeDetalle.nivel} - {(activeDetalle as any).centroNombre || ''}
+                  <span className="max-w-40 truncate">
+                    {(activeDetalle as any).nombreCorto || (activeDetalle as any).codigoGrupo} <span className="hidden md:inline">({(activeDetalle as any).centroNombre || ''})</span>
                   </span>
                   <svg className="h-3 w-3 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -370,10 +371,10 @@ export default function App() {
                                 : 'text-slate-700 hover:bg-slate-50 font-medium'
                             }`}
                           >
-                            <span className="block truncate">{d.ciclo} {d.nivel}</span>
+                            <span className="block truncate">{(d as any).nombreCorto || (d as any).codigoGrupo}</span>
                             {(d as any).centroNombre && (
                               <span className="block text-[11px] text-slate-400 truncate">
-                                {(d as any).centroNombre} - {(d as any).codigoGrupo}
+                                {(d as any).centroNombre}
                               </span>
                             )}
                           </button>
@@ -481,6 +482,10 @@ export default function App() {
               <InteresesView
                 cursoId={activeCurso.id!}
                 detalleAcademicoId={activeDetalle?.id}
+                onCreateRelacion={(empresaId, alumnoIds) => {
+                  setPreloadRelacion({ empresaId, alumnoIds });
+                  setActiveTab('relaciones');
+                }}
               />
             )}
             {activeTab === 'convenios' && activeCurso && (
@@ -490,7 +495,7 @@ export default function App() {
               />
             )}
           {activeTab === 'relaciones' && activeCurso && (
-            <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} profesor={profesor ?? undefined} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} />
+            <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} profesor={profesor ?? undefined} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} preloadRelacion={preloadRelacion} />
           )}
           {activeTab === 'historico' && <HistoricoView />}
           {activeTab === 'configuracion' && <ConfiguracionView initialTab={configTab} />}

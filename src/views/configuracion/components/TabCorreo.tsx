@@ -1244,17 +1244,53 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                     <EditorContent editor={templateEditor} />
                   </EditorContext.Provider>
                 </div>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {['{{nombreEmpresa}}','{{profesor}}','{{centro}}','{{curso.descripcion}}','{{@contacto}}','{{@nombreEmpresa}}','{{per_...}}'].map(m => (
-                    <code
-                      key={m}
-                      className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded cursor-pointer hover:bg-slate-200"
-                      onClick={() => templateEditor?.chain().focus().insertContent(m).run()}
-                    >
-                      {m}
-                    </code>
-                  ))}
-                </div>
+                {(() => {
+                  const place = editTemplate?.place || 'empresa';
+                  const allGroups: Record<string, string[]> = {
+                    empresa: [
+                      '{{profesor.nombre}}', '{{profesor.apellidos}}',
+                      '{{empresa.nombre}}', '{{empresa.personaContacto}}',
+                      '{{centro.nombre}}', '{{curso.descripcion}}',
+                      '{{@contacto}}', '{{@nombreEmpresa}}',
+                    ],
+                    relaciones: [
+                      '{{profesor.nombre}}', '{{profesor.apellidos}}',
+                      '{{empresa.nombre}}', '{{empresa.direccion}}', '{{empresa.personaContacto}}',
+                      '{{tutor.nombre}}', '{{tutor.apellidos}}',
+                      '{{nombreApellidosAlumnos}}', '{{alumnoTutor}}',
+                      '{{@contacto}}', '{{@nombreEmpresa}}',
+                    ],
+                    alumno: [
+                      '{{profesor.nombre}}', '{{profesor.apellidos}}',
+                      '{{empresa.nombre}}', '{{empresa.personaContacto}}',
+                      '{{nombreApellidosAlumnos}}', '{{alumnoTutor}}',
+                      '{{@contacto}}', '{{@nombreEmpresa}}',
+                    ],
+                  };
+                  const markers = allGroups[place] || allGroups.empresa;
+                  return (
+                    <div className="mt-2">
+                      <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1.5">Marcadores disponibles</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {markers.map(m => (
+                          <code
+                            key={m}
+                            className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded cursor-pointer hover:bg-slate-200"
+                            onClick={() => templateEditor?.chain().focus().insertContent(m).run()}
+                          >
+                            {m}
+                          </code>
+                        ))}
+                        <code
+                          className="text-[10px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded cursor-pointer hover:bg-purple-100"
+                          onClick={() => templateEditor?.chain().focus().insertContent('{{per_...}}').run()}
+                        >
+                          {'{{per_...}}'}
+                        </code>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 shrink-0">

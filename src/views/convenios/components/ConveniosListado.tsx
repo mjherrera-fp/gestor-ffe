@@ -4,6 +4,7 @@ import { ConvenioEstado, ConvenioEstadoLabels } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { ConvenioExtendido, SortField, SortOrder } from '../hooks/useConvenios.ts';
 import { StatusBadge } from './StatusBadge.tsx';
+import { Title } from '@/src/components/Title.tsx';
 
 interface ConveniosListadoProps {
   convenios: ConvenioExtendido[];
@@ -176,18 +177,22 @@ export function ConveniosListado({
                 </td>
                 <td className="px-5 py-4 text-right" onClick={e => e.stopPropagation()}>
                   <div className="flex items-center justify-end">
-                    <button
-                      onClick={() => onEdit(conv)}
-                      className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => onDeleteRequest(conv.id!)}
-                      className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <Title text="Editar convenio">
+                      <button
+                        onClick={() => onEdit(conv)}
+                        className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                    </Title>
+                    <Title text="Eliminar convenio">
+                      <button
+                        onClick={() => onDeleteRequest(conv.id!)}
+                        className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </Title>
                   </div>
                 </td>
               </tr>

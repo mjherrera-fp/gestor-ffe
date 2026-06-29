@@ -1,6 +1,6 @@
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption, Transition } from '@headlessui/react';
 import { Check, ChevronDown } from 'lucide-react';
-import { Fragment } from 'react';
+import { Fragment, ReactNode } from 'react';
 
 interface Option {
   id: string | number | undefined; // Añadimos undefined aquí
@@ -12,17 +12,21 @@ interface Props {
   value: string | number;
   onChange: (value: any) => void;
   label?: string;
-  required?: boolean; // 1. Añadimos la prop required
-  name?: string;     // 2. Recomendado añadir un nombre para el formulario
-  classListboxButton?: string; // 3. Para personalizar estilos desde el padre
+  required?: boolean;
+  name?: string;
+  classListboxButton?: string;
+  error?: string | null;
+  wrapperClassName?: string;
+  prefix?: string;
+  suffix?: ReactNode;
 }
 
-export function CustomSelect({ options, value, onChange, label, required, name, classListboxButton }: Props) {
+export function CustomSelect({ options, value, onChange, label, required, name, classListboxButton, error, wrapperClassName, prefix, suffix }: Props) {
   const selected = options.find(o => o.id === value);
 
   return (
-    <div className="w-full">
-      {label && <label className="block text-[10px] font-bold text-slate-500 uppercase ml-1 mb-1">{label}</label>}
+    <div className={wrapperClassName || 'w-full'}>
+      {label && <label className="block text-[10px] font-bold text-slate-500 uppercase ml-1 mb-1">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</label>}
 
       <Listbox value={value} onChange={onChange}>
         <div className="relative mt-1">
@@ -37,15 +41,19 @@ export function CustomSelect({ options, value, onChange, label, required, name, 
             name={name}
           />
 
-          {/* ListboxButton en lugar de Listbox.Button */}
-          <ListboxButton className={`relative w-full cursor-pointer bg-white border rounded-xl py-2.5 pl-4 pr-10 text-left text-xs font-bold transition-all outline-none focus:ring-4 focus:ring-primary/10 
-            ${required && !value ? 'border-red-200' : 'border-slate-200 focus:border-primary'} 
-            ${value ? 'text-slate-700' : 'text-slate-400'} ${classListboxButton}`}>
-            <span className="block truncate">{selected ? selected.label : 'Seleccionar...'}</span>
-            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
-            </span>
-          </ListboxButton>
+          <div className="flex items-center gap-0.5">
+            {prefix && <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">{prefix}:</span>}
+            {/* ListboxButton en lugar de Listbox.Button */}
+            <ListboxButton className={`relative w-full cursor-pointer bg-white border rounded-xl py-2.5 pl-4 pr-10 text-left text-xs font-bold transition-all outline-none focus:ring-4 focus:ring-primary/10 
+              ${error ? 'border-red-400 ring-2 ring-red-200' : required && !value ? 'border-red-200' : 'border-slate-200 focus:border-primary'} 
+              ${value ? 'text-slate-700' : 'text-slate-400'} ${classListboxButton}`}>
+              <span className="block truncate">{selected ? selected.label : 'Seleccionar...'}</span>
+              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
+              </span>
+            </ListboxButton>
+            {suffix}
+          </div>
 
           <Transition
             as={Fragment}
@@ -85,6 +93,7 @@ export function CustomSelect({ options, value, onChange, label, required, name, 
           </Transition>
         </div>
       </Listbox>
+      {error && <p className="text-red-500 text-xs mt-1 italic font-medium">{error}</p>}
     </div>
   );
 }

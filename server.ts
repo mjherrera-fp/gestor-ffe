@@ -1,6 +1,7 @@
 import express from 'express';
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 import PizZip from 'pizzip';
+import JSZip from 'jszip';
 import Docxtemplater from 'docxtemplater';
 import puppeteer from 'puppeteer';
 import Handlebars from 'handlebars';
@@ -578,7 +579,6 @@ async function startServer() {
     const mimeType = req.file.mimetype; // Debería ser application/pdf
     const dataURI = `data:${mimeType};base64,${base64Data}`;
 
-    const { AlumnoDAO } = require('./src/lib/dao.ts');
     try {
       // En lugar de una ruta de archivo, guardamos el DataURI inmenso
       AlumnoDAO.updateCV(Number(req.params.id), dataURI);
@@ -590,7 +590,6 @@ async function startServer() {
 
   // NUEVA RUTA PARA ELIMINAR CV
   app.delete('/api/alumnos/:id/cv', (req, res) => {
-    const { AlumnoDAO } = require('./src/lib/dao.ts');
     try {
       AlumnoDAO.updateCV(Number(req.params.id), null);
       res.json({ message: 'CV eliminado' });
@@ -598,6 +597,81 @@ async function startServer() {
       res.status(500).json({ error: 'Error al eliminar el CV' });
     }
   });
+
+  // Preparar attachments de CVs para enviar por email
+  app.post('/api/alumnos/cv/preparar-attachments', (req, res) => {
+    const { alumnoIds } = req.body;
+    if (!Array.isArray(alumnoIds) || alumnoIds.length === 0) {
+      return res.status(400).json({ error: 'Se requiere un array de alumnoIds' });
+    }
+    const attachments: { filename: string; path: string; size: number }[] = [];
+    for (const id of alumnoIds) {
+      const alumno = AlumnoDAO.getById(id);
+      if (!alumno || !alumno.cvPath) continue;
+      const filename = `${alumno.nombre}_${alumno.apellidos}.pdf`.replace(/\s+/g, '_');
+      const safeName = Date.now() + '-' + Math.round(Math.random() * 1e9) + '-' + filename;
+      const outputPath = path.join(emailUploadDir, safeName);
+      try {
+        const buffer = Buffer.from(alumno.cvPath, 'base64');
+        fs.writeFileSync(outputPath, buffer);
+        attachments.push({ filename, path: outputPath, size: buffer.length });
+      } catch { /* skip alumno */ }
+    }
+    res.json(attachments);
+  });
+
+  // Carga masiva de CVs via ZIP
+  const uploadZip = multer({
+    storage: multer.diskStorage({
+      destination: (req, file, cb) => cb(null, emailUploadDir),
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, uniqueSuffix + '-' + file.originalname);
+      }
+    }),
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype === 'application/zip' || file.originalname.endsWith('.zip')) cb(null, true);
+      else cb(new Error('Only ZIP files allowed'));
+    }
+  });
+
+  app.post('/api/alumnos/cv/zip', uploadZip.single('zip'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    const results: { dni: string; nombre: string; ok: boolean; error?: string }[] = [];
+
+    try {
+      const zipData = fs.readFileSync(req.file.path);
+      const zip = await JSZip.loadAsync(zipData);
+
+      const pdfFiles = Object.keys(zip.files).filter(f => f.endsWith('.pdf'));
+
+      for (const fileName of pdfFiles) {
+        const dni = fileName.replace(/\.pdf$/i, '').trim();
+        try {
+          const alumno = db.prepare('SELECT id, nombre, apellidos FROM alumnos WHERE dni = ?').get(dni) as any;
+          if (!alumno) {
+            results.push({ dni, nombre: '', ok: false, error: 'Alumno no encontrado' });
+            continue;
+          }
+          const fileData = await zip.files[fileName].async('nodebuffer');
+          const base64Data = fileData.toString('base64');
+          const dataURI = `data:application/pdf;base64,${base64Data}`;
+          AlumnoDAO.updateCV(alumno.id, dataURI);
+          results.push({ dni, nombre: `${alumno.nombre} ${alumno.apellidos}`, ok: true });
+        } catch (err: any) {
+          results.push({ dni, nombre: '', ok: false, error: err.message || 'Error al procesar' });
+        }
+      }
+
+      // Cleanup uploaded ZIP
+      try { fs.unlinkSync(req.file.path); } catch {}
+
+      res.json({ total: pdfFiles.length, procesados: results.filter(r => r.ok).length, errores: results.filter(r => !r.ok).length, results });
+    } catch (err: any) {
+      res.status(500).json({ error: 'Error al procesar el ZIP: ' + err.message });
+    }
+  });
+
   app.get('/uploads/:filename', (req, res) => {
     res.sendFile(path.resolve('uploads', req.params.filename));
   });

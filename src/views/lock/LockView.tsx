@@ -3,6 +3,16 @@ import { Lock, ShieldAlert, KeyRound, ArrowRight, Copyright } from 'lucide-react
 import { motion } from 'motion/react';
 import packageJson from '../../../package.json';
 import CopyrightModal from '../../components/CopyrightModal.tsx';
+import { required } from '../../utils/validation.ts';
+import { useFormValidation } from '../../hooks/useFormValidation.ts';
+
+const inputCls = 'block w-full pl-10 pr-3 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all';
+const inputErrCls = 'border-red-500 ring-2 ring-red-400/30';
+const errMsgCls = 'text-red-400 text-xs mt-1 italic font-medium';
+
+const RULES = {
+  password: [required('Contraseña Maestra')],
+};
 
 interface LockViewProps {
   onUnlock: (password: string) => Promise<void>;
@@ -13,10 +23,11 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCopyright, setShowCopyright] = useState(false);
+  const { errors, onBlur, validateAll } = useFormValidation(RULES);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password) return;
+    if (!validateAll({ password })) return;
 
     setIsSubmitting(true);
     await onUnlock(password);
@@ -56,8 +67,10 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Contraseña Maestra"
-                className="block w-full pl-10 pr-3 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className={`${inputCls} ${errors.password ? inputErrCls : ''}`}
+                onBlur={() => onBlur('password', password)}
               />
+              {errors.password && <p className={errMsgCls}>{errors.password}</p>}
             </div>
 
             {error && (

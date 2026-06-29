@@ -134,188 +134,192 @@ export function RelacionesListado({
   return (
     <div className="w-full lg:flex-1 bg-white rounded-xl lg:rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
       {/* Barra de filtros */}
-        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                <ArrowLeftRight className="h-5 w-5" />
-              </div>
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Relaciones</span>
+      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <ArrowLeftRight className="h-5 w-5" />
             </div>
-            <div className="flex items-center gap-2">
-              
-              <Title text="Descargar todos los documentos">
-                <button
-                  onClick={() => { if (relaciones) setTargetDownloadRelaciones(relaciones); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
-                >
-                  {isDownloading ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-                  ) : (
-                    <Download className="h-3.5 w-3.5" />
-                  )}
-                </button>
-              </Title>
-              <button
-                onClick={() => createRelacion(null)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold shadow-md shadow-blue-600/10 transition-all"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Crear Relación</span>
-              </button>
-            </div>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Listado de Relaciones</span>
           </div>
+          <div className="flex items-center gap-2">
 
-          {/* Buscador */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Buscar empresa, relación, o alumno..."
-              className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
-              value={listSearchTerm}
-              onChange={e => onListSearchChange(e.target.value)}
-            />
-            {listSearchTerm && (
+            <Title text="Descargar todos los documentos">
               <button
-                onClick={() => onListSearchChange('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                onClick={() => { if (relaciones) setTargetDownloadRelaciones(relaciones); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
               >
-                <X className="h-3 w-3" />
+                {isDownloading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                ) : (
+                  <Download className="h-3.5 w-3.5" />
+                )}
               </button>
-            )}
+            </Title>
+            <button
+              onClick={() => createRelacion(null)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold shadow-md shadow-blue-600/10 transition-all"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Crear Relación</span>
+            </button>
           </div>
+        </div>
 
-          {/* Botón desplegable filtros + ordenación */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setFilterOpen(!filterOpen)}
-                className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider hover:text-slate-700 transition-colors"
-              >
-                {filterOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                Filtros
-              </button>
-              <button
-                onClick={onClearFilters}
-                className="text-[9px] font-bold text-slate-400 hover:text-red-500 transition-colors underline"
-              >
-                Limpiar filtros
-              </button>
-            </div>
-
-            <div className="flex bg-white border border-slate-200 rounded-lg p-1">
-              <button
-                onClick={onSortByEmpresa}
-                className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all px-2 whitespace-nowrap ${sortBy === 'empresa' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-              >
-                Empresa {sortBy === 'empresa' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </button>
-              <button
-                onClick={onSortByEstado}
-                className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all px-2 whitespace-nowrap ${sortBy === 'estado' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-              >
-                Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </button>
-            </div>
-          </div>
-
-          {/* Panel de filtros desplegable */}
-          {filterOpen && (
-            <div className="space-y-3 pt-1">
-              {/* Fila 1: Filtros de estado por tipo de documento */}
-              <div className="flex flex-wrap items-center gap-2">
-                {(['relacion', 'plan', 'seguimiento', 'valoracion'] as const).map(tipo => {
-                  const f = statusFilters[tipo];
-                  const options = getEstadoOptions(tipo);
-                  return (
-                    <div key={tipo} className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">{tipoLabels[tipo]}:</span>
-                      <select
-                        value={f.value}
-                        onChange={e => onStatusFilterChange(tipo, e.target.value)}
-                        className="text-[10px] font-semibold text-slate-700 bg-transparent border-none outline-none py-0.5 pr-4 cursor-pointer appearance-none"
-                        style={{ backgroundImage: 'none' }}
-                      >
-                        {options.map(o => (
-                          <option key={o.id} value={o.id}>{o.label}</option>
-                        ))}
-                      </select>
-                      <Title text={f.negate ? 'Excluir este estado' : 'Incluir este estado'}>
-                        <button
-                          onClick={() => onStatusFilterChange(tipo, f.value, !f.negate)}
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all ${
-                            f.negate
-                              ? 'bg-red-50 text-red-500 border border-red-200'
-                              : 'bg-blue-50 text-blue-500 border border-blue-200'
-                          }`}
-                        >
-                          {f.negate ? '≠' : '='}
-                        </button>
-                      </Title>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Fila 2: Filtros de fecha */}
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 whitespace-nowrap">
-                  Inicia
-                  <input
-                    type="number"
-                    min={0}
-                    placeholder="0"
-                    value={dateFilters.inicioDias || ''}
-                    onChange={e => onDateFilterChange({ inicioDias: Math.max(0, parseInt(e.target.value) || 0) })}
-                    className="w-12 bg-white border border-slate-200 rounded px-1.5 py-1 text-[10px] font-bold text-center outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                  días
-                </label>
-
-                <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 whitespace-nowrap">
-                  Finaliza
-                  <input
-                    type="number"
-                    min={0}
-                    placeholder="0"
-                    value={dateFilters.finDias || ''}
-                    onChange={e => onDateFilterChange({ finDias: Math.max(0, parseInt(e.target.value) || 0) })}
-                    className="w-12 bg-white border border-slate-200 rounded px-1.5 py-1 text-[10px] font-bold text-center outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                  días
-                </label>
-
-                <span className="text-[10px] text-slate-300 font-bold">|</span>
-
-                <span className="text-[10px] font-bold text-slate-500">Fecha específica</span>
-                <input
-                  type="date"
-                  value={dateFilters.especificaDate}
-                  onChange={e => onDateFilterChange({ especificaDate: e.target.value })}
-                  className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                <select
-                  value={dateFilters.especificaField}
-                  onChange={e => onDateFilterChange({ especificaField: e.target.value as any })}
-                  className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none"
-                >
-                  <option value="inicio">Inicio</option>
-                  <option value="fin">Fin</option>
-                </select>
-                <select
-                  value={dateFilters.especificaOp}
-                  onChange={e => onDateFilterChange({ especificaOp: e.target.value as any })}
-                  className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none"
-                >
-                  <option value="on">en</option>
-                  <option value="before">antes de</option>
-                  <option value="after">después de</option>
-                </select>
-              </div>
-            </div>
+        {/* Buscador */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Buscar empresa, relación, o alumno..."
+            className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+            value={listSearchTerm}
+            onChange={e => onListSearchChange(e.target.value)}
+          />
+          {listSearchTerm && (
+            <button
+              onClick={() => onListSearchChange('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <X className="h-3 w-3" />
+            </button>
           )}
         </div>
+
+        {/* Botón desplegable filtros + ordenación */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setFilterOpen(!filterOpen)}
+              className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider hover:text-slate-700 transition-colors"
+            >
+              {filterOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+              Filtros
+            </button>
+            <button
+              onClick={onClearFilters}
+              className="text-[9px] font-bold text-slate-400 hover:text-red-500 transition-colors underline"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+
+          <div className="flex bg-white border border-slate-200 rounded-lg p-1">
+            <button
+              onClick={onSortByEmpresa}
+              className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all px-2 whitespace-nowrap ${sortBy === 'empresa' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              Empresa {sortBy === 'empresa' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </button>
+            <button
+              onClick={onSortByEstado}
+              className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all px-2 whitespace-nowrap ${sortBy === 'estado' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </button>
+          </div>
+        </div>
+
+        {/* Panel de filtros desplegable */}
+        {filterOpen && (
+          <div className="space-y-3 pt-1">
+            {/* Fila 1: Filtros de estado por tipo de documento */}
+            <div className="flex flex-wrap items-center gap-0.5">
+              {(['relacion', 'plan', 'seguimiento', 'valoracion'] as const).map(tipo => {
+                const f = statusFilters[tipo];
+                const options = getEstadoOptions(tipo);
+                return (
+                  <div key={tipo} className="bg-white border border-slate-200 rounded-lg px-1.5 py-0.5">
+                    <CustomSelect
+                      prefix={tipoLabels[tipo]}
+                      value={f.value}
+                      onChange={(val) => onStatusFilterChange(tipo, val as string)}
+                      options={options}
+                      wrapperClassName="w-auto"
+                      classListboxButton="!rounded-md !py-0 !pl-1.5 !pr-6 !text-[10px] !font-semibold !border-0 !focus:ring-0"
+                      suffix={
+                        <Title text={f.negate ? 'Excluir este estado' : 'Incluir este estado'}>
+                          <button
+                            onClick={() => onStatusFilterChange(tipo, f.value, !f.negate)}
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all ${f.negate
+                                ? 'bg-red-50 text-red-500 border border-red-200'
+                                : 'bg-blue-50 text-blue-500 border border-blue-200'
+                              }`}
+                          >
+                            {f.negate ? '≠' : '='}
+                          </button>
+                        </Title>
+                      }
+                    />
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Fila 2: Filtros de fecha */}
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 whitespace-nowrap">
+                Inicia
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  value={dateFilters.inicioDias || ''}
+                  onChange={e => onDateFilterChange({ inicioDias: Math.max(0, parseInt(e.target.value) || 0) })}
+                  className="w-12 bg-white border border-slate-200 rounded px-1.5 py-1 text-[10px] font-bold text-center outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                días
+              </label>
+
+              <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 whitespace-nowrap">
+                Finaliza
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  value={dateFilters.finDias || ''}
+                  onChange={e => onDateFilterChange({ finDias: Math.max(0, parseInt(e.target.value) || 0) })}
+                  className="w-12 bg-white border border-slate-200 rounded px-1.5 py-1 text-[10px] font-bold text-center outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                días
+              </label>
+
+              <span className="text-[10px] text-slate-300 font-bold">|</span>
+
+              <span className="text-[10px] font-bold text-slate-500">Fecha específica</span>
+              <input
+                type="date"
+                value={dateFilters.especificaDate}
+                onChange={e => onDateFilterChange({ especificaDate: e.target.value })}
+                className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <div className="w-20">
+                <CustomSelect
+                  options={[
+                    { id: 'inicio', label: 'Inicio' },
+                    { id: 'fin', label: 'Fin' },
+                  ]}
+                  value={dateFilters.especificaField}
+                  onChange={(val) => onDateFilterChange({ especificaField: val })}
+                  classListboxButton="!rounded-lg !py-1 !pl-2 !pr-8 !text-[10px] !font-semibold"
+                />
+              </div>
+              <div className="w-28">
+                <CustomSelect
+                  options={[
+                    { id: 'on', label: 'en' },
+                    { id: 'before', label: 'antes de' },
+                    { id: 'after', label: 'después de' },
+                  ]}
+                  value={dateFilters.especificaOp}
+                  onChange={(val) => onDateFilterChange({ especificaOp: val })}
+                  classListboxButton="!rounded-lg !py-1 !pl-2 !pr-8 !text-[10px] !font-semibold"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Tabla */}
       <div className="overflow-auto flex-1">
@@ -367,19 +371,22 @@ export function RelacionesListado({
                               <Star className="h-4 w-4" />
                             </button>
                           </Title>
-                          <button
-                            onClick={() => onEdit(rel)}
-                            className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </button>
-                          
-                          <button
-                            onClick={() => onDeleteRequest(rel.id!)}
-                            className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          <Title text="Editar relación">
+                            <button
+                              onClick={() => onEdit(rel)}
+                              className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </button>
+                          </Title>
+                          <Title text="Eliminar relación">
+                            <button
+                              onClick={() => onDeleteRequest(rel.id!)}
+                              className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </Title>
                         </div>
                       </div>
 

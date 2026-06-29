@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import JSZip from 'jszip';
 import {
     RelacionAlumno, Convenio, TutorEmpresa, Alumno, Curso, Profesor,
@@ -40,7 +40,7 @@ export interface BulkHorario {
 //  HOOK PRINCIPAL
 // ─────────────────────────────────────────
 
-export function useRelaciones(cursoId: number, detalleAcademicoId?: number, profesor?: Profesor) {
+export function useRelaciones(cursoId: number, detalleAcademicoId?: number, profesor?: Profesor, preloadRelacion?: { empresaId: number; alumnoIds: number[] } | null) {
 
     // ── Datos del servidor ──
     const [relaciones, setRelaciones] = useState<RelacionAlumno[]>([]);
@@ -199,6 +199,78 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
 
     useEffect(() => { fetchData(); }, [cursoId, detalleAcademicoId]);
     useEffect(() => { setSelectedRelacion(null); }, [cursoId, detalleAcademicoId]);
+
+    // ── Pre-carga desde match en Intereses ──
+    const preloadProcessed = useRef(false);
+    const preloadData = useRef(preloadRelacion);
+    useEffect(() => {
+        if (!preloadRelacion) {
+            preloadProcessed.current = false;
+            preloadData.current = null;
+            return;
+        }
+        preloadData.current = preloadRelacion;
+        const { empresaId, alumnoIds } = preloadRelacion;
+
+        if (!preloadProcessed.current) {
+            preloadProcessed.current = true;
+            setEditing(null);
+            setSelectedAlumnosIds([]);
+            setFormData({
+                alumnos: [],
+                numRelacion: '',
+                horario: { ...DEFAULT_HORARIO },
+                estado: RelacionEstado.PENDIENTE_ENVIAR_EMPRESA,
+                estadoPlanFormativo: PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE,
+                firmaRelacion: FirmaTipo.DIGITAL,
+                firmaPlanFormativo: FirmaTipo.DIGITAL,
+                firmaSeguimiento: FirmaTipo.DIGITAL,
+                firmaValoracion: FirmaTipo.DIGITAL,
+            });
+            setSearchTermConvenio('');
+            setEmpresaFestivosActuales([]);
+
+            // Buscar el convenio de la empresa via API (los datos pueden no estar cargados aún)
+            fetch(`/api/convenios?cursoId=${cursoId}`)
+                .then(r => r.json())
+                .then((convs: any[]) => {
+                    if (preloadData.current !== preloadRelacion) return;
+                    const found = convs.find((c: any) => c.empresaId === empresaId);
+                    if (found) {
+                        setFormData(prev => ({ ...prev, convenioId: found.id }));
+                        setSearchTermConvenio(`${found.empresaNombre || ''} (Ref: ${found.numConvenio})`);
+                    }
+                });
+
+            setShowForm(true);
+        }
+
+        // Pre-seleccionar alumnos (se ejecuta también cuando ctx.alumnos se cargue después)
+        const formAlumnos: any[] = [];
+        for (const id of alumnoIds) {
+            const alumnoObj = alumnos.find(a => a.id === id);
+            if (alumnoObj) {
+                formAlumnos.push({
+                    ...alumnoObj,
+                    totalHorasFFE: alumnoObj.totalHorasFFE ?? 500,
+                    fechaInicio: '',
+                    fechaFin: '',
+                });
+            }
+        }
+        if (formAlumnos.length > 0) {
+            setFormData(prev => ({ ...prev, alumnos: formAlumnos }));
+            setSelectedAlumnosIds(prev => {
+                const newIds = alumnoIds.filter(id => !prev.includes(id));
+                return newIds.length > 0 ? [...prev, ...newIds] : prev;
+            });
+        }
+
+        // Tutor automático si solo hay 1
+        if (tutores.length === 1) {
+            setFormData(prev => ({ ...prev, tutorEmpresaId: tutores[0].id }));
+        }
+    }, [preloadRelacion, alumnos, tutores]);
 
     // Cargar config de creación de ficheros
     useEffect(() => {
@@ -1798,7 +1870,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     return {
         // Datos
         relaciones, convenios, alumnos, tutores, curso, centroFestivos, profesor,
-        usarFestivos, usarFestivosEmpresa, empresaFestivosActuales,
+        usarFestivos, usarFestivosEmpresa, empresaFestivosActuales, setEmpresaFestivosActuales,
         modoCreacion, carpetaEstudiante,
         // Listado UI
         selectedRelacion, setSelectedRelacion,
@@ -1810,7 +1882,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         filteredAndSortedRelaciones,
         // Formulario UI
         showForm, setShowForm,
-        editing,
+        editing, setEditing,
         formData, setFormData,
         searchTermAlumno, setSearchTermAlumno,
         searchTermConvenio, setSearchTermConvenio,
