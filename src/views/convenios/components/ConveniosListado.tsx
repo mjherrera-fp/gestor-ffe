@@ -1,10 +1,10 @@
 import React from 'react';
-import { FileText, Plus, Search, X, Edit2, Trash2 } from 'lucide-react';
-import { ConvenioEstado, ConvenioEstadoLabels } from '../../../types/index.ts';
-import { CustomSelect } from '../../../components/CustomSelect.tsx';
-import { ConvenioExtendido, SortField, SortOrder } from '../hooks/useConvenios.ts';
-import { StatusBadge } from './StatusBadge.tsx';
-import { Title } from '@/src/components/Title.tsx';
+import {Archive, Edit2, FileText, Plus, Search, Trash2, Upload, X} from 'lucide-react';
+import {ConvenioEstado, ConvenioEstadoLabels} from '../../../types/index.ts';
+import {CustomSelect} from '../../../components/CustomSelect.tsx';
+import {ConvenioExtendido, SortField, SortOrder} from '../hooks/useConvenios.ts';
+import {StatusBadge} from './StatusBadge.tsx';
+import {Title} from '@/src/components/Title.tsx';
 
 interface ConveniosListadoProps {
   convenios: ConvenioExtendido[];
@@ -13,6 +13,7 @@ interface ConveniosListadoProps {
   onEdit: (c: ConvenioExtendido) => void;
   onDeleteRequest: (id: number) => void;
   onNew: () => void;
+  onUploadDocument?: (conv: ConvenioExtendido) => void;
   listSearchTerm: string;
   onListSearchChange: (v: string) => void;
   statusFilter: string;
@@ -25,7 +26,7 @@ interface ConveniosListadoProps {
 
 export function ConveniosListado({
   convenios, selectedConvenio,
-  onSelectConvenio, onEdit, onDeleteRequest, onNew,
+                                   onSelectConvenio, onEdit, onDeleteRequest, onNew, onUploadDocument,
   listSearchTerm, onListSearchChange,
   statusFilter, onStatusFilterChange,
   sortBy, sortOrder, onSortByEmpresa, onSortByEstado,
@@ -124,6 +125,20 @@ export function ConveniosListado({
                 <StatusBadge estado={conv.estado} />
               </div>
             </div>
+            {onUploadDocument && (
+                <div className="mt-2 flex justify-end">
+                  <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUploadDocument(conv);
+                      }}
+                      className="text-[10px] font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1"
+                  >
+                    <Upload className="h-3 w-3"/>
+                    Documentos
+                  </button>
+                </div>
+            )}
           </div>
         ))}
         {convenios.length === 0 && (
@@ -177,6 +192,16 @@ export function ConveniosListado({
                 </td>
                 <td className="px-5 py-4 text-right" onClick={e => e.stopPropagation()}>
                   <div className="flex items-center justify-end">
+                    {onUploadDocument && (
+                        <Title text="Subir documentos">
+                          <button
+                              onClick={() => onUploadDocument(conv)}
+                              className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                          >
+                            <Archive className="h-4 w-4"/>
+                          </button>
+                        </Title>
+                    )}
                     <Title text="Editar convenio">
                       <button
                         onClick={() => onEdit(conv)}

@@ -1,14 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { FileArchive, Loader2, Plus, Trash2, FileText, ClipboardCheck, Play, CheckCircle, MoreHorizontal, PencilRuler } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {
+    CheckCircle,
+    ClipboardCheck,
+    FileArchive,
+    FileText,
+    Loader2,
+    MoreHorizontal,
+    PencilRuler,
+    Play,
+    Plus,
+    Trash2
+} from 'lucide-react';
 
-import { useRelaciones }                from './hooks/useRelaciones.ts';
-import { RelacionesListado }            from './components/RelacionesListado.tsx';
-import { RelacionDetalle }              from './components/RelacionesDetalle.tsx';
-import { RelacionFormModal }            from './components/RelacionesFormModal.tsx';
-import { RelacionEstadisticaFormModal } from './components/RelacionEstadisticaFormModal.tsx';
-import { calculateEndDateForHours }     from './utils/relacionesUtils.ts';
-import { EmailModal }                   from '../../components/EmailModal.tsx';
-import { Modal }                        from '../../components/ui/Modal.tsx';
+import {useRelaciones} from './hooks/useRelaciones.ts';
+import {Alumno, RelacionAlumno} from '../../types/index.ts';
+import {RelacionesListado} from './components/RelacionesListado.tsx';
+import {RelacionDetalle} from './components/RelacionesDetalle.tsx';
+import {RelacionFormModal} from './components/RelacionesFormModal.tsx';
+import {RelacionEstadisticaFormModal} from './components/RelacionEstadisticaFormModal.tsx';
+import {calculateEndDateForHours} from './utils/relacionesUtils.ts';
+import {EmailModal} from '../../components/EmailModal.tsx';
+import {GestorDocumentalModal} from '../../components/GestorDocumentalModal.tsx';
+import {Modal} from '../../components/ui/Modal.tsx';
 
 
 interface Props {
@@ -22,6 +35,20 @@ interface Props {
 export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConfig, profesor, preloadRelacion }: Props) {
   const ctx = useRelaciones(cursoId, detalleAcademicoId, profesor, preloadRelacion);
   const [plantillas, setPlantillas] = useState<any[]>([]);
+    const [showDocManager, setShowDocManager] = useState(false);
+    const [docManagerTarget, setDocManagerTarget] = useState<{
+        rel: RelacionAlumno;
+        entidad: string;
+        alumno?: Alumno
+    } | null>(null);
+    const handleOpenDocManager = (rel: RelacionAlumno, entidad: string, alumno?: Alumno) => {
+        setDocManagerTarget({rel, entidad, alumno});
+        setShowDocManager(true);
+    };
+    const handleCloseDocManager = () => {
+        setShowDocManager(false);
+        setDocManagerTarget(null);
+    };
 
   useEffect(() => {
     if (ctx.targetEmailRelaciones.length > 0) {
@@ -415,6 +442,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
             selectedDocs={ctx.selectedDocs}
             setTargetEmailRelaciones={ctx.setTargetEmailRelaciones}
             onUpdateFirma={ctx.updateFirma}
+            onOpenDocManager={handleOpenDocManager}
           />
         </div>
       </div>
@@ -514,6 +542,43 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         onGoToConfig={onGoToConfig}
         contextualContactIds={ctx.contextualContactIds}
       />
+
+        {/* ── MODAL: Gestor Documental ── */}
+        {docManagerTarget && (
+            <GestorDocumentalModal
+                open={showDocManager}
+                onClose={handleCloseDocManager}
+                entidad={docManagerTarget.entidad}
+                entidadId={docManagerTarget.rel.id!}
+                entityNombre={docManagerTarget.entidad === 'relacion'
+                    ? docManagerTarget.rel.alumnos?.map(a => `${a.apellidos}, ${a.nombre}`).join(' | ') || ''
+                    : docManagerTarget.alumno
+                        ? `${docManagerTarget.alumno.nombre} ${docManagerTarget.alumno.apellidos}`
+                        : ''
+                }
+                entityRef={docManagerTarget.rel.numRelacion}
+                prefijo={
+                    docManagerTarget.entidad === 'relacion' ? 'RELA' :
+                        docManagerTarget.entidad === 'plan-formativo' ? 'PLFO' :
+                            docManagerTarget.entidad === 'seguimiento' ? 'SEGP' :
+                                'VALO'
+                }
+                detalleAcademicoId={detalleAcademicoId}
+                estado={
+                    docManagerTarget.entidad === 'relacion' ? docManagerTarget.rel.estado :
+                        docManagerTarget.entidad === 'plan-formativo' ?
+                            (docManagerTarget.alumno as any)?.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE' :
+                            docManagerTarget.entidad === 'seguimiento' ?
+                                (docManagerTarget.alumno as any)?.estadoSeguimiento || 'PENDIENTE' :
+                                docManagerTarget.entidad === 'valoracion' ?
+                                    (docManagerTarget.alumno as any)?.estadoValoracion || 'PENDIENTE' :
+                                    docManagerTarget.rel.estado
+                }
+                alumnos={docManagerTarget.alumno ? [docManagerTarget.alumno] : docManagerTarget.rel.alumnos}
+                alumnoId={docManagerTarget.alumno?.id}
+                onEntityUpdated={ctx.fetchData}
+            />
+        )}
     </div>
   );
 }

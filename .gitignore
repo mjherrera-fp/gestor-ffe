@@ -15,3 +15,5 @@ docs/
 claves-dev.txt
 uploads/
 prompt.ia
+.idea/
+.vscode/

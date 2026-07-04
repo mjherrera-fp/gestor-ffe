@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3-multiple-ciphers';
 import path from 'path';
-import { PlantillaCorreoDB } from '../types/email.ts';
+import {PlantillaCorreoDB} from '../types/email.ts';
 
 // Recuperamos la ruta que configuramos en el servidor
 const baseDir = process.env.PORTABLE_EXECUTABLE_DIR || process.cwd();
@@ -163,6 +163,67 @@ function setupTables() {
     FOREIGN KEY(centroId) REFERENCES centros_educativos(id) ON DELETE SET NULL
   );
 
+  CREATE TABLE IF NOT EXISTS doc_convenio (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    convenioId INTEGER NOT NULL,
+    nombreFichero TEXT NOT NULL,
+    contenido TEXT NOT NULL,
+    comentario TEXT,
+    version INTEGER NOT NULL DEFAULT 1,
+    fechaSubida TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY(convenioId) REFERENCES convenios(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS doc_relacion (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    relacionId INTEGER NOT NULL,
+    nombreFichero TEXT NOT NULL,
+    contenido TEXT NOT NULL,
+    comentario TEXT,
+    version INTEGER NOT NULL DEFAULT 1,
+    fechaSubida TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY(relacionId) REFERENCES relaciones(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS doc_planes_formativos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    relacionId INTEGER NOT NULL,
+    alumnoId INTEGER NOT NULL,
+    nombreFichero TEXT NOT NULL,
+    contenido TEXT NOT NULL,
+    comentario TEXT,
+    version INTEGER NOT NULL DEFAULT 1,
+    fechaSubida TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY(relacionId) REFERENCES relaciones(id) ON DELETE CASCADE,
+    FOREIGN KEY(alumnoId) REFERENCES alumnos(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS doc_seguimiento (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    relacionId INTEGER NOT NULL,
+    alumnoId INTEGER NOT NULL,
+    nombreFichero TEXT NOT NULL,
+    contenido TEXT NOT NULL,
+    comentario TEXT,
+    version INTEGER NOT NULL DEFAULT 1,
+    fechaSubida TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY(relacionId) REFERENCES relaciones(id) ON DELETE CASCADE,
+    FOREIGN KEY(alumnoId) REFERENCES alumnos(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS doc_valoracion (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    relacionId INTEGER NOT NULL,
+    alumnoId INTEGER NOT NULL,
+    nombreFichero TEXT NOT NULL,
+    contenido TEXT NOT NULL,
+    comentario TEXT,
+    version INTEGER NOT NULL DEFAULT 1,
+    fechaSubida TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY(relacionId) REFERENCES relaciones(id) ON DELETE CASCADE,
+    FOREIGN KEY(alumnoId) REFERENCES alumnos(id) ON DELETE CASCADE
+  );
+
   CREATE TABLE IF NOT EXISTS relaciones (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     convenioId INTEGER NOT NULL,
@@ -192,9 +253,9 @@ function setupTables() {
     totalHorasFFE INTEGER NOT NULL,
     fechaInicio TEXT,
     fechaFin TEXT,
-    estadoPlanFormativo TEXT NOT NULL DEFAULT 'PENDIENTE_ENVIAR_ESTUDIANTE',
-    estadoSeguimiento TEXT NOT NULL DEFAULT 'PENDIENTE',
-    estadoValoracion TEXT NOT NULL DEFAULT 'PENDIENTE',
+    estadoPlanFormativo TEXT,
+    estadoSeguimiento TEXT,
+    estadoValoracion TEXT,
     cursoId INTEGER,
     relacionId INTEGER,
     detalleAcademicoId INTEGER,
@@ -288,6 +349,25 @@ function setupTables() {
       fecha_hora TEXT NOT NULL DEFAULT (datetime('now')),
       relacion_id INTEGER,
       referencia TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS comunicaciones_dat (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      fecha TEXT NOT NULL,
+      estado TEXT NOT NULL DEFAULT 'PENDIENTE_ENVIAR_DIRECTOR',
+      detalleAcademicoId INTEGER,
+      FOREIGN KEY(detalleAcademicoId) REFERENCES detalles_academicos(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS doc_comunicaciones_dat (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      comunicacionDatId INTEGER NOT NULL,
+      nombreFichero TEXT NOT NULL,
+      contenido TEXT NOT NULL,
+      comentario TEXT,
+      version INTEGER NOT NULL DEFAULT 1,
+      fechaSubida TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+      FOREIGN KEY(comunicacionDatId) REFERENCES comunicaciones_dat(id) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS historico_cambios_estado (
@@ -385,6 +465,10 @@ function setupTables() {
   try { db.exec("ALTER TABLE detalles_academicos ADD COLUMN tutorias TEXT"); } catch {}
   try { db.exec("ALTER TABLE detalles_academicos ADD COLUMN nombreCorto TEXT"); } catch {}
   try { db.exec("ALTER TABLE centros_educativos ADD COLUMN codigo_centro TEXT"); } catch {}
+  try {
+    db.exec("ALTER TABLE alumnos ADD COLUMN comunicacionDAT INTEGER REFERENCES comunicaciones_dat(id) ON DELETE SET NULL");
+  } catch {
+  }
   // Migración: eliminar festivos y tutorias de cursos
   try { db.exec("ALTER TABLE cursos DROP COLUMN festivos"); } catch {}
   try { db.exec("ALTER TABLE cursos DROP COLUMN tutorias"); } catch {}

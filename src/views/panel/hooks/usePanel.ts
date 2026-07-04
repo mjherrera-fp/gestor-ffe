@@ -1,16 +1,22 @@
-import { useState, useEffect, useMemo } from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {
-  PanelResumenRow, SeguridadSocialData,
-  ConvenioEstadoLabels, RelacionEstadoLabels,
-  PlanFormativoEstadoLabels, SeguimientoEstadoLabels, ValoracionEstadoLabels
+  ComunicacionDATEstadoLabels,
+  ConvenioEstadoLabels,
+  PanelResumenRow,
+  PlanFormativoEstadoLabels,
+  RelacionEstadoLabels,
+  SeguimientoEstadoLabels,
+  SeguridadSocialData,
+  ValoracionEstadoLabels
 } from '../../../types/index.ts';
-import { formatDate } from '../../../lib/dateUtils.ts';
+import {formatDate} from '../../../lib/dateUtils.ts';
 
 export type ColumnId =
   | 'alumno' | 'fechaInicio' | 'fechaFin' | 'empresa'
   | 'numConvenio' | 'numRelacion'
   | 'estadoConvenio' | 'estadoRelacion' | 'estadoPlanFormativo'
-  | 'estadoSeguimiento' | 'estadoValoracion';
+    | 'estadoSeguimiento' | 'estadoValoracion'
+    | 'fechaEnvioDAT' | 'estadoDAT';
 
 export type SortDir = 'asc' | 'desc';
 
@@ -46,8 +52,16 @@ export const COLUMNS: ColumnMeta[] = [
   { id: 'empresa', label: 'Empresa', type: 'text', getValue: r => r.empresaNombre },
   { id: 'numConvenio', label: 'Nº Convenio', type: 'text', getValue: r => r.numConvenio },
   { id: 'numRelacion', label: 'Nº Relación', type: 'text', getValue: r => r.numRelacion },
+  {id: 'fechaEnvioDAT', label: 'Fecha Envío DAT', type: 'date', getValue: r => r.fechaEnvioDAT},
   { id: 'estadoConvenio', label: 'Estado Convenio', type: 'status', statusLabels: ConvenioEstadoLabels, getValue: r => r.estadoConvenio },
   { id: 'estadoRelacion', label: 'Estado Relación', type: 'status', statusLabels: RelacionEstadoLabels, getValue: r => r.estadoRelacion },
+  {
+    id: 'estadoDAT',
+    label: 'Estado DAT',
+    type: 'status',
+    statusLabels: ComunicacionDATEstadoLabels,
+    getValue: r => r.estadoDAT
+  },
   { id: 'estadoPlanFormativo', label: 'Plan Formativo', type: 'status', statusLabels: PlanFormativoEstadoLabels, getValue: r => r.estadoPlanFormativo },
   { id: 'estadoSeguimiento', label: 'Seguimiento', type: 'status', statusLabels: SeguimientoEstadoLabels, getValue: r => r.estadoSeguimiento },
   { id: 'estadoValoracion', label: 'Valoración', type: 'status', statusLabels: ValoracionEstadoLabels, getValue: r => r.estadoValoracion },
@@ -57,7 +71,7 @@ function compareValues(a: string | null | undefined, b: string | null | undefine
   const va = a ?? '';
   const vb = b ?? '';
   let cmp = 0;
-  if (col === 'fechaInicio' || col === 'fechaFin') {
+  if (col === 'fechaInicio' || col === 'fechaFin' || col === 'fechaEnvioDAT') {
     cmp = (a || '').localeCompare(b || '');
   } else {
     cmp = va.localeCompare(vb, 'es', { sensitivity: 'base' });

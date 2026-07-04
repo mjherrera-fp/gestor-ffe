@@ -1,5 +1,5 @@
 import express from 'express';
-import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
+import {DOMParser, XMLSerializer} from '@xmldom/xmldom';
 import PizZip from 'pizzip';
 import JSZip from 'jszip';
 import Docxtemplater from 'docxtemplater';
@@ -9,10 +9,51 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
-import { db } from './src/lib/db.ts';
-import { ProfesorDAO, ConfiguracionDAO, AceptacionUsoDAO, CentroDAO, DetalleAcademicoDAO, CursoDAO, AlumnoDAO, EmpresaDAO, EmpresaFestivosDAO, TutorEmpresaDAO, EmpresaEstadisticaDAO, ConvenioDAO, InteresDAO, RelacionAlumnoDAO, PanelDAO, EmailContactsDAO, HistoricoDAO, AvisosDAO, PlantillaCorreoDAO, MarcadorPersonalizadoDAO, ContactoDAO, GrupoContactoDAO, FFEValoracionFinalDAO, FFEMotivoNoRealizacionDAO, FFEEvaluacionDAO, FFEResultadoRADAO, FFEInformeDAO, isDatabaseLocked, isDatabaseEncrypted, unlockDatabase, encryptDatabase, lockDatabase, recalcularFechasAlumnos } from './src/lib/dao.ts';
-import { Alumno, ConvenioEstado, DetalleAcademico } from './src/types/index.ts';
-import { fileURLToPath } from 'url';
+import {db} from './src/lib/db.ts';
+import {
+  AceptacionUsoDAO,
+  AlumnoDAO,
+  AvisosDAO,
+  CentroDAO,
+  ComunicacionDATDAO,
+  ConfiguracionDAO,
+  ContactoDAO,
+  ConvenioDAO,
+  CursoDAO,
+  DetalleAcademicoDAO,
+  DocComunicacionDATDAO,
+  DocConvenioDAO,
+  DocPlanFormativoDAO,
+  DocRelacionDAO,
+  DocSeguimientoDAO,
+  DocValoracionDAO,
+  EmailContactsDAO,
+  EmpresaDAO,
+  EmpresaEstadisticaDAO,
+  EmpresaFestivosDAO,
+  encryptDatabase,
+  FFEEvaluacionDAO,
+  FFEInformeDAO,
+  FFEMotivoNoRealizacionDAO,
+  FFEResultadoRADAO,
+  FFEValoracionFinalDAO,
+  GrupoContactoDAO,
+  HistoricoDAO,
+  InteresDAO,
+  isDatabaseEncrypted,
+  isDatabaseLocked,
+  lockDatabase,
+  MarcadorPersonalizadoDAO,
+  PanelDAO,
+  PlantillaCorreoDAO,
+  ProfesorDAO,
+  recalcularFechasAlumnos,
+  RelacionAlumnoDAO,
+  TutorEmpresaDAO,
+  unlockDatabase
+} from './src/lib/dao.ts';
+import {Alumno, DetalleAcademico, DocConvenio, DocRelacion} from './src/types/index.ts';
+import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,7 +73,7 @@ async function startServer() {
     if (process.send) process.send('ERROR_PERMISOS');
   }
 
-  app.use(express.json());
+  app.use(express.json({limit: '50mb'}));
 
   // 2. Configurar carpeta de subidas (UPLOADS) portable
   const uploadDir = path.join(baseDir, 'uploads');
@@ -956,6 +997,11 @@ async function startServer() {
     req.query.cursoId ? Number(req.query.cursoId) : undefined,
     req.query.centroId ? Number(req.query.centroId) : undefined
   )));
+  app.get('/api/convenios/:id', (req, res) => {
+    const conv = ConvenioDAO.getById(Number(req.params.id));
+    if (!conv) return res.status(404).json({error: 'Convenio no encontrado'});
+    res.json(conv);
+  });
   app.post('/api/convenios', (req, res) => {
     const { convenio } = req.body;
     if (!convenio.centroId) return res.status(400).json({ error: 'El centro educativo es obligatorio.' });
@@ -984,6 +1030,459 @@ async function startServer() {
     res.json({ success: true });
   });
 
+  // ─── Documentos de Convenio ───
+
+  app.post('/api/documentos/convenio', upload.single('file'), (req, res) => {
+    if (!req.file) return res.status(400).json({error: 'No se ha subido ningún archivo'});
+    const {convenioId, comentario, nombreFichero} = req.body;
+    if (!convenioId) return res.status(400).json({error: 'Falta convenioId'});
+
+    const convenioRow = db.prepare('SELECT c.numConvenio, e.nombre as empresaNombre FROM convenios c JOIN empresas e ON c.empresaId = e.id WHERE c.id = ?').get(Number(convenioId)) as any;
+    if (!convenioRow) return res.status(404).json({error: 'Convenio no encontrado'});
+
+    let finalNombre = nombreFichero;
+    if (!finalNombre) {
+      const parts = (convenioRow.numConvenio as string).split('/');
+      const ref = parts.length > 1 ? parts[parts.length - 1].trim() : (convenioRow.numConvenio as string).trim();
+      const paddedRef = ref.padStart(4, '0');
+      const empresaSanitized = (convenioRow.empresaNombre as string).replace(/[<>:"/\\|?*]/g, '_').trim();
+      finalNombre = `CONV_${paddedRef}_${empresaSanitized}.pdf`;
+    }
+
+    const nextVersion = DocConvenioDAO.getNextVersion(Number(convenioId));
+
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const base64Data = fileBuffer.toString('base64');
+    const dataURI = `data:${req.file.mimetype};base64,${base64Data}`;
+
+    const id = DocConvenioDAO.create({
+      convenioId: Number(convenioId),
+      nombreFichero: finalNombre,
+      contenido: dataURI,
+      comentario: comentario || null,
+      version: nextVersion,
+    } as DocConvenio);
+
+    res.json({id, version: nextVersion, nombreFichero: finalNombre});
+  });
+
+  app.get('/api/documentos/convenio', (req, res) => {
+    const convenioId = req.query.convenioId ? Number(req.query.convenioId) : undefined;
+    if (!convenioId) return res.status(400).json({error: 'Falta convenioId'});
+    res.json(DocConvenioDAO.getByConvenioId(convenioId));
+  });
+
+  app.get('/api/documentos/convenio/:id/download', (req, res) => {
+    const doc = DocConvenioDAO.getById(Number(req.params.id));
+    if (!doc) return res.status(404).json({error: 'Documento no encontrado'});
+
+    // El contenido es un data URI: data:application/pdf;base64,XXXXX
+    const matches = doc.contenido.match(/^data:([^;]+);base64,(.+)$/);
+    if (!matches) return res.status(500).json({error: 'Formato de documento inválido'});
+
+    const buffer = Buffer.from(matches[2], 'base64');
+    res.setHeader('Content-Type', matches[1]);
+    res.setHeader('Content-Disposition', `inline; filename="${doc.nombreFichero}"`);
+    res.send(buffer);
+  });
+
+  app.delete('/api/documentos/convenio/:id', (req, res) => {
+    DocConvenioDAO.delete(Number(req.params.id));
+    res.json({success: true});
+  });
+
+  // ─── Documentos de Relación ───
+
+  app.post('/api/documentos/relacion', upload.single('file'), (req, res) => {
+    if (!req.file) return res.status(400).json({error: 'No se ha subido ningún archivo'});
+    const {relacionId, comentario, nombreFichero} = req.body;
+    if (!relacionId) return res.status(400).json({error: 'Falta relacionId'});
+
+    const relacion = RelacionAlumnoDAO.getById(Number(relacionId));
+    if (!relacion) return res.status(404).json({error: 'Relación no encontrada'});
+
+    let finalNombre = nombreFichero;
+    if (!finalNombre) {
+      // Buscar codigoGrupo del detalle académico de los alumnos
+      let codigoGrupo = '';
+      if (relacion.alumnos && relacion.alumnos.length > 0) {
+        const alumno = relacion.alumnos[0];
+        const da = db.prepare('SELECT codigoGrupo FROM detalles_academicos WHERE id = ?').get(alumno.detalleAcademicoId) as any;
+        if (da) codigoGrupo = da.codigoGrupo || '';
+      }
+      const dnis = (relacion.alumnos || []).map((a: any) => a.dni).join('_');
+      finalNombre = `RELA_${codigoGrupo}_${dnis}.pdf`;
+    }
+
+    const nextVersion = DocRelacionDAO.getNextVersion(Number(relacionId));
+
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const base64Data = fileBuffer.toString('base64');
+    const dataURI = `data:${req.file.mimetype};base64,${base64Data}`;
+
+    const id = DocRelacionDAO.create({
+      relacionId: Number(relacionId),
+      nombreFichero: finalNombre,
+      contenido: dataURI,
+      comentario: comentario || null,
+      version: nextVersion,
+    } as DocRelacion);
+
+    res.json({id, version: nextVersion, nombreFichero: finalNombre});
+  });
+
+  app.get('/api/documentos/relacion', (req, res) => {
+    const relacionId = req.query.relacionId ? Number(req.query.relacionId) : undefined;
+    if (!relacionId) return res.status(400).json({error: 'Falta relacionId'});
+    res.json(DocRelacionDAO.getByRelacionId(relacionId));
+  });
+
+  app.get('/api/documentos/relacion/:id/download', (req, res) => {
+    const doc = DocRelacionDAO.getById(Number(req.params.id));
+    if (!doc) return res.status(404).json({error: 'Documento no encontrado'});
+
+    const matches = doc.contenido.match(/^data:([^;]+);base64,(.+)$/);
+    if (!matches) return res.status(500).json({error: 'Formato de documento inválido'});
+
+    const buffer = Buffer.from(matches[2], 'base64');
+    res.setHeader('Content-Type', matches[1]);
+    res.setHeader('Content-Disposition', `inline; filename="${doc.nombreFichero}"`);
+    res.send(buffer);
+  });
+
+  app.delete('/api/documentos/relacion/:id', (req, res) => {
+    DocRelacionDAO.delete(Number(req.params.id));
+    res.json({success: true});
+  });
+
+  // ─── Documentos de Plan Formativo, Seguimiento, Valoración ───
+
+  function addDocAlumnoRoutes(apiPath: string, dao: any, prefijo: string, docType: string) {
+    const dbTable = docType === 'plan-formativo' ? 'doc_planes_formativos' : `doc_${docType}`;
+
+    app.post(`/api/documentos/${apiPath}`, upload.single('file'), (req, res) => {
+      if (!req.file) return res.status(400).json({error: 'No se ha subido ningún archivo'});
+      const {relacionId, alumnoId, comentario, nombreFichero} = req.body;
+      if (!relacionId) return res.status(400).json({error: 'Falta relacionId'});
+      if (!alumnoId) return res.status(400).json({error: 'Falta alumnoId'});
+
+      const alumno = db.prepare('SELECT dni, detalleAcademicoId FROM alumnos WHERE id = ?').get(Number(alumnoId)) as any;
+      if (!alumno) return res.status(404).json({error: 'Alumno no encontrado'});
+
+      let finalNombre = nombreFichero;
+      if (!finalNombre) {
+        let codigoGrupo = '';
+        const da = db.prepare('SELECT codigoGrupo FROM detalles_academicos WHERE id = ?').get(alumno.detalleAcademicoId) as any;
+        if (da) codigoGrupo = da.codigoGrupo || '';
+        finalNombre = `${prefijo}_${codigoGrupo}_${alumno.dni}.pdf`;
+      }
+
+      const nextVersion = dao.getNextVersion(Number(relacionId), Number(alumnoId));
+
+      const fileBuffer = fs.readFileSync(req.file.path);
+      const base64Data = fileBuffer.toString('base64');
+      const dataURI = `data:${req.file.mimetype};base64,${base64Data}`;
+
+      const id = dao.create({
+        relacionId: Number(relacionId),
+        alumnoId: Number(alumnoId),
+        nombreFichero: finalNombre,
+        contenido: dataURI,
+        comentario: comentario || null,
+        version: nextVersion,
+      });
+
+      res.json({id, version: nextVersion, nombreFichero: finalNombre});
+    });
+
+    app.get(`/api/documentos/${apiPath}`, (req, res) => {
+      const relacionId = req.query.relacionId ? Number(req.query.relacionId) : undefined;
+      const alumnoId = req.query.alumnoId ? Number(req.query.alumnoId) : undefined;
+      if (!relacionId) return res.status(400).json({error: 'Falta relacionId'});
+      if (!alumnoId) return res.status(400).json({error: 'Falta alumnoId'});
+      res.json(dao.getByRelacionIdAndAlumnoId(relacionId, alumnoId));
+    });
+
+    app.get(`/api/documentos/${apiPath}/:id/download`, (req, res) => {
+      const doc = dao.getById(Number(req.params.id));
+      if (!doc) return res.status(404).json({error: 'Documento no encontrado'});
+
+      const matches = doc.contenido.match(/^data:([^;]+);base64,(.+)$/);
+      if (!matches) return res.status(500).json({error: 'Formato de documento inválido'});
+
+      const buffer = Buffer.from(matches[2], 'base64');
+      res.setHeader('Content-Type', matches[1]);
+      res.setHeader('Content-Disposition', `inline; filename="${doc.nombreFichero}"`);
+      res.send(buffer);
+    });
+
+    app.delete(`/api/documentos/${apiPath}/:id`, (req, res) => {
+      dao.delete(Number(req.params.id));
+      res.json({success: true});
+    });
+  }
+
+  addDocAlumnoRoutes('plan-formativo', DocPlanFormativoDAO, 'PLFO', 'plan-formativo');
+  addDocAlumnoRoutes('seguimiento', DocSeguimientoDAO, 'SEGP', 'seguimiento');
+  addDocAlumnoRoutes('valoracion', DocValoracionDAO, 'VALO', 'valoracion');
+
+  // ─── Documentos Comunicación DAT ────────────────────
+
+  app.post('/api/documentos/com-dat', upload.single('file'), (req, res) => {
+    if (!req.file) return res.status(400).json({error: 'No se ha subido ningún archivo'});
+    const {comunicacionDatId, comentario, nombreFichero} = req.body;
+    if (!comunicacionDatId) return res.status(400).json({error: 'Falta comunicacionDatId'});
+
+    const nextVersion = DocComunicacionDATDAO.getNextVersion(Number(comunicacionDatId));
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const base64Data = fileBuffer.toString('base64');
+    const dataURI = `data:${req.file.mimetype};base64,${base64Data}`;
+
+    const id = DocComunicacionDATDAO.create({
+      comunicacionDatId: Number(comunicacionDatId),
+      nombreFichero: nombreFichero || 'documento.pdf',
+      contenido: dataURI,
+      comentario: comentario || null,
+      version: nextVersion,
+    });
+    res.json({id, version: nextVersion, nombreFichero: nombreFichero || 'documento.pdf'});
+  });
+
+  app.get('/api/documentos/com-dat', (req, res) => {
+    const comunicacionDatId = Number(req.query.comunicacionDatId);
+    if (!comunicacionDatId) return res.status(400).json({error: 'Falta comunicacionDatId'});
+    res.json(DocComunicacionDATDAO.getByComunicacionId(comunicacionDatId));
+  });
+
+  app.get('/api/documentos/com-dat/:id/download', (req, res) => {
+    const doc = DocComunicacionDATDAO.getById(Number(req.params.id));
+    if (!doc) return res.status(404).json({error: 'Documento no encontrado'});
+
+    const matches = doc.contenido.match(/^data:([^;]+);base64,(.+)$/);
+    if (!matches) return res.status(500).json({error: 'Formato de documento inválido'});
+
+    const buffer = Buffer.from(matches[2], 'base64');
+    res.setHeader('Content-Type', matches[1]);
+    res.setHeader('Content-Disposition', `inline; filename="${doc.nombreFichero}"`);
+    res.send(buffer);
+  });
+
+  app.delete('/api/documentos/com-dat/:id', (req, res) => {
+    DocComunicacionDATDAO.delete(Number(req.params.id));
+    res.json({success: true});
+  });
+
+  // ─── Comunicaciones DAT ─────────────────────────────
+
+  app.get('/api/comunicaciones-dat', (req, res) => {
+    const detalleAcademicoId = Number(req.query.detalleAcademicoId);
+    if (!detalleAcademicoId) return res.status(400).json({error: 'Falta detalleAcademicoId'});
+    res.json(ComunicacionDATDAO.getAllByDetalleAcademico(detalleAcademicoId));
+  });
+
+  app.post('/api/comunicaciones-dat', (req, res) => {
+    const {fecha, alumnoIds, detalleAcademicoId} = req.body;
+    if (!fecha || !alumnoIds || !detalleAcademicoId) return res.status(400).json({error: 'Faltan datos'});
+    const id = ComunicacionDATDAO.create(fecha, detalleAcademicoId, alumnoIds);
+    res.json({id, fecha, estado: 'PENDIENTE_ENVIAR_DIRECTOR'});
+  });
+
+  app.put('/api/comunicaciones-dat/:id', (req, res) => {
+    ComunicacionDATDAO.update(Number(req.params.id), req.body.fecha);
+    res.json({success: true});
+  });
+
+  app.put('/api/comunicaciones-dat/:id/estado', (req, res) => {
+    ComunicacionDATDAO.updateEstado(Number(req.params.id), req.body.estado);
+    res.json({success: true});
+  });
+
+  app.delete('/api/comunicaciones-dat/:id', (req, res) => {
+    ComunicacionDATDAO.delete(Number(req.params.id));
+    res.json({success: true});
+  });
+
+  app.get('/api/alumnos/con-relacion-completada', (req, res) => {
+    const detalleAcademicoId = Number(req.query.detalleAcademicoId);
+    const incluirConComunicacion = req.query.incluirConComunicacion === 'true';
+    if (!detalleAcademicoId) return res.status(400).json({error: 'Falta detalleAcademicoId'});
+    let sql = 'SELECT * FROM alumnos WHERE detalleAcademicoId = ? AND relacionId IS NOT NULL AND (SELECT estado FROM relaciones WHERE id = relacionId) = ?';
+    if (!incluirConComunicacion) sql += ' AND comunicacionDAT IS NULL';
+    res.json(db.prepare(sql).all(detalleAcademicoId, 'COMPLETADO'));
+  });
+
+  // ─── NextCloud ──────────────────────────────────────
+  // Raw WebDAV (compatible con todas las versiones de NextCloud)
+
+  function resolveNextCloudCreds(existing: any, body: any): {
+    serverUrl: string;
+    username: string;
+    password: string
+  } | null {
+    const profesorId = existing?.id;
+    let serverUrl = body.server_url || body.serverUrl;
+    let username = body.username;
+    let password = body.password;
+
+    // 1. Try body creds
+    if (serverUrl && username && password) {
+      return {serverUrl, username, password};
+    }
+
+    // 2. Try saved cloud config
+    if (profesorId) {
+      const saved = ConfiguracionDAO.getConfig(profesorId, 'cloud');
+      if (saved) {
+        serverUrl = serverUrl || saved.server_url || saved.serverUrl || '';
+        username = username || saved.username || '';
+        password = password || saved.password || '';
+        if (serverUrl && username && password) {
+          return {serverUrl, username, password};
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function getWebDavUrl(serverUrl: string, username: string): string {
+    const s = serverUrl.replace(/\/+$/, '');
+    // If user already specified a full WebDAV path, use it as-is
+    if (s.includes('/remote.php/webdav') || s.includes('/remote.php/dav')) return s;
+    // Modern NextCloud uses personal files endpoint
+    if (username) return `${s}/remote.php/dav/files/${encodeURIComponent(username)}`;
+    return `${s}/remote.php/webdav`;
+  }
+
+  function getBasicAuthHeader(username: string, password: string): string {
+    return 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
+  }
+
+  app.post('/api/nextcloud/list-folders', async (req, res) => {
+    try {
+      const existing = ProfesorDAO.get();
+      if (!existing) return res.status(400).json({error: 'No hay profesor'});
+      const creds = resolveNextCloudCreds(existing, req.body);
+      if (!creds) {
+        return res.status(400).json({error: 'NextCloud no configurado. Guarda la configuración primero.'});
+      }
+      const {serverUrl, username, password} = creds;
+
+      const webdavUrl = getWebDavUrl(serverUrl, username);
+      const auth = getBasicAuthHeader(username, password);
+      const path: string = req.body.path || '/';
+      const cleanPath = path.replace(/\/+$/, '') || '/';
+
+      const propfindBody = `<?xml version="1.0"?>
+<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">
+  <d:prop>
+    <d:getlastmodified />
+    <d:resourcetype />
+    <oc:fileid />
+  </d:prop>
+</d:propfind>`;
+
+      const url = `${webdavUrl}${cleanPath}`;
+      const response = await fetch(url, {
+        method: 'PROPFIND',
+        headers: {
+          'Authorization': auth,
+          'Content-Type': 'application/xml',
+          'Depth': '1',
+        },
+        body: propfindBody,
+      });
+
+      if (!response.ok) {
+        console.error('[NextCloud] PROPFIND failed:', response.status, response.statusText, 'url:', url, 'user:', username);
+        return res.status(400).json({error: `Error NextCloud (${response.status}): ${response.statusText}`});
+      }
+
+      const text = await response.text();
+      // Parse the multistatus XML
+      const folders: { name: string; path: string }[] = [];
+      const regex = /<d:response[^>]*>([\s\S]*?)<\/d:response>/g;
+      let match;
+      while ((match = regex.exec(text)) !== null) {
+        const respXml = match[1];
+        const hrefMatch = respXml.match(/<d:href[^>]*>([^<]+)<\/d:href>/);
+        if (!hrefMatch) continue;
+        let href = decodeURIComponent(hrefMatch[1].trim());
+        // Skip the current folder
+        const baseUrlForCompare = (url.endsWith('/') ? url : url + '/');
+        if (baseUrlForCompare.endsWith(href) || baseUrlForCompare === href) continue;
+        // Check if it's a directory
+        if (!respXml.includes('<d:collection/>')) continue;
+        // Extract name from href
+        href = href.replace(/\/+$/, '');
+        const name = href.split('/').pop() || '';
+        if (!name) continue;
+        // Build relative path
+        const webdavBase = webdavUrl.replace(/\/+$/, '') + '/';
+        const relPath = href.startsWith(webdavBase) ? href.slice(webdavBase.length - 1) : '/' + href.split('/').slice(href.split('/').indexOf('files') + 1).join('/');
+        folders.push({
+          name,
+          path: cleanPath === '/' ? `/${name}` : `${cleanPath}/${name}`,
+        });
+      }
+
+      res.json({folders});
+    } catch (e: any) {
+      console.error('NextCloud list error:', e);
+      res.status(500).json({error: e.message || 'Error al listar carpetas'});
+    }
+  });
+
+  app.post('/api/nextcloud/upload', async (req, res) => {
+    try {
+      const existing = ProfesorDAO.get();
+      if (!existing) return res.status(400).json({error: 'No hay profesor'});
+      const creds = resolveNextCloudCreds(existing, req.body);
+      if (!creds) {
+        return res.status(400).json({error: 'NextCloud no configurado'});
+      }
+      const {serverUrl, username, password} = creds;
+
+      const {folder: folderPath, filename, contentBase64} = req.body;
+      if (!folderPath || !filename || !contentBase64) {
+        return res.status(400).json({error: 'Faltan datos: folder, filename, contentBase64'});
+      }
+
+      const webdavUrl = getWebDavUrl(serverUrl, username);
+      const auth = getBasicAuthHeader(username, password);
+      const buffer = Buffer.from(contentBase64, 'base64');
+
+      // Ensure folder exists (MKCOL)
+      const cleanFolder = folderPath.replace(/\/+$/, '') || '/';
+      const folderUrl = `${webdavUrl}${cleanFolder}`;
+      try {
+        await fetch(folderUrl, {method: 'MKCOL', headers: {'Authorization': auth}});
+      } catch { /* folder may already exist */
+      }
+
+      // Upload file (PUT)
+      const fileUrl = `${webdavUrl}${cleanFolder}/${filename}`;
+      const putRes = await fetch(fileUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': auth,
+          'Content-Type': 'application/octet-stream',
+        },
+        body: buffer,
+      });
+
+      if (!putRes.ok) {
+        console.error('[NextCloud] PUT failed:', putRes.status, putRes.statusText, 'url:', fileUrl, 'user:', username);
+        return res.status(400).json({error: `Error al subir (${putRes.status}): ${putRes.statusText}`});
+      }
+
+      res.json({success: true, name: filename});
+    } catch (e: any) {
+      console.error('NextCloud upload error:', e);
+      res.status(500).json({error: e.message || 'Error al subir a NextCloud'});
+    }
+  });
+
   // Intereses
   app.get('/api/intereses', (req, res) => res.json(InteresDAO.getIntereses(
     req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
@@ -1006,6 +1505,11 @@ async function startServer() {
     res.json(RelacionAlumnoDAO.getAll(
       req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
     ));
+  });
+  app.get('/api/relaciones-alumnos/:id', (req, res) => {
+    const rel = RelacionAlumnoDAO.getById(Number(req.params.id));
+    if (!rel) return res.status(404).json({error: 'Relación no encontrada'});
+    res.json(rel);
   });
   app.post('/api/relaciones-alumnos', (req, res) => {
     try {

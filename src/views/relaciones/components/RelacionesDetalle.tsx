@@ -1,13 +1,41 @@
-import React, { useState } from 'react';
-import { FileText, ArrowLeft, Send, Clock, ShieldCheck, CheckCircle2, Calendar, FileDown, Users, CalendarDays, Download, Loader2, FileArchive, Mail, FileBadge, X, CheckSquare } from 'lucide-react';
-import { RelacionAlumno, Alumno, RelacionEstado, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, SelectedDocs, FirmaTipo, FirmaTipoLabels, ResultadoAprendizaje, FFEValoracionFinal } from '../../../types/index.ts';
-import { BotonDescargaPDF } from '../../../components/BotonDescargaPDF.tsx';
-import { BotonDescargaDOCX } from '../../../components/BotonDescargaDOCX.tsx';
-import { CustomSelect } from '../../../components/CustomSelect.tsx';
-import { StatusBadge } from './RelacionesListado.tsx';
-import { getAnexoStatusButton, getPlanStatusButton, getSeguimientoStatusButton, getValoracionStatusButton } from '../utils/relacionesUtils.ts';
-import { Title } from '@/src/components/Title.tsx';
-import { Modal } from '../../../components/ui/Modal.tsx';
+import React, {useState} from 'react';
+import {
+  Archive,
+  ArrowLeft,
+  CalendarDays,
+  CheckSquare,
+  Download,
+  FileBadge,
+  FileText,
+  Loader2,
+  Mail,
+  X
+} from 'lucide-react';
+import {
+  Alumno,
+  FFEValoracionFinal,
+  FirmaTipo,
+  FirmaTipoLabels,
+  PlanFormativoEstado,
+  RelacionAlumno,
+  RelacionEstado,
+  ResultadoAprendizaje,
+  SeguimientoEstado,
+  SelectedDocs,
+  ValoracionEstado
+} from '../../../types/index.ts';
+import {BotonDescargaPDF} from '../../../components/BotonDescargaPDF.tsx';
+import {BotonDescargaDOCX} from '../../../components/BotonDescargaDOCX.tsx';
+import {CustomSelect} from '../../../components/CustomSelect.tsx';
+import {StatusBadge} from './RelacionesListado.tsx';
+import {
+  getAnexoStatusButton,
+  getPlanStatusButton,
+  getSeguimientoStatusButton,
+  getValoracionStatusButton
+} from '../utils/relacionesUtils.ts';
+import {Title} from '@/src/components/Title.tsx';
+import {Modal} from '../../../components/ui/Modal.tsx';
 
 const FIRMA_CICLO: FirmaTipo[] = [FirmaTipo.SIN_ASIGNAR, FirmaTipo.DIGITAL, FirmaTipo.MANUAL];
 
@@ -70,6 +98,7 @@ interface RelacionDetalleProps {
   setSelectedDocs: React.Dispatch<React.SetStateAction<SelectedDocs>>;
   setTargetEmailRelaciones: React.Dispatch<React.SetStateAction<RelacionAlumno[]>>;
   onUpdateFirma: (campo: keyof Pick<RelacionAlumno, 'firmaRelacion' | 'firmaPlanFormativo' | 'firmaSeguimiento' | 'firmaValoracion'>, valor: FirmaTipo) => void;
+  onOpenDocManager: (rel: RelacionAlumno, entidad: string, alumno?: Alumno) => void;
 }
 
 export function RelacionDetalle({
@@ -86,7 +115,8 @@ export function RelacionDetalle({
   isDownloadingMasivo, downloadProgress, downloadStatus,
   setTargetDownloadRelaciones, targetDownloadRelaciones, setSelectedDocs, selectedDocs,
   setTargetEmailRelaciones,
-  onUpdateFirma
+                                  onUpdateFirma,
+                                  onOpenDocManager
 }: RelacionDetalleProps) {
 
   const [isDownloading, setIsDownloading] = useState(false);
@@ -276,6 +306,14 @@ export function RelacionDetalle({
                     {sendingEmail === 'relacion' ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
                   </button>
                 </Title>
+                <Title text="Gestor documental">
+                  <button
+                      onClick={() => onOpenDocManager(selectedRelacion, 'relacion')}
+                      className="h-8 px-2.5 flex items-center justify-center gap-1 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200 text-[10px] font-bold uppercase"
+                  >
+                    <Archive className="h-3.5 w-3.5"/> DOCS
+                  </button>
+                </Title>
               </div>
 
               {anexoBtn ? (
@@ -363,6 +401,14 @@ export function RelacionDetalle({
                               className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 text-[10px] font-bold uppercase disabled:opacity-50"
                             >
                               {sendingEmail === `plan-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                            </button>
+                          </Title>
+                          <Title text="Gestor documental">
+                            <button
+                                onClick={() => onOpenDocManager(selectedRelacion, 'plan-formativo', alumno)}
+                                className="h-8 px-2.5 flex items-center justify-center gap-1 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200 text-[10px] font-bold uppercase"
+                            >
+                              <Archive className="h-3.5 w-3.5"/> DOCS
                             </button>
                           </Title>
                         </div>
@@ -455,6 +501,14 @@ export function RelacionDetalle({
                               {sendingEmail === `seg-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
                             </button>
                           </Title>
+                          <Title text="Gestor documental">
+                            <button
+                                onClick={() => onOpenDocManager(selectedRelacion, 'seguimiento', alumno)}
+                                className="h-8 px-2.5 flex items-center justify-center gap-1 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200 text-[10px] font-bold uppercase"
+                            >
+                              <Archive className="h-3.5 w-3.5"/> DOCS
+                            </button>
+                          </Title>
                         </div>
 
                         {planBtn ? (
@@ -543,6 +597,14 @@ export function RelacionDetalle({
                               className="h-8 px-2.5 flex items-center justify-center gap-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors border border-blue-100 text-[10px] font-bold uppercase disabled:opacity-50"
                             >
                               {sendingEmail === `val-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                            </button>
+                          </Title>
+                          <Title text="Gestor documental">
+                            <button
+                                onClick={() => onOpenDocManager(selectedRelacion, 'valoracion', alumno)}
+                                className="h-8 px-2.5 flex items-center justify-center gap-1 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200 text-[10px] font-bold uppercase"
+                            >
+                              <Archive className="h-3.5 w-3.5"/> DOCS
                             </button>
                           </Title>
                           <Title text="Evaluación FFE">
