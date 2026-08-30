@@ -334,6 +334,13 @@ async function startServer() {
 
     res.json({ success: true, recalculadas });
   });
+  app.post('/api/profesor/config/correo/firma', (req, res) => {
+    const existing = ProfesorDAO.get();
+    if (!existing) return res.status(400).json({error: 'No hay profesor'});
+    const firma = req.body.firma_correo || '';
+    ConfiguracionDAO.upsertConfigKey(existing.id!, 'correo', 'firma_correo', firma);
+    res.json({success: true});
+  });
   app.get('/api/profesor/aceptacion-uso', (req, res) => {
     res.json({ aceptado: AceptacionUsoDAO.getAceptado() });
   });

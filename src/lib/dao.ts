@@ -149,6 +149,16 @@ export const ConfiguracionDAO = {
     });
     transaction();
   },
+  upsertConfigKey: (profesorId: number, tipo: string, clave: string, valor: string) => {
+    const existing = db.prepare('SELECT id FROM configuracion WHERE profesorId = ? AND tipo = ? AND clave = ?').get(profesorId, tipo, clave) as {
+      id: number
+    } | undefined;
+    if (existing) {
+      db.prepare('UPDATE configuracion SET valor = ? WHERE id = ?').run(valor, existing.id);
+    } else {
+      db.prepare('INSERT INTO configuracion (profesorId, tipo, clave, valor) VALUES (?, ?, ?, ?)').run(profesorId, tipo, clave, valor);
+    }
+  },
 };
 
 export const AceptacionUsoDAO = {

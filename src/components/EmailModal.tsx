@@ -1,39 +1,50 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { useEditor, EditorContent, EditorContext } from '@tiptap/react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {EditorContent, EditorContext, useEditor} from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
-import { TaskList, TaskItem } from '@tiptap/extension-list';
+import {TaskItem, TaskList} from '@tiptap/extension-list';
 import Highlight from '@tiptap/extension-highlight';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
-import { Image } from '@tiptap/extension-image';
+import {Image} from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
-import { Selection } from '@tiptap/extensions';
-import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
+import {Selection} from '@tiptap/extensions';
+import {Table, TableCell, TableHeader, TableRow} from '@tiptap/extension-table';
 import "@/components/tiptap-node/list-node/list-node.scss";
 import "@/components/tiptap-node/heading-node/heading-node.scss";
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/table-node/table-node.scss";
 import {
-  X, Send, Settings, Paperclip, Trash2, Loader2, FileText, User, Briefcase, GraduationCap as StudentIcon, Info, Users
+  Briefcase,
+  FileText,
+  GraduationCap as StudentIcon,
+  Info,
+  Loader2,
+  Paperclip,
+  Send,
+  Settings,
+  Trash2,
+  User,
+  Users,
+  X
 } from 'lucide-react';
-import { EmailAttachment, EmailSendRequest, GrupoContacto } from '../types/email.ts';
-import { uploadAttachment, deleteAttachment } from '../utils/emailUtils.ts';
-import { Title } from './Title.tsx';
-import { Toolbar, ToolbarGroup, ToolbarSeparator } from '@/components/tiptap-ui-primitive/toolbar';
-import { Spacer } from '@/components/tiptap-ui-primitive/spacer';
-import { UndoRedoButton } from '@/components/tiptap-ui/undo-redo-button';
-import { HeadingDropdownMenu } from '@/components/tiptap-ui/heading-dropdown-menu';
-import { ListDropdownMenu } from '@/components/tiptap-ui/list-dropdown-menu';
-import { BlockquoteButton } from '@/components/tiptap-ui/blockquote-button';
-import { CodeBlockButton } from '@/components/tiptap-ui/code-block-button';
-import { MarkButton } from '@/components/tiptap-ui/mark-button';
-import { TextAlignButton } from '@/components/tiptap-ui/text-align-button';
-import { ColorHighlightPopover } from '@/components/tiptap-ui/color-highlight-popover';
-import { LinkPopover } from '@/components/tiptap-ui/link-popover';
-import { TableDropdownMenu } from '@/components/tiptap-ui/table-dropdown-menu';
+import {EmailAttachment, EmailSendRequest, GrupoContacto} from '../types/email.ts';
+import {deleteAttachment, uploadAttachment} from '../utils/emailUtils.ts';
+import {Title} from './Title.tsx';
+import {Toolbar, ToolbarGroup, ToolbarSeparator} from '@/components/tiptap-ui-primitive/toolbar';
+import {Spacer} from '@/components/tiptap-ui-primitive/spacer';
+import {UndoRedoButton} from '@/components/tiptap-ui/undo-redo-button';
+import {HeadingDropdownMenu} from '@/components/tiptap-ui/heading-dropdown-menu';
+import {ListDropdownMenu} from '@/components/tiptap-ui/list-dropdown-menu';
+import {BlockquoteButton} from '@/components/tiptap-ui/blockquote-button';
+import {CodeBlockButton} from '@/components/tiptap-ui/code-block-button';
+import {MarkButton} from '@/components/tiptap-ui/mark-button';
+import {TextAlignButton} from '@/components/tiptap-ui/text-align-button';
+import {ColorHighlightPopover} from '@/components/tiptap-ui/color-highlight-popover';
+import {LinkPopover} from '@/components/tiptap-ui/link-popover';
+import {TableDropdownMenu} from '@/components/tiptap-ui/table-dropdown-menu';
 
 interface EmailContact {
   id: number;
@@ -311,13 +322,20 @@ export function EmailModal({
   const [gruposContactos, setGruposContactos] = useState<GrupoContacto[]>([]);
   const [activeAutocomplete, setActiveAutocomplete] = useState<'to' | 'cc' | 'bcc' | null>(null);
   const [configOk, setConfigOk] = useState<boolean>(true);
+  const [signature, setSignature] = useState<string>('');
+  const signatureAppendedRef = useRef(false);
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      signatureAppendedRef.current = false;
+      setSignature('');
       fetch('/api/profesor/config/correo')
         .then(res => res.json())
-        .then(cfg => setConfigOk(!!cfg.smtp_user))
+          .then(cfg => {
+            setConfigOk(!!cfg.smtp_user);
+            setSignature(cfg.firma_correo || '');
+          })
         .catch(() => setConfigOk(false));
     }
   }, [isOpen]);
@@ -368,6 +386,17 @@ export function EmailModal({
       editor?.chain().selectAll().setTextAlign('justify').setTextSelection(1).run();
     }
   }, [isOpen]);
+
+  // Append signature once when loaded
+  useEffect(() => {
+    if (!signature || !editor || signatureAppendedRef.current) return;
+    let bodyHtml = editor.getHTML().replace(/<br\s*class="ProseMirror-trailingBreak">/g, '');
+    if (bodyHtml == "<p style=\"text-align: justify;\"></p>") {
+      bodyHtml = "<p style=\"text-align: justify;\"><br></p>"
+    }
+    editor.commands.setContent(bodyHtml + signature);
+    signatureAppendedRef.current = true;
+  }, [signature, editor, isOpen]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
