@@ -36,6 +36,8 @@ jobs:
 
       - name: Comprobar que no exista release con la versión actual
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $tag = "v${{ steps.version.outputs.version }}"
           Write-Host "Comprobando si ya existe la release $tag..."
@@ -45,6 +47,7 @@ jobs:
             exit 1
           }
           Write-Host "OK: no existe $tag, se procede a empaquetar."
+          exit 0
 
       - name: Inyectar token de actualización (si está configurado)
         shell: pwsh
