@@ -2,14 +2,17 @@
 // Gestor FFE - Actualizador automático para el target PORTABLE (Windows)
 // =====================================================================
 // Mecánica:
-//   1. Al arrancar la app (solo empaquetada) se consulta el release
-//      "latest" de tu repositorio de GitHub.
+//   1. Al arrancar la app (solo empaquetada) el renderer pide la
+//      comprobación (updater-check) y se consulta el release "latest"
+//      de tu repositorio de GitHub.
 //   2. Si la etiqueta (tag = v{version}) es mayor que la versión actual,
-//      se descarga el .exe portable a %TEMP%\gestor-ffe-update.
-//   3. El usuario confirma en la interfaz -> se lanza el exe nuevo como
-//      proceso auxiliar (--ffapply-update), que espera al cierre de la
-//      app, renombra el exe activo a ".old", se copia a sí mismo en su
-//      lugar y relanza la aplicación.
+//      se avisa del nueva versión disponible (SIN descargar nada).
+//   3. El usuario confirma -> se descarga el .exe portable a
+//      %TEMP%\gestor-ffe-update como fichero aparte (nunca se sobrescribe
+//      el exe actual mientras está en ejecución).
+//   4. "Reiniciar y actualizar" escribe un script .cmd independiente que
+//      espera el cierre de la app, borra el exe antiguo, mueve el nuevo a
+//      la carpeta portable con su nombre de versión y relanza la app.
 // =====================================================================
 import { app, net } from 'electron';
 import path from 'path';
@@ -29,7 +32,6 @@ const GH_LATEST_URL = () =>
 
 const GH_HEADERS_BASE = {
   'User-Agent': 'gestor-ffe-updater/0.1.0',
-  Accept: 'application/vnd.github+json',
 };
 
 // ─────────────────────────────────────────────────────────────────────
@@ -43,8 +45,13 @@ const GH_HEADERS_BASE = {
 // ⚠️ El token viaja DENTRO del binario distribuido (extraíble): usa un
 //    Fine-grained PAT de SOLO LECTURA y acotado únicamente a este repo.
 // ─────────────────────────────────────────────────────────────────────
-async function getAuthHeaders() {
-  const headers = { ...GH_HEADERS_BASE };
+async function getAuthHeaders({ download = false } = {}) {
+  const headers = {
+    ...GH_HEADERS_BASE,
+    // La API de GitHub exige este Accept salvo para recuperar el binario
+    // de un asset del release (entonces se usa application/octet-stream).
+    Accept: download ? 'application/octet-stream' : 'application/vnd.github+json',
+  };
   let token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
   if (!token) {
     try {
@@ -110,10 +117,6 @@ export function compareVersions(a, b) {
 // ─────────────────────────────────────────────────────────────────────
 // GitHub
 // ─────────────────────────────────────────────────────────────────────
-export function isUpdateHelper() {
-  return process.argv.includes('--ffapply-update');
-}
-
 async function fetchLatestRelease() {
   const res = await net.fetch(GH_LATEST_URL(), { headers: await getAuthHeaders() });
   if (res.status === 404) return null;
@@ -130,11 +133,19 @@ function findPortableAsset(assets = []) {
   );
 }
 
+// En repos privados, asset.browser_download_url devuelve 404 incluso con
+// token; el camino fiable es el endpoint de la API, que responde 302 hacia
+// una URL firmada (release-assets.githubusercontent.com) sin necesidad de
+// autenticación en el destino final.
+function assetApiUrl(asset) {
+  return `https://api.github.com/repos/${UPDATE_CONFIG.owner}/${UPDATE_CONFIG.repo}/releases/assets/${asset.id}`;
+}
+
 // ─────────────────────────────────────────────────────────────────────
 // Descarga con progreso
 // ─────────────────────────────────────────────────────────────────────
 async function downloadUpdate(url, dest, onProgress) {
-  const res = await net.fetch(url, { headers: await getAuthHeaders() });
+  const res = await net.fetch(url, { headers: await getAuthHeaders({ download: true }) });
   if (!res.ok) throw new Error(`Descarga falló (HTTP ${res.status})`);
   const total = Number(res.headers.get('content-length')) || 0;
   fs.mkdirSync(path.dirname(dest), { recursive: true });
@@ -159,9 +170,9 @@ async function downloadUpdate(url, dest, onProgress) {
 // ─────────────────────────────────────────────────────────────────────
 // Marca de actualización pendiente (sobrevive a reinicios guardados)
 // ─────────────────────────────────────────────────────────────────────
-function savePending(version, exePath) {
+function savePending(version, exePath, fileName) {
   try {
-    fs.writeFileSync(pendingFile(), JSON.stringify({ version, exePath }));
+    fs.writeFileSync(pendingFile(), JSON.stringify({ version, exePath, fileName }));
   } catch (err) {
     console.error('[updater] no se pudo guardar la marca pendiente', err);
   }
@@ -180,7 +191,28 @@ function clearPending() {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Flujo principal de comprobación (solo app empaquetada)
+// Candidato a actualización (se resuelve una vez y se reutiliza)
+// ─────────────────────────────────────────────────────────────────────
+let latestCandidate = null;
+
+async function resolveLatestCandidate() {
+  if (latestCandidate) return latestCandidate;
+  const release = await fetchLatestRelease();
+  if (!release) return null;
+  const tagVersion = String(release.tag_name || '').replace(/^v/, '');
+  const asset = findPortableAsset(release.assets);
+  if (tagVersion && compareVersions(tagVersion, app.getVersion()) > 0 && asset) {
+    latestCandidate = {
+      version: tagVersion,
+      url: assetApiUrl(asset),
+      fileName: path.basename(asset.name),
+    };
+  }
+  return latestCandidate;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Comprobación al arrancar: SOLO avisa (no descarga nada)
 // ─────────────────────────────────────────────────────────────────────
 export async function checkForUpdates({ send } = {}) {
   try {
@@ -194,127 +226,133 @@ export async function checkForUpdates({ send } = {}) {
 
     send && send({ state: 'checking' });
 
-    const release = await fetchLatestRelease();
-    if (!release) return send && send({ state: 'none' });
-
-    const tagVersion = String(release.tag_name || '').replace(/^v/, '');
-    if (!tagVersion || compareVersions(tagVersion, app.getVersion()) <= 0) {
-      return send && send({ state: 'none' });
-    }
-
-    const asset = findPortableAsset(release.assets);
-    if (!asset) return send && send({ state: 'none' });
+    const candidate = await resolveLatestCandidate();
+    if (!candidate) return send && send({ state: 'none' });
 
     // Reutilizamos una descarga previa del mismo candidato
     const pending = readPending();
-    if (pending && pending.version === tagVersion && fs.existsSync(pending.exePath)) {
-      return send && send({ state: 'ready', version: tagVersion });
+    if (pending && pending.version === candidate.version && fs.existsSync(pending.exePath)) {
+      return send && send({ state: 'ready', version: candidate.version });
     }
 
-    const dest = path.join(tmpDir(), `${tagVersion}.exe`);
-    send && send({ state: 'downloading', version: tagVersion, received: 0, total: 0 });
-    await downloadUpdate(asset.browser_download_url, dest, (received, total) => {
-      send && send({ state: 'downloading', version: tagVersion, received, total });
-    });
-
-    savePending(tagVersion, dest);
-    send && send({ state: 'ready', version: tagVersion });
+    // Hay una versión nueva: avisamos y esperamos a que el usuario apruebe
+    send && send({ state: 'available', version: candidate.version });
   } catch (err) {
     console.error('[updater] error en la comprobación', err);
-    send && send({ state: 'error', message: String(err && err.message || err) });
+    send && send({ state: 'error', message: String((err && err.message) || err) });
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Aplicar: lanza el exe nuevo como helper y cierra la app
+// Descarga (solo cuando el usuario lo confirma desde el aviso)
 // ─────────────────────────────────────────────────────────────────────
-export function applyUpdateAndRestart() {
+export async function startAvailableDownload({ send } = {}) {
+  try {
+    const candidate = await resolveLatestCandidate();
+    if (!candidate) return send && send({ state: 'none' });
+
+    const pending = readPending();
+    if (pending && pending.version === candidate.version && fs.existsSync(pending.exePath)) {
+      return send && send({ state: 'ready', version: candidate.version });
+    }
+
+    const fileName = candidate.fileName || `${candidate.version}.exe`;
+    const dest = path.join(tmpDir(), fileName);
+    send && send({ state: 'downloading', version: candidate.version, received: 0, total: 0 });
+    await downloadUpdate(candidate.url, dest, (received, total) => {
+      send && send({ state: 'downloading', version: candidate.version, received, total });
+    });
+
+    savePending(candidate.version, dest, fileName);
+    latestCandidate = null;
+    send && send({ state: 'ready', version: candidate.version });
+  } catch (err) {
+    console.error('[updater] error en la descarga', err);
+    send && send({ state: 'error', message: String((err && err.message) || err) });
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Aplicar actualización (portable): proceso .cmd independiente
+// ─────────────────────────────────────────────────────────────────────
+// El exe nuevo YA está descargado como fichero aparte y nunca se escribe
+// sobre el actual (%TEMP%\gestor-ffe-update\{nombre-asset}). Un script
+// .cmd independiente: espera el cierre de la app, BORRA el exe antiguo y
+// MUEVE el nuevo a la carpeta portable con SU NOMBRE DE VERSIÓN (p. ej.
+// Gestor.FFE.0.1.1-alpha.exe) antes de relanzarlo con entorno limpio (sin
+// las PORTABLE_EXECUTABLE_* heredadas, que hacían fallar al SFX con
+// "Invalid file descriptor to ICU data received"). La BBDD vive en
+// PORTABLE_EXECUTABLE_DIR (la carpeta del exe), no depende de su nombre.
+function writeApplyScript() {
   const pending = readPending();
-  if (!pending || !fs.existsSync(pending.exePath)) return false;
+  if (!pending || !fs.existsSync(pending.exePath)) return null;
 
   const target = portableFilePath();
-  const args = [
-    '--ffapply-update',
-    `--fftarget=${target}`,
-    `--ffpid=${process.pid}`,
-  ];
-  const child = spawn(pending.exePath, args, {
+  const fileName = pending.fileName || `${pending.version}.exe`;
+  const finalPath = path.join(path.dirname(target), fileName);
+  // Escapado mínimo para un .cmd: '%' -> '%%' y '&' -> '^&'
+  const esc = (s) => s.replace(/%/g, '%%').replace(/&/g, '^&');
+
+  const script = [
+    '@echo off',
+    'setlocal',
+    `set "APP=${esc(target)}"`,
+    `set "FINAL=${esc(finalPath)}"`,
+    `set "NEW=${esc(pending.exePath)}"`,
+    `set "PID=${process.pid}"`,
+    '',
+    // Espera al cierre del proceso. Con PowerShell no hay ambigüedad de
+    // localización ni falsos positivos (get-process con PID inexistente
+    // -> error 0). Tope: ~60 s; después, cierre forzoso.
+    'set /a w=0',
+    ':wait',
+    'powershell -NoProfile -Command "if (Get-Process -Id %PID% -ErrorAction SilentlyContinue) { exit 1 } else { exit 0 }"',
+    'if not errorlevel 1 goto go',
+    'set /a w+=1',
+    'if %w% GEQ 60 goto force',
+    'timeout /t 1 /nobreak >nul',
+    'goto wait',
+    ':force',
+    'powershell -NoProfile -Command "Stop-Process -Id %PID% -Force -ErrorAction SilentlyContinue"',
+    'timeout /t 3 /nobreak >nul',
+    ':go',
+    '',
+    // 1) Borrar el exe antiguo (ya cerrado)  2) Mover el nuevo a la carpeta
+    // portable con su nombre de versión (p. ej. Gestor.FFE.0.1.1-alpha.exe).
+    'if exist "%APP%" del /f /q "%APP%"',
+    'move /y "%NEW%" "%FINAL%" >nul',
+    'if not exist "%FINAL%" goto fail',
+    '',
+    // Entorno limpio para que el SFX recalcule sus propias variables.
+    'set "PORTABLE_EXECUTABLE_FILE="',
+    'set "PORTABLE_EXECUTABLE_DIR="',
+    'set "PORTABLE_EXECUTABLE_APP_FILENAME="',
+    '',
+    'start "" "%FINAL%"',
+    'goto end',
+    '',
+    ':fail',
+    'echo [updater] no se pudo sustituir el exe > "%FINAL%.update-fallido.txt"',
+    ':end',
+    'del /f /q "%~f0" 2>nul',
+    'endlocal',
+  ].join('\r\n');
+
+  const bat = path.join(app.getPath('userData'), 'update-apply.cmd');
+  fs.writeFileSync(bat, script, 'utf8');
+  return bat;
+}
+
+export function applyUpdateAndRestart() {
+  const bat = writeApplyScript();
+  if (!bat) return false;
+  const child = spawn('cmd.exe', ['/c', bat], {
     detached: true,
     stdio: 'ignore',
-    env: { ...process.env, FF_APPLY_UPDATE: '1' },
+    windowsHide: true,
   });
   child.unref();
   return true;
-}
-
-// ─────────────────────────────────────────────────────────────────────
-// Modo helper: el EXE NUEVO se ejecuta con --ffapply-update y sustituye
-// al viejo. Solo sustituye el archivo .exe portable; la carpeta (con la
-// BBDD) queda intacta.
-// ─────────────────────────────────────────────────────────────────────
-export async function applyUpdateHelper() {
-  const args = process.argv;
-  const target = args.find((a) => a.startsWith('--fftarget='))?.split('=')[1];
-  const pid = Number(args.find((a) => a.startsWith('--ffpid='))?.split('=')[1] || 0);
-
-  if (!target) throw new Error('Falta --fftarget');
-
-  await app.whenReady();
-
-  // 1. Esperamos a que el proceso padre (la app vieja) haya terminado.
-  const deadline = Date.now() + 120000;
-  while (Date.now() < deadline) {
-    if (!isProcessAlive(pid)) break;
-    await sleep(500);
-  }
-
-  // 2. Renombramos el exe activo (con reintentos: Windows puede tardar
-  //    en liberar el archivo tras el cierre).
-  const old = `${target}.old`;
-  await renameWithRetry(target, old);
-
-  // 3. Nos copiamos a nosotros mismos (el exe nuevo) al destino.
-  try {
-    fs.copyFileSync(process.execPath, target);
-  } catch (err) {
-    // Rollback: restauramos la versión anterior
-    try { if (fs.existsSync(old)) fs.renameSync(old, target); } catch { /* noop */ }
-    throw err;
-  }
-
-  // 4. El .old sirve de respaldo; se eliminará en el próximo arranque OK.
-  clearPending();
-
-  // 5. Relanzamos la app actualizada.
-  const child = spawn(target, [], { detached: true, stdio: 'ignore' });
-  child.unref();
-}
-
-function isProcessAlive(pid) {
-  if (!pid) return true;
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (err) {
-    return err && err.code === 'EPERM';
-  }
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function renameWithRetry(from, to, attempts = 10) {
-  for (let i = 0; i < attempts; i++) {
-    try {
-      if (fs.existsSync(to)) fs.unlinkSync(to);
-      fs.renameSync(from, to);
-      return;
-    } catch (err) {
-      if (i === attempts - 1) throw err;
-      await sleep(800);
-    }
-  }
 }
 
 export function cleanupRollback() {

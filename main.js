@@ -4,9 +4,8 @@ import { fileURLToPath } from 'url';
 import { fork } from 'child_process';
 import {
   checkForUpdates,
+  startAvailableDownload,
   applyUpdateAndRestart,
-  applyUpdateHelper,
-  isUpdateHelper,
 } from './src/lib/updater.js';
 
 // 1. APAGAR ACELERACIÓN POR HARDWARE (Crucial para evitar cuelgues en Windows)
@@ -17,17 +16,6 @@ const __dirname = path.dirname(__filename);
 
 let mainWindow;
 let serverProcess;
-
-// MODO AUXILIAR DE ACTUALIZACIÓN: el exe nuevo se ejecuta con
-// "--ffapply-update" y sustituye al portable antiguo cuando la app cierra.
-if (isUpdateHelper()) {
-  applyUpdateHelper()
-    .then(() => process.exit(0))
-    .catch((err) => {
-      console.error('[updater] fallo al aplicar la actualización', err);
-      process.exit(1);
-    });
-} else {
 
 // FUNCIÓN DE REINTENTO INTELIGENTE
 const cargarURLConReintentos = (ventanaPrincipal, splashWindow, url, reintentos = 20) => {
@@ -177,8 +165,8 @@ app.whenReady().then(async () => {
     const serverReady = await waitForServer('http://127.0.0.1:3000');
     if (serverReady) {
       createWindow();
-      // Comprobación de actualizaciones en segundo plano (silenciosa)
-      setTimeout(() => checkForUpdates({ send: sendUpdateStatus }), 6000);
+      // La comprobación de actualizaciones la dispara el renderer al montar
+      // (UpdaterProvider -> updater-check), no un timer del proceso principal.
     } else {
       console.error("El servidor tardó demasiado en iniciar.");
       app.quit();
@@ -214,9 +202,12 @@ app.on('before-quit', () => {
     checkForUpdates({ send: sendUpdateStatus });
   });
 
+  ipcMain.on('updater-download', () => {
+    startAvailableDownload({ send: sendUpdateStatus });
+  });
+
   ipcMain.on('updater-apply', () => {
     if (applyUpdateAndRestart()) {
       app.quit();
     }
   });
-}

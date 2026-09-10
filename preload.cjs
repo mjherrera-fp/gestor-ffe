@@ -12,4 +12,7 @@ contextBridge.exposeInMainWorld('updater', {
   checkNow() {
     ipcRenderer.send('updater-check');
   },
+  download() {
+    ipcRenderer.send('updater-download');
+  },
 });

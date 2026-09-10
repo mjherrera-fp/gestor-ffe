@@ -42,6 +42,8 @@ import ToastContainer from './components/ToastContainer.tsx';
 import NotificationBell from './components/NotificationBell.tsx';
 import CreateNotificationModal from './components/CreateNotificationModal.tsx';
 import UpdateBanner from './views/updater/UpdateBanner.tsx';
+import UpdateButton from './views/updater/UpdateButton.tsx';
+import { UpdaterProvider } from './views/updater/useUpdaterStatus.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -237,7 +239,8 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-bg-base overflow-hidden font-sans relative">
+    <UpdaterProvider>
+      <div className="flex h-screen bg-bg-base overflow-hidden font-sans relative">
       {/* Mobile Backdrop */}
       <AnimatePresence mode="wait">
         {isSidebarOpen && (
@@ -410,6 +413,7 @@ export default function App() {
               onDescartar={handleDescartarAviso}
               onAbrirCrear={() => setShowCreateNotification(true)}
             />
+            <UpdateButton />
             <Title text="Configuración">
               <button
                 onClick={() => setActiveTab('configuracion')}
@@ -519,5 +523,6 @@ export default function App() {
 
       <UpdateBanner />
     </div>
+    </UpdaterProvider>
   );
 }
