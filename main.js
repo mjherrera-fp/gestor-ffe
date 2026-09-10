@@ -1,7 +1,13 @@
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { fork } from 'child_process';
+import {
+  checkForUpdates,
+  applyUpdateAndRestart,
+  applyUpdateHelper,
+  isUpdateHelper,
+} from './src/lib/updater.js';
 
 // 1. APAGAR ACELERACIÓN POR HARDWARE (Crucial para evitar cuelgues en Windows)
 app.disableHardwareAcceleration();
@@ -11,6 +17,17 @@ const __dirname = path.dirname(__filename);
 
 let mainWindow;
 let serverProcess;
+
+// MODO AUXILIAR DE ACTUALIZACIÓN: el exe nuevo se ejecuta con
+// "--ffapply-update" y sustituye al portable antiguo cuando la app cierra.
+if (isUpdateHelper()) {
+  applyUpdateHelper()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error('[updater] fallo al aplicar la actualización', err);
+      process.exit(1);
+    });
+} else {
 
 // FUNCIÓN DE REINTENTO INTELIGENTE
 const cargarURLConReintentos = (ventanaPrincipal, splashWindow, url, reintentos = 20) => {
@@ -55,7 +72,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      nativeWindowOpen: true
+      nativeWindowOpen: true,
+      preload: path.join(__dirname, 'preload.cjs'),
     }
   });
 
@@ -143,6 +161,13 @@ async function waitForServer(url, timeout = 10000) {
   return false;
 }
 
+// Envía el estado del actualizador a la ventana principal
+function sendUpdateStatus(status) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('updater-status', status);
+  }
+}
+
 // NUEVO CICLO DE VIDA (Más estable que app.on('ready'))
 app.whenReady().then(async () => {
   startServer();
@@ -152,6 +177,8 @@ app.whenReady().then(async () => {
     const serverReady = await waitForServer('http://127.0.0.1:3000');
     if (serverReady) {
       createWindow();
+      // Comprobación de actualizaciones en segundo plano (silenciosa)
+      setTimeout(() => checkForUpdates({ send: sendUpdateStatus }), 6000);
     } else {
       console.error("El servidor tardó demasiado en iniciar.");
       app.quit();
@@ -181,3 +208,15 @@ app.on('before-quit', () => {
     serverProcess.kill();
   }
 });
+
+  // IPC del actualizador
+  ipcMain.on('updater-check', () => {
+    checkForUpdates({ send: sendUpdateStatus });
+  });
+
+  ipcMain.on('updater-apply', () => {
+    if (applyUpdateAndRestart()) {
+      app.quit();
+    }
+  });
+}

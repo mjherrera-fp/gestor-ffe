@@ -133,7 +133,7 @@ export const AceptacionUsoDAO = {
     const existing = db.prepare('SELECT id FROM profesores LIMIT 1').get() as { id: number } | undefined;
     if (existing) return existing.id;
     const info = db.prepare(
-      "INSERT INTO profesores (nombre, apellidos, nif, email, telefono) VALUES ('Pendiente', 'de configuración', '', '', '')"
+      "INSERT INTO profesores (nombre, apellidos, nif, email, telefono) VALUES ('', '', '', '', '')"
     ).run();
     return info.lastInsertRowid as number;
   },

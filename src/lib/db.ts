@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3-multiple-ciphers';
+import fs from 'fs';
 import path from 'path';
 import { PlantillaCorreoDB } from '../types/email.ts';
 
@@ -18,20 +19,35 @@ export const initDB = () => {
     // Intentamos abrir la base de datos de forma normal
     const tempDb = new Database(dbPath);
 
-    // Prueba de lectura: Si está cifrada, esto lanzará un error inmediatamente
-    tempDb.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+    try {
+      // Prueba de lectura: Si está cifrada, esto lanzará un error inmediatamente
+      tempDb.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+    } catch (error: any) {
+      // Solo consideramos que está cifrada si el archivo tiene contenido real.
+      // Un archivo recién creado (0 bytes) es una instalación nueva, no una DB cifrada.
+      let fileSize = 0;
+      try { fileSize = fs.statSync(dbPath).size; } catch {}
+      if (fileSize > 0) {
+        // El código de error 26 o mensajes sobre "file is not a database"
+        // suelen indicar que está cifrada y falta la clave
+        tempDb.close();
+        db = null;
+        isDbEncrypted = true;
+        console.log("Base de datos detectada como cifrada. Esperando clave...");
+        return;
+      }
+    }
 
-    // Si llegamos aquí, NO está cifrada o ya estaba abierta
+    // Instalación nueva (archivo vacío) o DB sin cifrar: abrimos con normalidad
     db = tempDb;
     isDbEncrypted = false;
     setupTables(); // Tu lógica de creación de tablas
     console.log("Base de datos abierta (Sin cifrado)");
   } catch (error: any) {
-    // El código de error 26 o mensajes sobre "file is not a database" 
-    // suelen indicar que está cifrada y falta la clave
-    isDbEncrypted = true;
-    db = null;
-    console.log("Base de datos detectada como cifrada. Esperando clave...");
+    // Un fallo real (por ejemplo, un error de migración) no debe
+    // enmascararse como si la base de datos estuviera cifrada
+    console.error("Error al inicializar la base de datos:", error);
+    throw error;
   }
 };
 
@@ -71,6 +87,100 @@ export const lockDB = () => {
   }
 };
 
+
+function getColumnNames(db: any, table: string): string[] {
+  const rows = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  return rows.map((r) => r.name);
+}
+
+function hasColumn(db: any, table: string, column: string): boolean {
+  return getColumnNames(db, table).includes(column);
+}
+
+function ensureColumn(db: any, table: string, column: string, ddl: string): void {
+  if (!hasColumn(db, table, column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+  }
+}
+
+function dropColumnIfExists(db: any, table: string, column: string): void {
+  if (hasColumn(db, table, column)) {
+    db.exec(`ALTER TABLE ${table} DROP COLUMN ${column}`);
+  }
+}
+
+// Migraciones de esquema ordenadas. SCHEMA_MIGRATIONS[i] migra de versión i a i+1.
+// Las migraciones deben ser idempotentes: en bases nuevas el esquema base ya trae
+// los cambios y aquí quedan como no-op; en instalaciones antiguas reconcilian el esquema.
+const SCHEMA_MIGRATIONS: Array<(db: any) => void> = [
+  // v0 -> v1: reconciliar esquema de instalaciones existentes
+  (db) => {
+    ensureColumn(db, 'relaciones', 'firmaRelacion', "firmaRelacion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'");
+    ensureColumn(db, 'relaciones', 'firmaPlanFormativo', "firmaPlanFormativo TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'");
+    ensureColumn(db, 'relaciones', 'firmaSeguimiento', "firmaSeguimiento TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'");
+    ensureColumn(db, 'relaciones', 'firmaValoracion', "firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'");
+    ensureColumn(db, 'convenios', 'tipoFirma', "tipoFirma TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'");
+    ensureColumn(db, 'profesores', 'send_delay_ms', 'send_delay_ms INTEGER DEFAULT 1500');
+    ensureColumn(db, 'plantillas_correo', 'grupo', "grupo TEXT NOT NULL DEFAULT ''");
+
+    db.exec("UPDATE plantillas_correo SET grupo = 'varios-registros' WHERE grupo = 'enviar-todo'");
+    db.exec("UPDATE plantillas_correo SET grupo = 'registro-individual' WHERE grupo = 'documento'");
+
+    ensureColumn(db, 'centros_educativos', 'festivos', 'festivos TEXT');
+    ensureColumn(db, 'detalles_academicos', 'tutorias', 'tutorias TEXT');
+    ensureColumn(db, 'detalles_academicos', 'nombreCorto', 'nombreCorto TEXT');
+    ensureColumn(db, 'centros_educativos', 'codigo_centro', 'codigo_centro TEXT');
+    dropColumnIfExists(db, 'cursos', 'festivos');
+    dropColumnIfExists(db, 'cursos', 'tutorias');
+    ensureColumn(db, 'empresas', 'personaContacto', 'personaContacto TEXT');
+    ensureColumn(db, 'empresas', 'comunidad', 'comunidad TEXT');
+    ensureColumn(db, 'empresas', 'provincia', 'provincia TEXT');
+
+    // Instalaciones antiguas con la tabla tutores_empresa: la base ya crea
+    // empresa_tutores, así que fusionamos los datos y descartamos la tabla vieja
+    const tutoresEmpresa = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='tutores_empresa'").get();
+    if (tutoresEmpresa) {
+      db.exec(`INSERT OR IGNORE INTO empresa_tutores (id, empresaId, nombre, apellidos, nif, email, tlfn)
+        SELECT id, empresaId, nombre, apellidos, nif, email, tlfn FROM tutores_empresa`);
+      db.exec("DROP TABLE tutores_empresa");
+    }
+  },
+];
+
+const CURRENT_SCHEMA_VERSION = SCHEMA_MIGRATIONS.length;
+
+function runMigrations() {
+  if (!db) return;
+  const current = Number(db.pragma('user_version', { simple: true }) ?? 0);
+  if (current >= CURRENT_SCHEMA_VERSION) return;
+
+  console.log(`Migraciones de esquema pendientes: v${current} -> v${CURRENT_SCHEMA_VERSION}`);
+
+  try {
+    fs.copyFileSync(dbPath, `${dbPath}.bak`);
+  } catch (e) {
+    console.warn('No se pudo crear el backup antes de migrar la BBDD:', e);
+  }
+
+  db.exec('PRAGMA foreign_keys = OFF');
+  try {
+    for (let v = current; v < CURRENT_SCHEMA_VERSION; v++) {
+      db.exec('BEGIN IMMEDIATE');
+      try {
+        SCHEMA_MIGRATIONS[v](db);
+        db.exec(`PRAGMA user_version = ${v + 1}`);
+        db.exec('COMMIT');
+        console.log(`Migración de esquema aplicada: v${v} -> v${v + 1}`);
+      } catch (e) {
+        db.exec('ROLLBACK');
+        console.error(`Error en la migración v${v} -> v${v + 1}:`, e);
+        throw e;
+      }
+    }
+  } finally {
+    db.exec('PRAGMA foreign_keys = ON');
+  }
+}
 
 function setupTables() {
   if (!db) return;
@@ -368,64 +478,8 @@ function setupTables() {
     );
   `);
 
-  // Migración: añadir columnas nuevas a tablas existentes
-  try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaRelacion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
-  try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaPlanFormativo TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
-  try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaSeguimiento TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
-  try { db.exec("ALTER TABLE relaciones ADD COLUMN firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
-  try { db.exec("ALTER TABLE convenios ADD COLUMN tipoFirma TEXT NOT NULL DEFAULT 'SIN_ASIGNAR'"); } catch {}
-  try { db.exec("ALTER TABLE profesores ADD COLUMN send_delay_ms INTEGER DEFAULT 1500"); } catch {}
-
-  // Migración: actualizar grupo de plantillas existentes
-  try { db.exec("UPDATE plantillas_correo SET grupo = 'varios-registros' WHERE grupo = 'enviar-todo'"); } catch {}
-  try { db.exec("UPDATE plantillas_correo SET grupo = 'registro-individual' WHERE grupo = 'documento'"); } catch {}
-
-  // Migración: añadir festivos a centros_educativos, tutorias a detalles_academicos y codigo_centro
-  try { db.exec("ALTER TABLE centros_educativos ADD COLUMN festivos TEXT"); } catch {}
-  try { db.exec("ALTER TABLE detalles_academicos ADD COLUMN tutorias TEXT"); } catch {}
-  try { db.exec("ALTER TABLE detalles_academicos ADD COLUMN nombreCorto TEXT"); } catch {}
-  try { db.exec("ALTER TABLE centros_educativos ADD COLUMN codigo_centro TEXT"); } catch {}
-  // Migración: eliminar festivos y tutorias de cursos
-  try { db.exec("ALTER TABLE cursos DROP COLUMN festivos"); } catch {}
-  try { db.exec("ALTER TABLE cursos DROP COLUMN tutorias"); } catch {}
-  // Migración: añadir columnas a empresas
-  try { db.exec("ALTER TABLE empresas ADD COLUMN personaContacto TEXT"); } catch {}
-  try { db.exec("ALTER TABLE empresas ADD COLUMN comunidad TEXT"); } catch {}
-  try { db.exec("ALTER TABLE empresas ADD COLUMN provincia TEXT"); } catch {}
-
-  // Migración: añadir grupo a plantillas_correo
-  try { db.exec("ALTER TABLE plantillas_correo ADD COLUMN grupo TEXT NOT NULL DEFAULT ''"); } catch {}
-
-  // Migración: renombrar tutores_empresa → empresa_tutores
-  try {
-    db.exec("PRAGMA foreign_keys = OFF");
-    const oldExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='tutores_empresa'").get();
-    if (oldExists) {
-      db.exec("ALTER TABLE tutores_empresa RENAME TO empresa_tutores");
-      const relacionesData = db.prepare("SELECT * FROM relaciones").all();
-      db.exec("DROP TABLE relaciones");
-      db.exec(`CREATE TABLE relaciones (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        convenioId INTEGER NOT NULL,
-        tutorEmpresaId INTEGER NOT NULL,
-        numRelacion TEXT NOT NULL,
-        horario TEXT NOT NULL,
-        estado TEXT NOT NULL,
-        firmaRelacion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
-        firmaPlanFormativo TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
-        firmaSeguimiento TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
-        firmaValoracion TEXT NOT NULL DEFAULT 'SIN_ASIGNAR',
-        FOREIGN KEY (convenioId) REFERENCES convenios(id) ON DELETE CASCADE,
-        FOREIGN KEY (tutorEmpresaId) REFERENCES empresa_tutores(id)
-      )`);
-      for (const row of relacionesData as any[]) {
-        db.prepare(`INSERT INTO relaciones (id, convenioId, tutorEmpresaId, numRelacion, horario, estado, firmaRelacion, firmaPlanFormativo, firmaSeguimiento, firmaValoracion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(row.id, row.convenioId, row.tutorEmpresaId, row.numRelacion, row.horario, row.estado, row.firmaRelacion || 'SIN_ASIGNAR', row.firmaPlanFormativo || 'SIN_ASIGNAR', row.firmaSeguimiento || 'SIN_ASIGNAR', row.firmaValoracion || 'SIN_ASIGNAR');
-      }
-    }
-    db.exec("PRAGMA foreign_keys = ON");
-  } catch (e) {
-    console.error("Migration rename tutores_empresa (may be already applied):", e);
-  }
+  // Migraciones de esquema versionadas (PRAGMA user_version)
+  runMigrations();
 
   // Seed: migrar plantillas si la tabla está vacía
   const count = db.prepare("SELECT COUNT(*) as count FROM plantillas_correo").get() as any;
@@ -480,4 +534,18 @@ function setupTables() {
 
 // Ejecutamos el intento inicial al importar el módulo
 initDB();
+
+// Cierre limpio de la BBDD al salir: evita el crash nativo del addon
+// (RemoveEnvironmentCleanupHook) durante el teardown del proceso.
+const closeDbOnExit = () => {
+  if (db) {
+    try { db.close(); } catch {}
+    db = null;
+  }
+};
+
+process.on('SIGTERM', () => { closeDbOnExit(); process.exit(0); });
+process.on('SIGINT', () => { closeDbOnExit(); process.exit(0); });
+process.on('exit', closeDbOnExit);
+
 export default db;

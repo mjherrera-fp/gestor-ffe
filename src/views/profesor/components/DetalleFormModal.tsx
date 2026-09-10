@@ -92,7 +92,7 @@ export function DetalleFormModal({
                   className={`${inputClass} ${errors.codigo ? inputErrCls : ''}`}
                   value={formData.codigo || ''}
                   onChange={update('codigo')}
-                  placeholder="Ej: IFC303"
+                  placeholder="Ej: IFCS02"
                   onBlur={() => onBlur('codigo', formData.codigo)}
                 />
                 {errors.codigo && <p className={errMsgCls}>{errors.codigo}</p>}
@@ -194,13 +194,13 @@ export function DetalleFormModal({
                   className="col-span-1 bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-indigo-400"
                   value={newRA.modulo}
                   onChange={e => onNewRAChange({ ...newRA, modulo: e.target.value })}
-                  placeholder="Módulo"
+                  placeholder="Nombre del módulo"
                 />
                 <input
                   className="col-span-1 bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-indigo-400"
                   value={newRA.codigo}
                   onChange={e => onNewRAChange({ ...newRA, codigo: e.target.value })}
-                  placeholder="Cód."
+                  placeholder="Cód.del módulo"
                 />
                 <input
                   className="col-span-2 bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-indigo-400"

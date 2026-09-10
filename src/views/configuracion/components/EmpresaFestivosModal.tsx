@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Loader2, ExternalLink, X } from 'lucide-react';
 import { DateList } from '../../../components/ui/DateList.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
+import { FestivosYearModal } from '../../../components/ui/FestivosYearModal.tsx';
 import { allLocalidades, LocalidadEntry } from '../../../data/geo/geoData.ts';
 
 interface EmpresaFestivosModalProps {
@@ -17,6 +18,7 @@ export function EmpresaFestivosModal({ open, localidad, festivos, onSave, onClos
   const [newDate, setNewDate] = useState('');
   const [loadingFestivos, setLoadingFestivos] = useState(false);
   const [showAgradecimiento, setShowAgradecimiento] = useState(false);
+  const [showYearModal, setShowYearModal] = useState(false);
   const [festivosImportados, setFestivosImportados] = useState(0);
 
   const localidadEntry: LocalidadEntry | undefined = localidad
@@ -36,20 +38,18 @@ export function EmpresaFestivosModal({ open, localidad, festivos, onSave, onClos
     setDates(prev => prev.filter(x => x !== d));
   };
 
-  const handleObtenerFestivos = async () => {
+  const handleObtenerFestivos = async (year: number) => {
     if (!slug) return;
     setLoadingFestivos(true);
     try {
-      const res = await fetch(`/api/festivos/obtener?slug=${slug}`);
+      const res = await fetch(`/api/festivos/obtener?slug=${slug}&year=${year}`);
       const data = await res.json();
-      if (data.fechas?.length) {
-        const nuevasFechas = data.fechas.filter((f: string) => !dates.includes(f));
-        const newSet = [...new Set([...dates, ...data.fechas])];
-        newSet.sort();
-        setDates(newSet);
-        setFestivosImportados(nuevasFechas.length);
-        setShowAgradecimiento(true);
-      }
+      const nuevasFechas = (data.fechas || []).filter((f: string) => !dates.includes(f));
+      const newSet = [...new Set([...dates, ...(data.fechas || [])])];
+      newSet.sort();
+      setDates(newSet);
+      setFestivosImportados(nuevasFechas.length);
+      setShowAgradecimiento(true);
     } catch {
       alert('No se pudieron obtener los días festivos.');
     } finally {
@@ -90,7 +90,7 @@ export function EmpresaFestivosModal({ open, localidad, festivos, onSave, onClos
               <button
                 type="button"
                 disabled={loadingFestivos}
-                onClick={handleObtenerFestivos}
+                onClick={() => { if (!loadingFestivos) setShowYearModal(true); }}
                 className="text-[9px] font-bold text-blue-600 hover:text-blue-800 underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 {loadingFestivos && <Loader2 className="h-3 w-3 animate-spin" />}
@@ -139,6 +139,14 @@ export function EmpresaFestivosModal({ open, localidad, festivos, onSave, onClos
                 Entendido
               </button>
             </Modal>
+
+        {/* Modal previo: elegir año de los festivos */}
+        <FestivosYearModal
+          open={showYearModal}
+          localidad={localidad || undefined}
+          onClose={() => setShowYearModal(false)}
+          onConfirm={(year) => { setShowYearModal(false); handleObtenerFestivos(year); }}
+        />
     </Modal>
   );
 }

@@ -41,6 +41,7 @@ import HistoricoView from './views/historico/HistoricoView.tsx';
 import ToastContainer from './components/ToastContainer.tsx';
 import NotificationBell from './components/NotificationBell.tsx';
 import CreateNotificationModal from './components/CreateNotificationModal.tsx';
+import UpdateBanner from './views/updater/UpdateBanner.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -515,6 +516,8 @@ export default function App() {
         onClose={() => setShowCreateNotification(false)}
         onCreado={refrescarAvisos}
       />
+
+      <UpdateBanner />
     </div>
   );
 }
