@@ -28,26 +28,48 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Leer versión
-        id: version
-        run: |
-          $v = node -p "require('./package.json').version"
-          Add-Content $env:GITHUB_OUTPUT ("version=" + $v)
-
-      - name: Comprobar que no exista release con la versión actual
+      - name: Autoversión (incrementa si ya está publicada)
+        id: autoversion
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = "v${{ steps.version.outputs.version }}"
-          Write-Host "Comprobando si ya existe la release $tag..."
-          gh release view $tag --json tagName --quiet 2>$null | Out-Null
+          $version = node -p "require('./package.json').version"
+          $bumped = $false
+          for ($i = 0; $i -lt 5; $i++) {
+            $tag = "v$version"
+            Write-Host "Comprobando si ya existe la release $tag..."
+            gh release view $tag --json tagName --quiet 2>$null | Out-Null
+            if ($LASTEXITCODE -ne 0) { break }
+            Write-Host "Ya existe $tag; se incrementa la versión automáticamente."
+            $version = node -e "const fs=require('fs');const fp='package.json';const j=JSON.parse(fs.readFileSync(fp,'utf8'));const m=j.version.match(/^(\d+)\.(\d+)\.(\d+)(?:-(.*))?$/);if(!m){console.error('Version no parseable');process.exit(1);}const n=''+m[1]+'.'+m[2]+'.'+(Number(m[3])+1)+(m[4]?('-'+m[4]):'');j.version=n;fs.writeFileSync(fp,JSON.stringify(j,null,2)+'\n');try{const lp='package-lock.json';if(fs.existsSync(lp)){const l=JSON.parse(fs.readFileSync(lp,'utf8'));l.version=n;if(l.packages&&l.packages[''])l.packages[''].version=n;fs.writeFileSync(lp,JSON.stringify(l,null,2)+'\n');}}catch(e){}console.log(n);"
+            if (-not $version) { Write-Error 'No se pudo incrementar la versión'; exit 1 }
+            $bumped = $true
+          }
+          if (-not $version) { Write-Error 'Sin versión válida en package.json'; exit 1 }
+          gh release view "v$version" --json tagName --quiet 2>$null | Out-Null
           if ($LASTEXITCODE -eq 0) {
-            Write-Error "Ya existe una release con el tag $tag. Incrementa la versión en package.json antes de hacer commit."
+            Write-Error "No se encontró una versión libre (v$version ya existe tras 5 intentos)."
             exit 1
           }
-          Write-Host "OK: no existe $tag, se procede a empaquetar."
-          exit 0
+          Write-Host "Versión final: $version"
+          Add-Content $env:GITHUB_OUTPUT ("version=" + $version)
+
+          # Sincronizar el repo: commit + push del bump (solo si cambió)
+          if ($bumped) {
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package.json package-lock.json
+            git commit -m "chore(version): v$version [skip ci]"
+            if ($LASTEXITCODE -eq 0) {
+              git push origin main
+              if ($LASTEXITCODE -ne 0) {
+                Write-Warning "No se pudo hacer push del bump a main (¿branch protection?). El repo queda desincronizado; la próxima versión lo resolverá."
+              } else {
+                Write-Host "Bump commiteado y empujado a main: v$version"
+              }
+            }
+          }
 
       - name: Inyectar token de actualización (si está configurado)
         shell: pwsh
@@ -74,7 +96,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $version = "${{ steps.version.outputs.version }}"
+          $version = "${{ steps.autoversion.outputs.version }}"
           $releaseDir = Resolve-Path release
           $exe = Get-ChildItem (Join-Path $releaseDir '*.exe') |
             Where-Object { $_.Name -match 'Gestor' -and $_.Name -inotmatch 'Setup' } |

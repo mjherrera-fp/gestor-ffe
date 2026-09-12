@@ -338,15 +338,6 @@ export function RelacionFormModal({
                       name="estado"
                       error={errors.estado}
                     />
-
-                    <CustomSelect
-                      label="Estado de Tramitación"
-                      options={estadosOptions}
-                      value={formData.estado || ''}
-                      onChange={val => setFormData(prev => ({ ...prev, estado: val as RelacionEstado }))}
-                      required
-                      name="estado"
-                    />
                   </div>
                 </div>
               </div>
