@@ -34,21 +34,35 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Comprobar si una release ya existe. NO usamos "gh release view": a
+          # la vista no existe la opción --quiet (solo -q/--jq), con lo que gh
+          # salía con error "unknown flag" (exit 2) y dábamos por NO publicada
+          # una release que sí existía (colisión al crear). Consultamos la API
+          # directamente: 200 => existe, 404 => libre.
+          function Test-ReleaseExists([string]$tag) {
+            $uri = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases/tags/$tag"
+            try {
+              $null = Invoke-RestMethod -Uri $uri -Headers @{ Authorization = "token $env:GH_TOKEN"; 'User-Agent' = 'gestor-ffe' } -ErrorAction Stop
+              return $true
+            } catch {
+              if ($_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 404) { return $false }
+              throw
+            }
+          }
+
           $version = node -p "require('./package.json').version"
           $bumped = $false
           for ($i = 0; $i -lt 5; $i++) {
             $tag = "v$version"
             Write-Host "Comprobando si ya existe la release $tag..."
-            gh release view $tag --json tagName --quiet 2>$null | Out-Null
-            if ($LASTEXITCODE -ne 0) { break }
+            if (-not (Test-ReleaseExists $tag)) { break }
             Write-Host "Ya existe $tag; se incrementa la versión automáticamente."
             $version = node -e "const fs=require('fs');const fp='package.json';const j=JSON.parse(fs.readFileSync(fp,'utf8'));const m=j.version.match(/^(\d+)\.(\d+)\.(\d+)(?:-(.*))?$/);if(!m){console.error('Version no parseable');process.exit(1);}const n=''+m[1]+'.'+m[2]+'.'+(Number(m[3])+1)+(m[4]?('-'+m[4]):'');j.version=n;fs.writeFileSync(fp,JSON.stringify(j,null,2)+'\n');try{const lp='package-lock.json';if(fs.existsSync(lp)){const l=JSON.parse(fs.readFileSync(lp,'utf8'));l.version=n;if(l.packages&&l.packages[''])l.packages[''].version=n;fs.writeFileSync(lp,JSON.stringify(l,null,2)+'\n');}}catch(e){}console.log(n);"
             if (-not $version) { Write-Error 'No se pudo incrementar la versión'; exit 1 }
             $bumped = $true
           }
           if (-not $version) { Write-Error 'Sin versión válida en package.json'; exit 1 }
-          gh release view "v$version" --json tagName --quiet 2>$null | Out-Null
-          if ($LASTEXITCODE -eq 0) {
+          if (Test-ReleaseExists "v$version") {
             Write-Error "No se encontró una versión libre (v$version ya existe tras 5 intentos)."
             exit 1
           }
