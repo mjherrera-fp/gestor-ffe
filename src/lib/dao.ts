@@ -1,4 +1,4 @@
-import { db, isDbEncrypted, unlockDB, lockDB } from './db.ts';
+import { db, unlockDB, lockDB } from './db.ts';
 import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, EmpresaEstadistica, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData, Aviso, FFEValoracionFinal, FFEMotivoNoRealizacion, FFEEvaluacion, FFEResultadoRA, FFEInformeRow } from '../types/index.ts';
 import { PlantillaCorreoDB, MarcadorPersonalizado, Contacto, GrupoContacto, GrupoMiembro, GrupoMiembroResolved } from '../types/email.ts';
 
