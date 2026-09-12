@@ -71,6 +71,11 @@ jobs:
             }
           }
 
+          # Reset explícito del código de salida: la última invocación nativa
+          # (gh release view al comprobar, git push...) deja $LASTEXITCODE en 1
+          # aunque todo fuera correcto, y pwsh saldría con error.
+          exit 0
+
       - name: Inyectar token de actualización (si está configurado)
         shell: pwsh
         env:
