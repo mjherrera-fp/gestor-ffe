@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Download, FileSpreadsheet, Search, LayoutGrid, List, ArrowUpDown,
   GraduationCap, Mail, FileArchive, X,
-  Plus, Send, Building2, GitPullRequest,
+  Plus, Send, Building2, GitPullRequest, TriangleAlert,
 } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { Title } from '../../../components/Title.tsx';
@@ -33,6 +33,12 @@ const RELACION_STATUS_OPTIONS: { id: FilterRelacionStatus; label: string }[] = [
   { id: 'sin_relacion',   label: 'Sin relación' },
 ];
 
+const NSS_OPTIONS: { id: 'all' | 'con_nss' | 'sin_nss'; label: string }[] = [
+  { id: 'all',      label: 'Todos' },
+  { id: 'con_nss',  label: 'Con NSS' },
+  { id: 'sin_nss',  label: 'Sin NSS' },
+];
+
 interface AlumnosToolbarProps {
   searchTerm: string;
   onSearchChange: (v: string) => void;
@@ -49,6 +55,8 @@ interface AlumnosToolbarProps {
   onFilterEmpresasInteresadasChange: (v: 'all' | 'con' | 'sin') => void;
   filterRelacionStatus: FilterRelacionStatus;
   onFilterRelacionStatusChange: (v: FilterRelacionStatus) => void;
+  filterNSS: 'all' | 'con_nss' | 'sin_nss';
+  onFilterNSSChange: (v: 'all' | 'con_nss' | 'sin_nss') => void;
   isImporting: boolean;
   isImportingZip: boolean;
   onDownloadTemplate: () => void | Promise<void>;
@@ -66,6 +74,7 @@ export function AlumnosToolbar({
   filterMinCVEnvios, onFilterMinCVEnviosChange,
   filterEmpresasInteresadas, onFilterEmpresasInteresadasChange,
   filterRelacionStatus, onFilterRelacionStatusChange,
+  filterNSS, onFilterNSSChange,
   isImporting, isImportingZip, onDownloadTemplate, onImportClick, onImportZipClick, onNewAlumno,
   onBulkEmail,
 }: AlumnosToolbarProps) {
@@ -259,13 +268,36 @@ export function AlumnosToolbar({
             ))}
           </div>
 
+          <span className="text-slate-200 select-none">|</span>
+
+          {/* NSS */}
+          <div className="flex items-center gap-1">
+            <TriangleAlert className="h-3.5 w-3.5 text-slate-400" />
+            {NSS_OPTIONS.map(opt => (
+              <button
+                key={opt.id}
+                onClick={() => onFilterNSSChange(opt.id)}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border ${
+                  filterNSS === opt.id
+                    ? opt.id === 'sin_nss'
+                      ? 'bg-red-50 text-red-600 border-red-200'
+                      : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                    : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
           {/* Indicador de filtros activos */}
-          {(filterMinCVEnvios > 0 || filterEmpresasInteresadas !== 'all' || filterRelacionStatus !== 'all') && (
+          {(filterMinCVEnvios > 0 || filterEmpresasInteresadas !== 'all' || filterRelacionStatus !== 'all' || filterNSS !== 'all') && (
             <button
               onClick={() => {
                 onFilterMinCVEnviosChange(0);
                 onFilterEmpresasInteresadasChange('all');
                 onFilterRelacionStatusChange('all');
+                onFilterNSSChange('all');
               }}
               className="ml-auto px-2.5 py-1 rounded-md text-[11px] font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 transition-all"
             >
