@@ -873,8 +873,14 @@ async function startServer() {
 
   // Empresas
   app.get('/api/empresas', (req, res) => res.json(EmpresaDAO.getAll()));
-  app.post('/api/empresas', (req, res) => res.json({ id: EmpresaDAO.create(req.body) }));
+  app.post('/api/empresas', (req, res) => {
+    const yaExiste = EmpresaDAO.getByCif(req.body.cif);
+    if (yaExiste) return res.status(409).json({ error: 'Ya existe una empresa con ese CIF' });
+    res.json({ id: EmpresaDAO.create(req.body) });
+  });
   app.put('/api/empresas/:id', (req, res) => {
+    const yaExiste = EmpresaDAO.getByCif(req.body.cif);
+    if (yaExiste && yaExiste.id !== Number(req.params.id)) return res.status(409).json({ error: 'Ya existe una empresa con ese CIF' });
     EmpresaDAO.update(Number(req.params.id), req.body);
     res.json({ success: true });
   });

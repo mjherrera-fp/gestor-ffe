@@ -32,6 +32,7 @@ interface EmpresaFormModalProps {
   convenioRapido: ConvenioRapidoState;
   onConvenioRapidoChange: (data: ConvenioRapidoState) => void;
   centros: CentroEducativo[];
+  empresas: Empresa[];
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }
@@ -39,7 +40,7 @@ interface EmpresaFormModalProps {
 export function EmpresaFormModal({
   open, editing, formData, onChange,
   convenioRapido, onConvenioRapidoChange,
-  centros, onSubmit, onClose,
+  centros, empresas, onSubmit, onClose,
 }: EmpresaFormModalProps) {
   const [comunidadSlug, setComunidadSlug] = useState<string | null>(null);
   const [provinciaSlug, setProvinciaSlug] = useState<string | null>(null);
@@ -229,6 +230,14 @@ export function EmpresaFormModal({
     e.preventDefault();
     if (!validateAll(formData)) return;
     if (!validateConvenioFields()) return;
+    const cifKey = (formData.cif || '').trim().toLowerCase();
+    const cifDuplicado = empresas.find(emp =>
+      cifKey && emp.cif.trim().toLowerCase() === cifKey && (!editing || emp.id !== editing.id)
+    );
+    if (cifDuplicado) {
+      setFieldError('cif', 'Ya existe una empresa con ese CIF');
+      return;
+    }
     onSubmit(e);
   };
 
