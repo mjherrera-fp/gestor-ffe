@@ -7,16 +7,49 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
+  issues: read
 
 concurrency:
   group: release-portable
   cancel-in-progress: false
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      needs_release: ${{ steps.gate.outputs.needs_release }}
+    steps:
+      - name: Comprobar comentario [release] en la PR
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "needs_release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          SHA="${{ github.event.head_commit.id }}"
+          PRS=$(gh api "/repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '.[].number')
+          if [ -z "$PRS" ]; then
+            echo "::warning::Sin PR asociada al commit en main; no se publica. Comenta [release] en la PR antes del merge."
+            echo "needs_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for PR in $PRS; do
+            N=$(gh api "/repos/$GITHUB_REPOSITORY/issues/$PR/comments" --jq '[.[] | select(.body | contains("[release]"))] | length')
+            if [ "$N" -gt 0 ]; then
+              echo "needs_release=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "::warning::Ningún comentario [release] en el/los PR(s) $PRS; no se publica."
+          echo "needs_release=false" >> "$GITHUB_OUTPUT"
+
   release:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      contains(join(github.event.commits.*.message, ' '), '[release]')
+    needs: check
+    if: needs.check.outputs.needs_release == 'true'
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
