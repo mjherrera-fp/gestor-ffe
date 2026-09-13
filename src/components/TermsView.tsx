@@ -4,6 +4,8 @@ import { motion } from 'motion/react';
 import packageJson from '../../package.json';
 import CopyrightModal from './CopyrightModal.tsx';
 
+const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true;
+
 interface TermsViewProps {
   onAccept: () => void;
 }
@@ -101,7 +103,10 @@ export default function TermsView({ onAccept }: TermsViewProps) {
           </button>
         </div>
 
-        <p className="text-center mt-6 text-slate-500 text-[10px] font-medium uppercase tracking-widest">v{packageJson.version}</p>
+        <p className="text-center mt-6 text-slate-500 text-[10px] font-medium uppercase tracking-widest">
+          v{packageJson.version}
+          {isDev && <span className="ml-1 text-orange-500 font-bold">dev</span>}
+        </p>
         <p className="text-center mt-2 text-[9px] text-slate-500 tracking-widest">
           <Copyright size={12} className="inline" />{' '}
           <button onClick={() => setShowCopyright(true)} className="hover:text-blue-400 transition-colors cursor-pointer">mjherrera-fp</button>
