@@ -6,6 +6,8 @@ import CopyrightModal from '../../components/CopyrightModal.tsx';
 import { required } from '../../utils/validation.ts';
 import { useFormValidation } from '../../hooks/useFormValidation.ts';
 
+const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true;
+
 const inputCls = 'block w-full pl-10 pr-3 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all';
 const inputErrCls = 'border-red-500 ring-2 ring-red-400/30';
 const errMsgCls = 'text-red-400 text-xs mt-1 italic font-medium';
@@ -104,7 +106,10 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
         <p className="text-center mt-6 text-slate-500 text-xs uppercase tracking-widest font-medium">
           Sistema de Gestión de las FFE
         </p>
-        <p className="text-center mt-2 text-[10px] text-text-muted font-medium uppercase tracking-widest">v{packageJson.version}</p>
+        <p className="text-center mt-2 text-[10px] text-text-muted font-medium uppercase tracking-widest">
+          v{packageJson.version}
+          {isDev && <span className="ml-1 text-orange-500 font-bold">dev</span>}
+        </p>
         <p className="text-center mt-2 text-[9px] text-text-muted font-medium tracking-widest">
             <Copyright size={12} className="inline"/> <button onClick={() => setShowCopyright(true)} className="hover:text-blue-500 transition-colors cursor-pointer">mjherrera-fp</button>
           </p>
