@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   User, Mail, Phone, Edit2, Trash2, Send,
-  FileUp, CheckCircle, Clock, Eye, BadgeX, Loader2, X
+  FileUp, CheckCircle, Clock, Eye, BadgeX, Loader2, X, TriangleAlert
 } from 'lucide-react';
 import { Alumno, FFEMotivoNoRealizacion } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
@@ -116,6 +116,11 @@ export function AlumnoGridCard({
             {alumno.nombre} {alumno.apellidos}
           </h3>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">DNI: {alumno.dni}</p>
+          {!alumno.numSS?.trim() && (
+            <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+              <TriangleAlert className="h-3 w-3" /> Falta NSS
+            </span>
+          )}
         </div>
 
         {/* Datos contacto + estado */}

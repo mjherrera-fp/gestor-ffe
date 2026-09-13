@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Phone, GraduationCap, Edit2, Trash2, Send, CheckCircle, Clock, Search, Mail, BadgeX, Loader2, X, FileText, Upload } from 'lucide-react';
+import { User, Phone, GraduationCap, Edit2, Trash2, Send, CheckCircle, Clock, Search, Mail, BadgeX, Loader2, X, FileText, Upload, TriangleAlert } from 'lucide-react';
 import { Alumno, FFEMotivoNoRealizacion } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
@@ -92,6 +92,11 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                     <div>
                       <div className="font-bold text-slate-900 text-sm">{alumno.nombre}</div>
                       <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{alumno.apellidos}</div>
+                      {!alumno.numSS?.trim() && (
+                        <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                          <TriangleAlert className="h-3 w-3" /> Falta NSS
+                        </span>
+                      )}
                     </div>
                   </div>
                 </td>
