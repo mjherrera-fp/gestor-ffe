@@ -186,6 +186,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
         convenioRapido={ctx.convenioRapido}
         onConvenioRapidoChange={ctx.setConvenioRapido}
         centros={ctx.centros}
+        empresas={ctx.empresas}
         onSubmit={ctx.handleEmpresaSubmit}
         onClose={() => ctx.setShowEmpresaForm(false)}
       />
@@ -212,6 +213,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
           <div className="space-y-2 text-sm text-slate-600">
             <p><span className="font-bold text-emerald-600">{ctx.importResult?.success}</span> empresas nuevas</p>
             <p><span className="font-bold text-blue-600">{ctx.importResult?.updated}</span> empresas actualizadas</p>
+            <p><span className="font-bold text-amber-600">{ctx.importResult?.duplicated}</span> empresas omitidas (CIF repetido en el archivo)</p>
           </div>
           <button
             onClick={() => ctx.setImportResult(null)}

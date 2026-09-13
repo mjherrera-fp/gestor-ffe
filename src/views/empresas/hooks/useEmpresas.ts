@@ -75,7 +75,7 @@ export function useEmpresas(cursoId: number) {
 
   // ── Importación Excel ──
   const [isImporting,  setIsImporting]  = useState(false);
-  const [importResult, setImportResult] = useState<{ success: number; updated: number } | null>(null);
+  const [importResult, setImportResult] = useState<{ success: number; updated: number; duplicated: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── Filtros ──
@@ -232,18 +232,25 @@ export function useEmpresas(cursoId: number) {
         const ws   = wb.Sheets[wb.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false }) as any[];
 
-        let successCount = 0;
-        let updateCount  = 0;
+        let successCount   = 0;
+        let updateCount    = 0;
+        let duplicatedCount = 0;
 
-        const seenCifs = new Set<string>();
+        const procesados = new Set<string>();
 
         for (const row of data) {
           const nombre       = (row['Nombre'] || '').toString().trim();
           const cif          = (row['CIF'] || '').toString().trim();
           if (!nombre || !cif) continue;
 
+          const cifKey = cif.toLowerCase();
+          if (procesados.has(cifKey)) {
+            duplicatedCount++;
+            continue;
+          }
+
           let empresaId: number | null = null;
-          const existingEmpresa = empresas.find(e => e.cif.trim().toLowerCase() === cif.toLowerCase());
+          const existingEmpresa = empresas.find(e => e.cif.trim().toLowerCase() === cifKey);
 
           const empresaData = {
             nombre,
@@ -263,7 +270,7 @@ export function useEmpresas(cursoId: number) {
                 body: JSON.stringify(empresaData),
               });
               empresaId = existingEmpresa.id!;
-              if (!seenCifs.has(cif)) updateCount++;
+              updateCount++;
             } else {
               const res = await fetch('/api/empresas', {
                 method: 'POST',
@@ -272,9 +279,9 @@ export function useEmpresas(cursoId: number) {
               });
               const result = await res.json();
               empresaId = result.id;
-              if (!seenCifs.has(cif)) successCount++;
+              successCount++;
             }
-            seenCifs.add(cif);
+            procesados.add(cifKey);
           } catch {
             console.error('Error al procesar empresa:', nombre);
             continue;
@@ -324,7 +331,7 @@ export function useEmpresas(cursoId: number) {
           const tutorNombre = (row['Nombre Tutor'] || '').toString().trim();
           const tutorApellidos = (row['Apellidos Tutor'] || '').toString().trim();
           const tutorNif  = (row['NIF Tutor'] || '').toString().trim();
-          if (!tutorNombre || !tutorApellidos || !tutorNif) continue;
+          if (!tutorNombre) continue;
 
           const tutorData = {
             empresaId,
@@ -338,7 +345,9 @@ export function useEmpresas(cursoId: number) {
           try {
             const existingTutorRes = await fetch(`/api/empresas/${empresaId}/tutores`);
             const existingTutores: TutorEmpresa[] = await existingTutorRes.json();
-            const existingTutor = existingTutores.find(t => t.nif.trim().toLowerCase() === tutorNif.toLowerCase());
+            const existingTutor = tutorNif
+              ? existingTutores.find(t => t.nif.trim().toLowerCase() === tutorNif.toLowerCase())
+              : undefined;
 
             if (existingTutor) {
               await fetch(`/api/tutores-empresa/${existingTutor.id}`, {
@@ -359,7 +368,7 @@ export function useEmpresas(cursoId: number) {
         }
 
         fetchEmpresas();
-        setImportResult({ success: successCount, updated: updateCount });
+        setImportResult({ success: successCount, updated: updateCount, duplicated: duplicatedCount });
       } catch {
         alert('Hubo un error al procesar el archivo Excel.');
       } finally {
@@ -400,6 +409,11 @@ export function useEmpresas(cursoId: number) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(empresaFormData),
     });
+
+    if (res.status === 409) {
+      alert('Ya existe una empresa con ese CIF.');
+      return;
+    }
 
     if (res.ok) {
       const savedEmpresa  = await res.json();
@@ -469,6 +483,7 @@ export function useEmpresas(cursoId: number) {
     if (res.ok) {
       setShowTutorForm(false);
       fetchTutores(selectedEmpresa.id!);
+      fetchEmpresas();
     }
   };
 
@@ -477,6 +492,7 @@ export function useEmpresas(cursoId: number) {
       await fetch(`/api/tutores-empresa/${id}`, { method: 'DELETE' });
       setShowDeleteConfirm(null);
       fetchTutores(selectedEmpresa!.id!);
+      fetchEmpresas();
     } catch {
       alert('Error al eliminar el tutor.');
     }
