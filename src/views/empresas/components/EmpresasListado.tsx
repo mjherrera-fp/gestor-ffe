@@ -52,10 +52,10 @@ export function EmpresasListado({
   const cleanFilters = filterValoracion > 0 || filterUltimosCursos > 0 || filterColaboracion !== 'todas' || filterContactado !== 'todas';
 
   return (
-    <div className="w-full lg:flex-1 bg-white rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col h-full">
+    <div className="w-full lg:flex-1 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-white rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col">
 
       {/* Cabecera */}
-      <div className="px-6 py-4 border-b border-border-base space-y-4">
+      <div className="px-6 py-4 border-b border-border-base space-y-4 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -262,7 +262,7 @@ export function EmpresasListado({
       </div>
 
       {/* ── Desktop tabla ── */}
-      <div className="hidden lg:block overflow-auto border-b border-border-base">
+      <div className="hidden lg:block lg:flex-1 lg:min-h-0 lg:overflow-y-auto border-b border-border-base">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-border-base">
