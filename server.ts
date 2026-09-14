@@ -88,16 +88,8 @@ async function startServer() {
   }
 
   // Actualiza tu configuración de multer:
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir), // Usa la nueva ruta
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      cb(null, uniqueSuffix + '-' + file.originalname);
-    }
-  });
-
   const upload = multer({
-    storage,
+    storage: multer.memoryStorage(), // El CV se guarda en BD como dataURI (base64), no en disco
     fileFilter: (req, file, cb) => {
       if (file.mimetype === 'application/pdf') cb(null, true);
       else cb(new Error('Only PDF allowed'));
