@@ -30,7 +30,7 @@ export function TutoresPanel({
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div>
 
       {/* Cabecera */}
       <div className="p-6 border-b border-border-base">
@@ -41,7 +41,7 @@ export function TutoresPanel({
       </div>
 
       {/* Lista tutores */}
-      <div className="p-6 flex-1 overflow-y-auto space-y-4">
+      <div className="p-6 space-y-4">
         {tutores.map(tutor => (
           <div
             key={tutor.id}

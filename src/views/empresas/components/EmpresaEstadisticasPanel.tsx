@@ -65,7 +65,7 @@ export function EmpresaEstadisticasPanel({
   );
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div>
       <div className="p-6 border-b border-border-base space-y-3">
         <div className="flex items-center justify-between">
           <div>
@@ -93,7 +93,7 @@ export function EmpresaEstadisticasPanel({
         )}
       </div>
 
-      <div className="p-6 flex-1 overflow-y-auto space-y-4">
+      <div className="p-6 space-y-4">
         {stats.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
             {statCard(
