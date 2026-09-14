@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import {
   Download, FileSpreadsheet, Search, LayoutGrid, List, ArrowUpDown,
   GraduationCap, Mail, FileArchive, X,
-  Plus, Send, Building2, GitPullRequest, TriangleAlert,
+  Plus, Send, Building2, GitPullRequest, TriangleAlert, Clock,
 } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { Title } from '../../../components/Title.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
-import { SortField, SortOrder, FilterStatus, FilterRelacionStatus, ViewMode } from '../hooks/useAlumnos.ts';
+import { SortField, SortOrder, FilterStatus, FilterRelacionStatus, FilterHorasFFE, ViewMode } from '../hooks/useAlumnos.ts';
 
 const FILTER_OPTIONS = [
   { id: 'all',      label: 'Todos los Estudiantes' },
@@ -57,6 +57,8 @@ interface AlumnosToolbarProps {
   onFilterRelacionStatusChange: (v: FilterRelacionStatus) => void;
   filterNSS: 'all' | 'con_nss' | 'sin_nss';
   onFilterNSSChange: (v: 'all' | 'con_nss' | 'sin_nss') => void;
+  filterHorasFFE: FilterHorasFFE;
+  onFilterHorasFFEChange: (v: FilterHorasFFE) => void;
   isImporting: boolean;
   isImportingZip: boolean;
   onDownloadTemplate: () => void | Promise<void>;
@@ -75,10 +77,12 @@ export function AlumnosToolbar({
   filterEmpresasInteresadas, onFilterEmpresasInteresadasChange,
   filterRelacionStatus, onFilterRelacionStatusChange,
   filterNSS, onFilterNSSChange,
+  filterHorasFFE, onFilterHorasFFEChange,
   isImporting, isImportingZip, onDownloadTemplate, onImportClick, onImportZipClick, onNewAlumno,
   onBulkEmail,
 }: AlumnosToolbarProps) {
   const [showImportCVModal, setShowImportCVModal] = useState(false);
+  const [lteInput, setLteInput] = useState('');
   return (
     <div className="space-y-4">
 
@@ -290,14 +294,67 @@ export function AlumnosToolbar({
             ))}
           </div>
 
+          <span className="text-slate-200 select-none">|</span>
+
+          {/* Horas FFE */}
+          <div className="flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5 text-slate-400" />
+            <button
+              onClick={() => onFilterHorasFFEChange(
+                filterHorasFFE.mode === 'exact' && filterHorasFFE.value === 500
+                  ? { mode: 'off' }
+                  : { mode: 'exact', value: 500 }
+              )}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border ${
+                filterHorasFFE.mode === 'exact' && filterHorasFFE.value === 500
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              500h
+            </button>
+            <button
+              onClick={() => onFilterHorasFFEChange(
+                filterHorasFFE.mode === 'exact' && filterHorasFFE.value === 380
+                  ? { mode: 'off' }
+                  : { mode: 'exact', value: 380 }
+              )}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border ${
+                filterHorasFFE.mode === 'exact' && filterHorasFFE.value === 380
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              380h
+            </button>
+            <span className="text-[11px] text-slate-500 font-semibold whitespace-nowrap">≤</span>
+            <input
+              type="number"
+              min={0}
+              placeholder="0"
+              value={lteInput}
+              onChange={e => {
+                setLteInput(e.target.value);
+                const v = Number(e.target.value);
+                if (e.target.value === '' || Number.isNaN(v) || v < 0) onFilterHorasFFEChange({ mode: 'off' });
+                else onFilterHorasFFEChange({ mode: 'lte', value: Math.floor(v) });
+              }}
+              className={`w-14 px-2 py-1 text-xs font-bold text-center bg-slate-50 border rounded-md focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all ${
+                filterHorasFFE.mode === 'lte' ? 'border-amber-300 bg-amber-50/50' : 'border-slate-200'
+              }`}
+            />
+          </div>
+
           {/* Indicador de filtros activos */}
-          {(filterMinCVEnvios > 0 || filterEmpresasInteresadas !== 'all' || filterRelacionStatus !== 'all' || filterNSS !== 'all') && (
+          {(filterMinCVEnvios > 0 || filterEmpresasInteresadas !== 'all' || filterRelacionStatus !== 'all' || filterNSS !== 'all' || filterHorasFFE.mode !== 'off') && (
             <button
               onClick={() => {
                 onFilterMinCVEnviosChange(0);
                 onFilterEmpresasInteresadasChange('all');
                 onFilterRelacionStatusChange('all');
                 onFilterNSSChange('all');
+                onFilterHorasFFEChange({ mode: 'off' });
+                setLteInput('');
               }}
               className="ml-auto px-2.5 py-1 rounded-md text-[11px] font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 transition-all"
             >
