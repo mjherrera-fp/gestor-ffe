@@ -132,9 +132,9 @@ export function RelacionesListado({
   };
 
   return (
-    <div className="w-full lg:flex-1 bg-white rounded-xl lg:rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
+    <div className="w-full lg:flex-1 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-white rounded-xl lg:rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
       {/* Barra de filtros */}
-      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 space-y-3">
+      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 space-y-3 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -322,7 +322,7 @@ export function RelacionesListado({
       </div>
 
       {/* Tabla */}
-      <div className="overflow-auto flex-1">
+      <div className="flex-1 min-h-0 overflow-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-100">

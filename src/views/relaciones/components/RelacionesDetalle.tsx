@@ -191,10 +191,10 @@ export function RelacionDetalle({
   const anexoBtn = getAnexoStatusButton(selectedRelacion.estado);
 
   return (
-    <div className="flex flex-col h-full animate-in slide-in-from-right-4 duration-300">
+    <div className="flex flex-col flex-1 min-h-0 animate-in slide-in-from-right-4 duration-300">
 
 
-      <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-start justify-between mb-4">
+      <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-start justify-between mb-4 shrink-0">
 
         {/* NUEVO CONTENEDOR: Agrupa el título y la Ref en una columna */}
         <div className="flex flex-col">
@@ -236,7 +236,7 @@ export function RelacionDetalle({
 
       </div>
 
-      <div className="p-6 space-y-6 overflow-y-auto flex-1">
+      <div className="p-6 space-y-6 overflow-y-auto flex-1 min-h-0">
 
         {/* ── BLOQUE 1: ANEXO DE RELACIÓN ── */}
         <section className={`rounded-2xl p-4 space-y-4 transition-colors bg-slate-50/50 border ${anexoBtn ? 'border-slate-100' : 'border-emerald-100'
