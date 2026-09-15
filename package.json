@@ -141,7 +141,8 @@
       "createDesktopShortcut": true
     },
     "portable": {
-      "splashImage": "assets/splash-unzip.bmp"
+      "splashImage": "assets/splash-unzip.bmp",
+      "artifactName": "GestorFFE.exe"
     }
   },
   "allowScripts": {
