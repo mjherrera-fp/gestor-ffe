@@ -39,10 +39,10 @@ export function ConveniosListado({
   ];
 
   return (
-    <div className="w-full lg:flex-1 bg-white rounded-xl border border-border-base shadow-sm flex flex-col h-full">
+    <div className="w-full lg:flex-1 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-white rounded-xl border border-border-base shadow-sm flex flex-col">
 
       {/* ── Cabecera + filtros ── */}
-      <div className="px-6 py-4 border-b border-border-base space-y-4 relative z-20">
+      <div className="px-6 py-4 border-b border-border-base space-y-4 relative z-20 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -134,7 +134,7 @@ export function ConveniosListado({
       </div>
 
       {/* ── Vista desktop: tabla ── */}
-      <div className="hidden lg:block overflow-auto">
+      <div className="hidden lg:block lg:flex-1 lg:min-h-0 overflow-y-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-border-base">
