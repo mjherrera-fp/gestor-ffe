@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, UserPlus, Edit2, Trash2, Mail, Phone } from 'lucide-react';
+import { Building2, UserPlus, Edit2, Trash2, Mail, Phone, TriangleAlert } from 'lucide-react';
 import { Empresa, TutorEmpresa } from '../../../types/index.ts';
 
 interface TutoresPanelProps {
@@ -30,7 +30,7 @@ export function TutoresPanel({
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div>
 
       {/* Cabecera */}
       <div className="p-6 border-b border-border-base">
@@ -41,7 +41,7 @@ export function TutoresPanel({
       </div>
 
       {/* Lista tutores */}
-      <div className="p-6 flex-1 overflow-y-auto space-y-4">
+      <div className="p-6 space-y-4">
         {tutores.map(tutor => (
           <div
             key={tutor.id}
@@ -50,6 +50,11 @@ export function TutoresPanel({
             <div className="flex items-center justify-between mb-3">
               <div className="font-bold text-sm text-text-main leading-tight">
                 {tutor.nombre} {tutor.apellidos}
+                {(!tutor.apellidos?.trim() || !tutor.nif?.trim() || !tutor.email?.trim() || !tutor.tlfn?.trim()) && (
+                  <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide align-middle">
+                    <TriangleAlert className="h-2.5 w-2.5" /> Datos incompletos
+                  </span>
+                )}
               </div>
               <div className="flex gap-1.5">
                 <button

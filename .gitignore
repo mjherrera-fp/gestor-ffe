@@ -12,8 +12,10 @@ docs/
 !.env.example
 *.db
 *.db.bck
+*.db.bak
+.idea/
 claves-dev.txt
 uploads/
 prompt.ia
-.idea/
 .vscode/
+src/lib/update-secret.js

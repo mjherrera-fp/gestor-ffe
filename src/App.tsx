@@ -20,6 +20,8 @@ import {AnimatePresence, motion} from 'motion/react';
 import {Aviso, Curso, DetalleAcademico, Profesor} from './types/index.ts';
 import packageJson from '../package.json';
 
+const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true;
+
 // Components
 import {Title} from './components/Title.tsx';
 import ProfesorView from './views/profesor/ProfesorView.tsx';
@@ -39,6 +41,9 @@ import HistoricoView from './views/historico/HistoricoView.tsx';
 import ToastContainer from './components/ToastContainer.tsx';
 import NotificationBell from './components/NotificationBell.tsx';
 import CreateNotificationModal from './components/CreateNotificationModal.tsx';
+import UpdateBanner from './views/updater/UpdateBanner.tsx';
+import UpdateButton from './views/updater/UpdateButton.tsx';
+import { UpdaterProvider } from './views/updater/useUpdaterStatus.tsx';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -235,7 +240,8 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-bg-base overflow-hidden font-sans relative">
+    <UpdaterProvider>
+      <div className="flex h-screen bg-bg-base overflow-hidden font-sans relative">
       {/* Mobile Backdrop */}
       <AnimatePresence mode="wait">
         {isSidebarOpen && (
@@ -300,7 +306,10 @@ export default function App() {
         </nav>
 
         <div className="p-6 mt-auto border-t border-slate-50">
-          <p className="text-[10px] text-text-muted font-medium uppercase tracking-widest">v{packageJson.version}</p>
+          <p className="text-[10px] text-text-muted font-medium uppercase tracking-widest">
+            v{packageJson.version}
+            {isDev && <span className="ml-1 text-orange-500 font-bold">dev</span>}
+          </p>
           <p className="text-[9px] text-slate-400 mt-1">
             <Copyright size={12} className="inline"/> <button onClick={() => setShowCopyright(true)} className="hover:text-blue-500 transition-colors cursor-pointer">mjherrera-fp</button>
           </p>
@@ -408,6 +417,7 @@ export default function App() {
               onDescartar={handleDescartarAviso}
               onAbrirCrear={() => setShowCreateNotification(true)}
             />
+            <UpdateButton />
             <Title text="Configuración">
               <button
                 onClick={() => setActiveTab('configuracion')}
@@ -518,6 +528,9 @@ export default function App() {
         onClose={() => setShowCreateNotification(false)}
         onCreado={refrescarAvisos}
       />
+
+      <UpdateBanner />
     </div>
+    </UpdaterProvider>
   );
 }

@@ -1,11 +1,11 @@
 {
-  "name": "react-example",
+  "name": "gestor-ffe",
   "private": true,
-  "version": "0.1.0-alpha",
+  "version": "0.1.8-alpha",
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "rebuild:node": "npm rebuild better-sqlite3-multiple-ciphers",
+    "rebuild:node": "npx rimraf node_modules/better-sqlite3-multiple-ciphers/build && node node_modules/node-gyp/bin/node-gyp.js rebuild --release --directory node_modules/better-sqlite3-multiple-ciphers",
     "rebuild:electron": "npx @electron/rebuild -f -w better-sqlite3-multiple-ciphers",
     "dev": "npm run rebuild:node && concurrently --raw --kill-others \"npm run dev:server\" \"npm run dev:electron:wait\"",
     "dev:server": "tsx watch --ignore \"**/*.sqlite\" --ignore \"**/*.sqlite-*\" --ignore \"**/*.db\" --ignore \"**/*.db-*\" --ignore \"uploads/**\" server.ts",
@@ -37,7 +37,7 @@
     "@tiptap/extension-placeholder": "^3.23.6",
     "@tiptap/extension-subscript": "^3.23.6",
     "@tiptap/extension-superscript": "^3.23.6",
-    "@tiptap/extension-table": "^3.23.5",
+    "@tiptap/extension-table": "3.23.6",
     "@tiptap/extension-text-align": "^3.23.6",
     "@tiptap/extension-typography": "^3.23.6",
     "@tiptap/extensions": "^3.23.6",
@@ -46,7 +46,7 @@
     "@tiptap/starter-kit": "^3.23.6",
     "@vitejs/plugin-react": "^5.0.4",
     "@xmldom/xmldom": "^0.9.10",
-    "better-sqlite3-multiple-ciphers": "^12.9.0",
+    "better-sqlite3-multiple-ciphers": "^13.0.3",
     "docxtemplater": "^3.68.6",
     "express": "^4.21.2",
     "handlebars": "^4.7.9",
@@ -104,8 +104,11 @@
     "files": [
       "dist/**/*",
       "dist-server/**/*",
+      "src/lib/updater.js",
+      "src/lib/update-secret.js",
       "templates/**/*",
       "main.js",
+      "preload.cjs",
       "splash.html",
       "package.json"
     ],
@@ -139,7 +142,17 @@
       "createDesktopShortcut": true
     },
     "portable": {
-      "splashImage": "assets/splash-unzip.bmp"
+      "splashImage": "assets/splash-unzip.bmp",
+      "artifactName": "GestorFFE.exe"
     }
+  },
+  "allowScripts": {
+    "better-sqlite3-multiple-ciphers": false,
+    "electron-winstaller": false,
+    "electron@41.5.0": true,
+    "esbuild@0.27.7": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.0": true,
+    "puppeteer@24.42.0": true
   }
 }

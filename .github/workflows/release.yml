@@ -1,0 +1,166 @@
+name: Release portable
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: release-portable
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      needs_release: ${{ steps.gate.outputs.needs_release }}
+    steps:
+      - name: Comprobar comentario [release] en la PR
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "needs_release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          SHA="${{ github.event.head_commit.id }}"
+          PRS=$(gh api "/repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '.[].number')
+          if [ -z "$PRS" ]; then
+            echo "::warning::Sin PR asociada al commit en main; no se publica. Comenta [release] en la PR antes del merge."
+            echo "needs_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for PR in $PRS; do
+            N=$(gh api "/repos/$GITHUB_REPOSITORY/issues/$PR/comments" --jq '[.[] | select(.body | contains("[release]"))] | length')
+            if [ "$N" -gt 0 ]; then
+              echo "needs_release=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "::warning::Ningún comentario [release] en el/los PR(s) $PRS; no se publica."
+          echo "needs_release=false" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: check
+    if: needs.check.outputs.needs_release == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Autoversión (incrementa si ya está publicada)
+        id: autoversion
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Comprobar si una release ya existe. NO usamos "gh release view": a
+          # la vista no existe la opción --quiet (solo -q/--jq), con lo que gh
+          # salía con error "unknown flag" (exit 2) y dábamos por NO publicada
+          # una release que sí existía (colisión al crear). Consultamos la API
+          # directamente: 200 => existe, 404 => libre.
+          function Test-ReleaseExists([string]$tag) {
+            $uri = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases/tags/$tag"
+            try {
+              $null = Invoke-RestMethod -Uri $uri -Headers @{ Authorization = "token $env:GH_TOKEN"; 'User-Agent' = 'gestor-ffe' } -ErrorAction Stop
+              return $true
+            } catch {
+              if ($_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 404) { return $false }
+              throw
+            }
+          }
+
+          $version = node -p "require('./package.json').version"
+          $bumped = $false
+          for ($i = 0; $i -lt 5; $i++) {
+            $tag = "v$version"
+            Write-Host "Comprobando si ya existe la release $tag..."
+            if (-not (Test-ReleaseExists $tag)) { break }
+            Write-Host "Ya existe $tag; se incrementa la versión automáticamente."
+            $version = node -e "const fs=require('fs');const fp='package.json';const j=JSON.parse(fs.readFileSync(fp,'utf8'));const m=j.version.match(/^(\d+)\.(\d+)\.(\d+)(?:-(.*))?$/);if(!m){console.error('Version no parseable');process.exit(1);}const n=''+m[1]+'.'+m[2]+'.'+(Number(m[3])+1)+(m[4]?('-'+m[4]):'');j.version=n;fs.writeFileSync(fp,JSON.stringify(j,null,2)+'\n');try{const lp='package-lock.json';if(fs.existsSync(lp)){const l=JSON.parse(fs.readFileSync(lp,'utf8'));l.version=n;if(l.packages&&l.packages[''])l.packages[''].version=n;fs.writeFileSync(lp,JSON.stringify(l,null,2)+'\n');}}catch(e){}console.log(n);"
+            if (-not $version) { Write-Error 'No se pudo incrementar la versión'; exit 1 }
+            $bumped = $true
+          }
+          if (-not $version) { Write-Error 'Sin versión válida en package.json'; exit 1 }
+          if (Test-ReleaseExists "v$version") {
+            Write-Error "No se encontró una versión libre (v$version ya existe tras 5 intentos)."
+            exit 1
+          }
+          Write-Host "Versión final: $version"
+          Add-Content $env:GITHUB_OUTPUT ("version=" + $version)
+
+          # Sincronizar el repo: commit + push del bump (solo si cambió)
+          if ($bumped) {
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package.json package-lock.json
+            git commit -m "chore(version): v$version [skip ci]"
+            if ($LASTEXITCODE -eq 0) {
+              git push origin main
+              if ($LASTEXITCODE -ne 0) {
+                Write-Warning "No se pudo hacer push del bump a main (¿branch protection?). El repo queda desincronizado; la próxima versión lo resolverá."
+              } else {
+                Write-Host "Bump commiteado y empujado a main: v$version"
+              }
+            }
+          }
+
+          # Reset explícito del código de salida: la última invocación nativa
+          # (gh release view al comprobar, git push...) deja $LASTEXITCODE en 1
+          # aunque todo fuera correcto, y pwsh saldría con error.
+          exit 0
+
+      - name: Inyectar token de actualización (si está configurado)
+        shell: pwsh
+        env:
+          FFE_GH_TOKEN: ${{ secrets.FFE_GH_TOKEN }}
+        run: |
+          if ([string]::IsNullOrEmpty($env:FFE_GH_TOKEN)) {
+            Write-Warning "FFE_GH_TOKEN no está configurado en los secrets del repo. El portable generado NO podrá consultar releases del repo privado (actualizador inoperante). Configúralo en Settings > Secrets and variables > Actions."
+          } else {
+            $content = "export const UPDATE_TOKEN = '$env:FFE_GH_TOKEN';"
+            [System.IO.File]::WriteAllText(
+              (Join-Path (Get-Location) 'src/lib/update-secret.js'),
+              $content,
+              [System.Text.UTF8Encoding]::new($false)
+            )
+            Write-Host "src/lib/update-secret.js generado a partir del secret (no se versiona)."
+          }
+
+      - name: Empaquetar portable
+        run: npm run pack:win:portable
+
+      - name: Crear release y subir el portable
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = "${{ steps.autoversion.outputs.version }}"
+          $releaseDir = Resolve-Path release
+          $exe = Get-ChildItem (Join-Path $releaseDir '*.exe') |
+            Where-Object { $_.Name -match 'Gestor' -and $_.Name -inotmatch 'Setup' } |
+            Select-Object -First 1
+          if (-not $exe) {
+            Write-Error "No se encontró el portable en release\*.exe"
+            exit 1
+          }
+          Write-Host ("Subiendo " + $exe.Name)
+          $tag = "v$version"
+          gh release create $tag $exe.FullName --title "Gestor FFE $version" --generate-notes

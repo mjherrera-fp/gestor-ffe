@@ -1,7 +1,12 @@
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { fork } from 'child_process';
+import {
+  checkForUpdates,
+  startAvailableDownload,
+  applyUpdateAndRestart,
+} from './src/lib/updater.js';
 
 // 1. APAGAR ACELERACIÓN POR HARDWARE (Crucial para evitar cuelgues en Windows)
 app.disableHardwareAcceleration();
@@ -55,7 +60,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      nativeWindowOpen: true
+      nativeWindowOpen: true,
+      preload: path.join(__dirname, 'preload.cjs'),
     }
   });
 
@@ -143,6 +149,13 @@ async function waitForServer(url, timeout = 10000) {
   return false;
 }
 
+// Envía el estado del actualizador a la ventana principal
+function sendUpdateStatus(status) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('updater-status', status);
+  }
+}
+
 // NUEVO CICLO DE VIDA (Más estable que app.on('ready'))
 app.whenReady().then(async () => {
   startServer();
@@ -152,6 +165,8 @@ app.whenReady().then(async () => {
     const serverReady = await waitForServer('http://127.0.0.1:3000');
     if (serverReady) {
       createWindow();
+      // La comprobación de actualizaciones la dispara el renderer al montar
+      // (UpdaterProvider -> updater-check), no un timer del proceso principal.
     } else {
       console.error("El servidor tardó demasiado en iniciar.");
       app.quit();
@@ -181,3 +196,18 @@ app.on('before-quit', () => {
     serverProcess.kill();
   }
 });
+
+  // IPC del actualizador
+  ipcMain.on('updater-check', () => {
+    checkForUpdates({ send: sendUpdateStatus });
+  });
+
+  ipcMain.on('updater-download', () => {
+    startAvailableDownload({ send: sendUpdateStatus });
+  });
+
+  ipcMain.on('updater-apply', () => {
+    if (applyUpdateAndRestart()) {
+      app.quit();
+    }
+  });

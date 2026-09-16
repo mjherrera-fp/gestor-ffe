@@ -62,13 +62,13 @@ export function ConvenioDetalle({
   return (
     <div className="flex-1 flex flex-col">
       {/* Cabecera */}
-      <div className="p-6 border-b border-border-base">
+      <div className="p-6 border-b border-border-base shrink-0">
         <h2 className="text-lg font-bold text-text-main leading-tight">Detalle del Convenio</h2>
         <p className="text-sm text-text-muted mt-1">Ref: {selectedConvenio.empresaNombre}</p>
       </div>
 
       {/* Cuerpo */}
-      <div className="p-6 flex-1 overflow-y-auto space-y-6">
+      <div className="p-6 flex-1 min-h-0 overflow-y-auto space-y-6">
 
         <div className="flex items-center justify-between">
           <div>

@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { TutorEmpresa } from '../../../types/index.ts';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
-import { required, email, phone, compose } from '../../../utils/validation.ts';
+import { required, email, phone } from '../../../utils/validation.ts';
 
 const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 const inputErrCls = 'border-red-400 ring-2 ring-red-200';
@@ -12,10 +12,10 @@ const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
 
 const RULES = {
   nombre: [required('Nombre')],
-  apellidos: [required('Apellidos')],
-  nif: [required('NIF / NIE')],
-  email: [compose(required('Email Directo'), email('Email Directo'))],
-  tlfn: [compose(required('Teléfono Directo'), phone('Teléfono Directo'))],
+  apellidos: [],
+  nif: [],
+  email: [email('Email Directo')],
+  tlfn: [phone('Teléfono Directo')],
 };
 
 interface TutorFormModalProps {
@@ -66,7 +66,7 @@ export function TutorFormModal({ open, editing, formData, onChange, onSubmit, on
               {errors.nombre && <p className={errMsgCls}>{errors.nombre}</p>}
             </div>
             <div>
-              <label className={labelCls}>Apellidos<span className="text-red-500 ml-0.5">*</span></label>
+              <label className={labelCls}>Apellidos<span className="text-amber-500 ml-0.5">*</span></label>
               <input
                 className={`${inputCls} ${errors.apellidos ? inputErrCls : ''}`}
                 value={formData.apellidos || ''}
@@ -77,7 +77,7 @@ export function TutorFormModal({ open, editing, formData, onChange, onSubmit, on
             </div>
           </div>
           <div>
-            <label className={labelCls}>NIF / NIE<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelCls}>NIF / NIE<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               className={`${inputCls} ${errors.nif ? inputErrCls : ''}`}
               value={formData.nif || ''}
@@ -87,7 +87,7 @@ export function TutorFormModal({ open, editing, formData, onChange, onSubmit, on
             {errors.nif && <p className={errMsgCls}>{errors.nif}</p>}
           </div>
           <div>
-            <label className={labelCls}>Email Directo<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelCls}>Email Directo<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               type="email"
               className={`${inputCls} ${errors.email ? inputErrCls : ''}`}
@@ -98,7 +98,7 @@ export function TutorFormModal({ open, editing, formData, onChange, onSubmit, on
             {errors.email && <p className={errMsgCls}>{errors.email}</p>}
           </div>
           <div>
-            <label className={labelCls}>Teléfono Directo<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelCls}>Teléfono Directo<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               className={`${inputCls} ${errors.tlfn ? inputErrCls : ''}`}
               value={formData.tlfn || ''}

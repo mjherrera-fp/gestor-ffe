@@ -179,7 +179,7 @@ export const AceptacionUsoDAO = {
     const existing = db.prepare('SELECT id FROM profesores LIMIT 1').get() as { id: number } | undefined;
     if (existing) return existing.id;
     const info = db.prepare(
-      "INSERT INTO profesores (nombre, apellidos, nif, email, telefono) VALUES ('Pendiente', 'de configuración', '', '', '')"
+      "INSERT INTO profesores (nombre, apellidos, nif, email, telefono) VALUES ('', '', '', '', '')"
     ).run();
     return info.lastInsertRowid as number;
   },
@@ -642,8 +642,21 @@ export const GrupoContactoDAO = {
 };
 
 export const EmpresaDAO = {
-  getAll: () => db.prepare('SELECT * FROM empresas').all() as Empresa[],
+  getAll: () => db.prepare(`
+    SELECT e.*,
+      CASE WHEN EXISTS (
+        SELECT 1 FROM empresa_tutores t
+        WHERE t.empresaId = e.id AND (
+          TRIM(t.apellidos) = '' OR
+          TRIM(t.nif) = '' OR
+          TRIM(t.email) = '' OR
+          TRIM(t.tlfn) = ''
+        )
+      ) THEN 1 ELSE 0 END AS tutoresIncompletos
+    FROM empresas e
+  `).all() as Empresa[],
   getById: (id: number) => db.prepare('SELECT * FROM empresas WHERE id = ?').get(id) as Empresa,
+  getByCif: (cif: string): Empresa | undefined => db.prepare("SELECT * FROM empresas WHERE LOWER(TRIM(cif)) = LOWER(TRIM(?))").get(cif) as Empresa | undefined,
   create: (empresa: Empresa) => {
     const stmt = db.prepare('INSERT INTO empresas (nombre, direccion, ciudad, cif, email, tlfn, comentarios, personaContacto, comunidad, provincia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     const info = stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, empresa.comentarios ?? null, empresa.personaContacto ?? null, empresa.comunidad ?? null, empresa.provincia ?? null);

@@ -63,6 +63,10 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
         onFilterEmpresasInteresadasChange={ctx.setFilterEmpresasInteresadas}
         filterRelacionStatus={ctx.filterRelacionStatus}
         onFilterRelacionStatusChange={ctx.setFilterRelacionStatus}
+        filterNSS={ctx.filterNSS}
+        onFilterNSSChange={ctx.setFilterNSS}
+        filterHorasFFE={ctx.filterHorasFFE}
+        onFilterHorasFFEChange={ctx.setFilterHorasFFE}
         isImporting={ctx.isImporting}
         isImportingZip={ctx.isImportingZip}
         onDownloadTemplate={ctx.downloadTemplate}

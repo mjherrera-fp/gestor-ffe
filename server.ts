@@ -129,16 +129,8 @@ async function startServer() {
   }
 
   // Actualiza tu configuración de multer:
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir), // Usa la nueva ruta
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      cb(null, uniqueSuffix + '-' + file.originalname);
-    }
-  });
-
   const upload = multer({
-    storage,
+    storage: multer.memoryStorage(), // El CV se guarda en BD como dataURI (base64), no en disco
     fileFilter: (req, file, cb) => {
       if (file.mimetype === 'application/pdf') cb(null, true);
       else cb(new Error('Only PDF allowed'));
@@ -921,8 +913,14 @@ async function startServer() {
 
   // Empresas
   app.get('/api/empresas', (req, res) => res.json(EmpresaDAO.getAll()));
-  app.post('/api/empresas', (req, res) => res.json({ id: EmpresaDAO.create(req.body) }));
+  app.post('/api/empresas', (req, res) => {
+    const yaExiste = EmpresaDAO.getByCif(req.body.cif);
+    if (yaExiste) return res.status(409).json({ error: 'Ya existe una empresa con ese CIF' });
+    res.json({ id: EmpresaDAO.create(req.body) });
+  });
   app.put('/api/empresas/:id', (req, res) => {
+    const yaExiste = EmpresaDAO.getByCif(req.body.cif);
+    if (yaExiste && yaExiste.id !== Number(req.params.id)) return res.status(409).json({ error: 'Ya existe una empresa con ese CIF' });
     EmpresaDAO.update(Number(req.params.id), req.body);
     res.json({ success: true });
   });
@@ -2742,8 +2740,11 @@ async function startServer() {
     if (!slug) return res.status(400).json({ error: 'slug es requerido' });
 
     const cursos = CursoDAO.getAll();
-    if (cursos.length === 0) return res.status(400).json({ error: 'No hay curso activo' });
-    const year = new Date(cursos[0].fechaFin).getFullYear();
+    const curso = cursos[0];
+    let year = Number(req.query.year);
+    if (!year || Number.isNaN(year)) {
+      year = curso ? new Date(curso.fechaFin).getFullYear() : new Date().getFullYear();
+    }
 
     try {
       const response = await fetch(`https://calendariosnacionales.com/es/v1/${year}/localidades/mad/madrid/${slug}.json`);
@@ -2796,9 +2797,22 @@ async function startServer() {
     res.status(500).json({ error: err.message || 'Internal Server Error' });
   });
 
-  app.listen(PORT, '127.0.0.1', () => {
-    console.log(`Server running on http://127.0.0.1:${PORT}`);
-  });
+  function listenWithRetry(port: number, host: string, retries = 20, delayMs = 500): void {
+    const server = app.listen(port, host, () => {
+      console.log(`Server running on http://${host}:${port}`);
+    });
+    server.on('error', (err: any) => {
+      if (err?.code === 'EADDRINUSE' && retries > 0) {
+        console.log(`Puerto ${port} ocupado (${retries} reintentos). Reintentando...`);
+        setTimeout(() => listenWithRetry(port, host, retries - 1, delayMs), delayMs);
+      } else {
+        console.error('Error al iniciar el servidor: ' + err?.message);
+        process.exit(1);
+      }
+    });
+  }
+
+  listenWithRetry(PORT, '127.0.0.1');
 }
 
 startServer().catch(err => {

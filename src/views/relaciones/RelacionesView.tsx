@@ -64,7 +64,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
     calculateEndDateForHours(start, hours, ctx.formData.horario, ctx.centroFestivos, ctx.usarFestivos, ctx.empresaFestivosActuales, ctx.usarFestivosEmpresa);
 
   return (
-    <div className="space-y-6 flex flex-col h-full animate-in fade-in duration-500">
+    <div className="space-y-6 flex flex-col animate-in fade-in duration-500">
 
       {/* MODAL 1: SELECCIÓN DE DOCUMENTOS A DESCARGAR */}
       <Modal open={ctx.targetDownloadRelaciones.length > 0} onClose={() => ctx.setTargetDownloadRelaciones([])} maxWidth="md">
@@ -364,7 +364,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
       </div>
 
       {/* ── CONTENIDO PRINCIPAL (dos columnas) ── */}
-      <div className="flex flex-col lg:flex-row gap-6 h-full items-start">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
 
         {/* Columna izquierda: listado */}
         <RelacionesListado
@@ -406,7 +406,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         />
 
         {/* Columna derecha: detalle */}
-        <div className="w-full lg:w-96 lg:shrink-0 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-150">
+        <div className="w-full lg:w-96 lg:shrink-0 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
           <RelacionDetalle
             selectedRelacion={ctx.selectedRelacion}
             alumnos={ctx.alumnos}

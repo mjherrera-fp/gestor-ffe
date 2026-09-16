@@ -128,6 +128,7 @@ export interface Empresa {
   personaContacto?: string;
   comunidad?: string;
   provincia?: string;
+  tutoresIncompletos?: number;
 }
 
 export interface TutorEmpresa {

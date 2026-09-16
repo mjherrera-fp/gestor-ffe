@@ -12,6 +12,7 @@ export type SortField   = 'nombre' | 'apellidos' | 'horas';
 export type SortOrder   = 'asc' | 'desc';
 export type FilterStatus = 'all' | 'pending' | 'assigned';
 export type FilterRelacionStatus = 'all' | 'con_relacion' | 'sin_relacion';
+export type FilterHorasFFE = { mode: 'off' } | { mode: 'exact'; value: number } | { mode: 'lte'; value: number };
 export type ViewMode    = 'grid' | 'table';
 
 // ─────────────────────────────────────────
@@ -37,6 +38,8 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
   const [filterMinCVEnvios, setFilterMinCVEnvios] = useState<number>(0);
   const [filterEmpresasInteresadas, setFilterEmpresasInteresadas] = useState<'all' | 'con' | 'sin'>('all');
   const [filterRelacionStatus, setFilterRelacionStatus] = useState<FilterRelacionStatus>('all');
+  const [filterNSS, setFilterNSS] = useState<'all' | 'con_nss' | 'sin_nss'>('all');
+  const [filterHorasFFE, setFilterHorasFFE] = useState<FilterHorasFFE>({ mode: 'off' });
 
   // ── Modal alumno ──
   const [showForm,   setShowForm]   = useState(false);
@@ -395,7 +398,17 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
         filterRelacionStatus === 'all' ||
         (filterRelacionStatus === 'con_relacion' && isAssigned) ||
         (filterRelacionStatus === 'sin_relacion' && !isAssigned);
-      return matchesSearch && matchesStatus && matchesMinCV && matchesEmpInteresadas && matchesRelacionStatus;
+      const hasNSS = !!(alumno.numSS && alumno.numSS.trim());
+      const matchesNSS =
+        filterNSS === 'all' ||
+        (filterNSS === 'con_nss' && hasNSS) ||
+        (filterNSS === 'sin_nss' && !hasNSS);
+      const horasFFE = alumno.totalHorasFFE || 0;
+      const matchesHorasFFE =
+        filterHorasFFE.mode === 'off' ||
+        (filterHorasFFE.mode === 'exact' && horasFFE === filterHorasFFE.value) ||
+        (filterHorasFFE.mode === 'lte' && horasFFE <= filterHorasFFE.value);
+      return matchesSearch && matchesStatus && matchesMinCV && matchesEmpInteresadas && matchesRelacionStatus && matchesNSS && matchesHorasFFE;
     })
     .sort((a, b) => {
       let cmp = 0;
@@ -403,7 +416,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
       if (sortBy === 'apellidos') cmp = a.apellidos.localeCompare(b.apellidos);
       if (sortBy === 'horas')     cmp = (a.totalHorasFFE || 0) - (b.totalHorasFFE || 0);
       return sortOrder === 'asc' ? cmp : -cmp;
-    }), [alumnos, searchTerm, filterStatus, filterMinCVEnvios, filterEmpresasInteresadas, filterRelacionStatus, sortBy, sortOrder]);
+    }), [alumnos, searchTerm, filterStatus, filterMinCVEnvios, filterEmpresasInteresadas, filterRelacionStatus, filterNSS, filterHorasFFE, sortBy, sortOrder]);
 
   // ─────────────────────────────────────────
   //  EMAIL
@@ -482,6 +495,8 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     filterMinCVEnvios, setFilterMinCVEnvios,
     filterEmpresasInteresadas, setFilterEmpresasInteresadas,
     filterRelacionStatus, setFilterRelacionStatus,
+    filterNSS, setFilterNSS,
+    filterHorasFFE, setFilterHorasFFE,
     toggleSort,
     filteredAndSortedAlumnos,
     // Formulario

@@ -17,7 +17,7 @@ export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: P
   const ctx = useConvenios(cursoId, centroId);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full items-start">
+    <div className="flex flex-col lg:flex-row gap-6 items-start">
 
       {/* ── COLUMNA IZQUIERDA: Listado ── */}
       <ConveniosListado
@@ -45,7 +45,7 @@ export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: P
       />
 
       {/* ── COLUMNA DERECHA: Detalle ── */}
-      <div className="w-full lg:w-85 lg:shrink-0 bg-white rounded-xl border border-border-base shadow-sm flex flex-col h-full overflow-hidden min-h-75">
+      <div className="w-full lg:w-85 lg:shrink-0 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-white rounded-xl border border-border-base shadow-sm flex flex-col overflow-hidden">
         <ConvenioDetalle
           selectedConvenio={ctx.selectedConvenio}
           onAdvanceStatus={ctx.advanceStatus}

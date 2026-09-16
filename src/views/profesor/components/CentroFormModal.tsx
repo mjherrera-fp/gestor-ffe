@@ -3,6 +3,7 @@ import { Plus, Loader2, MapPin, ExternalLink, X } from 'lucide-react';
 import { CentroEducativo } from '../../../types/index.ts';
 import { DateList } from '../../../components/ui/DateList.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
+import { FestivosYearModal } from '../../../components/ui/FestivosYearModal.tsx';
 import localidades from '../../../data/geo/localidades-madrid.json';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
 import { required, email, compose } from '../../../utils/validation.ts';
@@ -42,6 +43,7 @@ export function CentroFormModal({
   const [ciudadFocused, setCiudadFocused] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [showAgradecimiento, setShowAgradecimiento] = useState(false);
+  const [showYearModal, setShowYearModal] = useState(false);
   const [festivosImportados, setFestivosImportados] = useState(0);
   const ciudadRef = useRef<HTMLDivElement>(null);
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -53,8 +55,10 @@ export function CentroFormModal({
     if (formData.ciudad) {
       const match = localidades.municipalities.find(m => m.name === formData.ciudad);
       setSelectedSlug(match ? match.slug : null);
+    } else {
+      setSelectedSlug(null);
     }
-  }, []);
+  }, [formData.ciudad]);
 
   useEffect(() => {
     return () => { if (blurTimerRef.current) clearTimeout(blurTimerRef.current); };
@@ -100,20 +104,19 @@ export function CentroFormModal({
     }
   };
 
-  const handleObtenerFestivos = async () => {
+  const handleObtenerFestivos = async (year: number) => {
     if (!selectedSlug) return;
     setLoadingFestivos(true);
     try {
-      const res = await fetch(`/api/festivos/obtener?slug=${selectedSlug}`);
+      const res = await fetch(`/api/festivos/obtener?slug=${selectedSlug}&year=${year}`);
       const data = await res.json();
-      if (data.fechas?.length) {
-        const existing = formData.festivos || [];
-        const newSet = [...new Set([...existing, ...data.fechas])];
-        newSet.sort();
-        onChange({ ...formData, festivos: newSet });
-        setFestivosImportados(data.fechas.length);
-        setShowAgradecimiento(true);
-      }
+      const existing = formData.festivos || [];
+      const nuevasFechas = (data.fechas || []).filter((f: string) => !existing.includes(f));
+      const newSet = [...new Set([...existing, ...(data.fechas || [])])];
+      newSet.sort();
+      onChange({ ...formData, festivos: newSet });
+      setFestivosImportados(nuevasFechas.length);
+      setShowAgradecimiento(true);
     } catch {
       alert('No se pudieron obtener los días festivos.');
     } finally {
@@ -233,7 +236,7 @@ export function CentroFormModal({
               <button
                 type="button"
                 disabled={loadingFestivos}
-                onClick={handleObtenerFestivos}
+                onClick={() => { if (!loadingFestivos) setShowYearModal(true); }}
                 className="text-[9px] font-bold text-blue-600 hover:text-blue-800 underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 {loadingFestivos && <Loader2 className="h-3 w-3 animate-spin" />}
@@ -283,6 +286,14 @@ export function CentroFormModal({
                 Entendido
               </button>
             </Modal>
+
+        {/* Modal previo: elegir año de los festivos */}
+        <FestivosYearModal
+          open={showYearModal}
+          localidad={formData.ciudad}
+          onClose={() => setShowYearModal(false)}
+          onConfirm={(year) => { setShowYearModal(false); handleObtenerFestivos(year); }}
+        />
       </Modal>
   );
 }

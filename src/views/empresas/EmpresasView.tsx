@@ -44,7 +44,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
       </div>
 
       {/* ── LAYOUT DOS COLUMNAS ── */}
-      <div className="flex flex-col lg:flex-row gap-6 h-full items-start">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
 
         {/* Columna izquierda: listado */}
         <EmpresasListado
@@ -82,7 +82,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
         />
 
         {/* Columna derecha: detalle con tabs */}
-        <div className="w-full lg:w-85 lg:shrink-0 bg-white rounded-xl border border-border-base shadow-sm flex flex-col h-full overflow-hidden min-h-75">
+        <div className="w-full lg:w-85 lg:shrink-0 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-white rounded-xl border border-border-base shadow-sm flex flex-col overflow-hidden">
 
           {!ctx.selectedEmpresa ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
@@ -122,18 +122,22 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
               </div>
 
               {ctx.activeTab === 'estadisticas' ? (
-                <EmpresaEstadisticasPanel
-                  selectedEmpresa={ctx.selectedEmpresa}
-                  estadisticas={ctx.estadisticas}
-                />
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                  <EmpresaEstadisticasPanel
+                    selectedEmpresa={ctx.selectedEmpresa}
+                    estadisticas={ctx.estadisticas}
+                  />
+                </div>
               ) : (
-                <TutoresPanel
-                  selectedEmpresa={ctx.selectedEmpresa}
-                  tutores={ctx.tutores}
-                  onAddTutor={ctx.handleOpenNewTutor}
-                  onEditTutor={ctx.handleOpenEditTutor}
-                  onDeleteTutor={id => ctx.setShowDeleteConfirm({ id, type: 'tutor' })}
-                />
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                  <TutoresPanel
+                    selectedEmpresa={ctx.selectedEmpresa}
+                    tutores={ctx.tutores}
+                    onAddTutor={ctx.handleOpenNewTutor}
+                    onEditTutor={ctx.handleOpenEditTutor}
+                    onDeleteTutor={id => ctx.setShowDeleteConfirm({ id, type: 'tutor' })}
+                  />
+                </div>
               )}
             </>
           )}
@@ -186,6 +190,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
         convenioRapido={ctx.convenioRapido}
         onConvenioRapidoChange={ctx.setConvenioRapido}
         centros={ctx.centros}
+        empresas={ctx.empresas}
         onSubmit={ctx.handleEmpresaSubmit}
         onClose={() => ctx.setShowEmpresaForm(false)}
       />
@@ -212,6 +217,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
           <div className="space-y-2 text-sm text-slate-600">
             <p><span className="font-bold text-emerald-600">{ctx.importResult?.success}</span> empresas nuevas</p>
             <p><span className="font-bold text-blue-600">{ctx.importResult?.updated}</span> empresas actualizadas</p>
+            <p><span className="font-bold text-amber-600">{ctx.importResult?.duplicated}</span> empresas omitidas (CIF repetido en el archivo)</p>
           </div>
           <button
             onClick={() => ctx.setImportResult(null)}
