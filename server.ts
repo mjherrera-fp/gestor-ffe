@@ -648,7 +648,7 @@ async function startServer() {
     for (const id of alumnoIds) {
       const alumno = AlumnoDAO.getById(id);
       if (!alumno || !alumno.cvPath) continue;
-      const filename = `${alumno.nombre}_${alumno.apellidos}.pdf`.replace(/\s+/g, '_');
+      const filename = `${alumno.nombre}_${alumno.apellidos}_cv.pdf`.replace(/\s+/g, '_');
       const safeName = Date.now() + '-' + Math.round(Math.random() * 1e9) + '-' + filename;
       const outputPath = path.join(emailUploadDir, safeName);
       try {
