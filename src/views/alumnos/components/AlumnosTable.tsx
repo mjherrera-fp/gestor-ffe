@@ -186,11 +186,18 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                     <div>
                       <div className="font-bold text-slate-900 text-sm">{alumno.nombre}</div>
                       <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{alumno.apellidos}</div>
-                      {!alumno.numSS?.trim() && (
-                        <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
-                          <TriangleAlert className="h-3 w-3" /> Falta NSS
-                        </span>
-                      )}
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                        {!alumno.numSS?.trim() && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                            <TriangleAlert className="h-3 w-3" /> Falta NSS
+                          </span>
+                        )}
+                        {!!alumno.alumnoIncompleto && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                            <TriangleAlert className="h-3 w-3" /> Falta info estudiante
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </td>

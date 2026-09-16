@@ -95,6 +95,7 @@ export interface Alumno {
   cvEnvioCount?: number;
   empresasInteresadasCount?: number;
   tieneMatch?: number;
+  alumnoIncompleto?: number;
   comunicacionDAT?: number;
 }
 
@@ -129,6 +130,7 @@ export interface Empresa {
   comunidad?: string;
   provincia?: string;
   tutoresIncompletos?: number;
+  empresaIncompleta?: number;
 }
 
 export interface TutorEmpresa {
@@ -157,8 +159,9 @@ export interface Convenio {
   estado: ConvenioEstado;
   empresaId: number;
   cursoId: number;
-  centroId: number;
+  centroId?: number;
   tipoFirma?: FirmaTipo;
+  convenioIncompleto?: number;
 }
 
 export interface DocConvenio {

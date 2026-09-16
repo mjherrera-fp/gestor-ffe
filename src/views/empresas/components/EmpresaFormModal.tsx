@@ -6,7 +6,7 @@ import { Modal } from '../../../components/ui/Modal.tsx';
 import { ConvenioRapidoState } from '../hooks/useEmpresas.ts';
 import { comunidades, allProvincias, searchProvincias, searchLocalidades, getComunidadBySlug } from '../../../data/geo/geoData.ts';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
-import { required, email, phone, compose } from '../../../utils/validation.ts';
+import { required, email, phone } from '../../../utils/validation.ts';
 
 const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 const inputErrCls = 'border-red-400 ring-2 ring-red-200';
@@ -15,13 +15,13 @@ const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
 
 const RULES = {
   nombre: [required('Nombre Comercial')],
-  cif: [required('CIF')],
-  direccion: [required('Dirección Principal')],
-  comunidad: [required('Comunidad')],
-  provincia: [required('Provincia')],
-  ciudad: [required('Localidad')],
-  tlfn: [compose(required('Teléfono'), phone('Teléfono'))],
-  email: [compose(required('Email de Contacto'), email('Email de Contacto'))],
+  cif: [],
+  direccion: [],
+  comunidad: [],
+  provincia: [],
+  ciudad: [],
+  tlfn: [phone('Teléfono')],
+  email: [email('Email de Contacto')],
 };
 
 interface EmpresaFormModalProps {
@@ -55,23 +55,9 @@ export function EmpresaFormModal({
   const localidadRef = useRef<HTMLDivElement>(null);
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const prevCentroRef = useRef<number | string>('');
-
   useEffect(() => {
     return () => { if (blurTimerRef.current) clearTimeout(blurTimerRef.current); };
   }, []);
-
-  useEffect(() => {
-    if (!convenioRapido.tieneConvenio) { prevCentroRef.current = ''; return; }
-    const centroId = convenioRapido.centroId;
-    if (!centroId || centroId === prevCentroRef.current) return;
-    prevCentroRef.current = centroId;
-    const centro = centros.find(c => c.id === Number(centroId));
-    if (!centro?.codigoCentro) return;
-    if (!convenioRapido.numConvenio) {
-      onConvenioRapidoChange({ ...convenioRapido, numConvenio: `${centro.codigoCentro} / ` });
-    }
-  }, [convenioRapido.centroId, convenioRapido.tieneConvenio, centros]);
 
   useEffect(() => {
     if (formData.comunidad) {
@@ -241,6 +227,8 @@ export function EmpresaFormModal({
     onSubmit(e);
   };
 
+  const numConvenioCodigo = centros.find(c => c.id === Number(convenioRapido.centroId))?.codigoCentro?.trim() || '00000000';
+
   return (
     <Modal open={open} onClose={onClose} maxWidth="2xl" cardClass="rounded-3xl">
 
@@ -267,7 +255,7 @@ export function EmpresaFormModal({
             {errors.nombre && <p className={errMsgCls}>{errors.nombre}</p>}
           </div>
           <div>
-            <label className={labelCls}>CIF<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelCls}>CIF<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               className={`${inputCls} ${errors.cif ? inputErrCls : ''}`}
               value={formData.cif || ''}
@@ -277,7 +265,7 @@ export function EmpresaFormModal({
             {errors.cif && <p className={errMsgCls}>{errors.cif}</p>}
           </div>
           <div>
-            <label className={labelCls}>Dirección Principal<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelCls}>Dirección Principal<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               className={`${inputCls} ${errors.direccion ? inputErrCls : ''}`}
               value={formData.direccion || ''}
@@ -288,7 +276,7 @@ export function EmpresaFormModal({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div ref={comunidadRef}>
-              <label className={labelCls}>Comunidad<span className="text-red-500 ml-0.5">*</span></label>
+              <label className={labelCls}>Comunidad<span className="text-amber-500 ml-0.5">*</span></label>
               <div className="relative">
                 <input
                   className={`${inputCls} ${errors.comunidad ? inputErrCls : ''}`}
@@ -318,7 +306,7 @@ export function EmpresaFormModal({
               </div>
             </div>
             <div ref={provinciaRef}>
-              <label className={labelCls}>Provincia<span className="text-red-500 ml-0.5">*</span></label>
+              <label className={labelCls}>Provincia<span className="text-amber-500 ml-0.5">*</span></label>
               <div className="relative">
                 <input
                   className={`${inputCls} ${errors.provincia ? inputErrCls : ''}`}
@@ -350,7 +338,7 @@ export function EmpresaFormModal({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div ref={localidadRef}>
-              <label className={labelCls}>Localidad<span className="text-red-500 ml-0.5">*</span></label>
+              <label className={labelCls}>Localidad<span className="text-amber-500 ml-0.5">*</span></label>
               <div className="relative">
                 <input
                   className={`${inputCls} ${errors.ciudad ? inputErrCls : ''}`}
@@ -383,7 +371,7 @@ export function EmpresaFormModal({
               </div>
             </div>
             <div>
-              <label className={labelCls}>Teléfono<span className="text-red-500 ml-0.5">*</span></label>
+              <label className={labelCls}>Teléfono<span className="text-amber-500 ml-0.5">*</span></label>
               <input
                 className={`${inputCls} ${errors.tlfn ? inputErrCls : ''}`}
                 value={formData.tlfn || ''}
@@ -398,7 +386,7 @@ export function EmpresaFormModal({
             <input className={inputCls} value={formData.personaContacto || ''} onChange={update('personaContacto')} />
           </div>
           <div>
-            <label className={labelCls}>Email de Contacto<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelCls}>Email de Contacto<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               className={`${inputCls} ${errors.email ? inputErrCls : ''}`}
               value={formData.email || ''}
@@ -459,7 +447,7 @@ export function EmpresaFormModal({
                       value={convenioRapido.numConvenio}
                       onChange={e => onConvenioRapidoChange({ ...convenioRapido, numConvenio: e.target.value })}
                       className={`${inputCls} ${errors.numConvenio ? inputErrCls : ''}`}
-                      placeholder="Ej: 28074852 / 0000"
+                      placeholder={`C-${numConvenioCodigo}-0000`}
                       onBlur={() => onBlur('numConvenio', convenioRapido.numConvenio)}
                     />
                     {errors.numConvenio && <p className={errMsgCls}>{errors.numConvenio}</p>}
