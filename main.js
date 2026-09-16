@@ -17,6 +17,10 @@ const __dirname = path.dirname(__filename);
 let mainWindow;
 let serverProcess;
 
+// Puerto del servidor: sobrescribible con PORT. Producción usa 3000 y
+// desarrollo 3100 (debe coincidir con la lógica de server.ts).
+const serverPort = Number(process.env.PORT) || (app.isPackaged ? 3000 : 3100);
+
 // FUNCIÓN DE REINTENTO INTELIGENTE
 const cargarURLConReintentos = (ventanaPrincipal, splashWindow, url, reintentos = 20) => {
   ventanaPrincipal.loadURL(url).then(() => {
@@ -92,7 +96,7 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false);
 
   // 3. INTENTAMOS CARGAR LA RUTA (Y LE PASAMOS EL SPLASH PARA QUE LO CIERRE AL TERMINAR)
-  cargarURLConReintentos(mainWindow, splash, 'http://127.0.0.1:3000');
+  cargarURLConReintentos(mainWindow, splash, `http://127.0.0.1:${serverPort}`);
 
   mainWindow.on('closed', function () {
     mainWindow = null;
@@ -162,7 +166,7 @@ app.whenReady().then(async () => {
 
   if (app.isPackaged) {
     // Producción: Esperamos a nuestro propio servidor forkeado
-    const serverReady = await waitForServer('http://127.0.0.1:3000');
+    const serverReady = await waitForServer(`http://127.0.0.1:${serverPort}`);
     if (serverReady) {
       createWindow();
       // La comprobación de actualizaciones la dispara el renderer al montar

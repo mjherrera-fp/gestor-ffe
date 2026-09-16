@@ -146,6 +146,12 @@ const SCHEMA_MIGRATIONS: Array<(db: any) => void> = [
       db.exec("DROP TABLE tutores_empresa");
     }
   },
+  // v1 -> v2: autosanación de columnas que la migración v0->v1 pudo dejar
+  // sin aplicar si la versión de esquema quedó adelantada (p. ej. instalaciones
+  // que marcaron user_version=1 sin completar el ALTER TABLE).
+  (db) => {
+    ensureColumn(db, 'alumnos', 'comunicacionDAT', 'comunicacionDAT INTEGER REFERENCES comunicaciones_dat(id) ON DELETE SET NULL');
+  },
 ];
 
 const CURRENT_SCHEMA_VERSION = SCHEMA_MIGRATIONS.length;
