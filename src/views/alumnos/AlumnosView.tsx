@@ -307,7 +307,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
               </Title>
               <a
                 href={getCVBlobUrl(viewingCV)}
-                download={`${viewingCV.nombre}_${viewingCV.apellidos}.pdf`}
+                download={`${viewingCV.nombre.replace(/\s+/g, '_')}_${viewingCV.apellidos.replace(/\s+/g, '_')}_cv.pdf`}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all"
               >
                 <Eye className="h-4 w-4" /> Descargar CV
