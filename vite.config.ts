@@ -5,6 +5,9 @@ import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
+  // En desarrollo el servidor de la app escucha en el puerto 3100 por defecto
+  // (el mismo criterio que server.ts); se puede sobrescribir con PORT.
+  const apiTarget = `http://127.0.0.1:${process.env.PORT || 3100}`;
   return {
     plugins: [react(), tailwindcss()],
     define: {
@@ -17,8 +20,8 @@ export default defineConfig(({mode}) => {
     },
     server: {
       proxy: {
-        '/api': { target: 'http://127.0.0.1:3000', changeOrigin: true },
-        '/uploads': { target: 'http://127.0.0.1:3000', changeOrigin: true },
+        '/api': { target: apiTarget, changeOrigin: true },
+        '/uploads': { target: apiTarget, changeOrigin: true },
       },
       hmr: process.env.DISABLE_HMR !== 'true',
     },

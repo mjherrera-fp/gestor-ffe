@@ -60,8 +60,10 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
   const isProd = process.env.NODE_ENV === 'production';
+  // Puerto: se puede sobrescribir con PORT. Por defecto producción usa 3000
+  // y desarrollo 3100 para no chocar con el de producción.
+  const PORT = Number(process.env.PORT) || (isProd ? 3000 : 3100);
   const baseDir = process.env.PORTABLE_EXECUTABLE_DIR || process.cwd();
 
   // 1. Validar permisos de escritura inmediatamente
