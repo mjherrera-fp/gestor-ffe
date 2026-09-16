@@ -1,27 +1,38 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import JSZip from 'jszip';
 import {
-    RelacionAlumno, Convenio, TutorEmpresa, Alumno, Curso, Profesor,
-    RelacionEstado, PlanFormativoEstado, HorarioSemanal, SeguimientoEstado,
-    ValoracionEstado, EmpresaEstadistica, FirmaTipo, SelectedDocs
+    Alumno,
+    Convenio,
+    Curso,
+    EmpresaEstadistica,
+    FirmaTipo,
+    HorarioSemanal,
+    PlanFormativoEstado,
+    Profesor,
+    RelacionAlumno,
+    RelacionEstado,
+    SeguimientoEstado,
+    SelectedDocs,
+    TutorEmpresa,
+    ValoracionEstado
 } from '../../../types/index.ts';
 import {
-    DEFAULT_HORARIO,
     calculateEndDateForHours,
     calculateStartDateFromEnd,
-    getNextRelacionEstado,
-    getPrevRelacionEstado,
+    DEFAULT_HORARIO,
     getNextPlanEstado,
-    getPrevPlanEstado,
+    getNextRelacionEstado,
     getNextSeguimientoEstado,
-    getPrevSeguimientoEstado,
     getNextValoracionEstado,
+    getPrevPlanEstado,
+    getPrevRelacionEstado,
+    getPrevSeguimientoEstado,
     getPrevValoracionEstado
 } from '../utils/relacionesUtils.ts';
-import { EmailAttachment } from '../../../types/email.ts';
-import { uploadGeneratedAttachment } from '../../../utils/emailUtils.ts';
-import { mostrarToast } from '../../../utils/toast.ts';
-import { interpolateBody, applyCustomMarkers } from '../../../../templates/emails/emailTemplates.ts';
+import {EmailAttachment} from '../../../types/email.ts';
+import {uploadGeneratedAttachment} from '../../../utils/emailUtils.ts';
+import {mostrarToast} from '../../../utils/toast.ts';
+import {applyCustomMarkers, interpolateBody} from '../../../../templates/emails/emailTemplates.ts';
 
 //todo el estado y lógica de relaciones-alumnos, incluyendo gestión de alumnos en el formulario, cambios de estado y descargas de planes formativos
 
@@ -156,44 +167,48 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     // ─────────────────────────────────────────
 
     const fetchData = async () => {
-        const relParams = new URLSearchParams();
-        if (detalleAcademicoId) relParams.set('detalleAcademicoId', String(detalleAcademicoId));
-        const convParams = new URLSearchParams({ cursoId: String(cursoId) });
-        const alumParams = new URLSearchParams({ cursoId: String(cursoId) });
-        if (detalleAcademicoId) alumParams.set('detalleAcademicoId', String(detalleAcademicoId));
-        const [relRes, convRes, cursoRes, alumRes, configRes, empFestRes] = await Promise.all([
-            fetch(`/api/relaciones-alumnos?${relParams}`),
-            fetch(`/api/convenios?${convParams}`),
-            fetch(`/api/cursos`),
-            fetch(`/api/alumnos?${alumParams}`),
-            fetch('/api/profesor/config/festivos'),
-            fetch('/api/empresas/festivos'),
-        ]);
+        try {
+            const relParams = new URLSearchParams();
+            if (detalleAcademicoId) relParams.set('detalleAcademicoId', String(detalleAcademicoId));
+            const convParams = new URLSearchParams({cursoId: String(cursoId)});
+            const alumParams = new URLSearchParams({cursoId: String(cursoId)});
+            if (detalleAcademicoId) alumParams.set('detalleAcademicoId', String(detalleAcademicoId));
+            const [relRes, convRes, cursoRes, alumRes, configRes, empFestRes] = await Promise.all([
+                fetch(`/api/relaciones-alumnos?${relParams}`),
+                fetch(`/api/convenios?${convParams}`),
+                fetch(`/api/cursos`),
+                fetch(`/api/alumnos?${alumParams}`),
+                fetch('/api/profesor/config/festivos'),
+                fetch('/api/empresas/festivos'),
+            ]);
 
-        const allRelaciones: RelacionAlumno[] = await relRes.json();
-        const allConvenios = await convRes.json();
-        const allCursos = await cursoRes.json();
-        const allAlumnos: Alumno[] = await alumRes.json();
+            const allRelaciones: RelacionAlumno[] = await relRes.json();
+            const allConvenios = await convRes.json();
+            const allCursos = await cursoRes.json();
+            const allAlumnos: Alumno[] = await alumRes.json();
 
-        setRelaciones(allRelaciones);
-        setConvenios(allConvenios);
-        setAlumnos(allAlumnos);
-        setCurso(allCursos.find((c: Curso) => c.id === cursoId));
+            setRelaciones(allRelaciones);
+            setConvenios(allConvenios);
+            setAlumnos(allAlumnos);
+            setCurso(allCursos.find((c: Curso) => c.id === cursoId));
 
-        if (configRes.ok) {
-            const configData = await configRes.json();
-            setUsarFestivos(configData.usar_festivos !== '0');
-            setUsarFestivosEmpresa(configData.usar_festivos_empresa === '1');
-        }
+            if (configRes.ok) {
+                const configData = await configRes.json();
+                setUsarFestivos(configData.usar_festivos !== '0');
+                setUsarFestivosEmpresa(configData.usar_festivos_empresa === '1');
+            }
 
-        if (empFestRes.ok) {
-            const data = await empFestRes.json();
-            setEmpresaFestivosMap(data);
-        }
+            if (empFestRes.ok) {
+                const data = await empFestRes.json();
+                setEmpresaFestivosMap(data);
+            }
 
-        if (selectedRelacion) {
-            const updated = allRelaciones.find(r => r.id === selectedRelacion.id);
-            if (updated) setSelectedRelacion(updated);
+            if (selectedRelacion) {
+                const updated = allRelaciones.find(r => r.id === selectedRelacion.id);
+                if (updated) setSelectedRelacion(updated);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
         }
     };
 
@@ -389,7 +404,10 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             if (res.ok) {
                 setShowForm(false);
                 setEditing(null);
-                fetchData();
+                await fetchData();
+            } else {
+                const err = await res.json().catch(() => ({error: 'Error desconocido'}));
+                alert(err.error || 'Error al guardar la relación');
             }
         } catch (error) {
             console.error('Error guardando relación:', error);
@@ -1926,6 +1944,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         handleEmailConTodo, handleEmailConPlantilla,
         isPreparingEmail,
         targetEmailRelaciones, setTargetEmailRelaciones,
+        fetchData,
     };
 
 }

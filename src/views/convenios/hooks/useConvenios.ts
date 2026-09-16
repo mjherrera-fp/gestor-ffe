@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Convenio, Empresa, CentroEducativo, ConvenioEstado, FirmaTipo } from '../../../types/index.ts';
-import { getNextConvenioEstado, getPrevConvenioEstado } from '../utils/conveniosUtils.ts';
+import {useEffect, useMemo, useState} from 'react';
+import {CentroEducativo, Convenio, ConvenioEstado, Empresa, FirmaTipo} from '../../../types/index.ts';
+import {getNextConvenioEstado, getPrevConvenioEstado} from '../utils/conveniosUtils.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -35,6 +35,19 @@ export function useConvenios(cursoId: number, centroId?: number) {
   const [statusFilter,      setStatusFilter]      = useState<string>('all');
   const [sortBy,            setBy]                = useState<SortField>('empresa');
   const [sortOrder,         setSortOrder]         = useState<SortOrder>('asc');
+
+  // ── Gestor Documental ──
+  const [showDocManager, setShowDocManager] = useState(false);
+  const [docManagerTarget, setDocManagerTarget] = useState<ConvenioExtendido | null>(null);
+
+  const handleOpenDocManager = (conv: ConvenioExtendido) => {
+    setDocManagerTarget(conv);
+    setShowDocManager(true);
+  };
+  const handleCloseDocManager = () => {
+    setShowDocManager(false);
+    setDocManagerTarget(null);
+  };
 
   // ── UI formulario ──
   const [showForm,        setShowForm]        = useState(false);
@@ -253,8 +266,11 @@ export function useConvenios(cursoId: number, centroId?: number) {
     selectedEmpresa, setSelectedEmpresa,
     selectedCentro, setSelectedCentro,
     searchTermEmpresa, setSearchTermEmpresa,
+    // Gestor Documental
+    showDocManager, docManagerTarget,
+    handleOpenDocManager, handleCloseDocManager,
     // Handlers
     handleOpenNew, handleEdit, handleSubmit, handleDelete,
-    advanceStatus, moveBackStatus, updateFirma,
+    advanceStatus, moveBackStatus, updateFirma, fetchData,
   };
 }

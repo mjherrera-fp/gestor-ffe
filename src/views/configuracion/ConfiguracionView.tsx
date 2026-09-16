@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Settings, ShieldCheck, Mail } from 'lucide-react';
-import { useConfiguracion } from './hooks/useConfiguracion.ts';
-import { TabGeneral } from './components/TabGeneral.tsx';
-import { TabCorreo } from './components/TabCorreo.tsx';
-import { TabSeguridad } from './components/TabSeguridad.tsx';
+import React, {useEffect, useState} from 'react';
+import {Cloud, Mail, Settings, ShieldCheck} from 'lucide-react';
+import {useConfiguracion} from './hooks/useConfiguracion.ts';
+import {TabGeneral} from './components/TabGeneral.tsx';
+import {TabCorreo} from './components/TabCorreo.tsx';
+import {TabSeguridad} from './components/TabSeguridad.tsx';
+import {TabCloud} from './components/TabCloud.tsx';
 
-type TabId = 'general' | 'correo' | 'seguridad';
+type TabId = 'general' | 'correo' | 'seguridad' | 'cloud';
 
 const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'general', label: 'General', icon: Settings },
   { id: 'correo', label: 'Correo', icon: Mail },
+  {id: 'cloud', label: 'Cloud', icon: Cloud},
   { id: 'seguridad', label: 'Seguridad', icon: ShieldCheck },
 ];
 
@@ -66,6 +68,7 @@ export default function ConfiguracionView({ initialTab }: Props = {}) {
           profesorApellidos={ctx.profesorApellidos}
         />
       )}
+      {activeTab === 'cloud' && <TabCloud/>}
       {activeTab === 'seguridad' && (
         <TabSeguridad
           isEncrypted={ctx.isEncrypted}

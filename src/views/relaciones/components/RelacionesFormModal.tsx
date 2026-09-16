@@ -1,18 +1,21 @@
 import React from 'react';
+import {ArrowLeftRight, Building2, Calendar, Clock, Plus, User, X} from 'lucide-react';
 import {
-  X, User, Building2, Calendar, Clock, ArrowLeftRight, Plus, Hash
-} from 'lucide-react';
-import {
-  RelacionAlumno, Alumno, Convenio, TutorEmpresa,
-  RelacionEstado, RelacionEstadoLabels, HorarioSemanal
+  Alumno,
+  Convenio,
+  HorarioSemanal,
+  RelacionAlumno,
+  RelacionEstado,
+  RelacionEstadoLabels,
+  TutorEmpresa
 } from '../../../types/index.ts';
-import { CustomSelect } from '../../../components/CustomSelect.tsx';
-import { Modal } from '../../../components/ui/Modal.tsx';
-import { DEFAULT_HORARIO, getDayName } from '../utils/relacionesUtils.ts';
-import { BulkHorario } from '../hooks/useRelaciones.ts';
-import { formatDate } from '../../../lib/dateUtils.ts';
-import { useFormValidation } from '../../../hooks/useFormValidation.ts';
-import { required } from '../../../utils/validation.ts';
+import {CustomSelect} from '../../../components/CustomSelect.tsx';
+import {Modal} from '../../../components/ui/Modal.tsx';
+import {DEFAULT_HORARIO, getDayName} from '../utils/relacionesUtils.ts';
+import {BulkHorario} from '../hooks/useRelaciones.ts';
+import {formatDate} from '../../../lib/dateUtils.ts';
+import {useFormValidation} from '../../../hooks/useFormValidation.ts';
+import {required} from '../../../utils/validation.ts';
 
 const inputCls = 'w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none';
 const inputErrCls = 'border-red-400 ring-2 ring-red-200';

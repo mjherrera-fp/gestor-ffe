@@ -1,6 +1,42 @@
-import { db, unlockDB, lockDB } from './db.ts';
-import { Profesor, CentroEducativo, DetalleAcademico, Curso, Alumno, Empresa, TutorEmpresa, EmpresaEstadistica, Convenio, InteresAlumnoEmpresa, RelacionAlumno, PlanFormativoEstado, SeguimientoEstado, ValoracionEstado, PanelResumenRow, SeguridadSocialData, Aviso, FFEValoracionFinal, FFEMotivoNoRealizacion, FFEEvaluacion, FFEResultadoRA, FFEInformeRow } from '../types/index.ts';
-import { PlantillaCorreoDB, MarcadorPersonalizado, Contacto, GrupoContacto, GrupoMiembro, GrupoMiembroResolved } from '../types/email.ts';
+import {db, lockDB, unlockDB} from './db.ts';
+import {
+  Alumno,
+  Aviso,
+  CentroEducativo,
+  Convenio,
+  Curso,
+  DetalleAcademico,
+  DocComunicacionDAT,
+  DocConvenio,
+  DocPlanFormativo,
+  DocRelacion,
+  DocSeguimiento,
+  DocValoracion,
+  Empresa,
+  EmpresaEstadistica,
+  FFEEvaluacion,
+  FFEInformeRow,
+  FFEMotivoNoRealizacion,
+  FFEResultadoRA,
+  FFEValoracionFinal,
+  InteresAlumnoEmpresa,
+  PanelResumenRow,
+  PlanFormativoEstado,
+  Profesor,
+  RelacionAlumno,
+  SeguimientoEstado,
+  SeguridadSocialData,
+  TutorEmpresa,
+  ValoracionEstado
+} from '../types/index.ts';
+import {
+  Contacto,
+  GrupoContacto,
+  GrupoMiembro,
+  GrupoMiembroResolved,
+  MarcadorPersonalizado,
+  PlantillaCorreoDB
+} from '../types/email.ts';
 
 const safeParse = (str: any, fallback: any) => {
   if (!str || str === 'undefined' || str === 'null') return fallback;
@@ -112,6 +148,16 @@ export const ConfiguracionDAO = {
       }
     });
     transaction();
+  },
+  upsertConfigKey: (profesorId: number, tipo: string, clave: string, valor: string) => {
+    const existing = db.prepare('SELECT id FROM configuracion WHERE profesorId = ? AND tipo = ? AND clave = ?').get(profesorId, tipo, clave) as {
+      id: number
+    } | undefined;
+    if (existing) {
+      db.prepare('UPDATE configuracion SET valor = ? WHERE id = ?').run(valor, existing.id);
+    } else {
+      db.prepare('INSERT INTO configuracion (profesorId, tipo, clave, valor) VALUES (?, ?, ?, ?)').run(profesorId, tipo, clave, valor);
+    }
   },
 };
 
@@ -449,7 +495,7 @@ export const AlumnoDAO = {
   getByRelacionId: (id: number) => db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').get(id) as Alumno[],
   create: (alumno: Alumno) => {
     const stmt = db.prepare('INSERT INTO alumnos (nombre, apellidos, dni, numSS, tlfn, emailEduca, emailPersonal, fechaNacimiento, cursoId, detalleAcademicoId, totalHorasFFE, fechaInicio, fechaFin, estadoPlanFormativo, estadoSeguimiento, estadoValoracion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo, alumno.estadoSeguimiento, alumno.estadoValoracion);
+    const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo || null, alumno.estadoSeguimiento || null, alumno.estadoValoracion || null);
     return info.lastInsertRowid;
   },
   update: (id: number, alumno: Alumno) => {
@@ -738,6 +784,112 @@ export const ConvenioDAO = {
   },
 };
 
+export const ComunicacionDATDAO = {
+  getAllByDetalleAcademico: (detalleAcademicoId: number): any[] => {
+    const rows = db.prepare('SELECT * FROM comunicaciones_dat WHERE detalleAcademicoId = ? ORDER BY fecha DESC').all(detalleAcademicoId) as any[];
+    return rows.map((r: any) => ({
+      ...r,
+      alumnos: db.prepare('SELECT * FROM alumnos WHERE comunicacionDAT = ?').all(r.id) as any[],
+    }));
+  },
+  getById: (id: number): any | undefined =>
+      db.prepare('SELECT * FROM comunicaciones_dat WHERE id = ?').get(id),
+  create: (fecha: string, detalleAcademicoId: number, alumnoIds: number[]): number => {
+    const stmt = db.prepare('INSERT INTO comunicaciones_dat (fecha, estado, detalleAcademicoId) VALUES (?, ?, ?)');
+    const info = stmt.run(fecha, 'PENDIENTE_ENVIAR_DIRECTOR', detalleAcademicoId);
+    const newId = info.lastInsertRowid as number;
+    for (const alumnoId of alumnoIds) {
+      db.prepare('UPDATE alumnos SET comunicacionDAT = ? WHERE id = ?').run(newId, alumnoId);
+    }
+    return newId;
+  },
+  update: (id: number, fecha: string) => {
+    db.prepare('UPDATE comunicaciones_dat SET fecha = ? WHERE id = ?').run(fecha, id);
+  },
+  updateEstado: (id: number, estado: string) => {
+    db.prepare('UPDATE comunicaciones_dat SET estado = ? WHERE id = ?').run(estado, id);
+  },
+  delete: (id: number) => {
+    db.prepare('UPDATE alumnos SET comunicacionDAT = NULL WHERE comunicacionDAT = ?').run(id);
+    db.prepare('DELETE FROM comunicaciones_dat WHERE id = ?').run(id);
+  },
+};
+
+export const DocComunicacionDATDAO = {
+  getByComunicacionId: (comunicacionDatId: number): DocComunicacionDAT[] =>
+      db.prepare('SELECT * FROM doc_comunicaciones_dat WHERE comunicacionDatId = ? ORDER BY version DESC').all(comunicacionDatId) as DocComunicacionDAT[],
+  getById: (id: number): DocComunicacionDAT | undefined =>
+      db.prepare('SELECT * FROM doc_comunicaciones_dat WHERE id = ?').get(id) as DocComunicacionDAT | undefined,
+  create: (doc: DocComunicacionDAT) => {
+    const stmt = db.prepare('INSERT INTO doc_comunicaciones_dat (comunicacionDatId, nombreFichero, contenido, comentario, version) VALUES (?, ?, ?, ?, ?)');
+    const info = stmt.run(doc.comunicacionDatId, doc.nombreFichero, doc.contenido, doc.comentario || null, doc.version);
+    return info.lastInsertRowid;
+  },
+  getNextVersion: (comunicacionDatId: number): number => {
+    const row = db.prepare('SELECT COALESCE(MAX(version),0) + 1 as next FROM doc_comunicaciones_dat WHERE comunicacionDatId = ?').get(comunicacionDatId) as any;
+    return row.next;
+  },
+  delete: (id: number) => db.prepare('DELETE FROM doc_comunicaciones_dat WHERE id = ?').run(id),
+};
+
+export const DocConvenioDAO = {
+  getByConvenioId: (convenioId: number): DocConvenio[] =>
+      db.prepare('SELECT * FROM doc_convenio WHERE convenioId = ? ORDER BY version DESC').all(convenioId) as DocConvenio[],
+  getById: (id: number): DocConvenio | undefined =>
+      db.prepare('SELECT * FROM doc_convenio WHERE id = ?').get(id) as DocConvenio | undefined,
+  create: (doc: DocConvenio) => {
+    const stmt = db.prepare('INSERT INTO doc_convenio (convenioId, nombreFichero, contenido, comentario, version) VALUES (?, ?, ?, ?, ?)');
+    const info = stmt.run(doc.convenioId, doc.nombreFichero, doc.contenido, doc.comentario || null, doc.version);
+    return info.lastInsertRowid;
+  },
+  getNextVersion: (convenioId: number): number => {
+    const row = db.prepare('SELECT COALESCE(MAX(version),0) + 1 as next FROM doc_convenio WHERE convenioId = ?').get(convenioId) as any;
+    return row.next;
+  },
+  delete: (id: number) => db.prepare('DELETE FROM doc_convenio WHERE id = ?').run(id),
+};
+
+export const DocRelacionDAO = {
+  getByRelacionId: (relacionId: number): DocRelacion[] =>
+      db.prepare('SELECT * FROM doc_relacion WHERE relacionId = ? ORDER BY version DESC').all(relacionId) as DocRelacion[],
+  getById: (id: number): DocRelacion | undefined =>
+      db.prepare('SELECT * FROM doc_relacion WHERE id = ?').get(id) as DocRelacion | undefined,
+  create: (doc: DocRelacion) => {
+    const stmt = db.prepare('INSERT INTO doc_relacion (relacionId, nombreFichero, contenido, comentario, version) VALUES (?, ?, ?, ?, ?)');
+    const info = stmt.run(doc.relacionId, doc.nombreFichero, doc.contenido, doc.comentario || null, doc.version);
+    return info.lastInsertRowid;
+  },
+  getNextVersion: (relacionId: number): number => {
+    const row = db.prepare('SELECT COALESCE(MAX(version),0) + 1 as next FROM doc_relacion WHERE relacionId = ?').get(relacionId) as any;
+    return row.next;
+  },
+  delete: (id: number) => db.prepare('DELETE FROM doc_relacion WHERE id = ?').run(id),
+};
+
+function createDocAlumnoDAO(tableName: string, typeName: string) {
+  const fkField = 'relacionId';
+  return {
+    getByRelacionIdAndAlumnoId: (relacionId: number, alumnoId: number): any[] =>
+        db.prepare(`SELECT * FROM ${tableName} WHERE relacionId = ? AND alumnoId = ? ORDER BY version DESC`).all(relacionId, alumnoId),
+    getById: (id: number): any | undefined =>
+        db.prepare(`SELECT * FROM ${tableName} WHERE id = ?`).get(id),
+    create: (doc: any) => {
+      const stmt = db.prepare(`INSERT INTO ${tableName} (relacionId, alumnoId, nombreFichero, contenido, comentario, version) VALUES (?, ?, ?, ?, ?, ?)`);
+      const info = stmt.run(doc.relacionId, doc.alumnoId, doc.nombreFichero, doc.contenido, doc.comentario || null, doc.version);
+      return info.lastInsertRowid;
+    },
+    getNextVersion: (relacionId: number, alumnoId: number): number => {
+      const row = db.prepare(`SELECT COALESCE(MAX(version),0) + 1 as next FROM ${tableName} WHERE relacionId = ? AND alumnoId = ?`).get(relacionId, alumnoId) as any;
+      return row.next;
+    },
+    delete: (id: number) => db.prepare(`DELETE FROM ${tableName} WHERE id = ?`).run(id),
+  };
+}
+
+export const DocPlanFormativoDAO = createDocAlumnoDAO('doc_planes_formativos', 'DocPlanFormativo');
+export const DocSeguimientoDAO = createDocAlumnoDAO('doc_seguimiento', 'DocSeguimiento');
+export const DocValoracionDAO = createDocAlumnoDAO('doc_valoracion', 'DocValoracion');
+
 export const InteresDAO = {
   getIntereses: (detalleAcademicoId?: number) => {
     if (detalleAcademicoId) {
@@ -869,12 +1021,15 @@ export const RelacionAlumnoDAO = {
         UPDATE alumnos SET 
           relacionId = ?, 
           fechaInicio = ?,
-          fechaFin = ? 
+          fechaFin = ?,
+          estadoPlanFormativo = ?,
+          estadoSeguimiento = ?,
+          estadoValoracion = ?
         WHERE id = ?
       `);
 
       for (const alu of rel.alumnos) {
-        stmtAlumno.run(relacionId, alu.fechaInicio, alu.fechaFin, alu.id);
+        stmtAlumno.run(relacionId, alu.fechaInicio, alu.fechaFin, 'PENDIENTE_ENVIAR_ESTUDIANTE', 'PENDIENTE', 'PENDIENTE', alu.id);
       }
 
       // 3. Sincronizar empresa_estadisticas
@@ -907,19 +1062,22 @@ export const RelacionAlumnoDAO = {
       );
 
       // 2. Gestionar alumnos: Primero desvinculamos a los que ya no están
-      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL WHERE relacionId = ?').run(id);
+      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = NULL, estadoSeguimiento = NULL, estadoValoracion = NULL WHERE relacionId = ?').run(id);
 
       // 3. Vinculamos a los nuevos/actuales
       const stmtAlumno = db.prepare(`
         UPDATE alumnos SET 
           relacionId = ?, 
           fechaInicio = ?,
-          fechaFin = ? 
+          fechaFin = ?,
+          estadoPlanFormativo = ?,
+          estadoSeguimiento = ?,
+          estadoValoracion = ?
         WHERE id = ?
       `);
 
       for (const alu of rel.alumnos) {
-        stmtAlumno.run(id, alu.fechaInicio, alu.fechaFin, alu.id);
+        stmtAlumno.run(id, alu.fechaInicio, alu.fechaFin, 'PENDIENTE_ENVIAR_ESTUDIANTE', 'PENDIENTE', 'PENDIENTE', alu.id);
       }
 
       // 4. Sincronizar empresa_estadisticas
@@ -933,7 +1091,7 @@ export const RelacionAlumnoDAO = {
 
     db.transaction(() => {
       // 1. Limpiamos la referencia en los alumnos antes de borrar la relación
-      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = ?, estadoSeguimiento = ?, estadoValoracion = ? WHERE relacionId = ?').run('PENDIENTE_ENVIAR_ESTUDIANTE', 'PENDIENTE', 'PENDIENTE', id);
+      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = NULL, estadoSeguimiento = NULL, estadoValoracion = NULL WHERE relacionId = ?').run(id);
 
       // 2. Borramos la relación
       db.prepare('DELETE FROM relaciones WHERE id = ?').run(id);
@@ -954,12 +1112,14 @@ export const PanelDAO = {
         c.numConvenio, c.estado as estadoConvenio,
         c.tipoFirma as tipoFirmaConvenio,
         r.numRelacion, r.estado as estadoRelacion,
+        cd.fecha as fechaEnvioDAT, cd.estado as estadoDAT,
         r.firmaRelacion, r.firmaPlanFormativo, r.firmaSeguimiento,
         r.firmaValoracion
       FROM alumnos a
       LEFT JOIN relaciones r ON a.relacionId = r.id
       LEFT JOIN convenios c ON r.convenioId = c.id
-      LEFT JOIN empresas e ON c.empresaId = e.id`;
+      LEFT JOIN empresas e ON c.empresaId = e.id
+      LEFT JOIN comunicaciones_dat cd ON cd.id = a.comunicacionDAT`;
     const conditions: string[] = [];
     const params: any[] = [];
     if (cursoId) { conditions.push('a.cursoId = ?'); params.push(cursoId); }

@@ -17,4 +17,5 @@ docs/
 claves-dev.txt
 uploads/
 prompt.ia
+.vscode/
 src/lib/update-secret.js

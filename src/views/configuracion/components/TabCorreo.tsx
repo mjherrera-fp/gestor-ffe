@@ -1,32 +1,57 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Mail, Settings, Send, Loader2, Eye, EyeOff, Trash2, Square, CheckSquare, FileText, ClipboardCheck, Play, CheckCircle, User, Building2, Handshake, MoreHorizontal, Plus, Pencil, X, Save, PencilRuler, Users, Phone } from 'lucide-react';
-import { CustomSelect } from '../../../components/CustomSelect.tsx';
-import { Contacto, GrupoContacto, GrupoMiembroResolved } from '../../../types/email.ts';
-import { useEditor, EditorContent, EditorContext } from '@tiptap/react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {
+  Building2,
+  CheckCircle,
+  CheckSquare,
+  ClipboardCheck,
+  Eye,
+  EyeOff,
+  FileText,
+  Handshake,
+  Loader2,
+  Mail,
+  MoreHorizontal,
+  Pencil,
+  PencilRuler,
+  Phone,
+  Play,
+  Plus,
+  Save,
+  Send,
+  Settings,
+  Square,
+  Trash2,
+  User,
+  Users,
+  X
+} from 'lucide-react';
+import {CustomSelect} from '../../../components/CustomSelect.tsx';
+import {Contacto, GrupoContacto} from '../../../types/email.ts';
+import {EditorContent, EditorContext, useEditor} from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
-import { TaskList, TaskItem } from '@tiptap/extension-list';
+import {TaskItem, TaskList} from '@tiptap/extension-list';
 import Highlight from '@tiptap/extension-highlight';
-import { Image } from '@tiptap/extension-image';
+import {Image} from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
-import { Selection } from '@tiptap/extensions';
-import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
-import { Toolbar, ToolbarGroup, ToolbarSeparator } from '@/components/tiptap-ui-primitive/toolbar';
-import { Spacer } from '@/components/tiptap-ui-primitive/spacer';
-import { UndoRedoButton } from '@/components/tiptap-ui/undo-redo-button';
-import { HeadingDropdownMenu } from '@/components/tiptap-ui/heading-dropdown-menu';
-import { ListDropdownMenu } from '@/components/tiptap-ui/list-dropdown-menu';
-import { BlockquoteButton } from '@/components/tiptap-ui/blockquote-button';
-import { CodeBlockButton } from '@/components/tiptap-ui/code-block-button';
-import { MarkButton } from '@/components/tiptap-ui/mark-button';
-import { TextAlignButton } from '@/components/tiptap-ui/text-align-button';
-import { ColorHighlightPopover } from '@/components/tiptap-ui/color-highlight-popover';
-import { LinkPopover } from '@/components/tiptap-ui/link-popover';
-import { TableDropdownMenu } from '@/components/tiptap-ui/table-dropdown-menu';
+import {Selection} from '@tiptap/extensions';
+import {Table, TableCell, TableHeader, TableRow} from '@tiptap/extension-table';
+import {Toolbar, ToolbarGroup, ToolbarSeparator} from '@/components/tiptap-ui-primitive/toolbar';
+import {Spacer} from '@/components/tiptap-ui-primitive/spacer';
+import {UndoRedoButton} from '@/components/tiptap-ui/undo-redo-button';
+import {HeadingDropdownMenu} from '@/components/tiptap-ui/heading-dropdown-menu';
+import {ListDropdownMenu} from '@/components/tiptap-ui/list-dropdown-menu';
+import {BlockquoteButton} from '@/components/tiptap-ui/blockquote-button';
+import {CodeBlockButton} from '@/components/tiptap-ui/code-block-button';
+import {MarkButton} from '@/components/tiptap-ui/mark-button';
+import {TextAlignButton} from '@/components/tiptap-ui/text-align-button';
+import {ColorHighlightPopover} from '@/components/tiptap-ui/color-highlight-popover';
+import {LinkPopover} from '@/components/tiptap-ui/link-popover';
+import {TableDropdownMenu} from '@/components/tiptap-ui/table-dropdown-menu';
 import '@/components/tiptap-node/list-node/list-node.scss';
 import '@/components/tiptap-node/heading-node/heading-node.scss';
 import '@/components/tiptap-node/blockquote-node/blockquote-node.scss';
@@ -188,6 +213,99 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
   const [editGrupo, setEditGrupo] = useState<{ nombre: string; miembros: Array<{ tipoOrigen: string; origenId: number; label: string }> } | null>(null);
   const [editGrupoId, setEditGrupoId] = useState<number | null>(null);
   const [savingGrupo, setSavingGrupo] = useState(false);
+
+  // Firma de correo
+  const [firmaCorreo, setFirmaCorreo] = useState('');
+  const [savingFirma, setSavingFirma] = useState(false);
+  const [successFirma, setSuccessFirma] = useState(false);
+
+  const firmaEditor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        horizontalRule: false,
+        underline: false,
+        link: {openOnClick: false},
+      }),
+      Underline,
+      Placeholder.configure({placeholder: 'Escribe tu firma de correo aquí...'}),
+      TextAlign.configure({types: ['heading', 'paragraph']}),
+      TaskList,
+      TaskItem.configure({nested: true}),
+      Highlight.configure({multicolor: true}),
+      Image,
+      Typography,
+      Superscript,
+      Subscript,
+      Selection,
+      Table.configure({resizable: true}),
+      TableRow,
+      TableCell,
+      TableHeader,
+    ],
+    editorProps: {
+      attributes: {
+        class: 'tiptap prose prose-sm max-w-none focus:outline-none min-h-48 p-4',
+      },
+    },
+  });
+
+  const isSettingFirmaContent = useRef(false);
+  const firmaEditorInitialized = useRef(false);
+
+  useEffect(() => {
+    if (!firmaEditor || !firmaCorreo || firmaEditorInitialized.current) return;
+    isSettingFirmaContent.current = true;
+    firmaEditor.commands.setContent(firmaCorreo);
+    queueMicrotask(() => {
+      isSettingFirmaContent.current = false;
+    });
+    firmaEditorInitialized.current = true;
+  }, [firmaEditor, firmaCorreo]);
+
+  useEffect(() => {
+    if (!firmaEditor || isSettingFirmaContent.current) return;
+    const handler = () => {
+      setFirmaCorreo(firmaEditor.getHTML());
+    };
+    firmaEditor.on('update', handler);
+    return () => {
+      firmaEditor.off('update', handler);
+    };
+  }, [firmaEditor, firmaCorreo]);
+
+  useEffect(() => {
+    fetch('/api/profesor/config/correo')
+        .then(res => res.json())
+        .then(cfg => {
+          if (cfg.firma_correo) {
+            setFirmaCorreo(cfg.firma_correo);
+          }
+        })
+        .catch(() => {
+        });
+  }, []);
+
+  const handleSaveFirma = async () => {
+    setSavingFirma(true);
+    setSuccessFirma(false);
+    const clean = firmaCorreo.replace(/<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, '').replace(/<br\s*class="ProseMirror-trailingBreak">/g, '');
+    try {
+      const res = await fetch('/api/profesor/config/correo/firma', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({firma_correo: clean}),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSuccessFirma(true);
+        setTimeout(() => setSuccessFirma(false), 3000);
+      }
+    } catch {
+      console.error('Error al guardar la firma');
+    } finally {
+      setSavingFirma(false);
+    }
+  };
   const [grupoSearchTerm, setGrupoSearchTerm] = useState('');
   const [grupoSearchSource, setGrupoSearchSource] = useState<'contacto' | 'empresa' | 'estudiante' | 'tutor'>('contacto');
   const [grupoSearchResults, setGrupoSearchResults] = useState<Array<{ tipoOrigen: string; origenId: number; label: string; email: string }>>([]);
@@ -712,6 +830,81 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
               {testResult.message}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Firma Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-violet-100 text-violet-600">
+              <Pencil className="h-5 w-5"/>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">Firma de Correo</h3>
+              <p className="text-sm text-slate-500">
+                Esta firma se añadirá al final de todos los correos electrónicos.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          {successFirma && (
+              <div
+                  className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+                Firma de correo guardada correctamente.
+              </div>
+          )}
+          <div className="border border-slate-200 rounded-lg overflow-hidden editor-body">
+            <style>{`.editor-body .ProseMirror p { margin-bottom: 0.75em; }`}</style>
+            <EditorContext.Provider value={{editor: firmaEditor}}>
+              <Toolbar variant="fixed">
+                <Spacer/>
+                <ToolbarGroup>
+                  <UndoRedoButton action="undo"/>
+                  <UndoRedoButton action="redo"/>
+                </ToolbarGroup>
+                <ToolbarSeparator/>
+                <ToolbarGroup>
+                  <HeadingDropdownMenu modal={false} levels={[1, 2, 3]}/>
+                  <ListDropdownMenu modal={false} types={['bulletList', 'orderedList']}/>
+                  <BlockquoteButton/>
+                  <CodeBlockButton/>
+                </ToolbarGroup>
+                <ToolbarSeparator/>
+                <ToolbarGroup>
+                  <MarkButton type="bold"/>
+                  <MarkButton type="italic"/>
+                  <MarkButton type="underline"/>
+                  <MarkButton type="strike"/>
+                  <ColorHighlightPopover/>
+                  <LinkPopover/>
+                </ToolbarGroup>
+                <ToolbarSeparator/>
+                <ToolbarGroup>
+                  <TextAlignButton align="left"/>
+                  <TextAlignButton align="center"/>
+                  <TextAlignButton align="right"/>
+                  <TextAlignButton align="justify"/>
+                </ToolbarGroup>
+                <Spacer/>
+              </Toolbar>
+              <EditorContent editor={firmaEditor}/>
+            </EditorContext.Provider>
+          </div>
+          <div className="mt-4">
+            <button
+                type="button"
+                onClick={handleSaveFirma}
+                disabled={savingFirma}
+                className="px-6 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-800 disabled:opacity-50 transition-colors"
+            >
+              <span className="flex items-center justify-center gap-2">
+                <Save className="h-5 w-5"/>
+                {savingFirma ? 'Guardando...' : 'Guardar Firma'}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 

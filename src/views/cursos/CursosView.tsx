@@ -1,11 +1,11 @@
 import React from 'react';
-import { History, AlertTriangle, Plus, X, Trash2 } from 'lucide-react';
-import { Curso } from '../../types/index.ts';
+import {AlertTriangle, BookOpen, Plus, Trash2, X} from 'lucide-react';
+import {Curso} from '../../types/index.ts';
 
-import { useCursos }            from './hooks/useCursos.ts';
-import { CursoFormModal }       from './components/CursoFormModal.tsx';
-import { CursosMobileList }     from './components/CursosMobileList.tsx';
-import { CursosTable }          from './components/CursosTable.tsx';
+import {useCursos} from './hooks/useCursos.ts';
+import {CursoFormModal} from './components/CursoFormModal.tsx';
+import {CursosMobileList} from './components/CursosMobileList.tsx';
+import {CursosTable} from './components/CursosTable.tsx';
 
 interface Props {
   cursos: Curso[];
@@ -119,7 +119,7 @@ export default function CursosView({ cursos, onUpdate }: Props) {
         <div className="px-6 py-4 border-b border-border-base bg-slate-50/50 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <History className="h-5 w-5" />
+              <BookOpen className="h-5 w-5"/>
             </div>
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
               Cursos

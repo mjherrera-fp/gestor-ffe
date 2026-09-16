@@ -1,17 +1,19 @@
 import React from 'react';
-import { X, Trash2 } from 'lucide-react';
+import {Trash2, X} from 'lucide-react';
 
-import { useConvenios }        from './hooks/useConvenios.ts';
-import { ConveniosListado }    from './components/ConveniosListado.tsx';
-import { ConvenioDetalle }     from './components/ConvenioDetalle.tsx';
-import { ConvenioFormModal }   from './components/ConvenioFormModal.tsx';
+import {useConvenios} from './hooks/useConvenios.ts';
+import {ConveniosListado} from './components/ConveniosListado.tsx';
+import {ConvenioDetalle} from './components/ConvenioDetalle.tsx';
+import {ConvenioFormModal} from './components/ConvenioFormModal.tsx';
+import {GestorDocumentalModal} from '../../components/GestorDocumentalModal.tsx';
 
 interface Props {
   cursoId: number;
   centroId?: number;
+    detalleAcademicoId?: number;
 }
 
-export default function ConveniosView({ cursoId, centroId }: Props) {
+export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: Props) {
   const ctx = useConvenios(cursoId, centroId);
 
   return (
@@ -39,6 +41,7 @@ export default function ConveniosView({ cursoId, centroId }: Props) {
           if (ctx.sortBy === 'estado') ctx.setSortOrder(ctx.sortOrder === 'asc' ? 'desc' : 'asc');
           else { ctx.setBy('estado'); ctx.setSortOrder('asc'); }
         }}
+        onUploadDocument={ctx.handleOpenDocManager}
       />
 
       {/* ── COLUMNA DERECHA: Detalle ── */}
@@ -119,6 +122,22 @@ export default function ConveniosView({ cursoId, centroId }: Props) {
         onSubmit={ctx.handleSubmit}
         onClose={() => ctx.setShowForm(false)}
       />
+
+        {/* ── MODAL: Gestor Documental ── */}
+        {ctx.docManagerTarget && (
+            <GestorDocumentalModal
+                open={ctx.showDocManager}
+                onClose={ctx.handleCloseDocManager}
+                entidad="convenio"
+                entidadId={ctx.docManagerTarget.id!}
+                entityNombre={ctx.docManagerTarget.empresaNombre}
+                entityRef={ctx.docManagerTarget.numConvenio}
+                prefijo="CONV"
+                detalleAcademicoId={detalleAcademicoId}
+                estado={ctx.docManagerTarget.estado}
+                onEntityUpdated={ctx.fetchData}
+            />
+        )}
     </div>
   );
 }

@@ -95,6 +95,7 @@ export interface Alumno {
   cvEnvioCount?: number;
   empresasInteresadasCount?: number;
   tieneMatch?: number;
+  comunicacionDAT?: number;
 }
 
 export interface RelacionAlumno {
@@ -160,6 +161,69 @@ export interface Convenio {
   tipoFirma?: FirmaTipo;
 }
 
+export interface DocConvenio {
+  id?: number;
+  convenioId: number;
+  nombreFichero: string;
+  contenido: string;
+  comentario?: string;
+  version: number;
+  fechaSubida: string;
+}
+
+export interface DocRelacion {
+  id?: number;
+  relacionId: number;
+  nombreFichero: string;
+  contenido: string;
+  comentario?: string;
+  version: number;
+  fechaSubida: string;
+}
+
+export interface DocComunicacionDAT {
+  id?: number;
+  comunicacionDatId: number;
+  nombreFichero: string;
+  contenido: string;
+  comentario?: string;
+  version: number;
+  fechaSubida?: string;
+}
+
+export interface DocPlanFormativo {
+  id?: number;
+  relacionId: number;
+  alumnoId: number;
+  nombreFichero: string;
+  contenido: string;
+  comentario?: string;
+  version: number;
+  fechaSubida: string;
+}
+
+export interface DocSeguimiento {
+  id?: number;
+  relacionId: number;
+  alumnoId: number;
+  nombreFichero: string;
+  contenido: string;
+  comentario?: string;
+  version: number;
+  fechaSubida: string;
+}
+
+export interface DocValoracion {
+  id?: number;
+  relacionId: number;
+  alumnoId: number;
+  nombreFichero: string;
+  contenido: string;
+  comentario?: string;
+  version: number;
+  fechaSubida: string;
+}
+
 export interface InteresAlumnoEmpresa {
   alumnoId: number;
   empresaId: number;
@@ -210,6 +274,20 @@ export enum ValoracionEstado {
   RECIBIDO = 'RECIBIDO'
 }
 
+export enum ComunicacionDATEstado {
+  PENDIENTE_ENVIAR_DIRECTOR = 'PENDIENTE_ENVIAR_DIRECTOR',
+  PENDIENTE_FIRMA_DIRECTOR = 'PENDIENTE_FIRMA_DIRECTOR',
+  COMPLETADO = 'COMPLETADO',
+}
+
+export interface ComunicacionDAT {
+  id?: number;
+  fecha: string;
+  estado: ComunicacionDATEstado;
+  detalleAcademicoId?: number;
+  alumnos?: Alumno[];
+}
+
 // 2. DICCIONARIOS DE TEXTO (Lo que ve el usuario en la Interfaz)
 export const RelacionEstadoLabels: Record<RelacionEstado, string> = {
   [RelacionEstado.PENDIENTE_ENVIAR_EMPRESA]: 'Pendiente enviar a empresa',
@@ -248,6 +326,12 @@ export const ValoracionEstadoLabels: Record<ValoracionEstado, string> = {
   [ValoracionEstado.RECIBIDO]: 'Recibido de empresa'
 };
 
+export const ComunicacionDATEstadoLabels: Record<ComunicacionDATEstado, string> = {
+  [ComunicacionDATEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'Pendiente enviar a director',
+  [ComunicacionDATEstado.PENDIENTE_FIRMA_DIRECTOR]: 'Pendiente firma director',
+  [ComunicacionDATEstado.COMPLETADO]: 'Completado',
+};
+
 export const FirmaTipoLabels: Record<FirmaTipo, string> = {
   [FirmaTipo.SIN_ASIGNAR]: 'Tipo firma',
   [FirmaTipo.DIGITAL]: 'Digital',
@@ -274,8 +358,10 @@ export interface PanelResumenRow {
   empresaNombre: string | null;
   numConvenio: string | null;
   numRelacion: string | null;
+  fechaEnvioDAT: string | null;
   estadoConvenio: ConvenioEstado | null;
   estadoRelacion: RelacionEstado | null;
+  estadoDAT: ComunicacionDATEstado | null;
   estadoPlanFormativo: PlanFormativoEstado;
   estadoSeguimiento: SeguimientoEstado;
   estadoValoracion: ValoracionEstado;

@@ -1,32 +1,29 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
-  Users,
+  ArrowLeftRight,
   BookOpen,
   Building2,
-  FileText,
-  UserCircle,
-  Trophy,
-  LayoutDashboard,
-  Menu,
-  X,
-  ArrowLeftRight,
-  Lock,
   Copyright,
-  Heart,
-  Settings,
-  ScrollText,
+  FileText,
+  FolderUp,
   History,
-  Bell,
-  Link
+  LayoutDashboard,
+  Link,
+  Lock,
+  Menu,
+  Settings,
+  UserCircle,
+  Users,
+  X
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Profesor, Curso, DetalleAcademico, Aviso } from './types/index.ts';
+import {AnimatePresence, motion} from 'motion/react';
+import {Aviso, Curso, DetalleAcademico, Profesor} from './types/index.ts';
 import packageJson from '../package.json';
 
 const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true;
 
 // Components
-import { Title } from './components/Title.tsx';
+import {Title} from './components/Title.tsx';
 import ProfesorView from './views/profesor/ProfesorView.tsx';
 import CursosView from './views/cursos/CursosView.tsx';
 import AlumnosView from './views/alumnos/AlumnosView.tsx';
@@ -34,6 +31,7 @@ import EmpresasView from './views/empresas/EmpresasView.tsx';
 import ConveniosView from './views/convenios/ConveniosView.tsx';
 import InteresesView from './views/intereses/InteresesView.tsx';
 import RelacionesView from './views/relaciones/RelacionesView.tsx';
+import ComunicacionesDatView from './views/comunicaciones-dat/ComunicacionesDatView.tsx';
 import PanelView from './views/panel/PanelView.tsx';
 import LockView from './views/lock/LockView.tsx';
 import ConfiguracionView from './views/configuracion/ConfiguracionView.tsx';
@@ -174,6 +172,7 @@ export default function App() {
     { id: 'intereses', label: 'Intereses', icon: Link, disabled: !tieneProfesor || !tieneCurso },
     { id: 'convenios', label: 'Convenios', icon: FileText, disabled: !tieneProfesor || !tieneCurso },
     { id: 'relaciones', label: 'Relaciones', icon: ArrowLeftRight, disabled: !tieneProfesor || !tieneCurso },
+    {id: 'comunicaciones-dat', label: 'Enviar a la DAT', icon: FolderUp, disabled: !tieneProfesor || !tieneCurso},
   ], [tieneProfesor, tieneCurso]);
 
   // 3. Función para intentar desbloquear
@@ -502,11 +501,15 @@ export default function App() {
               <ConveniosView
                 cursoId={activeCurso.id!}
                 centroId={activeDetalle?.centroId}
+                detalleAcademicoId={activeDetalle?.id}
               />
             )}
           {activeTab === 'relaciones' && activeCurso && (
             <RelacionesView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id} profesor={profesor ?? undefined} onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }} preloadRelacion={preloadRelacion} />
           )}
+            {activeTab === 'comunicaciones-dat' && activeCurso && (
+                <ComunicacionesDatView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id}/>
+            )}
           {activeTab === 'historico' && <HistoricoView />}
           {activeTab === 'configuracion' && <ConfiguracionView initialTab={configTab} />}
           </div>

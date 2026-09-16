@@ -1,12 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
+  ComunicacionDATEstadoLabels,
+  ConvenioEstadoLabels,
   PanelResumenRow,
-  ConvenioEstadoLabels, RelacionEstadoLabels,
-  PlanFormativoEstadoLabels, SeguimientoEstadoLabels, ValoracionEstadoLabels
+  PlanFormativoEstadoLabels,
+  RelacionEstadoLabels,
+  SeguimientoEstadoLabels,
+  ValoracionEstadoLabels
 } from '../../../types/index.ts';
-import type { ColumnId, SortConfig, ColumnFilter, FilterState, ColumnMeta } from '../hooks/usePanel.ts';
-import { COLUMNS } from '../hooks/usePanel.ts';
-import { ArrowUpDown, ArrowUp, ArrowDown, Filter, X, ChevronDown } from 'lucide-react';
+import type {ColumnFilter, ColumnId, ColumnMeta, FilterState, SortConfig} from '../hooks/usePanel.ts';
+import {COLUMNS} from '../hooks/usePanel.ts';
+import {ArrowDown, ArrowUp, ArrowUpDown, Filter, X} from 'lucide-react';
 
 interface Props {
   resumen: PanelResumenRow[];
@@ -22,6 +26,7 @@ interface Props {
 function getStatusLabels(col: ColumnMeta): Record<string, string> | null {
   if (col.id === 'estadoConvenio') return ConvenioEstadoLabels;
   if (col.id === 'estadoRelacion') return RelacionEstadoLabels;
+  if (col.id === 'estadoDAT') return ComunicacionDATEstadoLabels;
   if (col.id === 'estadoPlanFormativo') return PlanFormativoEstadoLabels;
   if (col.id === 'estadoSeguimiento') return SeguimientoEstadoLabels;
   if (col.id === 'estadoValoracion') return ValoracionEstadoLabels;
@@ -172,7 +177,7 @@ function CellContent({ row, col, formatDate }: { row: PanelResumenRow; col: Colu
     return <StatusBadge estado={val} labels={labels} />;
   }
 
-  if (col.id === 'fechaInicio' || col.id === 'fechaFin') {
+  if (col.id === 'fechaInicio' || col.id === 'fechaFin' || col.id === 'fechaEnvioDAT') {
     return <span className="text-slate-600 text-xs whitespace-nowrap">{formatDate(val)}</span>;
   }
 
