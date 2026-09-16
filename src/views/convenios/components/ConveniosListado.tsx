@@ -1,5 +1,5 @@
 import React from 'react';
-import {Archive, Edit2, FileText, Plus, Search, Trash2, Upload, X} from 'lucide-react';
+import {Archive, Edit2, FileText, Plus, Search, Trash2, Upload, X, TriangleAlert} from 'lucide-react';
 import {ConvenioEstado, ConvenioEstadoLabels} from '../../../types/index.ts';
 import {CustomSelect} from '../../../components/CustomSelect.tsx';
 import {ConvenioExtendido, SortField, SortOrder} from '../hooks/useConvenios.ts';
@@ -120,6 +120,11 @@ export function ConveniosListado({
                 <h4 className="font-bold text-sm text-text-main truncate">{conv.empresaNombre}</h4>
                 <p className="text-[10px] text-primary font-bold uppercase tracking-tight">{conv.centroNombre}</p>
                 <p className="text-[10px] text-text-muted font-bold mt-1">Ref: {conv.numConvenio}</p>
+                {!!conv.convenioIncompleto && (
+                  <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                    <TriangleAlert className="h-3 w-3" /> Falta info convenio
+                  </span>
+                )}
               </div>
               <div className="shrink-0 scale-90 origin-top-right">
                 <StatusBadge estado={conv.estado} />
@@ -183,6 +188,11 @@ export function ConveniosListado({
                 <td className="px-5 py-4">
                   <p className="text-[9px] text-primary font-bold uppercase tracking-tight mb-0.5">{conv.centroNombre}</p>
                   <p className="font-bold text-text-main text-sm truncate max-w-50">{conv.empresaNombre}</p>
+                  {!!conv.convenioIncompleto && (
+                    <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                      <TriangleAlert className="h-3 w-3" /> Falta info convenio
+                    </span>
+                  )}
                 </td>
                 <td className="px-5 py-4">
                   <p className="text-xs font-bold text-text-muted">{conv.numConvenio}</p>

@@ -1009,7 +1009,7 @@ async function startServer() {
   });
   app.post('/api/convenios', (req, res) => {
     const { convenio } = req.body;
-    if (!convenio.centroId) return res.status(400).json({ error: 'El centro educativo es obligatorio.' });
+    if (!convenio.empresaId) return res.status(400).json({ error: 'La empresa supervisora es obligatoria.' });
     const id = ConvenioDAO.create(convenio);
     try { HistoricoDAO.logOperacionConvenio('CREATE', id as number, convenio.numConvenio); } catch {}
     res.json({ id });
@@ -1017,7 +1017,7 @@ async function startServer() {
 
   app.put('/api/convenios/:id', (req, res) => {
     const { convenio } = req.body;
-    if (!convenio.centroId) return res.status(400).json({ error: 'El centro educativo es obligatorio.' });
+    if (!convenio.empresaId) return res.status(400).json({ error: 'La empresa supervisora es obligatoria.' });
     const old = ConvenioDAO.getById(Number(req.params.id));
     ConvenioDAO.update(Number(req.params.id), convenio);
     try {

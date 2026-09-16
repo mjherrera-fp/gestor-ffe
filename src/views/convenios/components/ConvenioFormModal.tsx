@@ -1,11 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { X, Search, Building2, CheckCircle2 } from 'lucide-react';
 import { Empresa, CentroEducativo } from '../../../types/index.ts';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { ConvenioFormState } from '../hooks/useConvenios.ts';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
-import { required } from '../../../utils/validation.ts';
 
 interface ConvenioFormModalProps {
   open: boolean;
@@ -34,8 +33,8 @@ const inputErrCls = 'border-red-400 ring-2 ring-red-200';
 const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
 
 const RULES = {
-  fechaConvenio: [required('Fecha del Convenio')],
-  numConvenio: [required('Nº Convenio')],
+  fechaConvenio: [],
+  numConvenio: [],
 };
 
 export function ConvenioFormModal({
@@ -47,43 +46,14 @@ export function ConvenioFormModal({
 }: ConvenioFormModalProps) {
   const { errors, onBlur, validateAll, setFieldError } = useFormValidation(RULES);
 
-  const openRef = useRef(false);
-  const prevCentroRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (open && !openRef.current) {
-      prevCentroRef.current = null;
-    }
-    openRef.current = open;
-  }, [open]);
-
-  useEffect(() => {
-    if (selectedCentro === prevCentroRef.current) return;
-    prevCentroRef.current = selectedCentro;
-    if (!selectedCentro) return;
-    const centro = centros.find(c => c.id === selectedCentro);
-    if (!centro?.codigoCentro) return;
-    setFormData(prev => {
-      if (prev.numConvenio) return prev;
-      return { ...prev, numConvenio: `${centro.codigoCentro} / ` };
-    });
-  }, [selectedCentro, centros, setFormData]);
-
   const validateSelectedFields = () => {
-    let valid = true;
-    if (!selectedCentro) {
-      setFieldError('selectedCentro', 'Centro Educativo es obligatorio');
-      valid = false;
-    } else {
-      setFieldError('selectedCentro', null);
-    }
+    setFieldError('selectedCentro', null);
     if (!selectedEmpresa) {
       setFieldError('selectedEmpresa', 'Empresa Supervisora es obligatoria');
-      valid = false;
-    } else {
-      setFieldError('selectedEmpresa', null);
+      return false;
     }
-    return valid;
+    setFieldError('selectedEmpresa', null);
+    return true;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -92,6 +62,9 @@ export function ConvenioFormModal({
     if (!validateSelectedFields()) return;
     onSubmit(e);
   };
+
+  const numConvenioCodigo = centros.find(c => c.id === selectedCentro)?.codigoCentro?.trim() || '00000000';
+
   return (
     <Modal open={open} onClose={onClose} maxWidth="3xl" cardClass="rounded-4xl">
 
@@ -118,14 +91,13 @@ export function ConvenioFormModal({
           {/* Centro Educativo */}
           <div>
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-              Centro Educativo<span className="text-red-500 ml-0.5">*</span>
+              Centro Educativo<span className="text-amber-500 ml-0.5">*</span>
             </label>
             <CustomSelect
               options={centros.map(c => ({ id: c.id!, label: c.nombre }))}
               value={selectedCentro || ''}
               onChange={val => onCentroChange(Number(val))}
               name="centroId"
-              required
               error={errors.selectedCentro}
             />
           </div>
@@ -193,7 +165,7 @@ export function ConvenioFormModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-                Fecha del Convenio<span className="text-red-500 ml-0.5">*</span>
+                Fecha del Convenio<span className="text-amber-500 ml-0.5">*</span>
               </label>
               <input
                 type="date"
@@ -206,10 +178,10 @@ export function ConvenioFormModal({
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-                Nº Convenio<span className="text-red-500 ml-0.5">*</span>
+                Nº Convenio<span className="text-amber-500 ml-0.5">*</span>
               </label>
               <input
-                placeholder="Ej: 28074852 / 0000"
+                placeholder={`C-${numConvenioCodigo}-0000`}
                 className={`${inputCls} ${errors.numConvenio ? inputErrCls : ''}`}
                 value={formData.numConvenio}
                 onChange={e => setFormData(prev => ({ ...prev, numConvenio: e.target.value }))}

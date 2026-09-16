@@ -213,11 +213,18 @@ export function EmpresasListado({
               <div className="min-w-0">
                 <h4 className="font-bold text-text-main text-sm truncate">{emp.nombre}</h4>
                 <p className="text-[9px] text-text-muted font-bold mt-1">CIF: {emp.cif}</p>
-                {!!emp.tutoresIncompletos && (
-                  <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
-                    <TriangleAlert className="h-3 w-3" /> Falta info tutor
-                  </span>
-                )}
+                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                  {!!emp.tutoresIncompletos && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                      <TriangleAlert className="h-3 w-3" /> Falta info tutor
+                    </span>
+                  )}
+                  {!!emp.empresaIncompleta && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                      <TriangleAlert className="h-3 w-3" /> Falta info empresa
+                    </span>
+                  )}
+                </div>
                 <div className="mt-3 space-y-1">
                   <div className="flex items-center gap-2 text-[10px] text-text-muted">
                     <Mail className="h-3 w-3" /> {emp.email}
@@ -281,11 +288,18 @@ export function EmpresasListado({
                 <td className="px-5 py-4">
                   <p className="font-bold text-text-main text-sm">{emp.nombre}</p>
                   <p className="text-[10px] text-text-muted">{emp.cif}</p>
-                  {!!emp.tutoresIncompletos && (
-                    <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
-                      <TriangleAlert className="h-3 w-3" /> Falta info tutor
-                    </span>
-                  )}
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    {!!emp.tutoresIncompletos && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                        <TriangleAlert className="h-3 w-3" /> Falta info tutor
+                      </span>
+                    )}
+                    {!!emp.empresaIncompleta && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                        <TriangleAlert className="h-3 w-3" /> Falta info empresa
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-5 py-4 text-sm text-text-main">
                   <p>{emp.email}</p>

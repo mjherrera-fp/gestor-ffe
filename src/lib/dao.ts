@@ -483,7 +483,17 @@ export const AlumnoDAO = {
         SELECT 1 FROM intereses i1
         JOIN intereses i2 ON i1.alumnoId = i2.alumnoId AND i1.empresaId = i2.empresaId
         WHERE i1.alumnoId = a.id AND i1.interesado = 'alumno' AND i2.interesado = 'empresa'
-      ) as tieneMatch
+      ) as tieneMatch,
+      CASE WHEN
+        COALESCE(TRIM(a.apellidos), '') = '' OR
+        COALESCE(TRIM(a.dni), '') = '' OR
+        COALESCE(TRIM(a.numSS), '') = '' OR
+        COALESCE(TRIM(a.tlfn), '') = '' OR
+        COALESCE(TRIM(a.fechaNacimiento), '') = '' OR
+        COALESCE(TRIM(a.emailEduca), '') = '' OR
+        COALESCE(TRIM(a.emailPersonal), '') = '' OR
+        a.totalHorasFFE IS NULL OR a.totalHorasFFE = 0
+      THEN 1 ELSE 0 END AS alumnoIncompleto
     `;
     const base = `SELECT a.*, ${subqueries} FROM alumnos a`;
     if (cursoId && detalleAcademicoId) return db.prepare(`${base} WHERE a.cursoId = ? AND a.detalleAcademicoId = ?`).all(cursoId, detalleAcademicoId) as Alumno[];
@@ -495,7 +505,7 @@ export const AlumnoDAO = {
   getByRelacionId: (id: number) => db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').get(id) as Alumno[],
   create: (alumno: Alumno) => {
     const stmt = db.prepare('INSERT INTO alumnos (nombre, apellidos, dni, numSS, tlfn, emailEduca, emailPersonal, fechaNacimiento, cursoId, detalleAcademicoId, totalHorasFFE, fechaInicio, fechaFin, estadoPlanFormativo, estadoSeguimiento, estadoValoracion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo || null, alumno.estadoSeguimiento || null, alumno.estadoValoracion || null);
+    const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE', alumno.estadoSeguimiento || 'PENDIENTE', alumno.estadoValoracion || 'PENDIENTE');
     return info.lastInsertRowid;
   },
   update: (id: number, alumno: Alumno) => {
@@ -652,7 +662,16 @@ export const EmpresaDAO = {
           TRIM(t.email) = '' OR
           TRIM(t.tlfn) = ''
         )
-      ) THEN 1 ELSE 0 END AS tutoresIncompletos
+      ) THEN 1 ELSE 0 END AS tutoresIncompletos,
+      CASE WHEN
+        COALESCE(TRIM(e.cif), '') = '' OR
+        COALESCE(TRIM(e.direccion), '') = '' OR
+        COALESCE(TRIM(e.comunidad), '') = '' OR
+        COALESCE(TRIM(e.provincia), '') = '' OR
+        COALESCE(TRIM(e.ciudad), '') = '' OR
+        COALESCE(TRIM(e.tlfn), '') = '' OR
+        COALESCE(TRIM(e.email), '') = ''
+      THEN 1 ELSE 0 END AS empresaIncompleta
     FROM empresas e
   `).all() as Empresa[],
   getById: (id: number) => db.prepare('SELECT * FROM empresas WHERE id = ?').get(id) as Empresa,
@@ -760,23 +779,23 @@ export const EmpresaEstadisticaDAO = {
 
 export const ConvenioDAO = {
   getAll: (cursoId?: number, centroId?: number) => {
-    let query = "SELECT c.*, e.nombre as empresaNombre, e.ciudad as empresaCiudad, ce.nombre as centroNombre FROM convenios c JOIN empresas e ON c.empresaId = e.id LEFT JOIN centros_educativos ce ON c.centroId = ce.id";
+    let query = "SELECT c.*, e.nombre as empresaNombre, e.ciudad as empresaCiudad, ce.nombre as centroNombre, CASE WHEN c.centroId IS NULL OR COALESCE(TRIM(c.numConvenio), '') = '' OR COALESCE(TRIM(c.fechaConvenio), '') = '' THEN 1 ELSE 0 END AS convenioIncompleto FROM convenios c JOIN empresas e ON c.empresaId = e.id LEFT JOIN centros_educativos ce ON c.centroId = ce.id";
     const params: any[] = [];
     const conditions: string[] = [];
     if (cursoId) { conditions.push('c.cursoId = ?'); params.push(cursoId); }
     if (centroId) { conditions.push('c.centroId = ?'); params.push(centroId); }
     if (conditions.length > 0) query += ' WHERE ' + conditions.join(' AND ');
-    return db.prepare(query).all(...params) as (Convenio & { empresaNombre: string, empresaCiudad?: string, centroNombre?: string })[];
+    return db.prepare(query).all(...params) as (Convenio & { empresaNombre: string, empresaCiudad?: string, centroNombre?: string, convenioIncompleto?: number })[];
   },
   getById: (id: number) => db.prepare('SELECT * FROM convenios WHERE id = ?').get(id) as Convenio,
   create: (convenio: Convenio) => {
     const stmt = db.prepare('INSERT INTO convenios (numConvenio, fechaConvenio, estado, empresaId, cursoId, centroId, tipoFirma) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(convenio.numConvenio, convenio.fechaConvenio, convenio.estado, convenio.empresaId, convenio.cursoId, convenio.centroId, convenio.tipoFirma || 'SIN_ASIGNAR');
+    const info = stmt.run(convenio.numConvenio, convenio.fechaConvenio, convenio.estado, convenio.empresaId, convenio.cursoId, convenio.centroId ?? null, convenio.tipoFirma || 'SIN_ASIGNAR');
     return info.lastInsertRowid;
   },
   update: (id: number, convenio: Convenio) => {
     const stmt = db.prepare('UPDATE convenios SET numConvenio = ?, fechaConvenio = ?, estado = ?, centroId = ?, tipoFirma = ? WHERE id = ?');
-    stmt.run(convenio.numConvenio, convenio.fechaConvenio, convenio.estado, convenio.centroId, convenio.tipoFirma || 'SIN_ASIGNAR', id);
+    stmt.run(convenio.numConvenio, convenio.fechaConvenio, convenio.estado, convenio.centroId ?? null, convenio.tipoFirma || 'SIN_ASIGNAR', id);
   },
   delete: (id: number) => db.prepare('DELETE FROM convenios WHERE id = ?').run(id),
   getEmpresaIdsConConvenio: (): number[] => {

@@ -116,11 +116,18 @@ export function AlumnoGridCard({
             {alumno.nombre} {alumno.apellidos}
           </h3>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">DNI: {alumno.dni}</p>
-          {!alumno.numSS?.trim() && (
-            <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
-              <TriangleAlert className="h-3 w-3" /> Falta NSS
-            </span>
-          )}
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {!alumno.numSS?.trim() && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                <TriangleAlert className="h-3 w-3" /> Falta NSS
+              </span>
+            )}
+            {!!alumno.alumnoIncompleto && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                <TriangleAlert className="h-3 w-3" /> Falta info estudiante
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Datos contacto + estado */}

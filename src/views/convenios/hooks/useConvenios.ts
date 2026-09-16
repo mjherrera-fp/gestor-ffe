@@ -127,7 +127,7 @@ export function useConvenios(cursoId: number, centroId?: number) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedEmpresa || !selectedCentro) return;
+    if (!selectedEmpresa) return;
 
     const convenio: Convenio = {
       numConvenio:   formData.numConvenio,
@@ -137,7 +137,7 @@ export function useConvenios(cursoId: number, centroId?: number) {
         : (selectedConvenio?.estado || ConvenioEstado.PENDIENTE_ENVIAR),
       empresaId: selectedEmpresa,
       cursoId,
-      centroId:  selectedCentro,
+      centroId:  selectedCentro ?? undefined,
       tipoFirma: selectedConvenio?.tipoFirma || FirmaTipo.SIN_ASIGNAR,
     };
 

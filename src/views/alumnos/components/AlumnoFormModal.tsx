@@ -5,7 +5,7 @@ import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { HorasWarningModal } from './HorasWarningModal.tsx';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
-import { required, email, isNumber, compose } from '../../../utils/validation.ts';
+import { required, email, isNumber } from '../../../utils/validation.ts';
 
 const inputClass = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
 const inputErrorClass = 'border-red-400 ring-2 ring-red-200';
@@ -14,14 +14,14 @@ const errorMsgClass = 'text-red-500 text-xs mt-1 italic font-medium';
 
 const RULES = {
   nombre: [required('Nombre')],
-  apellidos: [required('Apellidos')],
-  dni: [required('DNI / Pasaporte')],
-  numSS: [required('Número Seguridad Social')],
-  tlfn: [required('Teléfono')],
-  fechaNacimiento: [required('Fecha Nacimiento')],
-  emailEduca: [compose(required('Email EducaMadrid'), email('Email EducaMadrid'))],
-  emailPersonal: [compose(required('Email Personal'), email('Email Personal'))],
-  totalHorasFFE: [required('Horas Totales FFE'), isNumber('Horas Totales FFE')],
+  apellidos: [],
+  dni: [],
+  numSS: [],
+  tlfn: [],
+  fechaNacimiento: [],
+  emailEduca: [email('Email EducaMadrid')],
+  emailPersonal: [email('Email Personal')],
+  totalHorasFFE: [isNumber('Horas Totales FFE')],
 };
 
 interface AlumnoFormModalProps {
@@ -88,7 +88,7 @@ export function AlumnoFormModal({
             {errors.nombre && <p className={errorMsgClass}>{errors.nombre}</p>}
           </div>
           <div>
-            <label className={labelClass}>Apellidos<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelClass}>Apellidos<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               className={`${inputClass} ${errors.apellidos ? inputErrorClass : ''}`}
               value={formData.apellidos || ''}
@@ -98,7 +98,7 @@ export function AlumnoFormModal({
             {errors.apellidos && <p className={errorMsgClass}>{errors.apellidos}</p>}
           </div>
           <div>
-            <label className={labelClass}>DNI / Pasaporte<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelClass}>DNI / Pasaporte<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               className={`${inputClass} ${errors.dni ? inputErrorClass : ''}`}
               value={formData.dni || ''}
@@ -108,7 +108,7 @@ export function AlumnoFormModal({
             {errors.dni && <p className={errorMsgClass}>{errors.dni}</p>}
           </div>
           <div>
-            <label className={labelClass}>Número Seguridad Social<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelClass}>Número Seguridad Social<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               className={`${inputClass} ${errors.numSS ? inputErrorClass : ''}`}
               value={formData.numSS || ''}
@@ -118,7 +118,7 @@ export function AlumnoFormModal({
             {errors.numSS && <p className={errorMsgClass}>{errors.numSS}</p>}
           </div>
           <div>
-            <label className={labelClass}>Teléfono<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelClass}>Teléfono<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               className={`${inputClass} ${errors.tlfn ? inputErrorClass : ''}`}
               value={formData.tlfn || ''}
@@ -128,7 +128,7 @@ export function AlumnoFormModal({
             {errors.tlfn && <p className={errorMsgClass}>{errors.tlfn}</p>}
           </div>
           <div>
-            <label className={labelClass}>Fecha Nacimiento<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelClass}>Fecha Nacimiento<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               type="date"
               className={`${inputClass} ${errors.fechaNacimiento ? inputErrorClass : ''}`}
@@ -139,7 +139,7 @@ export function AlumnoFormModal({
             {errors.fechaNacimiento && <p className={errorMsgClass}>{errors.fechaNacimiento}</p>}
           </div>
           <div className="md:col-span-2">
-            <label className={labelClass}>Email EducaMadrid<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelClass}>Email EducaMadrid<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               type="email"
               className={`${inputClass} ${errors.emailEduca ? inputErrorClass : ''}`}
@@ -150,7 +150,7 @@ export function AlumnoFormModal({
             {errors.emailEduca && <p className={errorMsgClass}>{errors.emailEduca}</p>}
           </div>
           <div className="md:col-span-2">
-            <label className={labelClass}>Email Personal<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelClass}>Email Personal<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               type="email"
               className={`${inputClass} ${errors.emailPersonal ? inputErrorClass : ''}`}
@@ -161,7 +161,7 @@ export function AlumnoFormModal({
             {errors.emailPersonal && <p className={errorMsgClass}>{errors.emailPersonal}</p>}
           </div>
           <div>
-            <label className={labelClass}>Horas Totales FFE<span className="text-red-500 ml-0.5">*</span></label>
+            <label className={labelClass}>Horas Totales FFE<span className="text-amber-500 ml-0.5">*</span></label>
             <input
               type="number"
               className={`${inputClass} ${errors.totalHorasFFE ? inputErrorClass : ''}`}
