@@ -293,7 +293,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
             </div>
             <iframe
               src={getCVBlobUrl(viewingCV)}
-              className="w-full h-160 rounded-xl border border-slate-200"
+              className="w-full h-140 rounded-xl border border-slate-200"
               title="CV"
             />
             <div className="flex items-center justify-end gap-3 mt-4">
