@@ -500,10 +500,7 @@ export function EmailModal({
       return;
     }
 
-    const sendHtml = (h: string) => `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333">
-<style>p{margin:0 0 1.25em 0 !important}h1{font-size:1.5em;font-weight:700;margin:0 0 0.5em 0 !important}h2{font-size:1.25em;font-weight:700;margin:0 0 0.5em 0 !important}h3{font-size:1.125em;font-weight:600;margin:0 0 0.5em 0 !important}blockquote{padding-left:1em;margin:1.5rem 0;border-left:4px solid #cbd5e1}blockquote p{margin:0}ul{list-style:disc outside;margin:0 0 1.25em 0 !important}ol{list-style:decimal outside;margin:0 0 1.25em 0 !important}li{margin:0 !important}li>p{margin:0 !important}table{border-collapse:collapse;width:100%;margin:0 0 1.25em 0}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style>
-${h}
-</div>`;
+    const sendHtml = (h: string) => `<html lang="es"><head><meta charset="utf-8"><style>p{margin:0 0 1.25em 0 !important}h1{font-size:1.5em;font-weight:700;margin:0 0 0.5em 0 !important}h2{font-size:1.25em;font-weight:700;margin:0 0 0.5em 0 !important}h3{font-size:1.125em;font-weight:600;margin:0 0 0.5em 0 !important}blockquote{padding-left:1em;margin:1.5rem 0;border-left:4px solid #cbd5e1}blockquote p{margin:0}ul{list-style:disc outside;margin:0 0 1.25em 0 !important}ol{list-style:decimal outside;margin:0 0 1.25em 0 !important}li{margin:0 !important}li>p{margin:0 !important}table{border-collapse:collapse;width:100%;margin:0 0 1.25em 0}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style></head><body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333">${h}</body></html>`;
 
     const stripMarkers = (h: string) => h.replace(/\{\{@\w+\}\}/g, '');
 
@@ -517,7 +514,8 @@ ${h}
         const personalizedHtml = html.replace(/\{\{@(\w+)\}\}/g, (_, key: string) => data[key] ?? `{{@${key}}}`);
         const payload: EmailSendRequest = {
           to: [toList[i]],
-          cc: [],
+          cc: ccList,
+          bcc: bccList,
           subject,
           html: sendHtml(personalizedHtml),
           attachments: attachments.map(a => ({ filename: a.filename, path: a.path })),
@@ -546,8 +544,9 @@ ${h}
     const finalHtml = hasGroupMarkers ? stripMarkers(html) : html;
 
     const payload: EmailSendRequest = {
-      to: sendIndividualMode ? toList : allRecipients,
-      cc: sendIndividualMode ? [] : [],
+      to: toList,
+      cc: ccList,
+      bcc: bccList,
       subject,
       html: sendHtml(finalHtml),
       attachments: attachments.map(a => ({ filename: a.filename, path: a.path })),

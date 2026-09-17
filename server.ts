@@ -53,10 +53,31 @@ import {
   unlockDatabase
 } from './src/lib/dao.ts';
 import {Alumno, DetalleAcademico, DocConvenio, DocRelacion} from './src/types/index.ts';
+import {appendToSentFolder} from './src/lib/imap.ts';
 import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+function resolveImapSendConfig(emailCfg: Record<string, string>, smtpUser: string, smtpPass: string, smtpHost: string) {
+  const enabled = emailCfg.guardar_enviados === undefined ? true : emailCfg.guardar_enviados === '1';
+  const derivedHost = smtpHost ? smtpHost.replace(/^smtp\d*/i, 'imap') : 'imap.educa.madrid.org';
+  return {
+    enabled,
+    host: emailCfg.imap_host || derivedHost,
+    port: emailCfg.imap_port ? (Number(emailCfg.imap_port) || 993) : 993,
+    secure: emailCfg.imap_secure === undefined ? true : emailCfg.imap_secure === '1',
+    user: emailCfg.imap_user || smtpUser,
+    pass: emailCfg.imap_pass || smtpPass,
+    folder: emailCfg.imap_folder || 'Sent',
+  };
+}
+
+async function buildRawEmail(mailOptions: any): Promise<Buffer> {
+  const bufferTransport = nodemailer.createTransport({ streamTransport: true, buffer: true, newline: 'windows' });
+  const info: any = await bufferTransport.sendMail(mailOptions);
+  return info.message as Buffer;
+}
 
 async function startServer() {
   const app = express();
@@ -357,13 +378,31 @@ async function startServer() {
         auth: { user: smtp_user, pass: smtp_pass },
       });
       const fromEmail = smtp_email || `${smtp_user}@educa.madrid.org`;
-      await transporter.sendMail({
+      const mailOptions = {
         from: `"Test Configuración" <${fromEmail}>`,
         to,
         subject: 'Prueba de configuración de correo - Gestor FFE',
         html: '<p>Este es un correo de prueba para verificar la configuración SMTP del Gestor FFE.</p><p>Si recibes este mensaje, la configuración es correcta.</p>',
-      });
-      res.json({ success: true });
+        headers: { 'Content-Language': 'es' },
+      };
+      await transporter.sendMail(mailOptions);
+
+      let copiadoEnviados = 'desactivada';
+      let imapError = '';
+      const imapCfg = resolveImapSendConfig({}, smtp_user, smtp_pass, smtp_host);
+      if (imapCfg.enabled) {
+        try {
+          const raw = await buildRawEmail(mailOptions);
+          await appendToSentFolder({ ...imapCfg, raw });
+          copiadoEnviados = 'ok';
+        } catch (e: any) {
+          copiadoEnviados = 'error';
+          imapError = e.message || String(e);
+          console.warn('No se pudo guardar la copia en Enviados:', imapError);
+        }
+      }
+
+      res.json({ success: true, copiadoEnviados, imapError });
     } catch (error: any) {
       console.error('Error test-email:', error.message || error);
       res.status(500).json({ error: error.message || 'Error al enviar correo de prueba' });
@@ -434,7 +473,7 @@ async function startServer() {
 
   // Enviar email
   app.post('/api/send-email', async (req, res) => {
-    const { to, cc, subject, html, attachments, sendIndividual, delayMs } = req.body;
+    const { to, cc, bcc, subject, html, attachments, sendIndividual, delayMs } = req.body;
 
     try {
       const profesor = ProfesorDAO.get();
@@ -470,29 +509,50 @@ async function startServer() {
 
       const sendDelay = delayMs || (emailCfg.send_delay_ms ? parseInt(emailCfg.send_delay_ms, 10) : (profesor.send_delay_ms || 1500));
 
+      const imapCfg = resolveImapSendConfig(emailCfg, smtp_user, smtp_pass, smtp_host);
+      const pendingSaves: Promise<void>[] = [];
+
+      const saveSentCopy = async (mailOptions: any) => {
+        if (!imapCfg.enabled) return;
+        try {
+          const raw = await buildRawEmail(mailOptions);
+          await appendToSentFolder({ ...imapCfg, raw });
+        } catch (e: any) {
+          console.warn('No se pudo guardar la copia en Enviados:', e.message || e);
+        }
+      };
+
       if (sendIndividual && to?.length > 1) {
         for (let i = 0; i < to.length; i++) {
-          await transporter.sendMail({
+          const mailOptions = {
             from: fromStr,
             to: to[i],
             cc: cc || [],
+            bcc: bcc || [],
             subject,
             html,
+            headers: { 'Content-Language': 'es' },
             attachments: mailAttachments,
-          });
+          };
+          await transporter.sendMail(mailOptions);
+          pendingSaves.push(saveSentCopy(mailOptions));
           if (i < to.length - 1) {
             await new Promise(resolve => setTimeout(resolve, sendDelay));
           }
         }
       } else {
-        await transporter.sendMail({
+        const mailOptions = {
           from: fromStr,
           to: (to || []).join(', '),
           cc: (cc || []).join(', '),
+          bcc: (bcc || []).join(', '),
           subject,
           html,
+          headers: { 'Content-Language': 'es' },
           attachments: mailAttachments,
-        });
+        };
+        await transporter.sendMail(mailOptions);
+        pendingSaves.push(saveSentCopy(mailOptions));
       }
 
       // Registrar en histórico
@@ -501,19 +561,21 @@ async function startServer() {
         HistoricoDAO.logComunicacion(
           Array.isArray(to) ? to.join(', ') : (to || ''),
           Array.isArray(cc) ? cc.join(', ') : (cc || ''),
-          Array.isArray(req.body.bcc) ? req.body.bcc.join(', ') : (req.body.bcc || ''),
+          Array.isArray(bcc) ? bcc.join(', ') : (bcc || ''),
           subject || '',
           html || '',
           adjNames
         );
       } catch (e) { /* silencioso */ }
 
-      // Limpiar adjuntos temporales
-      for (const a of mailAttachments) {
-        try { if (fs.existsSync(a.path)) fs.unlinkSync(a.path); } catch {}
-      }
-
       res.json({ success: true });
+
+      // Limpiar adjuntos temporales una vez terminada la copia IMAP en segundo plano
+      Promise.allSettled(pendingSaves).then(() => {
+        for (const a of mailAttachments) {
+          try { if (fs.existsSync(a.path)) fs.unlinkSync(a.path); } catch {}
+        }
+      });
     } catch (error: any) {
       console.error('Error sending email:', error);
       res.status(500).json({ error: "Error al enviar el email", details: error.message || error });

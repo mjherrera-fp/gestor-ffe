@@ -68,6 +68,11 @@ interface EmailConfig {
   smtp_email: string;
   smtp_secure: boolean;
   send_delay_ms: number;
+  guardar_enviados: boolean;
+  imap_host: string;
+  imap_port: number;
+  imap_secure: boolean;
+  imap_folder: string;
 }
 
 interface PlantillaEdit {
@@ -795,6 +800,64 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   Tiempo de espera entre cada correo en envíos masivos. Valor recomendado: 1500ms (1.5 segundos).
                 </p>
               </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100">
+              <h4 className="text-sm font-bold text-slate-700 mb-3">Guardar copia en el servidor (Enviados)</h4>
+              <p className="text-xs text-slate-500 mb-3">
+                Al enviar un correo se guardará automáticamente una copia en la carpeta Enviados de tu webmail.
+                Es necesario que el servidor permita conexiones IMAP con las mismas credenciales.
+              </p>
+              <button
+                type="button"
+                onClick={() => onChange({ ...emailConfig, guardar_enviados: !emailConfig.guardar_enviados })}
+                className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-left"
+              >
+                {emailConfig.guardar_enviados ? (
+                  <CheckSquare className="h-5 w-5 text-blue-500 shrink-0" />
+                ) : (
+                  <Square className="h-5 w-5 text-slate-400 shrink-0" />
+                )}
+                <span className="text-sm text-slate-700">
+                  Guardar copia de los correos enviados en el servidor (carpeta Enviados)
+                </span>
+              </button>
+
+              {emailConfig.guardar_enviados && (
+                <div className="mt-4 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className={labelClass}>Servidor IMAP</label>
+                      <input type="text" name="imap_host" value={emailConfig.imap_host} onChange={handleChange} placeholder="imap.educa.madrid.org" className={inputClass} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Puerto IMAP</label>
+                      <input type="number" name="imap_port" value={emailConfig.imap_port} onChange={handleChange} className={inputClass} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Carpeta</label>
+                      <input type="text" name="imap_folder" value={emailConfig.imap_folder} onChange={handleChange} placeholder="Sent" className={inputClass} />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onChange({ ...emailConfig, imap_secure: !emailConfig.imap_secure })}
+                    className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-left"
+                  >
+                    {emailConfig.imap_secure ? (
+                      <CheckSquare className="h-5 w-5 text-blue-500 shrink-0" />
+                    ) : (
+                      <Square className="h-5 w-5 text-slate-400 shrink-0" />
+                    )}
+                    <span className="text-sm text-slate-700">
+                      Usar conexión IMAP segura SSL/TLS (Puerto 993). Dejar desmarcado para conexión sin cifrado.
+                    </span>
+                  </button>
+                  <p className="text-[10px] text-slate-400">
+                    Si el servidor no guarda la copia, el correo se enviará igualmente; solo se omitirá el guardado en Enviados.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
