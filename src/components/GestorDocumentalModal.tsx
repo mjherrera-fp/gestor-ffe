@@ -442,7 +442,7 @@ export function GestorDocumentalModal({
                 <div className="p-6 flex flex-col gap-4 overflow-y-auto flex-1">
                     <iframe
                         src={`${apiBase}/${viewingDoc.id}/download`}
-                        className="w-full h-160 rounded-xl border border-slate-200"
+                        className="w-full h-140 rounded-xl border border-slate-200"
                         title={viewingDoc.nombreFichero}
                     />
                     <div className="flex items-center justify-between">
