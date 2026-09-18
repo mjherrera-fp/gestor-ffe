@@ -1,0 +1,26 @@
+.tiptap-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  width: max-content;
+}
+
+.tiptap-emoji-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tiptap-emoji-item:hover,
+.tiptap-emoji-item[data-highlighted="true"] {
+  background: var(--tt-color-gray-200);
+}
