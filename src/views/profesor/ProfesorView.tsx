@@ -107,6 +107,9 @@ export default function ProfesorView({ profesor, onUpdate, onRefresh }: Props) {
         onNewRAChange={ctx.setNewRA}
         onAddRA={ctx.addRA}
         onRemoveRA={ctx.removeRA}
+        onEditRA={ctx.startEditRA}
+        onCancelEditRA={ctx.cancelEditRA}
+        editingRAId={ctx.editingRAId}
         newTutoria={ctx.newTutoria}
         setNewTutoria={ctx.setNewTutoria}
         onAddTutoria={ctx.addTutoria}

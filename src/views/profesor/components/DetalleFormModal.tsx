@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, CheckCircle, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Pencil, X, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { DetalleAcademico, ResultadoAprendizaje } from '../../../types/index.ts';
 import { DateList } from '../../../components/ui/DateList.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
@@ -30,6 +30,9 @@ interface DetalleFormModalProps {
   onNewRAChange: (ra: Partial<ResultadoAprendizaje>) => void;
   onAddRA: () => void;
   onRemoveRA: (id: string) => void;
+  onEditRA: (ra: ResultadoAprendizaje) => void;
+  onCancelEditRA: () => void;
+  editingRAId: string | null;
   newTutoria: string;
   setNewTutoria: (v: string) => void;
   onAddTutoria: () => void;
@@ -40,7 +43,7 @@ interface DetalleFormModalProps {
 
 export function DetalleFormModal({
   open, editing, formData, onChange,
-  newRA, onNewRAChange, onAddRA, onRemoveRA,
+  newRA, onNewRAChange, onAddRA, onRemoveRA, onEditRA, onCancelEditRA, editingRAId,
   newTutoria, setNewTutoria, onAddTutoria, onRemoveTutoria,
   onSubmit, onClose,
 }: DetalleFormModalProps) {
@@ -189,6 +192,21 @@ export function DetalleFormModal({
 
             {/* Formulario de nuevo RA */}
             <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-200/60 space-y-3">
+              {editingRAId && (
+                <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2">
+                  <span className="text-[9px] font-black text-indigo-600 uppercase tracking-wider flex items-center gap-1.5">
+                    <Pencil className="h-3 w-3" /> Editando RA
+                  </span>
+                  <button
+                    type="button"
+                    onClick={onCancelEditRA}
+                    className="text-indigo-400 hover:text-indigo-700 p-1 rounded-md hover:bg-indigo-100 transition-colors"
+                    title="Cancelar edición"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
               <div className="grid grid-cols-4 gap-2">
                 <input
                   className="col-span-1 bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-indigo-400"
@@ -236,9 +254,9 @@ export function DetalleFormModal({
                 <button
                   type="button"
                   onClick={onAddRA}
-                  className="bg-indigo-600 text-white px-3 py-2 rounded-lg font-bold text-[9px] uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-1"
+                  className={`${editingRAId ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white px-3 py-2 rounded-lg font-bold text-[9px] uppercase tracking-widest transition-all flex items-center gap-1`}
                 >
-                  <Plus className="h-3 w-3" /> Añadir RA
+                  {editingRAId ? <CheckCircle className="h-3 w-3" /> : <Plus className="h-3 w-3" />} {editingRAId ? 'Guardar RA' : 'Añadir RA'}
                 </button>
               </div>
             </div>
@@ -268,13 +286,24 @@ export function DetalleFormModal({
                       </p>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => onRemoveRA(ra.id)}
-                    className="text-slate-300 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => onEditRA(ra)}
+                      className="text-slate-300 hover:text-indigo-500 p-1 rounded-md hover:bg-indigo-50 transition-colors"
+                      title="Editar RA"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onRemoveRA(ra.id)}
+                      className="text-slate-300 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"
+                      title="Eliminar RA"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {(!formData.resultadosAprendizaje || formData.resultadosAprendizaje.length === 0) && (

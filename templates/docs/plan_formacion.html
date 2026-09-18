@@ -10,7 +10,7 @@
             font-family: Arial, sans-serif;
             margin: 30px;
             color: #000;
-            font-size: 13px;
+            font-size: 12px;
             line-height: 1.4;
         }
 
@@ -235,7 +235,6 @@
                     <ul style="margin: 0;">
                         <li>En caso afirmativo, especificar medidas/adaptaciones:</li>
                     </ul>
-                    <div class="spacer"></div>
                 </td>
             </tr>
             <tr>
@@ -252,7 +251,6 @@
                     <ul style="margin: 0;">
                         <li>Indicar causa/s:</li>
                     </ul>
-                    <div class="spacer"></div>
                 </td>
             </tr>
             <tr>
@@ -270,7 +268,20 @@
             <tr>
                 <td colspan="2">
                     <div>Periodos de formación en empresa u organismo equiparado:</div>
-                    <div class="periodos"></div>
+                    <div class="periodos">
+                        <table style="width: 100%;">
+                            <tr>
+                                <th>Nº periodo</th>
+                                <th>Calendario</th>
+                                <th>Horario</th>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center">1</td>
+                                <td>Del {{FECHA_INI}} al {{FECHA_FIN}}</td>
+                                <td>{{HORARIO}}</td>
+                            </tr>
+                        </table>
+                    </div>
                 </td>
             </tr>
         </table>

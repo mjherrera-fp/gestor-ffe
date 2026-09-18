@@ -2007,7 +2007,35 @@ async function startServer() {
     }
   });
 
-  // GENERAR DOCX PLAN FORMATIVO INDIVIDUAL
+  // Generador DOCX PLAN FORMATIVO INDIVIDUAL
+  const formatearHorarioCompacto = (horario: any): string => {
+    if (!horario || typeof horario !== 'object') return '';
+    const DIAS: { key: string; abrev: string }[] = [
+      { key: 'lunes', abrev: 'L' },
+      { key: 'martes', abrev: 'M' },
+      { key: 'miercoles', abrev: 'X' },
+      { key: 'jueves', abrev: 'J' },
+      { key: 'viernes', abrev: 'V' },
+      { key: 'sabado', abrev: 'S' },
+      { key: 'domingo', abrev: 'D' },
+    ];
+    const bloques: { dias: string[]; inicio: string; fin: string; horas: number }[] = [];
+    DIAS.forEach((d) => {
+      const dia = horario[d.key];
+      if (!dia || dia.horas <= 0) return;
+      const ultimo = bloques[bloques.length - 1];
+      if (ultimo && ultimo.inicio === dia.inicio && ultimo.fin === dia.fin && ultimo.horas === dia.horas) {
+        ultimo.dias.push(d.abrev);
+      } else {
+        bloques.push({ dias: [d.abrev], inicio: dia.inicio, fin: dia.fin, horas: dia.horas });
+      }
+    });
+    return bloques.map((b) => {
+      const dias = b.dias.length > 1 ? `${b.dias[0]}-${b.dias[b.dias.length - 1]}` : b.dias[0];
+      return `${dias}: ${b.inicio}-${b.fin} (${b.horas}h)`;
+    }).join(', ');
+  };
+
   app.get('/api/relaciones-alumnos/:id/plan-formativo', (req, res) => {
 
     try {
@@ -2074,6 +2102,9 @@ async function startServer() {
         EMPRESA_TUTOR_NOMBRE_COMPLETO: `${tutorEmpresa?.nombre} ${tutorEmpresa?.apellidos}`,
         EMPRESA_TUTOR_EMAIL: tutorEmpresa?.email,
         EMPRESA_TUTOR_TELEFONO: tutorEmpresa?.tlfn,
+        FECHA_INI: alumno.fechaInicio,
+        FECHA_FIN: alumno.fechaFin,
+        HORARIO: formatearHorarioCompacto(relacion.horario),
         TOTAL_HORAS: alumno.totalHorasFFE || 0,
         modulos: RAsData //
       });
@@ -2183,6 +2214,9 @@ async function startServer() {
         EMPRESA_TUTOR_NOMBRE_COMPLETO: `${tutorEmpresa?.nombre} ${tutorEmpresa?.apellidos}`,
         EMPRESA_TUTOR_EMAIL: tutorEmpresa?.email,
         EMPRESA_TUTOR_TELEFONO: tutorEmpresa?.tlfn,
+        FECHA_INI: alumno.fechaInicio || '',
+        FECHA_FIN: alumno.fechaFin || '',
+        HORARIO: formatearHorarioCompacto(relacionAlumno.horario),
         TOTAL_HORAS: alumno.totalHorasFFE || 0,
         modulos: (detalleAcademicoGlobal?.resultadosAprendizaje || []).map((ra: any) => ({
           MODULO: ra.modulo,
