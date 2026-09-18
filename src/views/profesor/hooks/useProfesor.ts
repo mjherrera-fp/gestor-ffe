@@ -46,6 +46,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   const [newRA, setNewRA] = useState<Partial<ResultadoAprendizaje>>({
     modulo: '', codigo: '', ra: '', nombre: '', impartidoEmpresa: false, actividadFormativa: '',
   });
+  const [editingRAId, setEditingRAId] = useState<string | null>(null);
 
   // ── Festivos / Tutorías ──
   const [newFestivo, setNewFestivo] = useState('');
@@ -227,6 +228,27 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
       alert('Por favor, rellena los campos obligatorios del Resultado de Aprendizaje.');
       return;
     }
+    if (editingRAId) {
+      setDetalleFormData(prev => ({
+        ...prev,
+        resultadosAprendizaje: (prev.resultadosAprendizaje || []).map(r =>
+          r.id === editingRAId
+            ? {
+                ...r,
+                modulo: newRA.modulo!,
+                codigo: newRA.codigo!,
+                ra: newRA.ra!,
+                nombre: newRA.nombre!,
+                impartidoEmpresa: newRA.impartidoEmpresa || false,
+                actividadFormativa: newRA.actividadFormativa,
+              }
+            : r
+        ),
+      }));
+      setEditingRAId(null);
+      setNewRA({ modulo: '', codigo: '', ra: '', nombre: '', impartidoEmpresa: false, actividadFormativa: '' });
+      return;
+    }
     const ra: ResultadoAprendizaje = {
       id: crypto.randomUUID(),
       modulo: newRA.modulo!,
@@ -243,11 +265,29 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     setNewRA({ modulo: '', codigo: '', ra: '', nombre: '', impartidoEmpresa: false, actividadFormativa: '' });
   };
 
+  const startEditRA = (ra: ResultadoAprendizaje) => {
+    setEditingRAId(ra.id);
+    setNewRA({
+      modulo: ra.modulo,
+      codigo: ra.codigo,
+      ra: ra.ra,
+      nombre: ra.nombre,
+      impartidoEmpresa: ra.impartidoEmpresa || false,
+      actividadFormativa: ra.actividadFormativa,
+    });
+  };
+
+  const cancelEditRA = () => {
+    setEditingRAId(null);
+    setNewRA({ modulo: '', codigo: '', ra: '', nombre: '', impartidoEmpresa: false, actividadFormativa: '' });
+  };
+
   const removeRA = (id: string) => {
     setDetalleFormData(prev => ({
       ...prev,
       resultadosAprendizaje: (prev.resultadosAprendizaje || []).filter(r => r.id !== id),
     }));
+    if (editingRAId === id) cancelEditRA();
   };
 
   // ─────────────────────────────────────────
@@ -308,7 +348,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     handleOpenDetalleForm, handleSaveDetalle,
     // RAs
     newRA, setNewRA,
-    addRA, removeRA,
+    addRA, removeRA, startEditRA, cancelEditRA, editingRAId,
     // Festivos / Tutorías
     newFestivo, setNewFestivo, addFestivo, removeFestivo,
     newTutoria, setNewTutoria, addTutoria, removeTutoria,
