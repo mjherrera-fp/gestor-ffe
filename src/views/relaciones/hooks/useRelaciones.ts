@@ -691,7 +691,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         if (!relacion?.alumnos?.length) { alert('No hay alumnos en esta relación.'); return; }
 
         const baseUrl = `/api/relaciones-alumnos/${relacion.id}/documento`;
-        const url = tipo === 'pdf' ? `${baseUrl}/pdf?t=${Date.now()}` : `${baseUrl}?t=${Date.now()}`;
+        const url = tipo === 'pdf' ? `${baseUrl}/pdf?t=${Date.now()}&raw=1` : `${baseUrl}?t=${Date.now()}&raw=1`;
 
         try {
             const response = await fetch(url);
@@ -749,7 +749,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const numRelacionLimpio = relacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const baseUrl = `/api/relaciones-alumnos/${relacion.id}/plan-formativo`;
-        const url = tipo === 'pdf' ? `${baseUrl}/pdf?alumnoId=${alumno.id}&t=${Date.now()}` : `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}`;
+        const url = tipo === 'pdf' ? `${baseUrl}/pdf?alumnoId=${alumno.id}&t=${Date.now()}&raw=1` : `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}&raw=1`;
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
@@ -800,7 +800,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const numRelacionLimpio = relacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const baseUrl = `/api/relaciones-alumnos/${relacion.id}/seguimiento`;
-        const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}`;
+        const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}&raw=1`;
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
@@ -853,7 +853,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         let nombreEmpresa = 'Empresa';
         const convenio = convenios.find(c => c.id === relacion.convenioId);
         if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
-        const url = `${baseUrl}?t=${Date.now()}`;
+        const url = `${baseUrl}?t=${Date.now()}&raw=1`;
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
@@ -906,7 +906,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const numRelacionLimpio = relacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const baseUrl = `/api/relaciones-alumnos/${relacion.id}/calendario`;
-        const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}`;
+        const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}&raw=1`;
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
@@ -957,7 +957,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const numRelacionLimpio = relacion.numRelacion.replace(/\//g, '_');
         const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
         const baseUrl = `/api/relaciones-alumnos/${relacion.id}/valoracion`;
-        const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}`;
+        const url = `${baseUrl}?alumnoId=${alumno.id}&t=${Date.now()}&raw=1`;
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);

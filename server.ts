@@ -1812,7 +1812,7 @@ async function startServer() {
       const buf = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
       const filename = `Anexo_Relacion_${relacionAlumno.numRelacion.replace(/\//g, '_')}.docx`;
 
-      if (modo === 'crear') {
+      if (modo === 'crear' && req.query.raw !== '1') {
         const result = saveToDocs(filename, buf, empresa?.nombre);
         return res.json({ success: true, filename: result.relativePath, path: result.filePath });
       }
@@ -1978,7 +1978,7 @@ async function startServer() {
       const modo = getCreacionFicherosModo();
       const filenamePdf = `Anexo_Relacion_${relacionAlumno.numRelacion.replace(/\//g, '_')}.pdf`;
 
-      if (modo === 'crear') {
+      if (modo === 'crear' && req.query.raw !== '1') {
         const result = saveToDocs(filenamePdf, Buffer.from(pdfBuffer), empresa?.nombre);
         return res.json({ success: true, filename: result.relativePath, path: result.filePath });
       }
@@ -2122,7 +2122,7 @@ async function startServer() {
       const modoPF = getCreacionFicherosModo();
       const filenamePF = `Plan_Formativo_${alumno.apellidos.replace(/\s+/g, '_')}.docx`;
 
-      if (modoPF === 'crear') {
+      if (modoPF === 'crear' && req.query.raw !== '1') {
         const cfg = getCreacionFicherosConfig();
         const subdirs = [empresa?.nombre];
         if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
@@ -2258,7 +2258,7 @@ async function startServer() {
       const modoPFPDF = getCreacionFicherosModo();
       const filenamePFPDF = `Plan_Formativo_${alumno.apellidos.replace(/\s+/g, '_')}.pdf`;
 
-      if (modoPFPDF === 'crear') {
+      if (modoPFPDF === 'crear' && req.query.raw !== '1') {
         const cfg = getCreacionFicherosConfig();
         const subdirs = [empresa?.nombre];
         if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
@@ -2435,7 +2435,7 @@ async function startServer() {
       const modoCal = getCreacionFicherosModo();
       const filenameCal = `Calendario_${alumno.apellidos.replace(/\s+/g, '_')}.pdf`;
 
-      if (modoCal === 'crear') {
+      if (modoCal === 'crear' && req.query.raw !== '1') {
         const cfg = getCreacionFicherosConfig();
         const subdirs = [empresa?.nombre];
         if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
@@ -2530,7 +2530,7 @@ async function startServer() {
       const modoCarta = getCreacionFicherosModo();
       const filenameCarta = `Carta_Informativa_${sanitizeDirName(empresa?.nombre || '').replace(/\s+/g, '_')}.pdf`;
 
-      if (modoCarta === 'crear') {
+      if (modoCarta === 'crear' && req.query.raw !== '1') {
         const result = saveToDocs(filenameCarta, Buffer.from(pdfBuffer), empresa?.nombre);
         return res.json({ success: true, filename: result.relativePath, path: result.filePath });
       }
@@ -2644,7 +2644,7 @@ async function startServer() {
       const modeSeg = getCreacionFicherosModo();
       const filenameSeg = `Seguimiento_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.apellidos.replace(/\s+/g, '_')}.docx`;
 
-      if (modeSeg === 'crear') {
+      if (modeSeg === 'crear' && req.query.raw !== '1') {
         const cfg = getCreacionFicherosConfig();
         const subdirs = [empresa?.nombre];
         if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
@@ -2739,7 +2739,7 @@ async function startServer() {
       const modoVal = getCreacionFicherosModo();
       const filenameVal = `Valoracion_final_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.apellidos.replace(/\s+/g, '_')}.docx`;
 
-      if (modoVal === 'crear') {
+      if (modoVal === 'crear' && req.query.raw !== '1') {
         const cfg = getCreacionFicherosConfig();
         const subdirs = [empresa?.nombre];
         if (cfg.carpeta_estudiante) subdirs.push(`${alumno.apellidos}_${alumno.nombre}`);
