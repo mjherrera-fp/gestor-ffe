@@ -11,6 +11,7 @@ import Superscript from '@tiptap/extension-superscript';
 import {Image} from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
 import {Selection} from '@tiptap/extensions';
+import {TextStyle, Color} from '@tiptap/extension-text-style';
 import {Table, TableCell, TableHeader, TableRow} from '@tiptap/extension-table';
 import "@/components/tiptap-node/list-node/list-node.scss";
 import "@/components/tiptap-node/heading-node/heading-node.scss";
@@ -43,6 +44,7 @@ import {CodeBlockButton} from '@/components/tiptap-ui/code-block-button';
 import {MarkButton} from '@/components/tiptap-ui/mark-button';
 import {TextAlignButton} from '@/components/tiptap-ui/text-align-button';
 import {ColorHighlightPopover} from '@/components/tiptap-ui/color-highlight-popover';
+import {TextColorPopover} from '@/components/tiptap-ui/text-color-popover';
 import {LinkPopover} from '@/components/tiptap-ui/link-popover';
 import {TableDropdownMenu} from '@/components/tiptap-ui/table-dropdown-menu';
 
@@ -350,6 +352,8 @@ export function EmailModal({
       Underline,
       Placeholder.configure({ placeholder: 'Escribe el contenido del correo aquí...' }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TextStyle,
+      Color,
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
@@ -854,6 +858,7 @@ export function EmailModal({
                           <MarkButton type="underline" />
                           <MarkButton type="strike" />
                           <MarkButton type="code" />
+                          <TextColorPopover />
                           <ColorHighlightPopover />
                           <LinkPopover />
                         </ToolbarGroup>
