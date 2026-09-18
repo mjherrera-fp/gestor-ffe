@@ -328,11 +328,6 @@ export function GestorDocumentalModal({
                 }
                 setNextcloudFolderPaths([folder]);
                 setNextcloudConfirmOpen(true);
-            } else if (entidad === 'com-dat' && estado === 'COMPLETADO') {
-                const folderKey = detalleAcademicoId ? `folder_${detalleAcademicoId}` : null;
-                const folder = (folderKey && config[folderKey]) || config.folder_default || '/';
-                setNextcloudFolderPaths([folder]);
-                setNextcloudConfirmOpen(true);
             } else if (estado === 'PENDIENTE_ENVIAR_DIRECTOR') {
                 const sendKey = entidad === 'relacion' ? 'folder_send_principal_rel' : 'folder_send_principal_conv';
                 const label = entidad === 'relacion' ? 'Relaciones' : 'Convenio / Acuerdo';

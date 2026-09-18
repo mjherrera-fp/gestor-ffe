@@ -533,13 +533,22 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     const advanceStatus = async (rel: RelacionAlumno) => {
         const nextEstado = getNextRelacionEstado(rel.estado);
         if (nextEstado === rel.estado) return;
-        await fetch(`/api/relaciones-alumnos/${rel.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...rel, estado: nextEstado }),
-        });
-        setSelectedRelacion({ ...rel, estado: nextEstado });
-        fetchData();
+        try {
+            const res = await fetch(`/api/relaciones-alumnos/${rel.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...rel, estado: nextEstado }),
+            });
+            if (res.ok) {
+                setSelectedRelacion({ ...rel, estado: nextEstado });
+                fetchData();
+            } else {
+                mostrarToast('Error al avanzar el estado', 'error');
+            }
+        } catch (error) {
+            console.error('Error al avanzar estado:', error);
+            mostrarToast('Error al avanzar el estado', 'error');
+        }
     };
 
     const moveBackStatus = async (rel: RelacionAlumno) => {

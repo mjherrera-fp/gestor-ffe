@@ -136,7 +136,15 @@ async function startServer() {
   }
 
   function sanitizeDirName(name: string): string {
-    return name.replace(/[<>:"/\\|?*]/g, '_').trim();
+    const reservedNames = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+    let sanitized = String(name ?? '')
+      .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_')
+      .replace(/[. ]+$/g, '')
+      .trim();
+    if (/^[.]+$/.test(sanitized)) sanitized = '';
+    if (reservedNames.test(sanitized)) sanitized += '_';
+    if (!sanitized) sanitized = 'Carpeta';
+    return sanitized.slice(0, 255);
   }
 
   function saveToDocs(filename: string, buffer: Buffer, ...subdirs: string[]): { filePath: string; relativePath: string } {
@@ -1114,14 +1122,13 @@ async function startServer() {
       const parts = (convenioRow.numConvenio as string).split('/');
       const ref = parts.length > 1 ? parts[parts.length - 1].trim() : (convenioRow.numConvenio as string).trim();
       const paddedRef = ref.padStart(4, '0');
-      const empresaSanitized = (convenioRow.empresaNombre as string).replace(/[<>:"/\\|?*]/g, '_').trim();
+      const empresaSanitized = sanitizeDirName((convenioRow.empresaNombre as string) || '');
       finalNombre = `CONV_${paddedRef}_${empresaSanitized}.pdf`;
     }
 
     const nextVersion = DocConvenioDAO.getNextVersion(Number(convenioId));
 
-    const fileBuffer = fs.readFileSync(req.file.path);
-    const base64Data = fileBuffer.toString('base64');
+    const base64Data = req.file.buffer.toString('base64');
     const dataURI = `data:${req.file.mimetype};base64,${base64Data}`;
 
     const id = DocConvenioDAO.create({
@@ -1185,8 +1192,7 @@ async function startServer() {
 
     const nextVersion = DocRelacionDAO.getNextVersion(Number(relacionId));
 
-    const fileBuffer = fs.readFileSync(req.file.path);
-    const base64Data = fileBuffer.toString('base64');
+    const base64Data = req.file.buffer.toString('base64');
     const dataURI = `data:${req.file.mimetype};base64,${base64Data}`;
 
     const id = DocRelacionDAO.create({
@@ -1248,8 +1254,7 @@ async function startServer() {
 
       const nextVersion = dao.getNextVersion(Number(relacionId), Number(alumnoId));
 
-      const fileBuffer = fs.readFileSync(req.file.path);
-      const base64Data = fileBuffer.toString('base64');
+      const base64Data = req.file.buffer.toString('base64');
       const dataURI = `data:${req.file.mimetype};base64,${base64Data}`;
 
       const id = dao.create({
@@ -1303,8 +1308,7 @@ async function startServer() {
     if (!comunicacionDatId) return res.status(400).json({error: 'Falta comunicacionDatId'});
 
     const nextVersion = DocComunicacionDATDAO.getNextVersion(Number(comunicacionDatId));
-    const fileBuffer = fs.readFileSync(req.file.path);
-    const base64Data = fileBuffer.toString('base64');
+    const base64Data = req.file.buffer.toString('base64');
     const dataURI = `data:${req.file.mimetype};base64,${base64Data}`;
 
     const id = DocComunicacionDATDAO.create({
@@ -2490,7 +2494,7 @@ async function startServer() {
 
       // 4. ENVÍO SEGURO DEL BUFFER
       const modoCarta = getCreacionFicherosModo();
-      const filenameCarta = `Carta_Informativa_${empresa?.nombre.replace(/\s+/g, '_')}.pdf`;
+      const filenameCarta = `Carta_Informativa_${sanitizeDirName(empresa?.nombre || '').replace(/\s+/g, '_')}.pdf`;
 
       if (modoCarta === 'crear') {
         const result = saveToDocs(filenameCarta, Buffer.from(pdfBuffer), empresa?.nombre);

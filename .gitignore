@@ -6,6 +6,7 @@ binarios/
 release/
 coverage/
 docs/
+!templates/docs/
 .DS_Store
 *.log
 .env*
