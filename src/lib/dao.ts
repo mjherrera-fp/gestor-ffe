@@ -1081,22 +1081,19 @@ export const RelacionAlumnoDAO = {
       );
 
       // 2. Gestionar alumnos: Primero desvinculamos a los que ya no están
-      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = NULL, estadoSeguimiento = NULL, estadoValoracion = NULL WHERE relacionId = ?').run(id);
+      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL WHERE relacionId = ?').run(id);
 
-      // 3. Vinculamos a los nuevos/actuales
+      // 3. Vinculamos a los nuevos/actuales (conservando su estado individual)
       const stmtAlumno = db.prepare(`
         UPDATE alumnos SET 
           relacionId = ?, 
           fechaInicio = ?,
-          fechaFin = ?,
-          estadoPlanFormativo = ?,
-          estadoSeguimiento = ?,
-          estadoValoracion = ?
+          fechaFin = ?
         WHERE id = ?
       `);
 
       for (const alu of rel.alumnos) {
-        stmtAlumno.run(id, alu.fechaInicio, alu.fechaFin, 'PENDIENTE_ENVIAR_ESTUDIANTE', 'PENDIENTE', 'PENDIENTE', alu.id);
+        stmtAlumno.run(id, alu.fechaInicio, alu.fechaFin, alu.id);
       }
 
       // 4. Sincronizar empresa_estadisticas
@@ -1110,7 +1107,7 @@ export const RelacionAlumnoDAO = {
 
     db.transaction(() => {
       // 1. Limpiamos la referencia en los alumnos antes de borrar la relación
-      db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = NULL, estadoSeguimiento = NULL, estadoValoracion = NULL WHERE relacionId = ?').run(id);
+      db.prepare(`UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = 'PENDIENTE_ENVIAR_ESTUDIANTE', estadoSeguimiento = 'PENDIENTE', estadoValoracion = 'PENDIENTE' WHERE relacionId = ?`).run(id);
 
       // 2. Borramos la relación
       db.prepare('DELETE FROM relaciones WHERE id = ?').run(id);
@@ -1433,19 +1430,19 @@ export const AvisosDAO = {
     for (const alu of alumnos) {
       const fechaInicio = new Date(alu.fechaInicio + 'T00:00:00');
       const fechaFin = new Date(alu.fechaFin + 'T00:00:00');
-      const diffInicioMs = today.getTime() - fechaInicio.getTime();
       const diffFinMs = fechaFin.getTime() - today.getTime();
-      const diasDesdeInicio = Math.floor(diffInicioMs / (1000 * 60 * 60 * 24));
+      const diffInicioMs = today.getTime() - fechaInicio.getTime();
       const diasHastaFin = Math.floor(diffFinMs / (1000 * 60 * 60 * 24));
+      const diasDesdeInicio = Math.floor(diffInicioMs / (1000 * 60 * 60 * 24));
 
       const nombreCompleto = `${alu.nombre} ${alu.apellidos}`;
 
-      // Alumnos a X semanas de empezar
-      if (diasDesdeInicio >= semanasInicio * 7 && !AvisosDAO.existeAutomatico(alu.id, 'inicio')) {
+      // Alumnos a X semanas de empezar (fecha de inicio a X semanas o menos)
+      if (diasDesdeInicio >= -semanasInicio * 7 && diasDesdeInicio <= 0 && !AvisosDAO.existeAutomatico(alu.id, 'inicio')) {
         AvisosDAO.crear({
           fecha_aviso: today.toISOString().split('T')[0],
           asunto: `Alumno a ${semanasInicio} semana(s) de empezar`,
-          descripcion: `${nombreCompleto} - Inició las prácticas el ${alu.fechaInicio}`,
+          descripcion: `${nombreCompleto} - Iniciará las prácticas el ${alu.fechaInicio}`,
           origen: 'automatico',
           alumno_id: alu.id,
           tipo_aviso: 'inicio',
@@ -1457,7 +1454,7 @@ export const AvisosDAO = {
         || alu.estadoSeguimiento !== 'RECIBIDO'
         || alu.estadoValoracion !== 'RECIBIDO';
 
-      if (diasDesdeInicio >= semanasInicioDocs * 7 && tieneDocsPendientes && !AvisosDAO.existeAutomatico(alu.id, 'inicio_documentos')) {
+      if (diasDesdeInicio >= -semanasInicioDocs * 7 && diasDesdeInicio <= 0 && tieneDocsPendientes && !AvisosDAO.existeAutomatico(alu.id, 'inicio_documentos')) {
         AvisosDAO.crear({
           fecha_aviso: today.toISOString().split('T')[0],
           asunto: `Documentos pendientes a ${semanasInicioDocs} semana(s) de empezar`,
@@ -1468,8 +1465,8 @@ export const AvisosDAO = {
         });
       }
 
-      // Alumnos a X semanas de terminar
-      if (diasHastaFin >= semanasFin * 7 && diasHastaFin > 0 && !AvisosDAO.existeAutomatico(alu.id, 'fin')) {
+      // Alumnos a X semanas de terminar (fecha de fin a X semanas o menos)
+      if (diasHastaFin > 0 && diasHastaFin <= semanasFin * 7 && !AvisosDAO.existeAutomatico(alu.id, 'fin')) {
         AvisosDAO.crear({
           fecha_aviso: today.toISOString().split('T')[0],
           asunto: `Alumno a ${semanasFin} semana(s) de terminar`,
