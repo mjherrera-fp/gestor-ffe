@@ -26,9 +26,10 @@ Aplicación de escritorio para la gestión integral de la Fase de Formación en 
 11. [Correo Electrónico](#11-correo-electrónico)
     1. [Configuración SMTP](#111-configuración-smtp)
     2. [Envío de correos](#112-envío-de-correos)
-    3. [Plantillas de correo](#113-plantillas-de-correo)
-    4. [Marcadores](#114-marcadores)
-    5. [Integración con Empresas y Relaciones](#115-integración-con-empresas-y-relaciones)
+    3. [Guardado en la carpeta Enviados](#113-guardado-en-la-carpeta-enviados)
+    4. [Plantillas de correo](#114-plantillas-de-correo)
+    5. [Marcadores](#115-marcadores)
+    6. [Integración con Empresas y Relaciones](#116-integración-con-empresas-y-relaciones)
 12. [Panel de Control](#12-panel-de-control)
 13. [Configuración](#13-configuración)
 14. [Histórico / Auditoría](#14-histórico--auditoría)
@@ -428,11 +429,26 @@ El editor de correo incluye:
 
 > `[IMAGEN: Modal de envío de correo con editor y selección de adjuntos]`
 
-### 11.3 Plantillas de correo
+### 11.3 Guardado en la carpeta Enviados
+
+El servidor SMTP de EducaMadrid no guarda por sí mismo una copia de los correos que se envían desde aplicaciones externas. Para que los envíos aparezcan en la carpeta **Enviados** de tu webmail, la aplicación guarda automáticamente una copia del mensaje en el servidor mediante **IMAP** justo después de enviarlo.
+
+En **Configuración → Correo → Guardar copia en el servidor (Enviados)** puedes:
+
+- **Activar o desactivar** el guardado de copias. Está activado por defecto.
+- Ajustar los datos de conexión IMAP: **servidor**, **puerto**, **carpeta** y **conexión segura SSL/TLS**.
+
+Los valores por defecto son `imap.educa.madrid.org`, puerto `993`, conexión segura activada y carpeta `Sent`. Se reutilizan el usuario y la contraseña configurados para el envío (SMTP).
+
+> El guardado en Enviados es opcional y no bloquea el envío: si la conexión IMAP falla, el correo se envía igualmente y solo se omite la copia en el servidor. En los envíos reales la copia IMAP se hace en segundo plano (no retrasa la entrega) y la conexión se reintenta varias veces con timeouts amplios; el botón **Probar configuración** sí espera al guardado IMAP y muestra si la copia se guardó correctamente.
+
+> El servidor IMAP de EducaMadrid usa un certificado no firmado por una CA pública, por lo que la conexión IMAP se realiza **sin validar la cadena de certificados** (el tráfico sigue cifrado con TLS, ejecutándose el login del usuario con su contraseña SMTP). Si necesitas conexiones IMAP con validación estricta, usa un servidor con certificado válido.
+
+### 11.4 Plantillas de correo
 
 Las plantillas de correo permiten crear mensajes predefinidos reutilizables que incorporan datos dinámicos mediante **marcadores**. Se gestionan desde **Configuración → Correo → Plantillas**.
 
-#### 11.3.1 Gestión de plantillas
+#### 11.4.1 Gestión de plantillas
 
 Desde la sección Plantillas puedes:
 
@@ -441,7 +457,7 @@ Desde la sección Plantillas puedes:
 - **Eliminar plantilla:** las plantillas personalizadas pueden eliminarse mediante el botón de papelera, con confirmación previa. Las plantillas de sistema no se pueden eliminar.
 - **Filtrar por ámbito:** usa los filtros superiores para ver plantillas de Empresas, Relaciones o Todos los ámbitos.
 
-#### 11.3.2 Editor WYSIWYG
+#### 11.4.2 Editor WYSIWYG
 
 Al editar una plantilla, se abre un editor visual basado en **TipTap** con las siguientes herramientas:
 
@@ -453,9 +469,9 @@ Al editar una plantilla, se abre un editor visual basado en **TipTap** con las s
 - Enlaces.
 - Deshacer / Rehacer.
 
-El cuerpo de la plantilla puede incluir **marcadores** (ver sección 11.4) que serán reemplazados por datos reales al enviar el correo.
+El cuerpo de la plantilla puede incluir **marcadores** (ver sección 11.5) que serán reemplazados por datos reales al enviar el correo.
 
-#### 11.3.3 Tarjetas de plantilla
+#### 11.4.3 Tarjetas de plantilla
 
 Cada plantilla se muestra como una tarjeta con:
 - **Icono y color:** las plantillas de sistema tienen icono y color predefinidos. Las personalizadas usan PencilRuler con el color hex seleccionado.
@@ -464,7 +480,7 @@ Cada plantilla se muestra como una tarjeta con:
 - **Botón de editar** (lápiz, aparece al hacer hover) — no visible en la plantilla "Otros".
 - **Botón de eliminar** (papelera, aparece al hacer hover) — solo en plantillas personalizadas.
 
-#### 11.3.4 La plantilla "Otros"
+#### 11.4.4 La plantilla "Otros"
 
 La plantilla **"Otros"** es una plantilla de sistema especial:
 - **No tiene contenido editable** — se usa como opción genérica para cualquier situación.
@@ -473,11 +489,11 @@ La plantilla **"Otros"** es una plantilla de sistema especial:
 - **No muestra botón de editar** ni se puede eliminar.
 - Se distingue visualmente mostrando "Todos" como ámbito.
 
-### 11.4 Marcadores
+### 11.5 Marcadores
 
 Los marcadores son códigos insertados en el cuerpo de las plantillas que se reemplazan automáticamente por datos reales del alumno, empresa o relación al enviar el correo.
 
-#### 11.4.1 Marcadores predefinidos de sistema
+#### 11.5.1 Marcadores predefinidos de sistema
 
 | Marcador | Descripción |
 |----------|-------------|
@@ -496,7 +512,7 @@ Los marcadores son códigos insertados en el cuerpo de las plantillas que se ree
 | `{{@contacto}}` | Persona de contacto (se resuelve individualmente por cada destinatario en envíos uno a uno) |
 | `{{@nombreEmpresa}}` | Nombre de la empresa (se resuelve individualmente por cada destinatario) |
 
-#### 11.4.2 Marcadores personalizados
+#### 11.5.2 Marcadores personalizados
 
 Además de los marcadores de sistema, puedes crear **marcadores personalizados** a tu medida. Se gestionan desde **Configuración → Correo → Marcadores**.
 
@@ -510,7 +526,7 @@ Los marcadores personalizados se renderizan con un editor WYSIWYG reducido y se 
 
 **Editar o eliminar:** usa los iconos de lápiz y papelera en cada tarjeta de marcador. La eliminación requiere confirmación.
 
-#### 11.4.3 Aplicación de marcadores
+#### 11.5.3 Aplicación de marcadores
 
 Cuando envías un correo usando una plantilla desde los módulos de **Empresas** o **Relaciones**:
 
@@ -521,7 +537,7 @@ Cuando envías un correo usando una plantilla desde los módulos de **Empresas**
 
 > ⚠️ Los marcadores con `@` (p.ej. `{{@contacto}}`) se ven en el editor y solo se sustituyen en el momento del envío, permitiendo enviar el mismo correo a varias empresas con los datos personalizados de cada una.
 
-### 11.5 Integración con Empresas y Relaciones
+### 11.6 Integración con Empresas y Relaciones
 
 Al enviar un correo desde los módulos de **Empresas** o **Relaciones**:
 1. Se muestra un selector modal con todas las plantillas aplicables al ámbito actual.

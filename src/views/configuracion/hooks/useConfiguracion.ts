@@ -10,6 +10,11 @@ export interface EmailConfig {
   smtp_email: string;
   smtp_secure: boolean;
   send_delay_ms: number;
+  guardar_enviados: boolean;
+  imap_host: string;
+  imap_port: number;
+  imap_secure: boolean;
+  imap_folder: string;
 }
 
 export function useConfiguracion() {
@@ -22,6 +27,11 @@ export function useConfiguracion() {
     smtp_email: '',
     smtp_secure: true,
     send_delay_ms: 1500,
+    guardar_enviados: true,
+    imap_host: 'imap.educa.madrid.org',
+    imap_port: 993,
+    imap_secure: true,
+    imap_folder: 'Sent',
   });
   const [savingEmail, setSavingEmail] = useState(false);
   const [successEmail, setSuccessEmail] = useState(false);
@@ -64,6 +74,11 @@ export function useConfiguracion() {
           smtp_email: cfg.smtp_email || (cfg.smtp_user ? `${cfg.smtp_user}@educa.madrid.org` : ''),
           smtp_secure: cfg.smtp_secure === '1',
           send_delay_ms: cfg.send_delay_ms ? Number(cfg.send_delay_ms) : 1500,
+          guardar_enviados: cfg.guardar_enviados === undefined ? true : cfg.guardar_enviados === '1',
+          imap_host: cfg.imap_host || 'imap.educa.madrid.org',
+          imap_port: cfg.imap_port ? Number(cfg.imap_port) : 993,
+          imap_secure: cfg.imap_secure === undefined ? true : cfg.imap_secure === '1',
+          imap_folder: cfg.imap_folder || 'Sent',
         });
       }
       // Cargar datos del profesor
@@ -140,7 +155,15 @@ export function useConfiguracion() {
         }),
       });
       if (res.ok) {
-        setTestEmailResult({ type: 'success', message: `Correo de prueba enviado a ${profesorEmail}` });
+        const data = await res.json();
+        const baseMsg = `Correo de prueba enviado a ${profesorEmail}`;
+        let message = baseMsg;
+        if (data.copiadoEnviados === 'ok') {
+          message = `${baseMsg}. Copia guardada en Enviados.`;
+        } else if (data.copiadoEnviados === 'error') {
+          message = `${baseMsg}. AVISO: no se pudo guardar la copia en Enviados (${data.imapError || 'error de conexión IMAP'}).`;
+        }
+        setTestEmailResult({ type: 'success', message });
       } else {
         const data = await res.json();
         setTestEmailResult({ type: 'error', message: data.error || 'Error al enviar correo de prueba' });

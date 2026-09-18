@@ -19,6 +19,7 @@ export interface EmailAttachment {
 export interface EmailSendRequest {
   to: string[];
   cc: string[];
+  bcc: string[];
   subject: string;
   html: string;
   attachments: { filename: string; path: string }[];
