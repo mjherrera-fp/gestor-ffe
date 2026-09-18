@@ -11,12 +11,14 @@ import Superscript from '@tiptap/extension-superscript';
 import {Image} from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
 import {Selection} from '@tiptap/extensions';
-import {TextStyle, Color} from '@tiptap/extension-text-style';
+import {TextStyle, Color, FontSize} from '@tiptap/extension-text-style';
 import {Table, TableCell, TableHeader, TableRow} from '@tiptap/extension-table';
+import {HorizontalRule} from '@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension';
 import "@/components/tiptap-node/list-node/list-node.scss";
 import "@/components/tiptap-node/heading-node/heading-node.scss";
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/table-node/table-node.scss";
+import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss";
 import {
   Briefcase,
   FileText,
@@ -35,7 +37,6 @@ import {EmailAttachment, EmailSendRequest, GrupoContacto} from '../types/email.t
 import {deleteAttachment, uploadAttachment} from '../utils/emailUtils.ts';
 import {Title} from './Title.tsx';
 import {Toolbar, ToolbarGroup, ToolbarSeparator} from '@/components/tiptap-ui-primitive/toolbar';
-import {Spacer} from '@/components/tiptap-ui-primitive/spacer';
 import {UndoRedoButton} from '@/components/tiptap-ui/undo-redo-button';
 import {HeadingDropdownMenu} from '@/components/tiptap-ui/heading-dropdown-menu';
 import {ListDropdownMenu} from '@/components/tiptap-ui/list-dropdown-menu';
@@ -47,6 +48,12 @@ import {ColorHighlightPopover} from '@/components/tiptap-ui/color-highlight-popo
 import {TextColorPopover} from '@/components/tiptap-ui/text-color-popover';
 import {LinkPopover} from '@/components/tiptap-ui/link-popover';
 import {TableDropdownMenu} from '@/components/tiptap-ui/table-dropdown-menu';
+import {FontSizeDropdown} from '@/components/tiptap-ui/font-size-dropdown';
+import {ClearFormattingButton} from '@/components/tiptap-ui/clear-formatting-button';
+import {HorizontalRuleButton} from '@/components/tiptap-ui/horizontal-rule-button';
+import {EmojiPicker} from '@/components/tiptap-ui/emoji-picker';
+import {ImageInsertButton} from '@/components/tiptap-ui/image-insert-button';
+import {WordCharacterCount} from '@/components/tiptap-ui/word-character-count';
 
 interface EmailContact {
   id: number;
@@ -354,6 +361,7 @@ export function EmailModal({
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       TextStyle,
       Color,
+      FontSize,
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
@@ -362,6 +370,7 @@ export function EmailModal({
       Superscript,
       Subscript,
       Selection,
+      HorizontalRule,
       Table.configure({ resizable: true }),
       TableRow,
       TableCell,
@@ -504,7 +513,7 @@ export function EmailModal({
       return;
     }
 
-    const sendHtml = (h: string) => `<html lang="es"><head><meta charset="utf-8"><style>p{margin:0 0 1.25em 0 !important}h1{font-size:1.5em;font-weight:700;margin:0 0 0.5em 0 !important}h2{font-size:1.25em;font-weight:700;margin:0 0 0.5em 0 !important}h3{font-size:1.125em;font-weight:600;margin:0 0 0.5em 0 !important}blockquote{padding-left:1em;margin:1.5rem 0;border-left:4px solid #cbd5e1}blockquote p{margin:0}ul{list-style:disc outside;margin:0 0 1.25em 0 !important}ol{list-style:decimal outside;margin:0 0 1.25em 0 !important}li{margin:0 !important}li>p{margin:0 !important}table{border-collapse:collapse;width:100%;margin:0 0 1.25em 0}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style></head><body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333">${h}</body></html>`;
+    const sendHtml = (h: string) => `<html lang="es"><head><meta charset="utf-8"><style>p{margin:0 0 1.25em 0 !important}h1{font-size:1.5em;font-weight:700;margin:0 0 0.5em 0 !important}h2{font-size:1.25em;font-weight:700;margin:0 0 0.5em 0 !important}h3{font-size:1.125em;font-weight:600;margin:0 0 0.5em 0 !important}blockquote{padding-left:1em;margin:1.5rem 0;border-left:4px solid #cbd5e1}blockquote p{margin:0}ul{list-style:disc outside;margin:0 0 1.25em 0 !important}ol{list-style:decimal outside;margin:0 0 1.25em 0 !important}li{margin:0 !important}li>p{margin:0 !important}table{border-collapse:collapse;width:100%;margin:0 0 1.25em 0}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style></head><body style="margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333">${h}</body></html>`;
 
     const stripMarkers = (h: string) => h.replace(/\{\{@\w+\}\}/g, '');
 
@@ -838,7 +847,6 @@ export function EmailModal({
                     <style>{`.editor-body .ProseMirror p { margin-bottom: 1.25em; } .editor-body .ProseMirror ul { margin-bottom: 1.25em; }`}</style>
                     <EditorContext.Provider value={{ editor }}>
                       <Toolbar variant="fixed">
-                        <Spacer />
                         <ToolbarGroup>
                           <UndoRedoButton action="undo" />
                           <UndoRedoButton action="redo" />
@@ -846,8 +854,9 @@ export function EmailModal({
                         <ToolbarSeparator />
                         <ToolbarGroup>
                           <HeadingDropdownMenu modal={false} levels={[1, 2, 3]} />
-                          <ListDropdownMenu modal={false} types={['bulletList', 'orderedList']} />
+                          <ListDropdownMenu modal={false} types={['bulletList', 'orderedList', 'taskList']} />
                           <BlockquoteButton />
+                          <HorizontalRuleButton editor={editor} />
                           <CodeBlockButton />
                           <TableDropdownMenu editor={editor} />
                         </ToolbarGroup>
@@ -859,6 +868,8 @@ export function EmailModal({
                           <MarkButton type="strike" />
                           <MarkButton type="code" />
                           <TextColorPopover />
+                          <FontSizeDropdown modal={false} />
+                          <ClearFormattingButton editor={editor} />
                           <ColorHighlightPopover />
                           <LinkPopover />
                         </ToolbarGroup>
@@ -874,9 +885,16 @@ export function EmailModal({
                           <TextAlignButton align="right" />
                           <TextAlignButton align="justify" />
                         </ToolbarGroup>
-                        <Spacer />
+                        <ToolbarSeparator />
+                        <ToolbarGroup>
+                          <ImageInsertButton editor={editor} />
+                          <EmojiPicker editor={editor} />
+                        </ToolbarGroup>
                       </Toolbar>
                       <EditorContent editor={editor} />
+                      <div className="flex justify-end px-3 py-1.5 text-[11px] text-slate-400 border-t border-slate-100">
+                        <WordCharacterCount editor={editor} />
+                      </div>
                     </EditorContext.Provider>
                   </div>
                 </div>

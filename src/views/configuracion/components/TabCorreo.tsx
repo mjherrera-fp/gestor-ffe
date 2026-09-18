@@ -39,10 +39,10 @@ import Typography from '@tiptap/extension-typography';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import {Selection} from '@tiptap/extensions';
-import {TextStyle, Color} from '@tiptap/extension-text-style';
+import {TextStyle, Color, FontSize} from '@tiptap/extension-text-style';
 import {Table, TableCell, TableHeader, TableRow} from '@tiptap/extension-table';
+import {HorizontalRule} from '@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension';
 import {Toolbar, ToolbarGroup, ToolbarSeparator} from '@/components/tiptap-ui-primitive/toolbar';
-import {Spacer} from '@/components/tiptap-ui-primitive/spacer';
 import {UndoRedoButton} from '@/components/tiptap-ui/undo-redo-button';
 import {HeadingDropdownMenu} from '@/components/tiptap-ui/heading-dropdown-menu';
 import {ListDropdownMenu} from '@/components/tiptap-ui/list-dropdown-menu';
@@ -58,6 +58,13 @@ import '@/components/tiptap-node/list-node/list-node.scss';
 import '@/components/tiptap-node/heading-node/heading-node.scss';
 import '@/components/tiptap-node/blockquote-node/blockquote-node.scss';
 import '@/components/tiptap-node/table-node/table-node.scss';
+import '@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss';
+import {FontSizeDropdown} from '@/components/tiptap-ui/font-size-dropdown';
+import {ClearFormattingButton} from '@/components/tiptap-ui/clear-formatting-button';
+import {HorizontalRuleButton} from '@/components/tiptap-ui/horizontal-rule-button';
+import {EmojiPicker} from '@/components/tiptap-ui/emoji-picker';
+import {ImageInsertButton} from '@/components/tiptap-ui/image-insert-button';
+import {WordCharacterCount} from '@/components/tiptap-ui/word-character-count';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
@@ -238,6 +245,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       TextAlign.configure({types: ['heading', 'paragraph']}),
       TextStyle,
       Color,
+      FontSize,
       TaskList,
       TaskItem.configure({nested: true}),
       Highlight.configure({multicolor: true}),
@@ -246,6 +254,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       Superscript,
       Subscript,
       Selection,
+      HorizontalRule,
       Table.configure({resizable: true}),
       TableRow,
       TableCell,
@@ -258,21 +267,16 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
     },
   });
 
-  const isSettingFirmaContent = useRef(false);
   const firmaEditorInitialized = useRef(false);
 
   useEffect(() => {
     if (!firmaEditor || !firmaCorreo || firmaEditorInitialized.current) return;
-    isSettingFirmaContent.current = true;
     firmaEditor.commands.setContent(firmaCorreo);
-    queueMicrotask(() => {
-      isSettingFirmaContent.current = false;
-    });
     firmaEditorInitialized.current = true;
   }, [firmaEditor, firmaCorreo]);
 
   useEffect(() => {
-    if (!firmaEditor || isSettingFirmaContent.current) return;
+    if (!firmaEditor) return;
     const handler = () => {
       setFirmaCorreo(firmaEditor.getHTML());
     };
@@ -280,7 +284,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
     return () => {
       firmaEditor.off('update', handler);
     };
-  }, [firmaEditor, firmaCorreo]);
+  }, [firmaEditor]);
 
   useEffect(() => {
     fetch('/api/profesor/config/correo')
@@ -297,7 +301,8 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
   const handleSaveFirma = async () => {
     setSavingFirma(true);
     setSuccessFirma(false);
-    const clean = firmaCorreo.replace(/<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, '').replace(/<br\s*class="ProseMirror-trailingBreak">/g, '');
+    const html = firmaEditor?.getHTML() || firmaCorreo;
+    const clean = html.replace(/<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, '').replace(/<br\s*class="ProseMirror-trailingBreak">/g, '');
     try {
       const res = await fetch('/api/profesor/config/correo/firma', {
         method: 'POST',
@@ -334,6 +339,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       TextStyle,
       Color,
+      FontSize,
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
@@ -342,6 +348,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       Superscript,
       Subscript,
       Selection,
+      HorizontalRule,
       Table.configure({ resizable: true }),
       TableRow,
       TableCell,
@@ -385,6 +392,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       TextStyle,
       Color,
+      FontSize,
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
@@ -393,6 +401,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       Superscript,
       Subscript,
       Selection,
+      HorizontalRule,
       Table.configure({ resizable: true }),
       TableRow,
       TableCell,
@@ -930,7 +939,6 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
             <style>{`.editor-body .ProseMirror p { margin-bottom: 0.75em; }`}</style>
             <EditorContext.Provider value={{editor: firmaEditor}}>
               <Toolbar variant="fixed">
-                <Spacer/>
                 <ToolbarGroup>
                   <UndoRedoButton action="undo"/>
                   <UndoRedoButton action="redo"/>
@@ -938,8 +946,9 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 <ToolbarSeparator/>
                 <ToolbarGroup>
                   <HeadingDropdownMenu modal={false} levels={[1, 2, 3]}/>
-                  <ListDropdownMenu modal={false} types={['bulletList', 'orderedList']}/>
+                  <ListDropdownMenu modal={false} types={['bulletList', 'orderedList', 'taskList']}/>
                   <BlockquoteButton/>
+                  <HorizontalRuleButton editor={firmaEditor}/>
                   <CodeBlockButton/>
                 </ToolbarGroup>
                 <ToolbarSeparator/>
@@ -949,6 +958,8 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   <MarkButton type="underline"/>
                   <MarkButton type="strike"/>
                   <TextColorPopover/>
+                  <FontSizeDropdown modal={false}/>
+                  <ClearFormattingButton editor={firmaEditor}/>
                   <ColorHighlightPopover/>
                   <LinkPopover/>
                 </ToolbarGroup>
@@ -959,9 +970,16 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   <TextAlignButton align="right"/>
                   <TextAlignButton align="justify"/>
                 </ToolbarGroup>
-                <Spacer/>
+                <ToolbarSeparator/>
+                <ToolbarGroup>
+                  <ImageInsertButton editor={firmaEditor}/>
+                  <EmojiPicker editor={firmaEditor}/>
+                </ToolbarGroup>
               </Toolbar>
               <EditorContent editor={firmaEditor}/>
+              <div className="flex justify-end px-3 py-1.5 text-[11px] text-text-muted border-t border-border-base">
+                <WordCharacterCount editor={firmaEditor}/>
+              </div>
             </EditorContext.Provider>
           </div>
           <div className="mt-4">
@@ -1469,7 +1487,6 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   <style>{`.editor-body .ProseMirror p { margin-bottom: 1.25em; } .editor-body .ProseMirror ul { margin-bottom: 1.25em; }`}</style>
                   <EditorContext.Provider value={{ editor: templateEditor }}>
                     <Toolbar variant="fixed">
-                      <Spacer />
                       <ToolbarGroup>
                         <UndoRedoButton action="undo" />
                         <UndoRedoButton action="redo" />
@@ -1477,8 +1494,9 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                       <ToolbarSeparator />
                       <ToolbarGroup>
                         <HeadingDropdownMenu modal={false} levels={[1, 2, 3]} />
-                        <ListDropdownMenu modal={false} types={['bulletList', 'orderedList']} />
+                        <ListDropdownMenu modal={false} types={['bulletList', 'orderedList', 'taskList']} />
                         <BlockquoteButton />
+                        <HorizontalRuleButton editor={templateEditor} />
                         <CodeBlockButton />
                         <TableDropdownMenu editor={templateEditor} />
                       </ToolbarGroup>
@@ -1490,6 +1508,8 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                         <MarkButton type="strike" />
                         <MarkButton type="code" />
                         <TextColorPopover />
+                        <FontSizeDropdown modal={false} />
+                        <ClearFormattingButton editor={templateEditor} />
                         <ColorHighlightPopover />
                         <LinkPopover />
                       </ToolbarGroup>
@@ -1505,9 +1525,16 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                         <TextAlignButton align="right" />
                         <TextAlignButton align="justify" />
                       </ToolbarGroup>
-                      <Spacer />
+                      <ToolbarSeparator />
+                      <ToolbarGroup>
+                        <ImageInsertButton editor={templateEditor} />
+                        <EmojiPicker editor={templateEditor} />
+                      </ToolbarGroup>
                     </Toolbar>
-                    <EditorContent editor={templateEditor} />
+                      <EditorContent editor={templateEditor} />
+                      <div className="flex justify-end px-3 py-1.5 text-[11px] text-text-muted border-t border-border-base">
+                        <WordCharacterCount editor={templateEditor} />
+                      </div>
                   </EditorContext.Provider>
                 </div>
                 {(() => {
@@ -1625,7 +1652,6 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   <style>{`.editor-body .ProseMirror p { margin-bottom: 1.25em; } .editor-body .ProseMirror ul { margin-bottom: 1.25em; }`}</style>
                   <EditorContext.Provider value={{ editor: markerEditor }}>
                     <Toolbar variant="fixed">
-                      <Spacer />
                       <ToolbarGroup>
                         <UndoRedoButton action="undo" />
                         <UndoRedoButton action="redo" />
@@ -1633,8 +1659,9 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                       <ToolbarSeparator />
                       <ToolbarGroup>
                         <HeadingDropdownMenu modal={false} levels={[1, 2, 3]} />
-                        <ListDropdownMenu modal={false} types={['bulletList', 'orderedList']} />
+                        <ListDropdownMenu modal={false} types={['bulletList', 'orderedList', 'taskList']} />
                         <BlockquoteButton />
+                        <HorizontalRuleButton editor={markerEditor} />
                         <CodeBlockButton />
                         <TableDropdownMenu editor={markerEditor} />
                       </ToolbarGroup>
@@ -1646,6 +1673,8 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                         <MarkButton type="strike" />
                         <MarkButton type="code" />
                         <TextColorPopover />
+                        <FontSizeDropdown modal={false} />
+                        <ClearFormattingButton editor={markerEditor} />
                         <ColorHighlightPopover />
                         <LinkPopover />
                       </ToolbarGroup>
@@ -1661,9 +1690,16 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                         <TextAlignButton align="right" />
                         <TextAlignButton align="justify" />
                       </ToolbarGroup>
-                      <Spacer />
+                      <ToolbarSeparator />
+                      <ToolbarGroup>
+                        <ImageInsertButton editor={markerEditor} />
+                        <EmojiPicker editor={markerEditor} />
+                      </ToolbarGroup>
                     </Toolbar>
                     <EditorContent editor={markerEditor} />
+                    <div className="flex justify-end px-3 py-1.5 text-[11px] text-text-muted border-t border-border-base">
+                      <WordCharacterCount editor={markerEditor} />
+                    </div>
                   </EditorContext.Provider>
                 </div>
               </div>
