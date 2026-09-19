@@ -5,6 +5,7 @@ import {
   CalendarDays,
   CheckSquare,
   Download,
+  ExternalLink,
   FileBadge,
   FileText,
   Loader2,
@@ -36,6 +37,7 @@ import {
 } from '../utils/relacionesUtils.ts';
 import {Title} from '@/src/components/Title.tsx';
 import {Modal} from '../../../components/ui/Modal.tsx';
+import {mostrarToast} from '../../../utils/toast.ts';
 
 const FIRMA_CICLO: FirmaTipo[] = [FirmaTipo.SIN_ASIGNAR, FirmaTipo.DIGITAL, FirmaTipo.MANUAL];
 
@@ -99,6 +101,8 @@ interface RelacionDetalleProps {
   setTargetEmailRelaciones: React.Dispatch<React.SetStateAction<RelacionAlumno[]>>;
   onUpdateFirma: (campo: keyof Pick<RelacionAlumno, 'firmaRelacion' | 'firmaPlanFormativo' | 'firmaSeguimiento' | 'firmaValoracion'>, valor: FirmaTipo) => void;
   onOpenDocManager: (rel: RelacionAlumno, entidad: string, alumno?: Alumno) => void;
+  anexoRelacionExterno?: boolean;
+  anexoRelacionUrl?: string;
 }
 
 export function RelacionDetalle({
@@ -116,7 +120,9 @@ export function RelacionDetalle({
   setTargetDownloadRelaciones, targetDownloadRelaciones, setSelectedDocs, selectedDocs,
   setTargetEmailRelaciones,
                                   onUpdateFirma,
-                                  onOpenDocManager
+                                  onOpenDocManager,
+                                  anexoRelacionExterno = false,
+                                  anexoRelacionUrl = ''
 }: RelacionDetalleProps) {
 
   const [isDownloading, setIsDownloading] = useState(false);
@@ -289,14 +295,33 @@ export function RelacionDetalle({
               </div>
 
               <div className="flex gap-2">
-                <BotonDescargaDOCX
-                  onClick={() => onDescargarRelacion('docx')}
-                  showText={true}
-                />
-                <BotonDescargaPDF
-                  onClick={() => onDescargarRelacion('pdf')}
-                  showText={true}
-                />
+                {anexoRelacionExterno ? (
+                  <Title text="Abrir el anexo de relación en el enlace externo">
+                    <button
+                      onClick={() => {
+                        if (!anexoRelacionUrl.trim()) {
+                          mostrarToast('No se ha configurado la URL del anexo de relación', 'error');
+                          return;
+                        }
+                        window.open(anexoRelacionUrl, '_blank', 'noopener,noreferrer');
+                      }}
+                      className="h-8 px-3 flex-1 flex items-center justify-center gap-1 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors border border-indigo-100 text-[10px] font-bold uppercase"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 shrink-0" /> Anexo externo
+                    </button>
+                  </Title>
+                ) : (
+                  <>
+                    <BotonDescargaDOCX
+                      onClick={() => onDescargarRelacion('docx')}
+                      showText={true}
+                    />
+                    <BotonDescargaPDF
+                      onClick={() => onDescargarRelacion('pdf')}
+                      showText={true}
+                    />
+                  </>
+                )}
                 <Title text="Enviar por correo">
                   <button
                     onClick={async () => { setSendingEmail('relacion'); try { await onEmailRelacion('pdf'); } finally { setSendingEmail(null); } }}

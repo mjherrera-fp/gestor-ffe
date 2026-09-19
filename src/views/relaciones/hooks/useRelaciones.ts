@@ -67,6 +67,10 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     const [modoCreacion, setModoCreacion] = useState('descargar');
     const [carpetaEstudiante, setCarpetaEstudiante] = useState(false);
 
+    // ── Configuración anexo de relación ──
+    const [anexoRelacionModo, setAnexoRelacionModo] = useState('app');
+    const [anexoRelacionUrl, setAnexoRelacionUrl] = useState('');
+
     // ── UI de listado ──
     const [selectedRelacion, setSelectedRelacion] = useState<RelacionAlumno | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
@@ -297,6 +301,19 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             })
             .catch(() => {});
     }, []);
+
+    // Cargar configuración del anexo de relación
+    useEffect(() => {
+        fetch('/api/profesor/config/anexo-relacion')
+            .then(r => r.json())
+            .then(data => {
+                setAnexoRelacionModo(data.modo || 'app');
+                setAnexoRelacionUrl(data.url || '');
+            })
+            .catch(() => {});
+    }, []);
+
+    const anexoRelacionExterno = anexoRelacionModo === 'externo';
 
     // Cargar tutores cuando cambia el convenio seleccionado
     useEffect(() => {
@@ -703,6 +720,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     };
 
     const descargarRelacion = async (tipo: 'docx' | 'pdf') => {
+        if (anexoRelacionExterno) return;
         if (!selectedRelacion?.alumnos?.length) {
             alert('No hay alumnos en esta relación.');
             return;
@@ -1063,8 +1081,12 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             const docsAlumno = ['plan', 'seguimiento', 'valoracion', 'calendario'];
             const docsRelacion = ['relacion', 'carta'];
 
+            const relacionSeleccionada = !anexoRelacionExterno && !!selectedDocs.relacion;
+
             const numDocsAlumno = docsAlumno.filter(k => selectedDocs[k as keyof typeof selectedDocs]).length;
-            const numDocsGeneral = docsRelacion.filter(k => selectedDocs[k as keyof typeof selectedDocs]).length;
+            const numDocsGeneral = docsRelacion.filter(k => k === 'relacion'
+                ? relacionSeleccionada
+                : selectedDocs[k as keyof typeof selectedDocs]).length;
 
             if (numDocsAlumno === 0 && numDocsGeneral === 0) {
                 alert('Debes seleccionar al menos un tipo de documento para descargar.');
@@ -1102,7 +1124,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                             tareasCrear.push(async () => { try { await fetch(url); } catch {} });
                         }
                     }
-                    if (selectedDocs.relacion) {
+                    if (relacionSeleccionada) {
                         const urlRelPdf = `/api/relaciones-alumnos/${relacion.id}/documento/pdf?t=${Date.now()}`;
                         const urlRelDocx = `/api/relaciones-alumnos/${relacion.id}/documento?t=${Date.now()}`;
                         tareasCrear.push(async () => { try { await fetch(urlRelPdf); } catch {} });
@@ -1225,7 +1247,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
 
                 if (numDocsGeneral > 0 && relacion) {
 
-                    if (selectedDocs.relacion) {
+                    if (relacionSeleccionada) {
                         // ---6. RELACION PDF---
                         // Usamos tu función crearDocumentoRelacion
                         const tarea = crearDocumentoRelacion('pdf', relacion).then((blob) => {
@@ -1505,14 +1527,26 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
 
     const handleEmailConRelacion = async (tipo: 'docx' | 'pdf') => {
         if (!selectedRelacion) return;
+        const placeholders = buildPlaceholders(selectedRelacion);
+        const cfg = await buildTemplateBody('relacion', placeholders);
+        if (!cfg) return;
+
+        if (anexoRelacionExterno) {
+            setEmailTo(getEmpresaEmail());
+            setEmailBcc([]);
+            setEmailAttachments([]);
+            setContextualContactIds(getContextualContactIds());
+            setEmailSubject(cfg.subject);
+            setEmailBody(cfg.body);
+            setShowEmailModal(true);
+            return;
+        }
+
         const blob = await crearDocumentoRelacion(tipo, selectedRelacion);
         if (!blob) return;
         const ext = tipo === 'pdf' ? 'pdf' : 'docx';
         const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
         const att = await uploadGeneratedAttachment(blob, `Relacion_${numRel}.${ext}`);
-        const placeholders = buildPlaceholders(selectedRelacion);
-        const cfg = await buildTemplateBody('relacion', placeholders);
-        if (!cfg) return;
         setEmailTo(getEmpresaEmail());
         setEmailBcc([]);
         setEmailAttachments([att]);
@@ -1632,7 +1666,10 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const docsAlumno: (keyof SelectedDocs)[] = ['plan', 'seguimiento', 'valoracion', 'calendario'];
 
         const hasAlumnoDocs = docsAlumno.some(k => selectedDocs[k]);
-        const hasRelacionDocs = (['relacion', 'carta'] as (keyof SelectedDocs)[]).some(k => selectedDocs[k]);
+        const relacionSeleccionadaEmail = !anexoRelacionExterno && !!selectedDocs.relacion;
+        const hasRelacionDocs = (['relacion', 'carta'] as (keyof SelectedDocs)[]).some(k => k === 'relacion'
+            ? relacionSeleccionadaEmail
+            : selectedDocs[k]);
 
         if (!hasAlumnoDocs && !hasRelacionDocs) {
             alert('Debes seleccionar al menos un tipo de documento para enviar.');
@@ -1643,7 +1680,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
 
         const atts: EmailAttachment[] = [];
         const destinatarios = new Set<string>();
-        const soloRelacion = selectedDocs.relacion && !hasAlumnoDocs && !selectedDocs.carta;
+        const soloRelacion = relacionSeleccionadaEmail && !hasAlumnoDocs && !selectedDocs.carta;
 
         for (const relacion of relaciones) {
             if (!relacion.alumnos?.length) continue;
@@ -1707,7 +1744,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                 }
             }
 
-            if (selectedDocs.relacion) {
+            if (relacionSeleccionadaEmail) {
                 const blob = await crearDocumentoRelacion('pdf', relacion);
                 if (blob) {
                     const a = await uploadGeneratedAttachment(blob, `Relacion_${numRel}.pdf`);
@@ -1772,6 +1809,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             // Documentos según la configuración de la plantilla
             for (const doc of JSON.parse(cfg.documents || '[]') as string[]) {
                 if (doc === 'relacion') {
+                    if (anexoRelacionExterno) continue;
                     const blob = await crearDocumentoRelacion('pdf', relacion);
                     if (blob) {
                         atts.push(await uploadGeneratedAttachment(blob, `Relacion_${numRel}.pdf`));
@@ -1899,6 +1937,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         relaciones, convenios, alumnos, tutores, curso, centroFestivos, profesor,
         usarFestivos, usarFestivosEmpresa, empresaFestivosActuales, setEmpresaFestivosActuales,
         modoCreacion, carpetaEstudiante,
+        anexoRelacionModo, anexoRelacionExterno, anexoRelacionUrl,
         // Listado UI
         selectedRelacion, setSelectedRelacion,
         showDeleteConfirm, setShowDeleteConfirm,

@@ -1,10 +1,11 @@
 import React from 'react';
 import { EstadoResumenTable } from './EstadoResumenTable.tsx';
-import type { ColumnId, SortConfig, FilterState, ColumnFilter } from '../hooks/usePanel.ts';
+import type { ColumnId, SortConfig, FilterState, ColumnFilter, ColumnMeta } from '../hooks/usePanel.ts';
 
 interface Ctx {
   resumen: any[];
   resumenTotal: any[];
+  columns: ColumnMeta[];
   sort: SortConfig;
   toggleSort: (c: ColumnId) => void;
   filters: FilterState;
@@ -18,6 +19,7 @@ export function ResumenTab({ ctx }: { ctx: Ctx }) {
   return (
     <EstadoResumenTable
       resumen={ctx.resumen}
+      columns={ctx.columns}
       sort={ctx.sort}
       toggleSort={ctx.toggleSort}
       filters={ctx.filters}

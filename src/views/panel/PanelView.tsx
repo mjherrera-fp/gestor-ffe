@@ -17,10 +17,11 @@ const tabs = [
 interface Props {
   cursoId: number;
   detalleAcademicoId?: number;
+  datNecesario?: boolean;
 }
 
-export default function PanelView({ cursoId, detalleAcademicoId }: Props) {
-  const ctx = usePanel(cursoId, detalleAcademicoId);
+export default function PanelView({ cursoId, detalleAcademicoId, datNecesario = true }: Props) {
+  const ctx = usePanel(cursoId, detalleAcademicoId, datNecesario);
   const [activeTab, setActiveTab] = useState('resumen');
 
   if (ctx.loading) {

@@ -114,18 +114,20 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
 
             {/* Checkboxes de opciones */}
             <div className="flex-1 overflow-y-auto min-h-0 space-y-3">
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={ctx.selectedDocs.relacion}
-                  onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, relacion: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Relación de alumnos</p>
-                  <p className="text-[11px] text-slate-400">Documento en formato Word (.docx) y PDF con la relación de alumnos</p>
-                </div>
-              </label>
+              {!ctx.anexoRelacionExterno && (
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={ctx.selectedDocs.relacion}
+                    onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, relacion: e.target.checked })}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-700">Relación de alumnos</p>
+                    <p className="text-[11px] text-slate-400">Documento en formato Word (.docx) y PDF con la relación de alumnos</p>
+                  </div>
+                </label>
+              )}
 
               <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
                 <input
@@ -443,6 +445,8 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
             setTargetEmailRelaciones={ctx.setTargetEmailRelaciones}
             onUpdateFirma={ctx.updateFirma}
             onOpenDocManager={handleOpenDocManager}
+            anexoRelacionExterno={ctx.anexoRelacionExterno}
+            anexoRelacionUrl={ctx.anexoRelacionUrl}
           />
         </div>
       </div>

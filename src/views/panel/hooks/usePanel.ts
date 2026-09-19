@@ -79,9 +79,9 @@ function compareValues(a: string | null | undefined, b: string | null | undefine
   return dir === 'asc' ? cmp : -cmp;
 }
 
-function applyFilters(rows: PanelResumenRow[], filters: FilterState): PanelResumenRow[] {
+function applyFilters(rows: PanelResumenRow[], filters: FilterState, columns: ColumnMeta[]): PanelResumenRow[] {
   return rows.filter(r => {
-    for (const col of COLUMNS) {
+    for (const col of columns) {
       const f = filters[col.id];
       if (!f) continue;
       const val = col.getValue(r);
@@ -109,7 +109,7 @@ function applyFilters(rows: PanelResumenRow[], filters: FilterState): PanelResum
   });
 }
 
-export function usePanel(cursoId: number, detalleAcademicoId?: number) {
+export function usePanel(cursoId: number, detalleAcademicoId?: number, datNecesario = true) {
   const [resumen, setResumen] = useState<PanelResumenRow[]>([]);
   const [ssData, setSsData] = useState<SeguridadSocialData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -117,6 +117,11 @@ export function usePanel(cursoId: number, detalleAcademicoId?: number) {
 
   const [sort, setSort] = useState<SortConfig>({ column: 'alumno', dir: 'asc' });
   const [filters, setFilters] = useState<FilterState>({});
+
+  const columns = useMemo(() => {
+    if (datNecesario) return COLUMNS;
+    return COLUMNS.filter(c => c.id !== 'fechaEnvioDAT' && c.id !== 'estadoDAT');
+  }, [datNecesario]);
 
   const fetchResumen = async () => {
     const params = new URLSearchParams({ cursoId: String(cursoId) });
@@ -175,13 +180,13 @@ export function usePanel(cursoId: number, detalleAcademicoId?: number) {
   const clearFilters = () => setFilters({});
 
   const processedResumen = useMemo(() => {
-    let rows = applyFilters(resumen, filters);
-    const col = COLUMNS.find(c => c.id === sort.column);
+    let rows = applyFilters(resumen, filters, columns);
+    const col = columns.find(c => c.id === sort.column);
     if (col) {
       rows = [...rows].sort((a, b) => compareValues(col.getValue(a), col.getValue(b), sort.column, sort.dir));
     }
     return rows;
-  }, [resumen, filters, sort]);
+  }, [resumen, filters, sort, columns]);
 
   const empresasConAlumnos = useMemo(() => {
     const map = new Map<string, number>();
@@ -281,6 +286,7 @@ export function usePanel(cursoId: number, detalleAcademicoId?: number) {
     error,
     resumen: processedResumen,
     resumenTotal: resumen,
+    columns,
     sort,
     toggleSort,
     filters,

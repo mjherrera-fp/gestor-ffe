@@ -9,11 +9,11 @@ import {
   ValoracionEstadoLabels
 } from '../../../types/index.ts';
 import type {ColumnFilter, ColumnId, ColumnMeta, FilterState, SortConfig} from '../hooks/usePanel.ts';
-import {COLUMNS} from '../hooks/usePanel.ts';
 import {ArrowDown, ArrowUp, ArrowUpDown, Filter, X} from 'lucide-react';
 
 interface Props {
   resumen: PanelResumenRow[];
+  columns: ColumnMeta[];
   sort: SortConfig;
   toggleSort: (c: ColumnId) => void;
   filters: FilterState;
@@ -185,7 +185,7 @@ function CellContent({ row, col, formatDate }: { row: PanelResumenRow; col: Colu
   return <span className={`text-slate-600 whitespace-nowrap ${col.type === 'text' ? 'font-semibold text-slate-900' : ''} ${col.id === 'numConvenio' || col.id === 'numRelacion' ? 'text-xs font-mono' : ''}`}>{display}</span>;
 }
 
-export function EstadoResumenTable({ resumen, sort, toggleSort, filters, setFilter, clearFilters, activeFiltersCount, formatDate }: Props) {
+export function EstadoResumenTable({ resumen, columns, sort, toggleSort, filters, setFilter, clearFilters, activeFiltersCount, formatDate }: Props) {
   const [openFilter, setOpenFilter] = useState<ColumnId | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const filterRef = useRef<HTMLDivElement>(null);
@@ -219,7 +219,7 @@ export function EstadoResumenTable({ resumen, sort, toggleSort, filters, setFilt
         <table className="w-full text-sm border-collapse">
           <thead className="sticky top-0 z-20">
             <tr className="bg-slate-50">
-              {COLUMNS.map(col => {
+              {columns.map(col => {
                 const hasFilter = !!filters[col.id];
                 return (
                   <th key={col.id} className="px-4 py-3 text-left whitespace-nowrap relative">
@@ -254,7 +254,7 @@ export function EstadoResumenTable({ resumen, sort, toggleSort, filters, setFilt
           <tbody className="divide-y divide-slate-100">
             {resumen.length === 0 ? (
               <tr>
-                <td colSpan={COLUMNS.length} className="px-4 py-16 text-center text-slate-400 font-medium">
+                <td colSpan={columns.length} className="px-4 py-16 text-center text-slate-400 font-medium">
                   No hay alumnos que coincidan con los filtros
                 </td>
               </tr>
@@ -269,7 +269,7 @@ export function EstadoResumenTable({ resumen, sort, toggleSort, filters, setFilt
                       : 'hover:bg-slate-50/50'
                   }`}
                 >
-                  {COLUMNS.map(col => (
+                  {columns.map(col => (
                     <td key={col.id} className="px-4 py-3">
                       <CellContent row={row} col={col} formatDate={formatDate} />
                     </td>

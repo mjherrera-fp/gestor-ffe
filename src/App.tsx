@@ -61,6 +61,7 @@ export default function App() {
   const [avisos, setAvisos] = useState<Aviso[]>([]);
   const [showCreateNotification, setShowCreateNotification] = useState(false);
   const [preloadRelacion, setPreloadRelacion] = useState<{ empresaId: number; alumnoIds: number[] } | null>(null);
+  const [datNecesario, setDatNecesario] = useState(true);
 
   const [isLocked, setIsLocked] = useState(false);
   const [isEncrypted, setIsEncrypted] = useState(false);
@@ -131,6 +132,17 @@ export default function App() {
       setCursos(cursosData);
       setDetallesAcademicos(detallesData);
 
+      try {
+        const datRes = await fetch('/api/profesor/config/dat');
+        const datData = await datRes.json();
+        setDatNecesario(datData.modo !== 'no');
+        if (datData.modo === 'no' && activeTab === 'comunicaciones-dat') {
+          setActiveTab('dashboard');
+        }
+      } catch {
+        setDatNecesario(true);
+      }
+
       // Auto-select first curso
       if (!activeCurso && cursosData.length > 0) {
         setActiveCurso(cursosData[0]);
@@ -172,8 +184,8 @@ export default function App() {
     { id: 'intereses', label: 'Intereses', icon: Link, disabled: !tieneProfesor || !tieneCurso },
     { id: 'convenios', label: 'Convenios', icon: FileText, disabled: !tieneProfesor || !tieneCurso },
     { id: 'relaciones', label: 'Relaciones', icon: ArrowLeftRight, disabled: !tieneProfesor || !tieneCurso },
-    {id: 'comunicaciones-dat', label: 'Enviar a la DAT', icon: FolderUp, disabled: !tieneProfesor || !tieneCurso},
-  ], [tieneProfesor, tieneCurso]);
+    { id: 'comunicaciones-dat', label: 'Enviar a la DAT', icon: FolderUp, disabled: !tieneProfesor || !tieneCurso },
+  ].filter(item => item.id !== 'comunicaciones-dat' || datNecesario), [tieneProfesor, tieneCurso, datNecesario]);
 
   // 3. Función para intentar desbloquear
   // Función para desbloquear (recibe directamente el string del componente)
@@ -485,6 +497,7 @@ export default function App() {
               <PanelView
                 cursoId={activeCurso.id!}
                 detalleAcademicoId={activeDetalle?.id}
+                datNecesario={datNecesario}
               />
             )}
             {activeTab === 'intereses' && activeCurso && (
