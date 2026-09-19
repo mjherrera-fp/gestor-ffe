@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, Trash2, FileDown, FolderOpen, Square, CheckSquare, Circle, CheckCircle2, Pencil, FileBadge, X } from 'lucide-react';
+import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, Trash2, FileDown, FolderOpen, Square, CheckSquare, Circle, CheckCircle2, Pencil, FileBadge, X, FileText, ExternalLink, FolderUp, Info } from 'lucide-react';
 import { EmpresaFestivosModal } from './EmpresaFestivosModal.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 
@@ -45,6 +45,21 @@ export function TabGeneral() {
   const [successCreacion, setSuccessCreacion] = useState('');
   const [errorCreacion, setErrorCreacion] = useState('');
 
+  // ── Estado anexo de relación ──
+  const [anexoRelacionModo, setAnexoRelacionModo] = useState('app');
+  const [anexoRelacionUrl, setAnexoRelacionUrl] = useState('');
+  const [loadingAnexo, setLoadingAnexo] = useState(true);
+  const [savingAnexo, setSavingAnexo] = useState(false);
+  const [successAnexo, setSuccessAnexo] = useState('');
+  const [errorAnexo, setErrorAnexo] = useState('');
+
+  // ── Estado envío a la DAT ──
+  const [datModo, setDatModo] = useState('necesario');
+  const [loadingDat, setLoadingDat] = useState(true);
+  const [savingDat, setSavingDat] = useState(false);
+  const [successDat, setSuccessDat] = useState('');
+  const [errorDat, setErrorDat] = useState('');
+
   // ── Cargar configuraciones ──
   useEffect(() => {
     fetch('/api/profesor/config/avisos')
@@ -86,6 +101,23 @@ export function TabGeneral() {
       })
       .catch(() => setErrorCreacion('Error al cargar configuración de creación de ficheros'))
       .finally(() => setLoadingCreacion(false));
+
+    fetch('/api/profesor/config/anexo-relacion')
+      .then(r => r.json())
+      .then(data => {
+        setAnexoRelacionModo(data.modo || 'app');
+        setAnexoRelacionUrl(data.url || '');
+      })
+      .catch(() => setErrorAnexo('Error al cargar configuración del anexo de relación'))
+      .finally(() => setLoadingAnexo(false));
+
+    fetch('/api/profesor/config/dat')
+      .then(r => r.json())
+      .then(data => {
+        setDatModo(data.modo || 'necesario');
+      })
+      .catch(() => setErrorDat('Error al cargar configuración de envío a la DAT'))
+      .finally(() => setLoadingDat(false));
   }, []);
 
   // ── Handlers avisos ──
@@ -184,6 +216,58 @@ export function TabGeneral() {
     }
   };
 
+  // ── Handlers anexo de relación ──
+  const handleSubmitAnexo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingAnexo(true);
+    setSuccessAnexo('');
+    setErrorAnexo('');
+    try {
+      if (anexoRelacionModo === 'externo' && !anexoRelacionUrl.trim()) {
+        setErrorAnexo('Debes indicar la URL del anexo de relación externo.');
+        return;
+      }
+      const res = await fetch('/api/profesor/config/anexo-relacion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modo: anexoRelacionModo, url: anexoRelacionUrl }),
+      });
+      if (res.ok) {
+        setSuccessAnexo('Configuración del anexo de relación guardada correctamente.');
+      } else {
+        setErrorAnexo('Error al guardar configuración del anexo de relación');
+      }
+    } catch {
+      setErrorAnexo('Error de conexión');
+    } finally {
+      setSavingAnexo(false);
+    }
+  };
+
+  // ── Handlers envío a la DAT ──
+  const handleSubmitDat = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingDat(true);
+    setSuccessDat('');
+    setErrorDat('');
+    try {
+      const res = await fetch('/api/profesor/config/dat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modo: datModo }),
+      });
+      if (res.ok) {
+        setSuccessDat('Configuración de envío a la DAT guardada correctamente.');
+      } else {
+        setErrorDat('Error al guardar configuración de envío a la DAT');
+      }
+    } catch {
+      setErrorDat('Error de conexión');
+    } finally {
+      setSavingDat(false);
+    }
+  };
+
   // ── Estado FFE valoraciones ──
   const [valoracionesFinales, setValoracionesFinales] = useState<{ id: number; codigo: string; valor: string; orden: number }[]>([]);
   const [editVF, setEditVF] = useState<{ id: number; codigo: string; valor: string; orden: number } | null>(null);
@@ -250,7 +334,7 @@ export function TabGeneral() {
     } finally { setSavingMN(false); }
   };
 
-  const loading = loadingAvisos || loadingFestivos || loadingCreacion;
+  const loading = loadingAvisos || loadingFestivos || loadingCreacion || loadingAnexo;
 
   if (loading) {
     return (
@@ -449,6 +533,199 @@ export function TabGeneral() {
                 <span className="flex items-center justify-center gap-2">
                   <Settings className="h-5 w-5" />
                   {savingCreacion ? 'Guardando...' : 'Guardar Configuración'}
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* ─── SECCIÓN ANEXO DE RELACIÓN ─── */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">Anexo de Relación</h3>
+              <p className="text-sm text-slate-500">
+                Elige cómo se genera el anexo de relación de alumnos: con la aplicación o mediante un enlace externo.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          {errorAnexo && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">{errorAnexo}</div>
+          )}
+          {successAnexo && (
+            <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+              {successAnexo}
+            </div>
+          )}
+          <form onSubmit={handleSubmitAnexo} className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setAnexoRelacionModo('app')}
+                className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
+                  anexoRelacionModo === 'app'
+                    ? 'bg-indigo-50 border-indigo-400 shadow-sm'
+                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                }`}
+              >
+                {anexoRelacionModo === 'app' ? (
+                  <CheckCircle2 className="h-5 w-5 text-indigo-500 mt-0.5 shrink-0" />
+                ) : (
+                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <FileText className={`h-4 w-4 ${anexoRelacionModo === 'app' ? 'text-indigo-500' : 'text-slate-500'}`} />
+                    <span className={`text-sm font-semibold ${anexoRelacionModo === 'app' ? 'text-indigo-800' : 'text-slate-800'}`}>Con la app</span>
+                  </div>
+                  <p className={`text-xs mt-1 ${anexoRelacionModo === 'app' ? 'text-indigo-600' : 'text-slate-500'}`}>
+                    El anexo se genera con la aplicación. Se muestran los botones de descarga DOCX y PDF y el correo incluye el documento adjunto.
+                  </p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAnexoRelacionModo('externo')}
+                className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
+                  anexoRelacionModo === 'externo'
+                    ? 'bg-emerald-50 border-emerald-400 shadow-sm'
+                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                }`}
+              >
+                {anexoRelacionModo === 'externo' ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
+                ) : (
+                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className={`h-4 w-4 ${anexoRelacionModo === 'externo' ? 'text-emerald-500' : 'text-slate-500'}`} />
+                    <span className={`text-sm font-semibold ${anexoRelacionModo === 'externo' ? 'text-emerald-800' : 'text-slate-800'}`}>Enlace externo</span>
+                  </div>
+                  <p className={`text-xs mt-1 ${anexoRelacionModo === 'externo' ? 'text-emerald-600' : 'text-slate-500'}`}>
+                    El anexo se abre desde una URL externa. En relación se mostrará un botón que abre el enlace y el correo no adjuntará el documento.
+                  </p>
+                </div>
+              </button>
+            </div>
+            {anexoRelacionModo === 'externo' && (
+              <div>
+                <label className={labelClass}>URL del anexo de relación</label>
+                <input
+                  type="url"
+                  value={anexoRelacionUrl}
+                  onChange={(e) => setAnexoRelacionUrl(e.target.value)}
+                  className={inputClass}
+                  placeholder="https://..."
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  En la pantalla de Relaciones, el apartado Anexo de Relación mostrará un botón que abre este enlace en el navegador.
+                </p>
+              </div>
+            )}
+            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+              <button type="submit" disabled={savingAnexo} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-indigo-600 disabled:opacity-50 transition-colors">
+                <span className="flex items-center justify-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  {savingAnexo ? 'Guardando...' : 'Guardar Configuración'}
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* ─── SECCIÓN ENVÍO A LA DAT ─── */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
+              <FolderUp className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">Enviar a la DAT</h3>
+              <p className="text-sm text-slate-500">
+                Indica si es necesario enviar la documentación a la DAT.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="mb-4 flex items-start gap-2 p-3 bg-sky-50 text-sky-700 rounded-lg text-sm border border-sky-100">
+            <Info className="h-5 w-5 shrink-0 mt-0.5 text-sky-500" />
+            <p>Es necesario reiniciar la aplicación para que los cambios tomen efecto.</p>
+          </div>
+          {errorDat && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">{errorDat}</div>
+          )}
+          {successDat && (
+            <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+              {successDat}
+            </div>
+          )}
+          <form onSubmit={handleSubmitDat} className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setDatModo('necesario')}
+                className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
+                  datModo === 'necesario'
+                    ? 'bg-indigo-50 border-indigo-400 shadow-sm'
+                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                }`}
+              >
+                {datModo === 'necesario' ? (
+                  <CheckCircle2 className="h-5 w-5 text-indigo-500 mt-0.5 shrink-0" />
+                ) : (
+                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <FolderUp className={`h-4 w-4 ${datModo === 'necesario' ? 'text-indigo-500' : 'text-slate-500'}`} />
+                    <span className={`text-sm font-semibold ${datModo === 'necesario' ? 'text-indigo-800' : 'text-slate-800'}`}>Es necesario</span>
+                  </div>
+                  <p className={`text-xs mt-1 ${datModo === 'necesario' ? 'text-indigo-600' : 'text-slate-500'}`}>
+                    Se muestra la opción de menú "Enviar a la DAT" y las columnas "Fecha Envío DAT" y "Estado DAT" en el panel.
+                  </p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDatModo('no')}
+                className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
+                  datModo === 'no'
+                    ? 'bg-emerald-50 border-emerald-400 shadow-sm'
+                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                }`}
+              >
+                {datModo === 'no' ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
+                ) : (
+                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <FolderUp className={`h-4 w-4 ${datModo === 'no' ? 'text-emerald-500' : 'text-slate-500'}`} />
+                    <span className={`text-sm font-semibold ${datModo === 'no' ? 'text-emerald-800' : 'text-slate-800'}`}>No es necesario</span>
+                  </div>
+                  <p className={`text-xs mt-1 ${datModo === 'no' ? 'text-emerald-600' : 'text-slate-500'}`}>
+                    Se oculta la opción de menú "Enviar a la DAT" y la información de la DAT en el panel.
+                  </p>
+                </div>
+              </button>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+              <button type="submit" disabled={savingDat} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-indigo-600 disabled:opacity-50 transition-colors">
+                <span className="flex items-center justify-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  {savingDat ? 'Guardando...' : 'Guardar Configuración'}
                 </span>
               </button>
             </div>
