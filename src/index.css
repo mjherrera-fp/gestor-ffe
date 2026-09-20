@@ -12,11 +12,65 @@
   --color-border-base: #e2e8f0;
   --color-success: #10b981;
   --color-warning: #f59e0b;
-  
+  --color-danger: #ef4444;
+
+  --color-surface-card: #ffffff;
+  --color-surface-subtle: #f8fafc;
+  --color-surface-hover: #f1f5f9;
+  --color-surface-strong: #e2e8f0;
+  --color-overlay: rgb(15 23 42 / 0.4);
+  --color-text-on-color: #ffffff;
+
+  --color-success-soft: #ecfdf5;
+  --color-warning-soft: #fffbeb;
+  --color-danger-soft: #fef2f2;
+  --color-info-soft: #eff6ff;
+  --color-success-strong: #065f46;
+  --color-warning-strong: #92400e;
+  --color-danger-strong: #991b1b;
+  --color-info-strong: #1e40af;
+
   --font-sans: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* Modo oscuro: se activa añadiendo la clase `dark` al elemento <html> */
+.dark {
+  --color-primary: #6366f1;
+  --color-primary-light: #312e81;
+  --color-bg-base: #0f172a;
+  --color-text-main: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-border-base: #334155;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+
+  --color-surface-card: #1e293b;
+  --color-surface-subtle: #0f172a;
+  --color-surface-hover: #334155;
+  --color-surface-strong: #475569;
+  --color-overlay: rgb(0 0 0 / 0.6);
+  --color-text-on-color: #ffffff;
+
+  --color-success-soft: #064e3b;
+  --color-warning-soft: #451a03;
+  --color-danger-soft: #450a0a;
+  --color-info-soft: #172554;
+  --color-success-strong: #6ee7b7;
+  --color-warning-strong: #fcd34d;
+  --color-danger-strong: #fca5a5;
+  --color-info-strong: #93c5fd;
+}
+
 @layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
   html, body {
     overflow: hidden;
     height: 100%;
@@ -42,6 +96,32 @@
   button:disabled,
   [role="button"][aria-disabled="true"] {
     @apply cursor-not-allowed;
+  }
+
+  /* Scrollbars acordes al tema */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-base);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-text-muted);
+  }
+
+  ::selection {
+    background-color: var(--color-primary-light);
+    color: var(--color-text-main);
   }
 }
 

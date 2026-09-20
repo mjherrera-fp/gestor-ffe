@@ -6,7 +6,7 @@ interface Props {
   sinFFE: number;
 }
 
-const COLORS = ['#3b82f6', '#94a3b8'];
+const COLORS = ['var(--color-primary)', '#94a3b8'];
 
 export function EstadisticasFFE({ conFFE, sinFFE }: Props) {
   const data = [
@@ -15,8 +15,8 @@ export function EstadisticasFFE({ conFFE, sinFFE }: Props) {
   ];
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-      <h4 className="text-sm font-bold text-slate-900 mb-4">Alumnos con/sin FFE</h4>
+    <div className="bg-surface-card rounded-xl border border-border-base shadow-sm p-6">
+      <h4 className="text-sm font-bold text-text-main mb-4">Alumnos con/sin FFE</h4>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
@@ -35,13 +35,15 @@ export function EstadisticasFFE({ conFFE, sinFFE }: Props) {
           <Tooltip
             contentStyle={{
               borderRadius: '8px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--color-border-base)',
               fontSize: '12px',
+              background: 'var(--color-surface-card)',
+              color: 'var(--color-text-main)',
             }}
           />
           <Legend
             formatter={(value, entry: any) => (
-              <span className="text-xs font-medium text-slate-600">
+              <span className="text-xs font-medium text-text-muted">
                 {value}: <strong>{entry.payload?.value}</strong>
               </span>
             )}

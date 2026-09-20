@@ -179,7 +179,7 @@ export default function InteresesView({ cursoId, detalleAcademicoId, onCreateRel
       />
 
       {/* ── COLUMNA DERECHA: Grid de intereses ── */}
-      <div className="w-full flex-1 bg-white rounded-xl border border-border-base shadow-sm flex flex-col h-full overflow-hidden">
+      <div className="w-full flex-1 bg-surface-card rounded-xl border border-border-base shadow-sm flex flex-col h-full overflow-hidden">
         <InteresesGrid
           selectedAlumno={gridAlumno}
           selectedAlumnoIds={ctx.selectedAlumnoIds}

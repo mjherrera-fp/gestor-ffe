@@ -25,17 +25,17 @@ export function EmailTypeSelector({
   ];
 
   return (
-    <Modal open={open} onClose={onClose} maxWidth="sm" backdropClass="bg-slate-900/60 backdrop-blur-sm">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+    <Modal open={open} onClose={onClose} maxWidth="sm" backdropClass="bg-overlay backdrop-blur-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-base">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+            <div className="p-2 rounded-lg bg-primary-light text-primary">
               <Mail className="h-5 w-5" />
             </div>
-            <h3 className="text-base font-bold text-slate-800">Seleccionar Correo</h3>
+            <h3 className="text-base font-bold text-text-main">Seleccionar Correo</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+            className="p-1.5 text-text-muted hover:text-text-main hover:bg-surface-hover rounded-lg transition-all"
           >
             <X className="h-4 w-4" />
           </button>
@@ -43,8 +43,8 @@ export function EmailTypeSelector({
 
         <div className="p-6">
           {nombreAlumno && (
-            <p className="text-sm text-slate-500 mb-4">
-              ¿Qué correo deseas usar para <strong className="text-slate-700">{nombreAlumno}</strong>?
+            <p className="text-sm text-text-muted mb-4">
+              ¿Qué correo deseas usar para <strong className="text-text-main">{nombreAlumno}</strong>?
             </p>
           )}
 
@@ -57,31 +57,31 @@ export function EmailTypeSelector({
                 className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
                   selected === opt.value
                     ? opt.value === 'educamadrid'
-                      ? 'border-blue-400 bg-blue-50'
-                      : 'border-slate-300 bg-slate-50'
-                    : 'border-slate-100 hover:border-slate-200 bg-white'
+                      ? 'border-primary-light bg-primary-light/60'
+                      : 'border-border-base bg-surface-subtle'
+                    : 'border-border-base hover:border-border-base bg-surface-card'
                 }`}
               >
                 <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
                   selected === opt.value
                     ? opt.value === 'educamadrid'
-                      ? 'border-blue-500'
-                      : 'border-slate-500'
-                    : 'border-slate-300'
+                      ? 'border-primary'
+                      : 'border-text-muted'
+                    : 'border-border-base'
                 }`}>
                   {selected === opt.value && (
                     <div className={`h-2 w-2 rounded-full ${
-                      opt.value === 'educamadrid' ? 'bg-blue-500' : 'bg-slate-500'
+                      opt.value === 'educamadrid' ? 'bg-primary' : 'bg-text-muted'
                     }`} />
                   )}
                 </div>
                 <div>
                   <span className={`text-sm font-semibold ${
-                    selected === opt.value ? 'text-slate-800' : 'text-slate-600'
+                    selected === opt.value ? 'text-text-main' : 'text-text-main'
                   }`}>
                     {opt.label}
                   </span>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{opt.description}</p>
+                  <p className="text-[10px] text-text-muted mt-0.5">{opt.description}</p>
                 </div>
               </button>
             ))}
@@ -92,14 +92,14 @@ export function EmailTypeSelector({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-colors"
+            className="flex-1 py-2.5 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl border border-border-base transition-colors"
           >
             Cancelar
           </button>
           <button
             type="button"
             onClick={() => onConfirm(selected)}
-            className="flex-1 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+            className="flex-1 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
           >
             Aceptar
           </button>

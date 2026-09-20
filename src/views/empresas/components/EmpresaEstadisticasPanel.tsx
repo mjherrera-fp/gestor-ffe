@@ -16,8 +16,8 @@ export function EmpresaEstadisticasPanel({
   if (!selectedEmpresa) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-        <div className="bg-slate-50 p-6 rounded-full mb-4">
-          <BarChart3 className="h-12 w-12 text-slate-200" />
+        <div className="bg-surface-subtle p-6 rounded-full mb-4">
+          <BarChart3 className="h-12 w-12 text-text-muted" />
         </div>
         <h3 className="text-base font-bold text-text-main mb-2">Selecciona una empresa</h3>
         <p className="text-xs text-text-muted leading-relaxed">
@@ -50,7 +50,7 @@ export function EmpresaEstadisticasPanel({
   const contratacionPct = totalAlumnos > 0 ? Math.round((totalContratados / totalAlumnos) * 100) : 0;
 
   const statCard = (icon: React.ReactNode, label: string, total: string | number, media?: string | number) => (
-    <div className="p-4 bg-white border border-border-base rounded-xl shadow-sm space-y-2">
+    <div className="p-4 bg-surface-card border border-border-base rounded-xl shadow-sm space-y-2">
       <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted uppercase tracking-wider">
         {icon}
         {label}
@@ -81,7 +81,7 @@ export function EmpresaEstadisticasPanel({
 
         {cursos.length > 0 && (
           <select
-            className="w-full text-xs bg-white border border-border-base rounded-lg px-3 py-2 font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+            className="w-full text-xs bg-surface-card border border-border-base rounded-lg px-3 py-2 font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
             value={selectedCurso ?? ''}
             onChange={e => setSelectedCurso(e.target.value || null)}
           >
@@ -97,7 +97,7 @@ export function EmpresaEstadisticasPanel({
         {stats.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
             {statCard(
-              <Award className="h-3.5 w-3.5 text-purple-500" />,
+              <Award className="h-3.5 w-3.5 text-primary" />,
               'Participaciones',
               selectedCurso ? '1 curso' : `${numCursos} ${numCursos === 1 ? 'curso' : 'cursos'}`
             )}
@@ -108,13 +108,13 @@ export function EmpresaEstadisticasPanel({
               valoraciones.length > 0 ? `${valoraciones.length} valoraciones` : undefined
             )}
             {statCard(
-              <Users className="h-3.5 w-3.5 text-blue-500" />,
+              <Users className="h-3.5 w-3.5 text-primary" />,
               'Alumnos Acogidos',
               totalAlumnos,
               numCursos > 1 ? mediaAlumnos : undefined
             )}
             {statCard(
-              <TrendingUp className="h-3.5 w-3.5 text-green-500" />,
+              <TrendingUp className="h-3.5 w-3.5 text-success" />,
               'Contrataciones tras FFE',
               `${totalContratados} (${contratacionPct}%)`,
               numCursos > 1 ? mediaContratados : undefined
@@ -122,7 +122,7 @@ export function EmpresaEstadisticasPanel({
           </div>
         ) : (
           <div className="py-12 text-center">
-            <BarChart3 className="h-10 w-10 mx-auto text-slate-200 mb-3" />
+            <BarChart3 className="h-10 w-10 mx-auto text-text-muted mb-3" />
             <p className="text-sm text-text-muted font-medium">
               {selectedCurso
                 ? 'No hay datos para el curso seleccionado.'

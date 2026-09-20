@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
-export const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+export const inputClass = 'w-full bg-surface-card border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
 
 
 export default function ProfesorView({ profesor, onUpdate, onRefresh }: Props) {
@@ -26,19 +26,19 @@ export default function ProfesorView({ profesor, onUpdate, onRefresh }: Props) {
 
       {/* ── MODAL: Confirmar eliminación ── */}
       {ctx.showDeleteConfirm && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-60 p-4">
-          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative text-center p-8">
+        <div className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-center justify-center z-60 p-4">
+          <div className="bg-surface-card rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative text-center p-8">
             <button
               onClick={() => ctx.setShowDeleteConfirm(null)}
-              className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600"
+              className="absolute top-6 right-6 p-2 text-text-muted hover:text-text-main"
             >
               <Plus className="rotate-45 h-5 w-5" />
             </button>
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-danger-soft text-danger-strong rounded-full flex items-center justify-center mx-auto mb-6">
               <Trash2 className="h-8 w-8" />
             </div>
-            <h3 className="text-xl font-black text-slate-900 mb-3">¿Estás seguro?</h3>
-            <p className="text-sm text-slate-500 font-medium mb-8">
+            <h3 className="text-xl font-black text-text-main mb-3">¿Estás seguro?</h3>
+            <p className="text-sm text-text-muted font-medium mb-8">
               {ctx.showDeleteConfirm.type === 'centro'
                 ? 'Esta acción eliminará el centro educativo y todos sus ciclos asociados de forma permanente.'
                 : 'Esta acción eliminará el ciclo formativo de forma permanente.'}
@@ -46,13 +46,13 @@ export default function ProfesorView({ profesor, onUpdate, onRefresh }: Props) {
             <div className="flex gap-3">
               <button
                 onClick={() => ctx.setShowDeleteConfirm(null)}
-                className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200"
+                className="flex-1 py-3 text-sm font-bold text-text-muted hover:bg-surface-hover rounded-xl border border-border-base"
               >
                 Cancelar
               </button>
               <button
                 onClick={ctx.handleConfirmDelete}
-                className="flex-1 py-3 bg-red-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600"
+                className="flex-1 py-3 bg-danger text-white text-sm font-bold rounded-xl shadow-lg shadow-danger/20 hover:bg-danger/90"
               >
                 Sí, eliminar
               </button>

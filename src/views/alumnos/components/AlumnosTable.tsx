@@ -133,19 +133,19 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
 
   const modalAlumno = ffeModalAlumnoId ? alumnos.find(a => a.id === ffeModalAlumnoId) : null;
   return (<>
-    <div className="bg-white rounded-4xl border border-slate-100 shadow-sm overflow-hidden relative">
+    <div className="bg-surface-card rounded-4xl border border-border-base shadow-sm overflow-hidden relative">
       <div ref={tableRef} onScroll={syncFromMain} className="overflow-x-auto">
       {alumnos.length > 0 && tableWidth > viewportWidth && (
         <div
           ref={trackRef}
           onPointerDown={onTrackPointerDown}
-          className="absolute left-0 z-30 h-3.5 overflow-hidden cursor-grab active:cursor-grabbing touch-none select-none bg-white border-b border-slate-200"
+          className="absolute left-0 z-30 h-3.5 overflow-hidden cursor-grab active:cursor-grabbing touch-none select-none bg-surface-card border-b border-border-base"
           style={{ top: headerHeight, width: tableWidth, transform: 'translateX(0px)' }}
         >
           <div
             ref={thumbRef}
             onPointerDown={onThumbPointerDown}
-            className="absolute top-0 bottom-0 rounded-r-md bg-slate-300 hover:bg-slate-400 transition-colors"
+            className="absolute top-0 bottom-0 rounded-r-md bg-surface-strong hover:text-main transition-colors"
             style={{ left: 0, width: Math.max(viewportWidth, 48) }}
           />
         </div>
@@ -161,39 +161,39 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
           <col style={{ width: '240px' }} />
         </colgroup>
         <thead ref={theadRef}>
-          <tr className="bg-slate-50">
-            <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 border-b border-slate-100">Alumno</th>
-            <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">DNI / Pasaporte</th>
-            <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">Contacto</th>
-            <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">Email EducaMadrid</th>
-            <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">Estado Asignación</th>
-            <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">FFE Pte.</th>
-            <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right border-b border-slate-100">Acciones</th>
+          <tr className="bg-surface-subtle">
+            <th className="px-8 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-r border-border-base border-b border-border-base">Alumno</th>
+            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">DNI / Pasaporte</th>
+            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Contacto</th>
+            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Email EducaMadrid</th>
+            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Estado Asignación</th>
+            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">FFE Pte.</th>
+            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest text-right border-b border-border-base">Acciones</th>
           </tr>
         </thead>
         <tbody>
           {alumnos.map(alumno => {
             const isAssigned = alumno.relacionId !== null;
             return (
-              <tr key={alumno.id} className="hover:bg-slate-50/50 transition-colors group font-sans">
+              <tr key={alumno.id} className="hover:bg-surface-hover/50 transition-colors group font-sans">
 
                 {/* Nombre */}
-                <td className="px-8 py-4 sticky left-0 z-10 bg-white group-hover:bg-slate-50 border-r border-slate-100 border-b border-slate-50">
+                <td className="px-8 py-4 sticky left-0 z-10 bg-surface-card group-hover:bg-surface-hover border-r border-border-base border-b border-border-base">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-colors">
+                    <div className="h-10 w-10 bg-surface-hover rounded-xl flex items-center justify-center text-text-muted group-hover:bg-primary group-hover:text-white transition-colors">
                       <User className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900 text-sm">{alumno.nombre}</div>
-                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{alumno.apellidos}</div>
+                      <div className="font-bold text-text-main text-sm">{alumno.nombre}</div>
+                      <div className="text-[10px] text-text-muted font-bold uppercase tracking-tight">{alumno.apellidos}</div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                         {!alumno.numSS?.trim() && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-danger-soft text-danger-strong border border-danger/20 rounded-full text-[9px] font-bold uppercase tracking-wide">
                             <TriangleAlert className="h-3 w-3" /> Falta NSS
                           </span>
                         )}
                         {!!alumno.alumnoIncompleto && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-warning-soft text-warning-strong border border-warning/20 rounded-full text-[9px] font-bold uppercase tracking-wide">
                             <TriangleAlert className="h-3 w-3" /> Falta info estudiante
                           </span>
                         )}
@@ -203,56 +203,56 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                 </td>
 
                 {/* DNI */}
-                <td className="px-6 py-4 border-b border-slate-50">
-                  <span className="text-sm font-medium text-slate-600 font-mono">{alumno.dni}</span>
+                <td className="px-6 py-4 border-b border-border-base">
+                  <span className="text-sm font-medium text-text-main font-mono">{alumno.dni}</span>
                 </td>
 
                 {/* Teléfono */}
-                <td className="px-6 py-4 border-b border-slate-50">
-                  <div className="text-sm text-slate-600 flex items-center gap-1.5 font-medium">
-                    <Phone className="h-3.5 w-3.5 text-slate-300" /> {alumno.tlfn}
+                <td className="px-6 py-4 border-b border-border-base">
+                  <div className="text-sm text-text-main flex items-center gap-1.5 font-medium">
+                    <Phone className="h-3.5 w-3.5 text-text-muted" /> {alumno.tlfn}
                   </div>
                 </td>
 
                 {/* Email */}
-                <td className="px-6 py-4 border-b border-slate-50">
-                  <div className="text-sm text-slate-500 truncate max-w-45 font-medium">{alumno.emailEduca}</div>
+                <td className="px-6 py-4 border-b border-border-base">
+                  <div className="text-sm text-text-muted truncate max-w-45 font-medium">{alumno.emailEduca}</div>
                 </td>
 
                 {/* Estado asignación */}
-                <td className="px-6 py-4 border-b border-slate-50">
+                <td className="px-6 py-4 border-b border-border-base">
                   {isAssigned ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[9px] font-bold uppercase tracking-tight border border-emerald-100">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success-soft text-success-strong text-[9px] font-bold uppercase tracking-tight border border-success/20">
                       Asignado
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-[9px] font-bold uppercase tracking-tight border border-amber-100">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-warning-soft text-warning-strong text-[9px] font-bold uppercase tracking-tight border border-warning/20">
                       Pdte. Asignar
                     </span>
                   )}
                 </td>
 
                 {/* Horas FFE */}
-                <td className="px-6 py-4 border-b border-slate-50">
+                <td className="px-6 py-4 border-b border-border-base">
                   {(alumno.totalHorasFFE || 0) > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-100">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-soft text-warning-strong text-[10px] font-black uppercase tracking-wider border border-warning/20">
                       <Clock className="h-3 w-3" /> {alumno.totalHorasFFE} Horas
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-wider border border-emerald-100">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-soft text-success-strong text-[10px] font-black uppercase tracking-wider border border-success/20">
                       <CheckCircle className="h-3 w-3" /> Completado
                     </span>
                   )}
                 </td>
 
                 {/* Acciones */}
-                <td className="px-6 py-4 text-right border-b border-slate-50">
+                <td className="px-6 py-4 text-right border-b border-border-base">
                   <div className="flex items-center justify-end gap-1">
                     {!isAssigned && (
                       <Title text="Seleciona motivo para la no realización de las FFE">
                         <button
                           onClick={() => handleOpenFFEMotivo(alumno.id!)}
-                          className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                          className="p-2 text-text-muted hover:text-warning-strong hover:bg-warning-soft rounded-lg transition-all"
                         >
                           <BadgeX className="h-4 w-4" />
                         </button>
@@ -262,8 +262,8 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                       <button
                         onClick={() => alumno.cvPath ? onViewCV(alumno) : document.getElementById(`cv-upload-${alumno.id}`)?.click()}
                         className={`p-2 rounded-lg transition-all ${alumno.cvPath
-                            ? 'text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50'
-                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                            ? 'text-success hover:text-success-strong hover:bg-success-soft'
+                            : 'text-text-muted hover:text-text-main hover:bg-surface-hover'
                           }`}
                       >
                         {alumno.cvPath ? <FileText className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
@@ -279,7 +279,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                     <Title text="Enviar correo">
                       <button
                         onClick={() => onEmail(alumno)}
-                        className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                        className="p-2 text-text-muted hover:text-primary hover:bg-primary-light rounded-lg transition-all"
                       >
                         <Mail className="h-4 w-4" />
                       </button>
@@ -287,7 +287,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                     <Title text="Editar estudiante">
                       <button
                         onClick={() => onEdit(alumno)}
-                        className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                        className="p-2 text-text-muted hover:text-primary hover:bg-primary-light rounded-lg transition-all"
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
@@ -295,7 +295,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                     <Title text="Eliminar estudiante">
                       <button
                         onClick={() => onDelete(alumno.id!)}
-                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                        className="p-2 text-text-muted hover:text-danger hover:bg-danger-soft rounded-lg transition-all"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -311,8 +311,8 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
 
       {alumnos.length === 0 && (
         <div className="p-20 text-center">
-          <Search className="h-12 w-12 mx-auto text-slate-200 mb-4" />
-          <p className="text-slate-500 font-bold text-sm">
+          <Search className="h-12 w-12 mx-auto text-border-base mb-4" />
+          <p className="text-text-muted font-bold text-sm">
             No se encontraron alumnos con los criterios de búsqueda.
           </p>
         </div>
@@ -324,35 +324,35 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
+            <div className="p-2 rounded-lg bg-warning-soft text-warning-strong">
               <BadgeX className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Sin relación</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Sin relación</h3>
+              <p className="text-sm text-text-muted">
                 {modalAlumno?.nombre} {modalAlumno?.apellidos}
               </p>
             </div>
           </div>
-          <button type="button" onClick={() => setFfeModalAlumnoId(null)} className="text-slate-400 hover:text-slate-600">
+          <button type="button" onClick={() => setFfeModalAlumnoId(null)} className="text-text-muted hover:text-text-main">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {loadingFFEMotivos ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
+            <Loader2 className="h-6 w-6 animate-spin text-warning-strong" />
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-xs text-slate-500">Selecciona el motivo por el que el alumno no cursa FFE:</p>
+            <p className="text-xs text-text-muted">Selecciona el motivo por el que el alumno no cursa FFE:</p>
             <div className="space-y-2">
               {ffeMotivos.map(m => (
                 <label
                   key={m.id}
                   className={`block p-3 rounded-xl border cursor-pointer transition-all ${ffeMotivoSelected === m.id
-                      ? 'border-amber-400 bg-amber-50'
-                      : 'border-slate-200 bg-white hover:bg-slate-50'
+                      ? 'border-warning/40 bg-warning-soft'
+                      : 'border-border-base bg-surface-card hover:bg-surface-hover'
                     }`}
                 >
                   <input
@@ -363,16 +363,16 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                     onChange={() => setFfeMotivoSelected(m.id)}
                     className="sr-only"
                   />
-                  <span className="text-sm font-semibold text-slate-800">{m.codigo}</span>
-                  <span className="text-sm text-slate-500 ml-2">— {m.valor}</span>
+                  <span className="text-sm font-semibold text-text-main">{m.codigo}</span>
+                  <span className="text-sm text-text-muted ml-2">— {m.valor}</span>
                 </label>
               ))}
             </div>
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-base">
               <button
                 type="button"
                 onClick={() => setFfeModalAlumnoId(null)}
-                className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+                className="px-5 py-2.5 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors"
               >
                 Cancelar
               </button>
@@ -380,7 +380,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                 type="button"
                 onClick={handleSaveFFEMotivo}
                 disabled={savingFFEMotivo || ffeMotivoSelected === null}
-                className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 text-white text-sm font-semibold rounded-xl hover:bg-amber-700 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-5 py-2.5 bg-warning text-white text-sm font-semibold rounded-xl hover:bg-warning/90 disabled:opacity-50 transition-colors"
               >
                 {savingFFEMotivo ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeX className="h-4 w-4" />}
                 {savingFFEMotivo ? 'Guardando...' : 'Guardar motivo'}

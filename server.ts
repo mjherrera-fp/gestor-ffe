@@ -98,6 +98,14 @@ async function startServer() {
 
   app.use(express.json({limit: '50mb'}));
 
+  // Si la BD está bloqueada (db === null), las rutas de datos deben responder
+  // 401 en vez de crashear con TypeError al usar la conexión null.
+  app.use('/api', (req, res, next) => {
+    if (req.path.startsWith('/auth')) return next();
+    if (!isDatabaseLocked()) return next();
+    res.status(401).json({ error: 'locked' });
+  });
+
   // 2. Configurar carpeta de subidas (UPLOADS) portable
   const uploadDir = path.join(baseDir, 'uploads');
   if (!fs.existsSync(uploadDir)) {

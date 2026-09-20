@@ -216,10 +216,10 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, grupos
 
   const contactIcon = (c: EmailContact) => {
     switch (c.type) {
-      case 'empresa': return <Briefcase className="h-3.5 w-3.5 text-blue-500 shrink-0" />;
-      case 'tutor': return <User className="h-3.5 w-3.5 text-amber-500 shrink-0" />;
-      case 'alumno': return <StudentIcon className="h-3.5 w-3.5 text-emerald-500 shrink-0" />;
-      case 'contacto': return <User className="h-3.5 w-3.5 text-indigo-500 shrink-0" />;
+      case 'empresa': return <Briefcase className="h-3.5 w-3.5 text-primary shrink-0" />;
+      case 'tutor': return <User className="h-3.5 w-3.5 text-warning-strong shrink-0" />;
+      case 'alumno': return <StudentIcon className="h-3.5 w-3.5 text-success shrink-0" />;
+      case 'contacto': return <User className="h-3.5 w-3.5 text-primary shrink-0" />;
     }
   };
 
@@ -242,11 +242,11 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, grupos
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+        className="w-full bg-surface-card border border-border-base rounded-lg px-3 py-2 text-sm text-text-main outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
       />
       {showSuggestions && (
-        <div className="absolute z-70 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
-          <div className="px-3 py-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100">
+        <div className="absolute z-70 left-0 right-0 top-full mt-1 bg-surface-card border border-border-base rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          <div className="px-3 py-1.5 text-[9px] font-bold text-text-muted uppercase tracking-wider bg-surface-subtle border-b border-border-base">
             Sugerencias
           </div>
           {dropdownItems.map((item, i) => {
@@ -258,12 +258,12 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, grupos
                 type="button"
                 onMouseDown={e => { e.preventDefault(); handleSelectSuggestion(s); }}
                 onMouseEnter={() => setHighlightedIndex(i)}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-slate-50 last:border-0 ${
-                  i === highlightedIndex ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+                className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-border-base last:border-0 ${
+                  i === highlightedIndex ? 'bg-primary-light text-primary' : 'text-text-main hover:bg-surface-hover'
                 }`}
               >
                 {isGroup
-                  ? <Users className="h-3.5 w-3.5 text-purple-500 shrink-0" />
+                  ? <Users className="h-3.5 w-3.5 text-primary shrink-0" />
                   : contactIcon((s as SuggestionItem).contact)}
                 <span className="truncate">{s.label}</span>
               </button>
@@ -272,15 +272,15 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, grupos
         </div>
       )}
       {show && !showSuggestions && (
-        <div className="absolute z-70 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+        <div className="absolute z-70 left-0 right-0 top-full mt-1 bg-surface-card border border-border-base rounded-lg shadow-xl max-h-60 overflow-y-auto">
           {filtered.map((c, i) => (
             <button
               key={`${c.type}-${c.id}`}
               type="button"
               onMouseDown={e => { e.preventDefault(); handleSelect(c); }}
               onMouseEnter={() => setHighlightedIndex(i)}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-slate-50 last:border-0 ${
-                i === highlightedIndex ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-border-base last:border-0 ${
+                i === highlightedIndex ? 'bg-primary-light text-primary' : 'text-text-main hover:bg-surface-hover'
               }`}
             >
               {contactIcon(c)}
@@ -593,19 +593,19 @@ export function EmailModal({
   const hasGroupMarkers = initialBody.includes('{{@');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-2">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-sm p-2">
+      <div className="bg-surface-card rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-base bg-surface-subtle shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+            <div className="p-2 rounded-lg bg-primary-light text-primary">
               <Send className="h-5 w-5" />
             </div>
-            <h2 className="text-lg font-bold text-slate-800">Nuevo Correo Electrónico</h2>
+            <h2 className="text-lg font-bold text-text-main">Nuevo Correo Electrónico</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+            className="p-2 text-text-muted hover:text-text-main hover:bg-surface-hover rounded-lg transition-all"
           >
             <X className="h-5 w-5" />
           </button>
@@ -615,11 +615,11 @@ export function EmailModal({
         {configOk === false ? (
           <div className="flex-1 flex items-center justify-center p-12">
             <div className="text-center max-w-md">
-              <div className="p-3 rounded-full bg-amber-100 text-amber-600 w-fit mx-auto mb-4">
+              <div className="p-3 rounded-full bg-warning-soft text-warning-strong w-fit mx-auto mb-4">
                 <Settings className="h-8 w-8" />
               </div>
-              <h3 className="text-lg font-bold text-slate-800 mb-2">Configuración de correo pendiente</h3>
-              <p className="text-sm text-slate-500 mb-6">
+              <h3 className="text-lg font-bold text-text-main mb-2">Configuración de correo pendiente</h3>
+              <p className="text-sm text-text-muted mb-6">
                 No hay configuración SMTP. Para poder enviar correos electrónicos debes configurar
                 tus credenciales de EducaMadrid en la sección de Configuración.
               </p>
@@ -627,14 +627,14 @@ export function EmailModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-lg transition-colors"
                 >
                   Cerrar
                 </button>
                 <button
                   type="button"
                   onClick={() => { onGoToConfig?.(); onClose(); }}
-                  className="px-5 py-2 bg-sky-600 text-white text-sm font-semibold rounded-xl hover:bg-sky-700 transition-all shadow-lg shadow-sky-600/20 flex items-center gap-2"
+                  className="px-5 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
                 >
                   <Settings className="h-4 w-4" />
                   Ir a Configuración
@@ -645,11 +645,11 @@ export function EmailModal({
         ) : (
           <div className="flex flex-1 overflow-hidden">
             {/* Left panel: Attachments */}
-            <div className="w-64 lg:w-72 shrink-0 border-r border-slate-200 bg-slate-50/50 overflow-y-auto p-4 space-y-4">
+            <div className="w-64 lg:w-72 shrink-0 border-r border-border-base bg-surface-subtle/50 overflow-y-auto p-4 space-y-4">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-blue-600 text-white text-xs font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-primary text-white text-xs font-semibold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
               >
                 <Paperclip className="h-4 w-4" />
                 Añadir adjunto
@@ -657,37 +657,37 @@ export function EmailModal({
               <input ref={fileInputRef} type="file" multiple onChange={handleFileSelect} className="hidden" />
 
               <div>
-                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Adjuntos</h3>
+                <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Adjuntos</h3>
                 {attachments.length > 0 ? (
                   <div className="space-y-1.5">
                     {attachments.map(att => (
                       <div
                         key={att.id}
-                        className="bg-white border border-slate-200 rounded-lg px-3 py-2 space-y-1"
+                        className="bg-surface-card border border-border-base rounded-lg px-3 py-2 space-y-1"
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <FileText className="h-4 w-4 text-slate-400 shrink-0" />
+                          <FileText className="h-4 w-4 text-text-muted shrink-0" />
                           <div className="min-w-0 flex-1">
                             <Title text={att.filename}>
-                              <span className="block text-xs text-slate-700 font-medium truncate">{att.filename}</span>
+                              <span className="block text-xs text-text-main font-medium truncate">{att.filename}</span>
                             </Title>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] text-slate-400">{(att.size / 1024).toFixed(1)} KB</span>
-                            <span className="text-[10px] text-slate-400 font-mono">{att.filename.split('.').pop()?.toUpperCase()}</span>
+                            <span className="text-[10px] text-text-muted">{(att.size / 1024).toFixed(1)} KB</span>
+                            <span className="text-[10px] text-text-muted font-mono">{att.filename.split('.').pop()?.toUpperCase()}</span>
                             {att.source === 'generated' && (
                               <>
-                                <span className="text-slate-300">·</span>
-                                <span className="text-[9px] font-bold text-blue-500 uppercase">Generado</span>
+                                <span className="text-border-base">·</span>
+                                <span className="text-[9px] font-bold text-primary uppercase">Generado</span>
                               </>
                             )}
                           </div>
                           <button
                             type="button"
                             onClick={() => handleRemoveAttachment(att)}
-                            className="p-1 text-slate-400 hover:text-red-500 rounded"
+                            className="p-1 text-text-muted hover:text-danger rounded"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -696,7 +696,7 @@ export function EmailModal({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-400 italic">Ningún archivo adjunto</p>
+                  <p className="text-xs text-text-muted italic">Ningún archivo adjunto</p>
                 )}
               </div>
             </div>
@@ -705,7 +705,7 @@ export function EmailModal({
             <div className="flex-1 flex flex-col overflow-hidden">
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {error && (
-                  <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">
+                  <div className="p-3 bg-danger-soft text-danger-strong rounded-lg text-sm border border-danger/20">
                     {error}
                   </div>
                 )}
@@ -713,22 +713,22 @@ export function EmailModal({
                 {/* Para */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Para</label>
+                    <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider">Para</label>
                     {parseEmails(to).length > 1 && !hasGroupMarkers && (
                       <button
                         type="button"
                         onClick={() => setSendIndividual(!sendIndividual)}
                         className={`px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border transition-all ${
                           sendIndividual
-                            ? 'bg-blue-50 text-blue-600 border-blue-200'
-                            : 'bg-slate-50 text-slate-400 border-slate-200'
+                            ? 'bg-primary-light text-primary border-primary-light'
+                            : 'bg-surface-hover text-text-muted border-border-base'
                         }`}
                       >
                         {sendIndividual ? 'Enviar 1 a 1' : 'Agrupado'}
                       </button>
                     )}
                     {hasGroupMarkers && (
-                      <span className="px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border bg-blue-50 text-blue-600 border-blue-200">
+                      <span className="px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border bg-primary-light text-primary border-primary-light">
                         Enviar 1 a 1
                       </span>
                     )}
@@ -747,7 +747,7 @@ export function EmailModal({
                     blurTimerRef={blurTimerRef}
                   />
                   {sendIndividual && parseEmails(to).length > 1 && (
-                    <p className="text-[10px] text-amber-600 mt-1">
+                    <p className="text-[10px] text-warning-strong mt-1">
                       Se enviará un correo individual a cada destinatario con 1.5s de espera entre envíos
                     </p>
                   )}
@@ -765,13 +765,13 @@ export function EmailModal({
                           setTo('');
                           setSendIndividual(false);
                         }}
-                        className="text-[10px] font-semibold text-slate-400 hover:text-blue-600 transition-colors"
+                        className="text-[10px] font-semibold text-text-muted hover:text-primary transition-colors"
                       >
                         Pasar destinatarios a CCO →
                       </button>
                     )}
                     {parseEmails(to).length > 0 && parseEmails(bcc).length > 0 && (
-                      <span className="text-slate-300 text-[10px]">|</span>
+                      <span className="text-border-base text-[10px]">|</span>
                     )}
                     {parseEmails(bcc).length > 0 && (
                       <button
@@ -782,7 +782,7 @@ export function EmailModal({
                           setBcc('');
                           setSendIndividual(true);
                         }}
-                        className="text-[10px] font-semibold text-slate-400 hover:text-blue-600 transition-colors"
+                        className="text-[10px] font-semibold text-text-muted hover:text-primary transition-colors"
                       >
                         ← Pasar destinatarios al Para
                       </button>
@@ -793,7 +793,7 @@ export function EmailModal({
                 {!hasGroupMarkers && (
                   <>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">CC</label>
+                      <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">CC</label>
                       <EmailAutocompleteField
                         value={cc}
                         onChange={setCc}
@@ -810,7 +810,7 @@ export function EmailModal({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">CCO</label>
+                      <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">CCO</label>
                       <EmailAutocompleteField
                         value={bcc}
                         onChange={setBcc}
@@ -830,20 +830,20 @@ export function EmailModal({
 
                 {/* Asunto */}
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Asunto</label>
+                  <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Asunto</label>
                   <input
                     type="text"
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
                     placeholder="Asunto del correo"
-                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+                    className="w-full bg-surface-card border border-border-base rounded-lg px-3 py-2 text-sm text-text-main outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
                   />
                 </div>
 
                 {/* WYSIWYG Editor */}
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cuerpo</label>
-                  <div className="border border-slate-200 rounded-lg overflow-hidden editor-body">
+                  <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Cuerpo</label>
+                  <div className="border border-border-base rounded-lg overflow-hidden editor-body">
                     <style>{`.editor-body .ProseMirror p { margin-bottom: 1.25em; } .editor-body .ProseMirror ul { margin-bottom: 1.25em; }`}</style>
                     <EditorContext.Provider value={{ editor }}>
                       <Toolbar variant="fixed">
@@ -892,7 +892,7 @@ export function EmailModal({
                         </ToolbarGroup>
                       </Toolbar>
                       <EditorContent editor={editor} />
-                      <div className="flex justify-end px-3 py-1.5 text-[11px] text-slate-400 border-t border-slate-100">
+                      <div className="flex justify-end px-3 py-1.5 text-[11px] text-text-muted border-t border-border-base">
                         <WordCharacterCount editor={editor} />
                       </div>
                     </EditorContext.Provider>
@@ -900,7 +900,7 @@ export function EmailModal({
                 </div>
 
                 {hasGroupMarkers && (
-                  <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-700 rounded-lg text-xs border border-amber-200">
+                  <div className="flex items-center gap-2 p-3 bg-warning-soft text-warning-strong rounded-lg text-xs border border-warning/20">
                     <Info className="h-4 w-4 shrink-0" />
                     <span>El cuerpo contiene marcadores <code className="font-mono font-bold">{'{{@...}}'}</code> que se sustituirán automáticamente al enviar según el destinatario. Por este motivo solo será posible enviar correos 1 a 1 a destinatarios en el Para.</span>
                   </div>
@@ -909,15 +909,15 @@ export function EmailModal({
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 shrink-0">
-                <span className="text-xs text-slate-400">
+              <div className="flex items-center justify-between px-6 py-4 border-t border-border-base bg-surface-subtle shrink-0">
+                <span className="text-xs text-text-muted">
                   {totalRecipients > 0 ? `${totalRecipients} destinatario${totalRecipients > 1 ? 's' : ''}` : 'Sin destinatarios'}
                 </span>
                 <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-lg transition-colors"
                   >
                     Cancelar
                   </button>
@@ -925,7 +925,7 @@ export function EmailModal({
                     type="button"
                     onClick={handleSend}
                     disabled={sending || totalRecipients === 0}
-                    className="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2"
+                    className="px-5 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
                   >
                     {sending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

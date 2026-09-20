@@ -5,9 +5,9 @@ import { Modal } from '../../../components/ui/Modal.tsx';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
 import { required } from '../../../utils/validation.ts';
 
-const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
+const inputCls = 'w-full bg-surface-card border border-border-base rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
 const inputErrCls = 'border-red-400 ring-2 ring-red-200';
-const labelCls = 'block text-sm font-medium text-slate-700 mb-1';
+const labelCls = 'block text-sm font-medium text-text-main mb-1';
 const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
 
 const RULES = {
@@ -41,11 +41,11 @@ export function CursoFormModal({
     <Modal open={open} onClose={onClose} maxWidth="lg">
 
         {/* Header */}
-        <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
-          <h3 className="text-xl font-bold text-slate-800">
+        <div className="px-8 py-6 border-b border-border-base flex items-center justify-between bg-surface-subtle shrink-0">
+          <h3 className="text-xl font-bold text-text-main">
             {editing ? 'Editar Curso' : 'Crear Nuevo Curso'}
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={onClose} className="text-text-muted hover:text-text-main transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -97,13 +97,13 @@ export function CursoFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 border border-slate-200 rounded-xl font-medium text-slate-600 hover:bg-slate-50 transition-all"
+              className="flex-1 py-3 border border-border-base rounded-xl font-medium text-text-main hover:bg-surface-hover transition-all"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+              className="flex-1 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
             >
               {editing ? 'Actualizar' : 'Crear Curso'}
             </button>

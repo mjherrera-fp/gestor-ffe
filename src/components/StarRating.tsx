@@ -35,14 +35,14 @@ export function StarRating({ value, onChange, readonly = false, size = 'md' }: S
               className={`${sizeCls} transition-all ${
                 filled
                   ? 'text-amber-400 fill-amber-400'
-                  : 'text-slate-300 fill-transparent'
+                  : 'text-text-muted fill-transparent'
               }`}
             />
           </button>
         );
       })}
       {!readonly && value !== undefined && (
-        <span className="ml-1.5 text-xs font-bold text-slate-400">
+        <span className="ml-1.5 text-xs font-bold text-text-muted">
           {value > 0 ? value.toFixed(1) : ''}
         </span>
       )}

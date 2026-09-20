@@ -10,10 +10,10 @@ function Badge({ valor }: { valor?: string }) {
   return (
     <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
       valor === FirmaTipo.DIGITAL
-        ? 'bg-blue-50 text-blue-600 border-blue-200'
+        ? 'bg-primary-light text-primary border-primary-light'
         : valor === FirmaTipo.MANUAL
-        ? 'bg-amber-50 text-amber-600 border-amber-200'
-        : 'bg-slate-50 text-slate-400 border-slate-200'
+        ? 'bg-warning-soft text-warning-strong border-warning/20'
+        : 'bg-surface-subtle text-text-muted border-border-base'
     }`}>
       {valor && valor !== FirmaTipo.SIN_ASIGNAR ? FirmaTipoLabels[valor as FirmaTipo] : '—'}
     </span>
@@ -26,7 +26,7 @@ export function FirmasTab({ ctx }: { ctx: Ctx }) {
   if (rows.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-slate-400 font-medium">No hay relaciones con alumnos para mostrar firmas</p>
+        <p className="text-text-muted font-medium">No hay relaciones con alumnos para mostrar firmas</p>
       </div>
     );
   }
@@ -48,40 +48,40 @@ export function FirmasTab({ ctx }: { ctx: Ctx }) {
 
       <div className="flex items-center justify-between no-print">
         <div>
-          <h3 className="text-lg font-bold text-slate-900">Tipo de Firma por Documento</h3>
-          <p className="text-xs text-slate-500 mt-1">
+          <h3 className="text-lg font-bold text-text-main">Tipo de Firma por Documento</h3>
+          <p className="text-xs text-text-muted mt-1">
             Indica si cada documento requiere firma digital o manual para cada alumno.
           </p>
         </div>
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-xl font-semibold text-xs shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+          className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-xl font-semibold text-xs shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
         >
           <Printer className="h-3.5 w-3.5" />
           Imprimir PDF
         </button>
       </div>
 
-      <div id="firmas-print-area" className="overflow-x-auto bg-white rounded-xl border border-slate-200 shadow-sm">
+      <div id="firmas-print-area" className="overflow-x-auto bg-surface-card rounded-xl border border-border-base shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Alumno</th>
-              <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Empresa</th>
-              <th className="text-center px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Convenio</th>
-              <th className="text-center px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Relación</th>
-              <th className="text-center px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Plan Formativo</th>
-              <th className="text-center px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Seguimiento</th>
-              <th className="text-center px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Valoración</th>
+            <tr className="bg-surface-subtle border-b border-border-base">
+              <th className="text-left px-4 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Alumno</th>
+              <th className="text-left px-4 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Empresa</th>
+              <th className="text-center px-4 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Convenio</th>
+              <th className="text-center px-4 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Relación</th>
+              <th className="text-center px-4 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Plan Formativo</th>
+              <th className="text-center px-4 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Seguimiento</th>
+              <th className="text-center px-4 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Valoración</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r: any, i: number) => (
-              <tr key={r.alumnoId || i} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                <td className="px-4 py-3 text-xs font-bold text-slate-700 whitespace-nowrap">
+              <tr key={r.alumnoId || i} className="border-b border-border-base hover:bg-surface-subtle/50 transition-colors">
+                <td className="px-4 py-3 text-xs font-bold text-text-main whitespace-nowrap">
                   {r.apellidos}, {r.nombre}
                 </td>
-                <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
+                <td className="px-4 py-3 text-xs text-text-muted whitespace-nowrap">
                   {r.empresaNombre || '—'}
                 </td>
                 <td className="px-4 py-3 text-center"><Badge valor={r.tipoFirmaConvenio} /></td>

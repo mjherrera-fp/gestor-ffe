@@ -40,7 +40,7 @@ export function ConveniosListado({
   ];
 
   return (
-    <div className="w-full lg:flex-1 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-white rounded-xl border border-border-base shadow-sm flex flex-col">
+    <div className="w-full lg:flex-1 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-surface-card rounded-xl border border-border-base shadow-sm flex flex-col">
 
       {/* ── Cabecera + filtros ── */}
       <div className="px-6 py-4 border-b border-border-base space-y-4 relative z-20 shrink-0">
@@ -68,7 +68,7 @@ export function ConveniosListado({
             <input
               type="text"
               placeholder="Buscar convenio..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+              className="w-full bg-surface-subtle border border-border-base rounded-lg pl-9 pr-4 py-2 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
               value={listSearchTerm}
               onChange={e => onListSearchChange(e.target.value)}
             />
@@ -90,16 +90,16 @@ export function ConveniosListado({
           />
 
           {/* Ordenación */}
-          <div className="flex w-full bg-slate-50 border border-slate-200 rounded-lg p-1">
+          <div className="flex w-full bg-surface-subtle border border-border-base rounded-lg p-1">
             <button
               onClick={onSortByEmpresa}
-              className={`flex-1 text-[9px] font-bold uppercase tracking-tight py-1 rounded-md transition-all ${sortBy === 'empresa' ? 'bg-white shadow-sm text-primary' : 'text-text-muted'}`}
+              className={`flex-1 text-[9px] font-bold uppercase tracking-tight py-1 rounded-md transition-all ${sortBy === 'empresa' ? 'bg-surface-card shadow-sm text-primary' : 'text-text-muted'}`}
             >
               Empresa {sortBy === 'empresa' && (sortOrder === 'asc' ? '↑' : '↓')}
             </button>
             <button
               onClick={onSortByEstado}
-              className={`flex-1 text-[9px] font-bold uppercase tracking-tight py-1 rounded-md transition-all ${sortBy === 'estado' ? 'bg-white shadow-sm text-primary' : 'text-text-muted'}`}
+              className={`flex-1 text-[9px] font-bold uppercase tracking-tight py-1 rounded-md transition-all ${sortBy === 'estado' ? 'bg-surface-card shadow-sm text-primary' : 'text-text-muted'}`}
             >
               Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
             </button>
@@ -113,7 +113,7 @@ export function ConveniosListado({
           <div
             key={conv.id}
             onClick={() => onSelectConvenio(conv)}
-            className={`p-5 cursor-pointer transition-colors ${selectedConvenio?.id === conv.id ? 'bg-primary-light/40' : 'hover:bg-slate-50'}`}
+            className={`p-5 cursor-pointer transition-colors ${selectedConvenio?.id === conv.id ? 'bg-primary-light/40' : 'hover:bg-surface-subtle'}`}
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
@@ -121,7 +121,7 @@ export function ConveniosListado({
                 <p className="text-[10px] text-primary font-bold uppercase tracking-tight">{conv.centroNombre}</p>
                 <p className="text-[10px] text-text-muted font-bold mt-1">Ref: {conv.numConvenio}</p>
                 {!!conv.convenioIncompleto && (
-                  <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                  <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-warning-soft text-warning-strong border border-warning/20 rounded-full text-[9px] font-bold uppercase tracking-wide">
                     <TriangleAlert className="h-3 w-3" /> Falta info convenio
                   </span>
                 )}
@@ -137,7 +137,7 @@ export function ConveniosListado({
                         e.stopPropagation();
                         onUploadDocument(conv);
                       }}
-                      className="text-[10px] font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1"
+                      className="text-[10px] font-bold text-text-muted hover:text-primary transition-colors flex items-center gap-1"
                   >
                     <Upload className="h-3 w-3"/>
                     Documentos
@@ -157,7 +157,7 @@ export function ConveniosListado({
       <div className="hidden lg:block lg:flex-1 lg:min-h-0 overflow-y-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 border-b border-border-base">
+            <tr className="bg-surface-subtle border-b border-border-base">
               <th
                 onClick={onSortByEmpresa}
                 className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider cursor-pointer hover:text-primary transition-colors"
@@ -183,13 +183,13 @@ export function ConveniosListado({
               <tr
                 key={conv.id}
                 onClick={() => onSelectConvenio(conv)}
-                className={`cursor-pointer transition-colors ${selectedConvenio?.id === conv.id ? 'bg-primary-light' : 'hover:bg-slate-50'}`}
+                className={`cursor-pointer transition-colors ${selectedConvenio?.id === conv.id ? 'bg-primary-light' : 'hover:bg-surface-subtle'}`}
               >
                 <td className="px-5 py-4">
                   <p className="text-[9px] text-primary font-bold uppercase tracking-tight mb-0.5">{conv.centroNombre}</p>
                   <p className="font-bold text-text-main text-sm truncate max-w-50">{conv.empresaNombre}</p>
                   {!!conv.convenioIncompleto && (
-                    <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                    <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-warning-soft text-warning-strong border border-warning/20 rounded-full text-[9px] font-bold uppercase tracking-wide">
                       <TriangleAlert className="h-3 w-3" /> Falta info convenio
                     </span>
                   )}
@@ -206,7 +206,7 @@ export function ConveniosListado({
                         <Title text="Subir documentos">
                           <button
                               onClick={() => onUploadDocument(conv)}
-                              className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                              className="p-2 text-text-muted hover:text-primary transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
                           >
                             <Archive className="h-4 w-4"/>
                           </button>
@@ -215,7 +215,7 @@ export function ConveniosListado({
                     <Title text="Editar convenio">
                       <button
                         onClick={() => onEdit(conv)}
-                        className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                        className="p-2 text-text-muted hover:text-primary transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
@@ -223,7 +223,7 @@ export function ConveniosListado({
                     <Title text="Eliminar convenio">
                       <button
                         onClick={() => onDeleteRequest(conv.id!)}
-                        className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                        className="p-2 text-text-muted hover:text-danger transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

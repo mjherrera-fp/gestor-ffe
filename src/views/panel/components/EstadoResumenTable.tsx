@@ -34,10 +34,10 @@ function getStatusLabels(col: ColumnMeta): Record<string, string> | null {
 }
 
 function SortIcon({ column, sort }: { column: ColumnId; sort: SortConfig }) {
-  if (sort.column !== column) return <ArrowUpDown className="h-3 w-3 text-slate-300 group-hover:text-slate-500" />;
+  if (sort.column !== column) return <ArrowUpDown className="h-3 w-3 text-text-muted group-hover:text-text-main" />;
   return sort.dir === 'asc'
-    ? <ArrowUp className="h-3 w-3 text-blue-600" />
-    : <ArrowDown className="h-3 w-3 text-blue-600" />;
+    ? <ArrowUp className="h-3 w-3 text-primary" />
+    : <ArrowDown className="h-3 w-3 text-primary" />;
 }
 
 function FilterDropdown({
@@ -67,16 +67,16 @@ function FilterDropdown({
   };
 
   return (
-    <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-xl border border-slate-200 shadow-xl z-50 p-4 space-y-3" onClick={e => e.stopPropagation()}>
+    <div className="absolute top-full left-0 mt-1 w-64 bg-surface-card rounded-xl border border-border-base shadow-xl z-50 p-4 space-y-3" onClick={e => e.stopPropagation()}>
       {column.type === 'text' && (
         <div>
-          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Contiene</label>
+          <label className="text-[11px] font-bold text-text-muted uppercase tracking-wider block mb-1">Contiene</label>
           <input
             type="text"
             value={local.text || ''}
             onChange={e => setLocal({ ...local, text: e.target.value })}
             placeholder="Filtrar..."
-            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            className="w-full px-3 py-2 text-sm bg-surface-card border border-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             autoFocus
           />
         </div>
@@ -85,21 +85,21 @@ function FilterDropdown({
       {column.type === 'date' && (
         <>
           <div>
-            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Desde</label>
+            <label className="text-[11px] font-bold text-text-muted uppercase tracking-wider block mb-1">Desde</label>
             <input
               type="date"
               value={local.from || ''}
               onChange={e => setLocal({ ...local, from: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              className="w-full px-3 py-2 text-sm bg-surface-card border border-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
           </div>
           <div>
-            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Hasta</label>
+            <label className="text-[11px] font-bold text-text-muted uppercase tracking-wider block mb-1">Hasta</label>
             <input
               type="date"
               value={local.to || ''}
               onChange={e => setLocal({ ...local, to: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              className="w-full px-3 py-2 text-sm bg-surface-card border border-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
           </div>
         </>
@@ -113,7 +113,7 @@ function FilterDropdown({
             const allKeys = Object.keys(labels);
             const sel = local.selected || [];
             return allKeys.map(key => (
-              <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 cursor-pointer">
+              <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface-subtle cursor-pointer">
                 <input
                   type="checkbox"
                   checked={sel.includes(key)}
@@ -123,20 +123,20 @@ function FilterDropdown({
                       : sel.filter(s => s !== key);
                     setLocal({ ...local, selected: next });
                   }}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-border-base text-primary focus:ring-primary"
                 />
-                <span className="text-sm text-slate-700">{labels[key]}</span>
+                <span className="text-sm text-text-main">{labels[key]}</span>
               </label>
             ));
           })()}
         </div>
       )}
 
-      <div className="flex gap-2 pt-2 border-t border-slate-100">
-        <button onClick={clear} className="flex-1 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-50 rounded-lg transition-colors">
+      <div className="flex gap-2 pt-2 border-t border-border-base">
+        <button onClick={clear} className="flex-1 py-1.5 text-xs font-semibold text-text-muted hover:bg-surface-subtle rounded-lg transition-colors">
           Limpiar
         </button>
-        <button onClick={apply} className="flex-1 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors">
+        <button onClick={apply} className="flex-1 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors">
           Aplicar
         </button>
       </div>
@@ -145,22 +145,22 @@ function FilterDropdown({
 }
 
 const badgeColors: Record<string, string> = {
-  'PENDIENTE_ENVIAR': 'bg-amber-50 text-amber-700 border-amber-200',
-  'PENDIENTE_FIRMA_EMPRESA': 'bg-orange-50 text-orange-700 border-orange-200',
-  'PENDIENTE_ENVIAR_DIRECTOR': 'bg-blue-50 text-blue-700 border-blue-200',
-  'PENDIENTE_FIRMA_DIRECTOR': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  'COMPLETADO': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'PENDIENTE_ENVIAR_EMPRESA': 'bg-amber-50 text-amber-700 border-amber-200',
-  'PENDIENTE_ENVIAR_ESTUDIANTE': 'bg-amber-50 text-amber-700 border-amber-200',
-  'PENDIENTE_FIRMAR_ESTUDIANTE': 'bg-orange-50 text-orange-700 border-orange-200',
-  'PENDIENTE_FIRMA_TUTOR': 'bg-purple-50 text-purple-700 border-purple-200',
-  'PENDIENTE': 'bg-slate-100 text-slate-600 border-slate-200',
-  'ENVIADO_A_EMPRESA': 'bg-blue-50 text-blue-700 border-blue-200',
-  'RECIBIDO': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  'PENDIENTE_ENVIAR': 'bg-warning-soft text-warning-strong border-warning/20',
+  'PENDIENTE_FIRMA_EMPRESA': 'bg-warning-soft text-warning-strong border-warning/20',
+  'PENDIENTE_ENVIAR_DIRECTOR': 'bg-primary-light text-primary border-primary-light',
+  'PENDIENTE_FIRMA_DIRECTOR': 'bg-primary-light text-primary border-primary-light',
+  'COMPLETADO': 'bg-success-soft text-success-strong border-success/20',
+  'PENDIENTE_ENVIAR_EMPRESA': 'bg-warning-soft text-warning-strong border-warning/20',
+  'PENDIENTE_ENVIAR_ESTUDIANTE': 'bg-warning-soft text-warning-strong border-warning/20',
+  'PENDIENTE_FIRMAR_ESTUDIANTE': 'bg-warning-soft text-warning-strong border-warning/20',
+  'PENDIENTE_FIRMA_TUTOR': 'bg-primary-light text-primary border-primary-light',
+  'PENDIENTE': 'bg-surface-subtle text-text-muted border-border-base',
+  'ENVIADO_A_EMPRESA': 'bg-primary-light text-primary border-primary-light',
+  'RECIBIDO': 'bg-success-soft text-success-strong border-success/20',
 };
 
 function StatusBadge({ estado, labels }: { estado: string; labels: Record<string, string> }) {
-  const color = badgeColors[estado] || 'bg-slate-100 text-slate-600 border-slate-200';
+  const color = badgeColors[estado] || 'bg-surface-subtle text-text-muted border-border-base';
   return (
     <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${color}`}>
       {labels[estado] || estado}
@@ -173,16 +173,16 @@ function CellContent({ row, col, formatDate }: { row: PanelResumenRow; col: Colu
 
   if (col.type === 'status') {
     const labels = getStatusLabels(col);
-    if (!val || !labels) return <span className="text-slate-300">—</span>;
+    if (!val || !labels) return <span className="text-text-muted">—</span>;
     return <StatusBadge estado={val} labels={labels} />;
   }
 
   if (col.id === 'fechaInicio' || col.id === 'fechaFin' || col.id === 'fechaEnvioDAT') {
-    return <span className="text-slate-600 text-xs whitespace-nowrap">{formatDate(val)}</span>;
+    return <span className="text-text-muted text-xs whitespace-nowrap">{formatDate(val)}</span>;
   }
 
   const display = val || '—';
-  return <span className={`text-slate-600 whitespace-nowrap ${col.type === 'text' ? 'font-semibold text-slate-900' : ''} ${col.id === 'numConvenio' || col.id === 'numRelacion' ? 'text-xs font-mono' : ''}`}>{display}</span>;
+  return <span className={`text-text-muted whitespace-nowrap ${col.type === 'text' ? 'font-semibold text-text-main' : ''} ${col.id === 'numConvenio' || col.id === 'numRelacion' ? 'text-xs font-mono' : ''}`}>{display}</span>;
 }
 
 export function EstadoResumenTable({ resumen, columns, sort, toggleSort, filters, setFilter, clearFilters, activeFiltersCount, formatDate }: Props) {
@@ -201,13 +201,13 @@ export function EstadoResumenTable({ resumen, columns, sort, toggleSort, filters
   }, []);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col" style={{ maxHeight: '75vh' }}>
-      <div className="p-4 border-b border-slate-100 flex items-center gap-3 shrink-0">
-        <h3 className="text-lg font-bold text-slate-900">Resumen de alumnos</h3>
+    <div className="bg-surface-card rounded-xl border border-border-base shadow-sm flex flex-col" style={{ maxHeight: '75vh' }}>
+      <div className="p-4 border-b border-border-base flex items-center gap-3 shrink-0">
+        <h3 className="text-lg font-bold text-text-main">Resumen de alumnos</h3>
         {activeFiltersCount > 0 && (
           <button
             onClick={clearFilters}
-            className="flex items-center gap-1.5 text-[11px] font-bold text-red-500 hover:text-red-600 bg-red-50 px-2.5 py-1 rounded-full transition-colors"
+            className="flex items-center gap-1.5 text-[11px] font-bold text-danger hover:text-danger bg-danger-soft px-2.5 py-1 rounded-full transition-colors"
           >
             <X className="h-3 w-3" />
             {activeFiltersCount} filtro{activeFiltersCount > 1 ? 's' : ''}
@@ -218,7 +218,7 @@ export function EstadoResumenTable({ resumen, columns, sort, toggleSort, filters
       <div className="overflow-auto flex-1" ref={filterRef}>
         <table className="w-full text-sm border-collapse">
           <thead className="sticky top-0 z-20">
-            <tr className="bg-slate-50">
+            <tr className="bg-surface-subtle">
               {columns.map(col => {
                 const hasFilter = !!filters[col.id];
                 return (
@@ -226,14 +226,14 @@ export function EstadoResumenTable({ resumen, columns, sort, toggleSort, filters
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => toggleSort(col.id)}
-                        className="group flex items-center gap-1.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider hover:text-slate-800 transition-colors"
+                        className="group flex items-center gap-1.5 text-[11px] font-bold text-text-muted uppercase tracking-wider hover:text-text-main transition-colors"
                       >
                         {col.label}
                         <SortIcon column={col.id} sort={sort} />
                       </button>
                       <button
                         onClick={() => setOpenFilter(openFilter === col.id ? null : col.id)}
-                        className={`p-0.5 rounded transition-colors ${hasFilter ? 'text-blue-600 bg-blue-50' : 'text-slate-300 hover:text-slate-500'}`}
+                        className={`p-0.5 rounded transition-colors ${hasFilter ? 'text-primary bg-primary-light' : 'text-text-muted hover:text-text-main'}`}
                       >
                         <Filter className="h-3 w-3" />
                       </button>
@@ -251,10 +251,10 @@ export function EstadoResumenTable({ resumen, columns, sort, toggleSort, filters
               })}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border-base">
             {resumen.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-16 text-center text-slate-400 font-medium">
+                <td colSpan={columns.length} className="px-4 py-16 text-center text-text-muted font-medium">
                   No hay alumnos que coincidan con los filtros
                 </td>
               </tr>
@@ -265,8 +265,8 @@ export function EstadoResumenTable({ resumen, columns, sort, toggleSort, filters
                   onClick={() => setSelectedRowId(selectedRowId === row.alumnoId ? null : row.alumnoId)}
                   className={`cursor-pointer transition-colors ${
                     selectedRowId === row.alumnoId
-                      ? 'bg-blue-50 hover:bg-blue-100'
-                      : 'hover:bg-slate-50/50'
+                      ? 'bg-primary-light hover:bg-primary-light'
+                      : 'hover:bg-surface-subtle/50'
                   }`}
                 >
                   {columns.map(col => (
@@ -281,7 +281,7 @@ export function EstadoResumenTable({ resumen, columns, sort, toggleSort, filters
         </table>
       </div>
 
-      <div className="px-4 py-3 border-t border-slate-100 text-xs text-slate-400 font-medium shrink-0">
+      <div className="px-4 py-3 border-t border-border-base text-xs text-text-muted font-medium shrink-0">
         {resumen.length} alumno{resumen.length !== 1 ? 's' : ''}
       </div>
     </div>

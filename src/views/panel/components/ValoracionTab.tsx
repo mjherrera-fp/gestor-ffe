@@ -38,101 +38,101 @@ export function ValoracionTab({ cursoId, detalleAcademicoId }: { cursoId: number
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+          <div className="p-2 rounded-lg bg-primary-light text-primary">
             <FileBadge className="h-5 w-5" />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">Valoración FFE</h3>
+          <h3 className="text-lg font-bold text-text-main">Valoración FFE</h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-600">Fecha de evaluación</span>
-          <CalendarDays className="h-4 w-4 text-slate-400" />
+          <span className="text-sm font-medium text-text-muted">Fecha de evaluación</span>
+          <CalendarDays className="h-4 w-4 text-text-muted" />
           <input
             type="date"
             value={fecha}
             onChange={e => setFecha(e.target.value)}
-            className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-purple-500/10 focus:border-purple-500 transition-all"
+            className="bg-surface-card border border-border-base rounded-lg px-3 py-1.5 text-sm font-medium text-text-main outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
           />
         </div>
       </div>
 
       {/* Summary cards row 1 */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col items-center text-center">
-          <span className="text-2xl font-black text-slate-800">{rows.length}</span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Alumnos</span>
+        <div className="bg-surface-card rounded-xl border border-border-base p-4 flex flex-col items-center text-center">
+          <span className="text-2xl font-black text-text-main">{rows.length}</span>
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider mt-1">Alumnos</span>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col items-center text-center">
-          <span className="text-2xl font-black text-emerald-600">{conFFE.length}</span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Con FFE</span>
+        <div className="bg-surface-card rounded-xl border border-border-base p-4 flex flex-col items-center text-center">
+          <span className="text-2xl font-black text-success">{conFFE.length}</span>
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider mt-1">Con FFE</span>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col items-center text-center">
-          <span className="text-2xl font-black text-amber-600">{sinFFE.length}</span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">No cursada</span>
+        <div className="bg-surface-card rounded-xl border border-border-base p-4 flex flex-col items-center text-center">
+          <span className="text-2xl font-black text-warning-strong">{sinFFE.length}</span>
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider mt-1">No cursada</span>
         </div>
       </div>
 
       {/* Summary cards row 2 */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col items-center text-center">
-          <span className="text-2xl font-black text-slate-500">{sinEvaluar.length}</span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Sin evaluar</span>
+        <div className="bg-surface-card rounded-xl border border-border-base p-4 flex flex-col items-center text-center">
+          <span className="text-2xl font-black text-text-muted">{sinEvaluar.length}</span>
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider mt-1">Sin evaluar</span>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col items-center text-center">
-          <span className="text-2xl font-black text-blue-600">{allOK.length}</span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Todos los RA superados</span>
+        <div className="bg-surface-card rounded-xl border border-border-base p-4 flex flex-col items-center text-center">
+          <span className="text-2xl font-black text-primary">{allOK.length}</span>
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider mt-1">Todos los RA superados</span>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col items-center text-center">
-          <span className="text-2xl font-black text-red-600">{conPendientes.length}</span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Con algún RA pendiente</span>
+        <div className="bg-surface-card rounded-xl border border-border-base p-4 flex flex-col items-center text-center">
+          <span className="text-2xl font-black text-danger">{conPendientes.length}</span>
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider mt-1">Con algún RA pendiente</span>
         </div>
       </div>
 
       {/* Table */}
-      {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
+      {error && <p className="text-sm text-danger font-medium">{error}</p>}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : rows.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-          <FileBadge className="h-10 w-10 mx-auto text-slate-300 mb-3" />
-          <p className="text-sm font-semibold text-slate-500">No hay datos de valoración para el mes seleccionado.</p>
+        <div className="bg-surface-card rounded-xl border border-border-base p-12 text-center">
+          <FileBadge className="h-10 w-10 mx-auto text-text-muted mb-3" />
+          <p className="text-sm font-semibold text-text-muted">No hay datos de valoración para el mes seleccionado.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden overflow-x-auto">
+        <div className="bg-surface-card rounded-xl border border-border-base shadow-sm overflow-hidden overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-200">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Alumno</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Nivel</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Horas FFE</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Resultado FFE</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Nota final</th>
+              <tr className="bg-surface-subtle border-b border-border-base">
+                <th className="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-widest">Alumno</th>
+                <th className="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-widest text-center">Nivel</th>
+                <th className="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-widest text-center">Horas FFE</th>
+                <th className="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-widest">Resultado FFE</th>
+                <th className="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-widest">Nota final</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-border-base">
               {rows.map(r => (
-                <tr key={r.alumnoId} className="hover:bg-slate-50/50 transition-colors">
+                <tr key={r.alumnoId} className="hover:bg-surface-subtle/50 transition-colors">
                   <td className="px-6 py-3">
-                    <span className="text-sm font-semibold text-slate-800">{r.apellidos}, {r.nombre}</span>
+                    <span className="text-sm font-semibold text-text-main">{r.apellidos}, {r.nombre}</span>
                   </td>
                   <td className="px-6 py-3 text-center">
-                    <span className="text-xs font-bold text-slate-500">{r.nivel}</span>
+                    <span className="text-xs font-bold text-text-muted">{r.nivel}</span>
                   </td>
                   <td className="px-6 py-3 text-center">
-                    <span className="font-mono text-sm font-bold text-slate-700">
+                    <span className="font-mono text-sm font-bold text-text-main">
                       {r.relacionId === null ? r.totalHorasFFE : r.horasRealizadas}h
                     </span>
                   </td>
                   <td className="px-6 py-3">
-                    <span className={`text-xs font-bold leading-relaxed ${r.relacionId === null ? 'text-amber-600' : r.resultadoFFE === 'Todos los RA superados' ? 'text-emerald-600' : 'text-red-600'}`}>
+                    <span className={`text-xs font-bold leading-relaxed ${r.relacionId === null ? 'text-warning-strong' : r.resultadoFFE === 'Todos los RA superados' ? 'text-success' : 'text-danger'}`}>
                       {r.resultadoFFE.split('\n').map((line, i) => (
                         <React.Fragment key={i}>{i > 0 && <br />}{line}</React.Fragment>
                       ))}
                     </span>
                   </td>
                   <td className="px-6 py-3">
-                    <span className="text-sm font-bold text-slate-700">{r.notaFinal}</span>
+                    <span className="text-sm font-bold text-text-main">{r.notaFinal}</span>
                   </td>
                 </tr>
               ))}

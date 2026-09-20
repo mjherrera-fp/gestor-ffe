@@ -36,10 +36,10 @@ export function AlumnosSidebar({
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   return (
-    <div className="w-full lg:w-75 lg:shrink-0 bg-white rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col h-full">
+    <div className="w-full lg:w-75 lg:shrink-0 bg-surface-card rounded-xl border border-border-base shadow-sm overflow-hidden flex flex-col h-full">
 
       {/* Cabecera + buscador */}
-      <div className="px-6 py-4 border-b border-border-base bg-slate-50/50 flex flex-col gap-3">
+      <div className="px-6 py-4 border-b border-border-base bg-surface-subtle/50 flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10 text-primary">
             <GraduationCap className="h-5 w-5" />
@@ -49,31 +49,31 @@ export function AlumnosSidebar({
           </span>
         </div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
           <input
             type="text"
             placeholder="Buscar alumno..."
             value={searchAlumno}
             onChange={e => onSearchChange(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-sans"
+            className="w-full pl-9 pr-3 py-1.5 bg-surface-card border border-border-base rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-sans"
           />
           {searchAlumno && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main"
             >
               <X className="h-3 w-3" />
             </button>
           )}
         </div>
-        <div className="flex items-center justify-between bg-purple-50 border border-purple-100 rounded-lg px-3 py-2 min-h-9">
-          <span className="text-xs font-bold text-purple-700">
+        <div className="flex items-center justify-between bg-primary-light border border-primary-light rounded-lg px-3 py-2 min-h-9">
+          <span className="text-xs font-bold text-primary">
             {selectedAlumnoIds.length} seleccionados
           </span>
           {selectedAlumnoIds.length > 0 && (
             <button
               onClick={onClearSelection}
-              className="text-[10px] font-bold text-purple-500 hover:text-purple-700 uppercase tracking-wider"
+              className="text-[10px] font-bold text-primary hover:text-primary uppercase tracking-wider"
             >
               Limpiar
             </button>
@@ -90,7 +90,7 @@ export function AlumnosSidebar({
             className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider transition-all border ${
               sortBy === field
                 ? 'bg-primary/10 text-primary border-primary/20'
-                : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
+                : 'bg-surface-card text-text-muted border-border-base hover:border-text-muted'
             }`}
           >
             {field === 'apellidos' ? 'Apellidos' : 'Nombre'}
@@ -105,38 +105,38 @@ export function AlumnosSidebar({
       <div className="border-b border-border-base">
         <button
           onClick={() => setFiltersOpen(!filtersOpen)}
-          className="w-full flex items-center justify-between px-4 py-2 text-[9px] font-bold text-slate-500 uppercase tracking-wider hover:bg-slate-50 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2 text-[9px] font-bold text-text-muted uppercase tracking-wider hover:bg-surface-subtle transition-colors"
         >
-          <span>Filtros{anyFilterActive && <span className="ml-1.5 inline-block w-1.5 h-1.5 rounded-full bg-red-400 align-middle" />}</span>
+          <span>Filtros{anyFilterActive && <span className="ml-1.5 inline-block w-1.5 h-1.5 rounded-full bg-danger align-middle" />}</span>
           {filtersOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </button>
         {filtersOpen && (
         <div className="px-3 pb-2 space-y-2">
           {/* + de X envíos */}
           <div className="flex items-center gap-1.5">
-            <Send className="h-3 w-3 text-slate-400 shrink-0" />
-            <span className="text-[9px] text-slate-500 font-bold whitespace-nowrap">+ de</span>
+            <Send className="h-3 w-3 text-text-muted shrink-0" />
+            <span className="text-[9px] text-text-muted font-bold whitespace-nowrap">+ de</span>
             <input
               type="number"
               min={0}
               value={filterMinCVEnvios}
               onChange={e => onFilterMinCVEnviosChange(Math.max(0, Number(e.target.value)))}
-              className="w-12 px-1.5 py-0.5 text-[10px] font-bold text-center bg-slate-50 border border-slate-200 rounded focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+              className="w-12 px-1.5 py-0.5 text-[10px] font-bold text-center bg-surface-subtle border border-border-base rounded focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
             />
-            <span className="text-[9px] text-slate-500 font-bold whitespace-nowrap">envíos</span>
+            <span className="text-[9px] text-text-muted font-bold whitespace-nowrap">envíos</span>
           </div>
 
           {/* Empresas interesadas */}
           <div className="flex items-center gap-1">
-            <Building2 className="h-3 w-3 text-slate-400 shrink-0" />
+            <Building2 className="h-3 w-3 text-text-muted shrink-0" />
             {(['all', 'con', 'sin'] as const).map(opt => (
               <button
                 key={opt}
                 onClick={() => onFilterEmpresasInteresadasChange(opt)}
                 className={`px-2 py-0.5 rounded text-[9px] font-bold transition-all border ${
                   filterEmpresasInteresadas === opt
-                    ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
-                    : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
+                    ? 'bg-primary-light text-primary border-primary-light'
+                    : 'bg-surface-card text-text-muted border-border-base hover:border-text-muted'
                 }`}
               >
                 {opt === 'all' ? 'Todas' : opt === 'con' ? 'Con interés' : 'Sin interés'}
@@ -146,15 +146,15 @@ export function AlumnosSidebar({
 
           {/* Match status */}
           <div className="flex items-center gap-1">
-            <GitCompare className="h-3 w-3 text-slate-400 shrink-0" />
+            <GitCompare className="h-3 w-3 text-text-muted shrink-0" />
             {(['all', 'con_match_y_relacion', 'con_match_sin_relacion', 'sin_match'] as const).map(opt => (
               <button
                 key={opt}
                 onClick={() => onFilterMatchStatusChange(opt)}
                 className={`px-2 py-0.5 rounded text-[9px] font-bold transition-all border ${
                   filterMatchStatus === opt
-                    ? 'bg-amber-50 text-amber-600 border-amber-200'
-                    : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
+                    ? 'bg-warning-soft text-warning-strong border-warning/20'
+                    : 'bg-surface-card text-text-muted border-border-base hover:border-text-muted'
                 }`}
               >
                 {opt === 'all' ? 'Todos' : opt === 'con_match_y_relacion' ? 'Match+Rel.' : opt === 'con_match_sin_relacion' ? 'Match sin Rel.' : 'Sin Match'}
@@ -169,7 +169,7 @@ export function AlumnosSidebar({
                 onFilterEmpresasInteresadasChange('all');
                 onFilterMatchStatusChange('all');
               }}
-              className="w-full mt-1 px-2 py-1 rounded text-[9px] font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 transition-all"
+              className="w-full mt-1 px-2 py-1 rounded text-[9px] font-bold text-danger border border-danger/20 bg-danger-soft hover:bg-danger-soft transition-all"
             >
               Limpiar filtros
             </button>
@@ -189,22 +189,22 @@ export function AlumnosSidebar({
               onClick={() => onToggleSelection(al.id!)}
               className={`flex items-center gap-2 p-2 pl-4 cursor-pointer transition-colors ${
                 isSelected
-                  ? 'bg-purple-50 border-l-3 border-purple-500'
-                  : 'hover:bg-slate-50 border-l-3 border-transparent'
+                  ? 'bg-primary-light border-l-3 border-primary'
+                  : 'hover:bg-surface-subtle border-l-3 border-transparent'
               }`}
             >
               <div className="flex-1 min-w-0 py-3">
                 <div className="flex flex-col gap-2">
                   <div className={`font-bold text-sm leading-tight truncate ${
-                    isSelected ? 'text-purple-700' : 'text-text-main'
+                    isSelected ? 'text-primary' : 'text-text-main'
                   }`}>
                     {al.nombre} {al.apellidos}
                   </div>
                   <div className="flex gap-1.5">
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-primary-light text-primary border border-primary-light">
                       {envios} Envíos
                     </span>
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-success-soft text-success-strong border border-success/20">
                       {solicitudes} Solics
                     </span>
                   </div>
@@ -214,7 +214,7 @@ export function AlumnosSidebar({
           );
         })}
         {alumnos.length === 0 && (
-          <div className="p-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">
+          <div className="p-10 text-center text-text-muted text-xs font-bold uppercase tracking-widest">
             No hay resultados
           </div>
         )}

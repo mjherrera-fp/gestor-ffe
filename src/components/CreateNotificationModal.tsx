@@ -4,9 +4,9 @@ import { Modal } from './ui/Modal.tsx';
 import { required } from '../utils/validation.ts';
 import { useFormValidation } from '../hooks/useFormValidation.ts';
 
-const inputCls = 'w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-primary';
-const inputErrCls = 'border-red-400 ring-2 ring-red-200';
-const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
+const inputCls = 'w-full border border-border-base rounded-lg px-3 py-2 text-xs outline-none focus:border-primary';
+const inputErrCls = 'border-danger ring-2 ring-danger/20';
+const errMsgCls = 'text-danger text-xs mt-1 italic font-medium';
 
 const RULES = {
   fecha: [required('Fecha del aviso')],
@@ -47,17 +47,17 @@ export default function CreateNotificationModal({ open, onClose, onCreado }: Cre
   };
 
   return (
-    <Modal open={open} onClose={onClose} maxWidth="md" backdropClass="bg-slate-900/60 backdrop-blur-sm">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
-        <h3 className="text-sm font-bold text-slate-800">Nuevo aviso</h3>
-        <button onClick={onClose} className="p-1 rounded-lg text-slate-300 hover:text-slate-500 hover:bg-slate-100 transition-colors">
+    <Modal open={open} onClose={onClose} maxWidth="md" backdropClass="bg-overlay backdrop-blur-sm">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border-base shrink-0">
+        <h3 className="text-sm font-bold text-text-main">Nuevo aviso</h3>
+        <button onClick={onClose} className="p-1 rounded-lg text-text-muted hover:text-text-main hover:bg-surface-hover transition-colors">
           <X className="h-4 w-4" />
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
         <div>
-          <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Fecha del aviso<span className="text-red-500 ml-0.5">*</span></label>
+          <label className="text-[9px] font-bold text-text-muted uppercase mb-1 block">Fecha del aviso<span className="text-danger ml-0.5">*</span></label>
           <input
             type="date"
             value={fecha}
@@ -68,7 +68,7 @@ export default function CreateNotificationModal({ open, onClose, onCreado }: Cre
           {errors.fecha && <p className={errMsgCls}>{errors.fecha}</p>}
         </div>
         <div>
-          <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Asunto<span className="text-red-500 ml-0.5">*</span></label>
+          <label className="text-[9px] font-bold text-text-muted uppercase mb-1 block">Asunto<span className="text-danger ml-0.5">*</span></label>
           <input
             type="text"
             value={asunto}
@@ -80,7 +80,7 @@ export default function CreateNotificationModal({ open, onClose, onCreado }: Cre
           {errors.asunto && <p className={errMsgCls}>{errors.asunto}</p>}
         </div>
         <div>
-          <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Descripción<span className="text-red-500 ml-0.5">*</span></label>
+          <label className="text-[9px] font-bold text-text-muted uppercase mb-1 block">Descripción<span className="text-danger ml-0.5">*</span></label>
           <textarea
             value={descripcion}
             onChange={e => setDescripcion(e.target.value)}
@@ -95,14 +95,14 @@ export default function CreateNotificationModal({ open, onClose, onCreado }: Cre
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 text-[10px] font-bold uppercase text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg py-2 transition-colors"
+            className="flex-1 text-[10px] font-bold uppercase text-text-muted bg-surface-hover hover:bg-surface-strong rounded-lg py-2 transition-colors"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 text-[10px] font-bold uppercase text-white bg-primary hover:bg-indigo-600 rounded-lg py-2 transition-colors disabled:opacity-50"
+            className="flex-1 text-[10px] font-bold uppercase text-white bg-primary hover:bg-primary/90 rounded-lg py-2 transition-colors disabled:opacity-50"
           >
             {loading ? 'Guardando...' : 'Crear aviso'}
           </button>

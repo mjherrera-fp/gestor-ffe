@@ -26,7 +26,7 @@ export function CustomSelect({ options, value, onChange, label, required, name, 
 
   return (
     <div className={wrapperClassName || 'w-full'}>
-      {label && <label className="block text-[10px] font-bold text-slate-500 uppercase ml-1 mb-1">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</label>}
+      {label && <label className="block text-[10px] font-bold text-text-muted uppercase ml-1 mb-1">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</label>}
 
       <Listbox value={value} onChange={onChange}>
         <div className="relative mt-1">
@@ -42,14 +42,14 @@ export function CustomSelect({ options, value, onChange, label, required, name, 
           />
 
           <div className="flex items-center gap-0.5">
-            {prefix && <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">{prefix}:</span>}
+            {prefix && <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">{prefix}:</span>}
             {/* ListboxButton en lugar de Listbox.Button */}
-            <ListboxButton className={`relative w-full cursor-pointer bg-white border rounded-xl py-2.5 pl-4 pr-10 text-left text-xs font-bold transition-all outline-none focus:ring-4 focus:ring-primary/10 
-              ${error ? 'border-red-400 ring-2 ring-red-200' : required && !value ? 'border-red-200' : 'border-slate-200 focus:border-primary'} 
-              ${value ? 'text-slate-700' : 'text-slate-400'} ${classListboxButton}`}>
+            <ListboxButton className={`relative w-full cursor-pointer bg-surface-card border rounded-xl py-2.5 pl-4 pr-10 text-left text-xs font-bold transition-all outline-none focus:ring-4 focus:ring-primary/10 
+              ${error ? 'border-red-400 ring-2 ring-red-200' : required && !value ? 'border-red-200' : 'border-border-base focus:border-primary'} 
+              ${value ? 'text-text-main' : 'text-text-muted'} ${classListboxButton}`}>
               <span className="block truncate">{selected ? selected.label : 'Seleccionar...'}</span>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                <ChevronDown className="h-4 w-4 text-text-muted" aria-hidden="true" />
               </span>
             </ListboxButton>
             {suffix}
@@ -63,7 +63,7 @@ export function CustomSelect({ options, value, onChange, label, required, name, 
           >
             {/* ListboxOptions en lugar de Listbox.Options */}
             <ListboxOptions
-              className="absolute z-70 mt-2 max-h-60 overflow-auto rounded-2xl bg-white py-2 text-xs shadow-2xl ring-1 ring-black/5 focus:outline-none animate-in fade-in zoom-in-95 duration-200
+              className="absolute z-70 mt-2 max-h-60 overflow-auto rounded-2xl bg-surface-card border border-border-base py-2 text-xs shadow-2xl ring-1 ring-black/5 focus:outline-none animate-in fade-in zoom-in-95 duration-200
                w-max min-w-full left-0">
               {options.map((option) => (
                 /* ListboxOption en lugar de Listbox.Option */
@@ -71,7 +71,7 @@ export function CustomSelect({ options, value, onChange, label, required, name, 
                   key={option.id}
                   value={option.id}
                   className={({ focus }) =>
-                    `relative cursor-pointer select-none py-3 pl-10 pr-4 transition-colors ${focus ? 'bg-slate-50 text-primary' : 'text-slate-700'
+                    `relative cursor-pointer select-none py-3 pl-10 pr-4 transition-colors ${focus ? 'bg-surface-hover text-primary' : 'text-text-main'
                     }`
                   }
                 >

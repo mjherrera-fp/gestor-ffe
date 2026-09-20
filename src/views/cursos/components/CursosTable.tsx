@@ -15,7 +15,7 @@ export function CursosTable({ cursos, onEdit, onDeleteRequest }: CursosTableProp
     <div className="hidden lg:block overflow-x-auto">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-slate-50 border-b border-border-base">
+          <tr className="bg-surface-subtle border-b border-border-base">
             <th className="px-6 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Descripción</th>
             <th className="px-6 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Período</th>
             <th className="px-6 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider text-right">Acciones</th>
@@ -30,7 +30,7 @@ export function CursosTable({ cursos, onEdit, onDeleteRequest }: CursosTableProp
             </tr>
           ) : (
             cursos.map(curso => (
-              <tr key={curso.id} className="group hover:bg-slate-50 transition-colors">
+              <tr key={curso.id} className="group hover:bg-surface-hover transition-colors">
                 <td className="px-6 py-4">
                   <span className="font-bold text-sm text-text-main">{curso.descripcion}</span>
                 </td>
@@ -46,7 +46,7 @@ export function CursosTable({ cursos, onEdit, onDeleteRequest }: CursosTableProp
                       <button
                         type="button"
                         onClick={() => onEdit(curso)}
-                        className="p-2 text-slate-500 bg-white border border-slate-200 hover:text-primary hover:border-primary-light hover:bg-primary-light transition-all rounded-lg shadow-sm active:scale-95"
+                        className="p-2 text-text-muted bg-surface-card border border-border-base hover:text-primary hover:border-primary-light hover:bg-primary-light transition-all rounded-lg shadow-sm active:scale-95"
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
@@ -55,7 +55,7 @@ export function CursosTable({ cursos, onEdit, onDeleteRequest }: CursosTableProp
                       <button
                         type="button"
                         onClick={() => onDeleteRequest(curso.id!)}
-                        className="p-2 text-slate-500 bg-white border border-slate-200 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all rounded-lg shadow-sm active:scale-95"
+                        className="p-2 text-text-muted bg-surface-card border border-border-base hover:text-danger hover:border-danger/40 hover:bg-danger-soft transition-all rounded-lg shadow-sm active:scale-95"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

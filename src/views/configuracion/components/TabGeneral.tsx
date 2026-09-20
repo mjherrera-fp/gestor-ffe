@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, Trash2, FileDown, FolderOpen, Square, CheckSquare, Circle, CheckCircle2, Pencil, FileBadge, X, FileText, ExternalLink, FolderUp, Info } from 'lucide-react';
+import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, Trash2, FileDown, FolderOpen, Square, CheckSquare, Circle, CheckCircle2, Pencil, FileBadge, X, FileText, ExternalLink, FolderUp, Info, Sun, Moon, Laptop } from 'lucide-react';
 import { EmpresaFestivosModal } from './EmpresaFestivosModal.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
+import { useTheme } from '../../../hooks/useTheme.tsx';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
-const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+const inputClass = 'w-full bg-surface-card border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
 
 interface AvisosConfig {
   semanas_inicio: string;
@@ -13,6 +14,9 @@ interface AvisosConfig {
 }
 
 export function TabGeneral() {
+  // ── Tema (apariencia) ──
+  const { theme, setTheme } = useTheme();
+
   // ── Estado avisos ──
   const [avisos, setAvisos] = useState<AvisosConfig>({
     semanas_inicio: '1',
@@ -338,8 +342,8 @@ export function TabGeneral() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-8 text-center text-slate-400">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-8 text-center text-text-muted">
           <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
           <p className="text-sm font-medium">Cargando configuración...</p>
         </div>
@@ -350,16 +354,59 @@ export function TabGeneral() {
   return (
     <div className="space-y-6">
 
-      {/* ─── SECCIÓN AVISOS ─── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      {/* ─── SECCIÓN APARIENCIA ─── */}
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
+            <div className="p-2 rounded-lg bg-primary-light text-primary">
+              <Sun className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-text-main">Apariencia</h3>
+              <p className="text-sm text-text-muted">
+                Elige el tema de la interfaz. También puedes cambiarlo desde la barra superior.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {([
+              { id: 'claro', label: 'Claro', icon: Sun, desc: 'Fondo claro' },
+              { id: 'oscuro', label: 'Oscuro', icon: Moon, desc: 'Fondo oscuro' },
+              { id: 'sistema', label: 'Sistema', icon: Laptop, desc: 'Sigue el sistema operativo' },
+            ] as const).map(({ id, label, icon: Icon, desc }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setTheme(id)}
+                className={`flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
+                  theme === id
+                    ? 'bg-primary-light border-primary shadow-sm'
+                    : 'bg-surface-subtle border-border-base hover:bg-surface-hover'
+                }`}
+              >
+                <Icon className={`h-6 w-6 shrink-0 ${theme === id ? 'text-primary' : 'text-text-muted'}`} />
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-bold ${theme === id ? 'text-primary' : 'text-text-main'}`}>{label}</p>
+                  <p className="text-[11px] text-text-muted">{desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ─── SECCIÓN AVISOS ─── */}
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-warning-soft text-warning-strong">
               <Bell className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Configuración de Avisos</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Configuración de Avisos</h3>
+              <p className="text-sm text-text-muted">
                 Configura los plazos para la generación automática de avisos de alumnos.
               </p>
             </div>
@@ -367,10 +414,10 @@ export function TabGeneral() {
         </div>
         <div className="p-6">
           {errorAvisos && (
-            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">{errorAvisos}</div>
+            <div className="mb-4 p-3 bg-danger-soft text-danger rounded-lg text-sm border border-danger/20">{errorAvisos}</div>
           )}
           {successAvisos && (
-            <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+            <div className="mb-4 p-3 bg-success-soft text-success-strong rounded-lg text-sm border border-success/20">
               {successAvisos}
             </div>
           )}
@@ -387,7 +434,7 @@ export function TabGeneral() {
                   min={0}
                   max={52}
                 />
-                <p className="text-[10px] text-slate-400 mt-1">
+                <p className="text-[10px] text-text-muted mt-1">
                   Alumnos con documentos sin finalizar a {avisos.semanas_inicio_documentos} semana/s de empezar.
                 </p>
               </div>
@@ -402,7 +449,7 @@ export function TabGeneral() {
                   min={0}
                   max={52}
                 />
-                <p className="text-[10px] text-slate-400 mt-1">
+                <p className="text-[10px] text-text-muted mt-1">
                   Alumnos a {avisos.semanas_inicio} semana/s de empezar las prácticas.
                 </p>
               </div>
@@ -417,13 +464,13 @@ export function TabGeneral() {
                   min={0}
                   max={52}
                 />
-                <p className="text-[10px] text-slate-400 mt-1">
+                <p className="text-[10px] text-text-muted mt-1">
                   Alumnos a {avisos.semanas_fin} semana/s de finalizar las prácticas.
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-              <button type="submit" disabled={savingAvisos} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-indigo-600 disabled:opacity-50 transition-colors">
+            <div className="flex items-center gap-3 pt-4 border-t border-border-base">
+              <button type="submit" disabled={savingAvisos} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors">
                 <span className="flex items-center justify-center gap-2">
                   <Settings className="h-5 w-5" />
                   {savingAvisos ? 'Guardando...' : 'Guardar Configuración de Avisos'}
@@ -435,15 +482,15 @@ export function TabGeneral() {
       </div>
 
       {/* ─── SECCIÓN CREACIÓN DE FICHEROS ─── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
+            <div className="p-2 rounded-lg bg-success-soft text-success-strong">
               <FileDown className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Creación de ficheros</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Creación de ficheros</h3>
+              <p className="text-sm text-text-muted">
                 Elige cómo se generan los documentos (PDF, DOCX, XLSX) al descargarlos.
               </p>
             </div>
@@ -451,10 +498,10 @@ export function TabGeneral() {
         </div>
         <div className="p-6">
           {errorCreacion && (
-            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">{errorCreacion}</div>
+            <div className="mb-4 p-3 bg-danger-soft text-danger rounded-lg text-sm border border-danger/20">{errorCreacion}</div>
           )}
           {successCreacion && (
-            <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+            <div className="mb-4 p-3 bg-success-soft text-success-strong rounded-lg text-sm border border-success/20">
               {successCreacion}
             </div>
           )}
@@ -465,21 +512,21 @@ export function TabGeneral() {
                 onClick={() => setModoCreacion('descargar')}
                 className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
                   modoCreacion === 'descargar'
-                    ? 'bg-indigo-50 border-indigo-400 shadow-sm'
-                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                    ? 'bg-primary-light border-primary shadow-sm'
+                    : 'bg-surface-subtle border-border-base hover:bg-surface-hover'
                 }`}
               >
                 {modoCreacion === 'descargar' ? (
-                  <CheckCircle2 className="h-5 w-5 text-indigo-500 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 ) : (
-                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                  <Circle className="h-5 w-5 text-border-base mt-0.5 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <FileDown className={`h-4 w-4 ${modoCreacion === 'descargar' ? 'text-indigo-500' : 'text-slate-500'}`} />
-                    <span className={`text-sm font-semibold ${modoCreacion === 'descargar' ? 'text-indigo-800' : 'text-slate-800'}`}>Descargar</span>
+                    <FileDown className={`h-4 w-4 ${modoCreacion === 'descargar' ? 'text-primary' : 'text-text-muted'}`} />
+                    <span className={`text-sm font-semibold ${modoCreacion === 'descargar' ? 'text-primary' : 'text-text-main'}`}>Descargar</span>
                   </div>
-                  <p className={`text-xs mt-1 ${modoCreacion === 'descargar' ? 'text-indigo-600' : 'text-slate-500'}`}>
+                  <p className={`text-xs mt-1 ${modoCreacion === 'descargar' ? 'text-primary' : 'text-text-muted'}`}>
                     Los documentos se descargan por el navegador a la carpeta de descargas del sistema.
                   </p>
                 </div>
@@ -489,47 +536,47 @@ export function TabGeneral() {
                 onClick={() => setModoCreacion('crear')}
                 className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
                   modoCreacion === 'crear'
-                    ? 'bg-emerald-50 border-emerald-400 shadow-sm'
-                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                    ? 'bg-success-soft border-success shadow-sm'
+                    : 'bg-surface-subtle border-border-base hover:bg-surface-hover'
                 }`}
               >
                 {modoCreacion === 'crear' ? (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-success mt-0.5 shrink-0" />
                 ) : (
-                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                  <Circle className="h-5 w-5 text-border-base mt-0.5 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <FolderOpen className={`h-4 w-4 ${modoCreacion === 'crear' ? 'text-emerald-500' : 'text-slate-500'}`} />
-                    <span className={`text-sm font-semibold ${modoCreacion === 'crear' ? 'text-emerald-800' : 'text-slate-800'}`}>Guardar en carpeta docs/</span>
+                    <FolderOpen className={`h-4 w-4 ${modoCreacion === 'crear' ? 'text-success' : 'text-text-muted'}`} />
+                    <span className={`text-sm font-semibold ${modoCreacion === 'crear' ? 'text-success-strong' : 'text-text-main'}`}>Guardar en carpeta docs/</span>
                   </div>
-                  <p className={`text-xs mt-1 ${modoCreacion === 'crear' ? 'text-emerald-600' : 'text-slate-500'}`}>
-                    Los documentos se guardan automáticamente en la carpeta <code className="bg-slate-200 px-1 rounded text-xs">docs/</code> junto al ejecutable de la aplicación.
+                  <p className={`text-xs mt-1 ${modoCreacion === 'crear' ? 'text-success' : 'text-text-muted'}`}>
+                    Los documentos se guardan automáticamente en la carpeta <code className="bg-surface-hover px-1 rounded text-xs">docs/</code> junto al ejecutable de la aplicación.
                   </p>
                 </div>
               </button>
             </div>
-            <div className="pt-4 border-t border-slate-100">
+            <div className="pt-4 border-t border-border-base">
               <button
                 type="button"
                 onClick={() => setCarpetaEstudiante(!carpetaEstudiante)}
-                className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-left"
+                className="flex items-center gap-3 w-full p-3 rounded-xl bg-surface-subtle border border-border-base hover:bg-surface-hover transition-colors text-left"
               >
                 {carpetaEstudiante ? (
-                  <CheckSquare className="h-5 w-5 text-blue-500 shrink-0" />
+                  <CheckSquare className="h-5 w-5 text-primary shrink-0" />
                 ) : (
-                  <Square className="h-5 w-5 text-slate-400 shrink-0" />
+                  <Square className="h-5 w-5 text-text-muted shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-slate-800">Crear una carpeta por estudiante</span>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <span className="text-sm font-semibold text-text-main">Crear una carpeta por estudiante</span>
+                  <p className="text-xs text-text-muted mt-0.5">
                     Si está marcado, dentro de la carpeta de cada empresa se crearán subcarpetas por alumno con sus documentos individuales.
                   </p>
                 </div>
               </button>
             </div>
-            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-              <button type="submit" disabled={savingCreacion} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-indigo-600 disabled:opacity-50 transition-colors">
+            <div className="flex items-center gap-3 pt-4 border-t border-border-base">
+              <button type="submit" disabled={savingCreacion} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors">
                 <span className="flex items-center justify-center gap-2">
                   <Settings className="h-5 w-5" />
                   {savingCreacion ? 'Guardando...' : 'Guardar Configuración'}
@@ -541,15 +588,15 @@ export function TabGeneral() {
       </div>
 
       {/* ─── SECCIÓN ANEXO DE RELACIÓN ─── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
+            <div className="p-2 rounded-lg bg-primary-light text-primary">
               <FileText className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Anexo de Relación</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Anexo de Relación</h3>
+              <p className="text-sm text-text-muted">
                 Elige cómo se genera el anexo de relación de alumnos: con la aplicación o mediante un enlace externo.
               </p>
             </div>
@@ -557,10 +604,10 @@ export function TabGeneral() {
         </div>
         <div className="p-6">
           {errorAnexo && (
-            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">{errorAnexo}</div>
+            <div className="mb-4 p-3 bg-danger-soft text-danger rounded-lg text-sm border border-danger/20">{errorAnexo}</div>
           )}
           {successAnexo && (
-            <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+            <div className="mb-4 p-3 bg-success-soft text-success-strong rounded-lg text-sm border border-success/20">
               {successAnexo}
             </div>
           )}
@@ -571,21 +618,21 @@ export function TabGeneral() {
                 onClick={() => setAnexoRelacionModo('app')}
                 className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
                   anexoRelacionModo === 'app'
-                    ? 'bg-indigo-50 border-indigo-400 shadow-sm'
-                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                    ? 'bg-primary-light border-primary shadow-sm'
+                    : 'bg-surface-subtle border-border-base hover:bg-surface-hover'
                 }`}
               >
                 {anexoRelacionModo === 'app' ? (
-                  <CheckCircle2 className="h-5 w-5 text-indigo-500 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 ) : (
-                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                  <Circle className="h-5 w-5 text-border-base mt-0.5 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <FileText className={`h-4 w-4 ${anexoRelacionModo === 'app' ? 'text-indigo-500' : 'text-slate-500'}`} />
-                    <span className={`text-sm font-semibold ${anexoRelacionModo === 'app' ? 'text-indigo-800' : 'text-slate-800'}`}>Con la app</span>
+                    <FileText className={`h-4 w-4 ${anexoRelacionModo === 'app' ? 'text-primary' : 'text-text-muted'}`} />
+                    <span className={`text-sm font-semibold ${anexoRelacionModo === 'app' ? 'text-primary' : 'text-text-main'}`}>Con la app</span>
                   </div>
-                  <p className={`text-xs mt-1 ${anexoRelacionModo === 'app' ? 'text-indigo-600' : 'text-slate-500'}`}>
+                  <p className={`text-xs mt-1 ${anexoRelacionModo === 'app' ? 'text-primary' : 'text-text-muted'}`}>
                     El anexo se genera con la aplicación. Se muestran los botones de descarga DOCX y PDF y el correo incluye el documento adjunto.
                   </p>
                 </div>
@@ -595,21 +642,21 @@ export function TabGeneral() {
                 onClick={() => setAnexoRelacionModo('externo')}
                 className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
                   anexoRelacionModo === 'externo'
-                    ? 'bg-emerald-50 border-emerald-400 shadow-sm'
-                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                    ? 'bg-success-soft border-success shadow-sm'
+                    : 'bg-surface-subtle border-border-base hover:bg-surface-hover'
                 }`}
               >
                 {anexoRelacionModo === 'externo' ? (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-success mt-0.5 shrink-0" />
                 ) : (
-                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                  <Circle className="h-5 w-5 text-border-base mt-0.5 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <ExternalLink className={`h-4 w-4 ${anexoRelacionModo === 'externo' ? 'text-emerald-500' : 'text-slate-500'}`} />
-                    <span className={`text-sm font-semibold ${anexoRelacionModo === 'externo' ? 'text-emerald-800' : 'text-slate-800'}`}>Enlace externo</span>
+                    <ExternalLink className={`h-4 w-4 ${anexoRelacionModo === 'externo' ? 'text-success' : 'text-text-muted'}`} />
+                    <span className={`text-sm font-semibold ${anexoRelacionModo === 'externo' ? 'text-success-strong' : 'text-text-main'}`}>Enlace externo</span>
                   </div>
-                  <p className={`text-xs mt-1 ${anexoRelacionModo === 'externo' ? 'text-emerald-600' : 'text-slate-500'}`}>
+                  <p className={`text-xs mt-1 ${anexoRelacionModo === 'externo' ? 'text-success' : 'text-text-muted'}`}>
                     El anexo se abre desde una URL externa. En relación se mostrará un botón que abre el enlace y el correo no adjuntará el documento.
                   </p>
                 </div>
@@ -625,13 +672,13 @@ export function TabGeneral() {
                   className={inputClass}
                   placeholder="https://..."
                 />
-                <p className="text-[10px] text-slate-400 mt-1">
+                <p className="text-[10px] text-text-muted mt-1">
                   En la pantalla de Relaciones, el apartado Anexo de Relación mostrará un botón que abre este enlace en el navegador.
                 </p>
               </div>
             )}
-            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-              <button type="submit" disabled={savingAnexo} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-indigo-600 disabled:opacity-50 transition-colors">
+            <div className="flex items-center gap-3 pt-4 border-t border-border-base">
+              <button type="submit" disabled={savingAnexo} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors">
                 <span className="flex items-center justify-center gap-2">
                   <Settings className="h-5 w-5" />
                   {savingAnexo ? 'Guardando...' : 'Guardar Configuración'}
@@ -642,31 +689,31 @@ export function TabGeneral() {
         </div>
       </div>
 
-      {/* ─── SECCIÓN ENVÍO A LA DAT ─── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+{/* ─── SECCIÓN ENVÍO A LA DAT ─── */}
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
+            <div className="p-2 rounded-lg bg-primary-light text-primary">
               <FolderUp className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Enviar a la DAT</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Enviar a la DAT</h3>
+              <p className="text-sm text-text-muted">
                 Indica si es necesario enviar la documentación a la DAT.
               </p>
             </div>
           </div>
         </div>
         <div className="p-6">
-          <div className="mb-4 flex items-start gap-2 p-3 bg-sky-50 text-sky-700 rounded-lg text-sm border border-sky-100">
-            <Info className="h-5 w-5 shrink-0 mt-0.5 text-sky-500" />
+          <div className="mb-4 flex items-start gap-2 p-3 bg-primary-light/40 text-primary rounded-lg text-sm border border-primary/15">
+            <Info className="h-5 w-5 shrink-0 mt-0.5 text-primary" />
             <p>Es necesario reiniciar la aplicación para que los cambios tomen efecto.</p>
           </div>
           {errorDat && (
-            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">{errorDat}</div>
+            <div className="mb-4 p-3 bg-danger-soft text-danger rounded-lg text-sm border border-danger/20">{errorDat}</div>
           )}
           {successDat && (
-            <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+            <div className="mb-4 p-3 bg-success-soft text-success-strong rounded-lg text-sm border border-success/20">
               {successDat}
             </div>
           )}
@@ -677,21 +724,21 @@ export function TabGeneral() {
                 onClick={() => setDatModo('necesario')}
                 className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
                   datModo === 'necesario'
-                    ? 'bg-indigo-50 border-indigo-400 shadow-sm'
-                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                    ? 'bg-primary-light border-primary shadow-sm'
+                    : 'bg-surface-subtle border-border-base hover:bg-surface-hover'
                 }`}
               >
                 {datModo === 'necesario' ? (
-                  <CheckCircle2 className="h-5 w-5 text-indigo-500 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 ) : (
-                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                  <Circle className="h-5 w-5 text-border-base mt-0.5 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <FolderUp className={`h-4 w-4 ${datModo === 'necesario' ? 'text-indigo-500' : 'text-slate-500'}`} />
-                    <span className={`text-sm font-semibold ${datModo === 'necesario' ? 'text-indigo-800' : 'text-slate-800'}`}>Es necesario</span>
+                    <FolderUp className={`h-4 w-4 ${datModo === 'necesario' ? 'text-primary' : 'text-text-muted'}`} />
+                    <span className={`text-sm font-semibold ${datModo === 'necesario' ? 'text-primary' : 'text-text-main'}`}>Es necesario</span>
                   </div>
-                  <p className={`text-xs mt-1 ${datModo === 'necesario' ? 'text-indigo-600' : 'text-slate-500'}`}>
+                  <p className={`text-xs mt-1 ${datModo === 'necesario' ? 'text-primary' : 'text-text-muted'}`}>
                     Se muestra la opción de menú "Enviar a la DAT" y las columnas "Fecha Envío DAT" y "Estado DAT" en el panel.
                   </p>
                 </div>
@@ -701,28 +748,28 @@ export function TabGeneral() {
                 onClick={() => setDatModo('no')}
                 className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${
                   datModo === 'no'
-                    ? 'bg-emerald-50 border-emerald-400 shadow-sm'
-                    : 'bg-slate-50 border-slate-100 hover:bg-slate-100'
+                    ? 'bg-success-soft border-success shadow-sm'
+                    : 'bg-surface-subtle border-border-base hover:bg-surface-hover'
                 }`}
               >
                 {datModo === 'no' ? (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-success mt-0.5 shrink-0" />
                 ) : (
-                  <Circle className="h-5 w-5 text-slate-300 mt-0.5 shrink-0" />
+                  <Circle className="h-5 w-5 text-border-base mt-0.5 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <FolderUp className={`h-4 w-4 ${datModo === 'no' ? 'text-emerald-500' : 'text-slate-500'}`} />
-                    <span className={`text-sm font-semibold ${datModo === 'no' ? 'text-emerald-800' : 'text-slate-800'}`}>No es necesario</span>
+                    <FolderUp className={`h-4 w-4 ${datModo === 'no' ? 'text-success' : 'text-text-muted'}`} />
+                    <span className={`text-sm font-semibold ${datModo === 'no' ? 'text-success-strong' : 'text-text-main'}`}>No es necesario</span>
                   </div>
-                  <p className={`text-xs mt-1 ${datModo === 'no' ? 'text-emerald-600' : 'text-slate-500'}`}>
+                  <p className={`text-xs mt-1 ${datModo === 'no' ? 'text-success' : 'text-text-muted'}`}>
                     Se oculta la opción de menú "Enviar a la DAT" y la información de la DAT en el panel.
                   </p>
                 </div>
               </button>
             </div>
-            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-              <button type="submit" disabled={savingDat} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-indigo-600 disabled:opacity-50 transition-colors">
+            <div className="flex items-center gap-3 pt-4 border-t border-border-base">
+              <button type="submit" disabled={savingDat} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors">
                 <span className="flex items-center justify-center gap-2">
                   <Settings className="h-5 w-5" />
                   {savingDat ? 'Guardando...' : 'Guardar Configuración'}
@@ -734,15 +781,15 @@ export function TabGeneral() {
       </div>
 
       {/* ─── SECCIÓN FESTIVOS ─── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+            <div className="p-2 rounded-lg bg-primary-light text-primary">
               <CalendarDays className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Configuración de Festivos</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Configuración de Festivos</h3>
+              <p className="text-sm text-text-muted">
                 Controla cómo afectan los días festivos a los cálculos de la FFE.
               </p>
             </div>
@@ -750,23 +797,23 @@ export function TabGeneral() {
         </div>
         <div className="p-6">
           {errorFestivos && (
-            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">{errorFestivos}</div>
+            <div className="mb-4 p-3 bg-danger-soft text-danger rounded-lg text-sm border border-danger/20">{errorFestivos}</div>
           )}
           {successFestivos && (
-            <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+            <div className="mb-4 p-3 bg-success-soft text-success-strong rounded-lg text-sm border border-success/20">
               {successFestivos}
             </div>
           )}
           <form onSubmit={handleSubmitFestivos} className="space-y-6">
             {/* Toggle festivos centro */}
-            <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg">
+            <div className="flex items-start gap-4 p-4 bg-surface-subtle rounded-lg">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label className="text-sm font-semibold text-slate-800">
+                    <label className="text-sm font-semibold text-text-main">
                       Descontar días festivos del centro
                     </label>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-text-muted mt-0.5">
                       {usarFestivos
                         ? 'Los días festivos del centro los estudiantes no irán a las prácticas y no contabilizarán para el cálculo de la fecha fin de la FFE ni de los días de cotización de la Seguridad Social.'
                         : 'Los días festivos del centro los estudiantes irán a las prácticas y contabilizarán para el cálculo de la fecha fin de la FFE y de los días de cotización de la Seguridad Social.'
@@ -780,21 +827,21 @@ export function TabGeneral() {
                       onChange={e => setUsarFestivos(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    <div className="w-11 h-6 bg-border-base peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:bg-white after:border-border-base after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                   </label>
                 </div>
               </div>
             </div>
 
             {/* Toggle festivos empresa */}
-            <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg">
+            <div className="flex items-start gap-4 p-4 bg-surface-subtle rounded-lg">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label className="text-sm font-semibold text-slate-800">
+                    <label className="text-sm font-semibold text-text-main">
                       Descontar días festivos de la empresa
                     </label>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-text-muted mt-0.5">
                       {usarFestivosEmpresa
                         ? 'Los días festivos de la localidad de la empresa los estudiantes no irán a las prácticas y no contabilizarán para el cálculo de la fecha fin de la FFE ni de los días de cotización de la Seguridad Social.'
                         : 'Los días festivos de la localidad de la empresa los estudiantes irán a las prácticas y contabilizarán para el cálculo de la fecha fin de la FFE y de los días de cotización de la Seguridad Social.'
@@ -808,7 +855,7 @@ export function TabGeneral() {
                       onChange={e => setUsarFestivosEmpresa(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    <div className="w-11 h-6 bg-border-base peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:bg-white after:border-border-base after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                   </label>
                 </div>
               </div>
@@ -817,24 +864,24 @@ export function TabGeneral() {
             {/* Lista de localidades con relaciones */}
             {usarFestivosEmpresa && (
               <div className="pt-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 block">
+                <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-3 block">
                   Localidades con relaciones activas
                 </label>
                 {localidades.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic py-3">No hay localidades con relaciones activas.</p>
+                  <p className="text-xs text-text-muted italic py-3">No hay localidades con relaciones activas.</p>
                 ) : (
                   <div className="space-y-2">
                     {localidades.map(loc => {
                       const festivosLoc = empresaFestivos[loc] || [];
                       return (
-                        <div key={loc} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <div key={loc} className="flex items-center justify-between p-3 bg-surface-subtle rounded-lg border border-border-base">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="p-1.5 rounded-lg bg-white text-slate-500 border border-slate-200">
+                            <div className="p-1.5 rounded-lg bg-surface-card text-text-muted border border-border-base">
                               <Building2 className="h-4 w-4" />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold text-slate-700 truncate">{loc}</p>
-                              <p className="text-[10px] text-slate-400">
+                              <p className="text-sm font-semibold text-text-main truncate">{loc}</p>
+                              <p className="text-[10px] text-text-muted">
                                 {festivosLoc.length > 0
                                   ? `${festivosLoc.length} día(s) festivo(s) configurado(s)`
                                   : 'Sin festivos configurados'}
@@ -846,7 +893,7 @@ export function TabGeneral() {
                               <button
                                 type="button"
                                 onClick={() => handleDeleteAllEmpresaFestivos(loc)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-200 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-card border border-danger/20 rounded-lg text-xs font-semibold text-danger hover:bg-danger-soft transition-colors"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
@@ -854,7 +901,7 @@ export function TabGeneral() {
                             <button
                               type="button"
                               onClick={() => setFestivosModalLocalidad(loc)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-card border border-border-base rounded-lg text-xs font-semibold text-text-muted hover:bg-surface-hover transition-colors"
                             >
                               <Plus className="h-3.5 w-3.5" />
                               Festivos
@@ -868,8 +915,8 @@ export function TabGeneral() {
               </div>
             )}
 
-            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-              <button type="submit" disabled={savingFestivos} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-indigo-600 disabled:opacity-50 transition-colors">
+            <div className="flex items-center gap-3 pt-4 border-t border-border-base">
+              <button type="submit" disabled={savingFestivos} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors">
                 <span className="flex items-center justify-center gap-2">
                   <CalendarDays className="h-5 w-5" />
                   {savingFestivos ? 'Guardando...' : 'Guardar Configuración de Festivos'}
@@ -890,15 +937,15 @@ export function TabGeneral() {
       />
 
       {/* ─── SECCIÓN VALORACIONES FFE ─── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+            <div className="p-2 rounded-lg bg-primary-light text-primary">
               <FileBadge className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Valoraciones FFE</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Valoraciones FFE</h3>
+              <p className="text-sm text-text-muted">
                 Gestiona los códigos de valoración final y motivos de no realización de las FFE.
               </p>
             </div>
@@ -909,25 +956,25 @@ export function TabGeneral() {
           {/* Valoración final */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Valoración final</h4>
+              <h4 className="text-sm font-bold text-text-main uppercase tracking-wider">Valoración final</h4>
               <button
                 type="button"
                 onClick={() => setEditVF({ id: 0, codigo: '', valor: '', orden: valoracionesFinales.length + 1 })}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-light text-primary rounded-lg text-xs font-semibold hover:bg-primary-light/70 transition-colors"
               >
                 <Plus className="h-3.5 w-3.5" /> Añadir
               </button>
             </div>
             <div className="space-y-2">
               {valoracionesFinales.length === 0 && (
-                <p className="text-xs text-slate-400 italic py-3">No hay valoraciones definidas.</p>
+                <p className="text-xs text-text-muted italic py-3">No hay valoraciones definidas.</p>
               )}
               {valoracionesFinales.map(vf => (
-                <div key={vf.id} className="group flex items-center gap-4 p-3 rounded-xl border border-slate-200 hover:border-purple-200 hover:bg-purple-50/30 transition-all cursor-pointer" onClick={() => setEditVF({ ...vf })}>
+                <div key={vf.id} className="group flex items-center gap-4 p-3 rounded-xl border border-border-base hover:border-primary/30 hover:bg-primary-light/20 transition-all cursor-pointer" onClick={() => setEditVF({ ...vf })}>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-700">
-                      <span className="text-purple-600">{vf.codigo}</span>
-                      {vf.valor && <span className="text-slate-400 font-normal"> — {vf.valor}</span>}
+                    <p className="text-sm font-semibold text-text-main">
+                      <span className="text-primary">{vf.codigo}</span>
+                      {vf.valor && <span className="text-text-muted font-normal"> — {vf.valor}</span>}
                     </p>
                   </div>
                   <button
@@ -935,14 +982,14 @@ export function TabGeneral() {
                     className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => { e.stopPropagation(); setEditVF({ ...vf }); }}
                   >
-                    <Pencil className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                    <Pencil className="h-4 w-4 text-text-muted hover:text-text-main" />
                   </button>
                   <button
                     type="button"
                     className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => { e.stopPropagation(); handleDeleteVF(vf.id, vf.codigo); }}
                   >
-                    <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                    <Trash2 className="h-4 w-4 text-danger/70 hover:text-danger" />
                   </button>
                 </div>
               ))}
@@ -952,25 +999,25 @@ export function TabGeneral() {
           {/* Motivo no realización */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Motivo por el que no realiza las FFE</h4>
+              <h4 className="text-sm font-bold text-text-main uppercase tracking-wider">Motivo por el que no realiza las FFE</h4>
               <button
                 type="button"
                 onClick={() => setEditMN({ id: 0, codigo: '', valor: '', orden: motivosNoRealizacion.length + 1 })}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-light text-primary rounded-lg text-xs font-semibold hover:bg-primary-light/70 transition-colors"
               >
                 <Plus className="h-3.5 w-3.5" /> Añadir
               </button>
             </div>
             <div className="space-y-2">
               {motivosNoRealizacion.length === 0 && (
-                <p className="text-xs text-slate-400 italic py-3">No hay motivos definidos.</p>
+                <p className="text-xs text-text-muted italic py-3">No hay motivos definidos.</p>
               )}
               {motivosNoRealizacion.map(mn => (
-                <div key={mn.id} className="group flex items-center gap-4 p-3 rounded-xl border border-slate-200 hover:border-purple-200 hover:bg-purple-50/30 transition-all cursor-pointer" onClick={() => setEditMN({ ...mn })}>
+                <div key={mn.id} className="group flex items-center gap-4 p-3 rounded-xl border border-border-base hover:border-primary/30 hover:bg-primary-light/20 transition-all cursor-pointer" onClick={() => setEditMN({ ...mn })}>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-700">
-                      <span className="text-purple-600">{mn.codigo}</span>
-                      {mn.valor && <span className="text-slate-400 font-normal"> — {mn.valor}</span>}
+                    <p className="text-sm font-semibold text-text-main">
+                      <span className="text-primary">{mn.codigo}</span>
+                      {mn.valor && <span className="text-text-muted font-normal"> — {mn.valor}</span>}
                     </p>
                   </div>
                   <button
@@ -978,14 +1025,14 @@ export function TabGeneral() {
                     className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => { e.stopPropagation(); setEditMN({ ...mn }); }}
                   >
-                    <Pencil className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                    <Pencil className="h-4 w-4 text-text-muted hover:text-text-main" />
                   </button>
                   <button
                     type="button"
                     className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ type: 'mn', id: mn.id, codigo: mn.codigo }); }}
                   >
-                    <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                    <Trash2 className="h-4 w-4 text-danger/70 hover:text-danger" />
                   </button>
                 </div>
               ))}
@@ -999,29 +1046,29 @@ export function TabGeneral() {
       <Modal open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} maxWidth="sm">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-red-100 text-red-600">
+            <div className="p-2 rounded-lg bg-danger-soft text-danger">
               <Trash2 className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Eliminar</h3>
-              <p className="text-sm text-slate-500">
-                {deleteConfirm?.type === 'vf' ? 'Valoración final' : 'Motivo no realización'}: <strong className="text-slate-700">{deleteConfirm?.codigo}</strong>
+              <h3 className="text-lg font-bold text-text-main">Eliminar</h3>
+              <p className="text-sm text-text-muted">
+                {deleteConfirm?.type === 'vf' ? 'Valoración final' : 'Motivo no realización'}: <strong className="text-text-main">{deleteConfirm?.codigo}</strong>
               </p>
             </div>
           </div>
-          <p className="text-sm text-slate-600 mb-6">¿Estás seguro de que deseas eliminar este elemento? Esta acción no se puede deshacer.</p>
+          <p className="text-sm text-text-muted mb-6">¿Estás seguro de que deseas eliminar este elemento? Esta acción no se puede deshacer.</p>
           <div className="flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={() => setDeleteConfirm(null)}
-              className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+              className="px-5 py-2.5 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors"
             >
               Cancelar
             </button>
             <button
               type="button"
               onClick={handleConfirmDelete}
-              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-danger text-white text-sm font-semibold rounded-xl hover:bg-danger/90 transition-colors"
             >
               <Trash2 className="h-4 w-4" /> Eliminar
             </button>
@@ -1033,10 +1080,10 @@ export function TabGeneral() {
       <Modal open={!!editVF} onClose={() => setEditVF(null)} maxWidth="sm">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-800">
+            <h3 className="text-lg font-bold text-text-main">
               {editVF?.id ? 'Editar valoración final' : 'Nueva valoración final'}
             </h3>
-            <button type="button" onClick={() => setEditVF(null)} className="text-slate-400 hover:text-slate-600">
+            <button type="button" onClick={() => setEditVF(null)} className="text-text-muted hover:text-text-main">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -1054,10 +1101,10 @@ export function TabGeneral() {
               <input className={inputClass} type="number" value={editVF?.orden || 0} onChange={e => setEditVF(prev => prev ? { ...prev, orden: Number(e.target.value) } : null)} />
             </div>
             <div className="flex items-center gap-3 pt-2">
-              <button type="submit" disabled={savingVF || !editVF?.codigo} className="px-5 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors">
+              <button type="submit" disabled={savingVF || !editVF?.codigo} className="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors">
                 {savingVF ? 'Guardando...' : 'Guardar'}
               </button>
-              <button type="button" onClick={() => setEditVF(null)} className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+              <button type="button" onClick={() => setEditVF(null)} className="px-5 py-2.5 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors">
                 Cancelar
               </button>
             </div>
@@ -1069,10 +1116,10 @@ export function TabGeneral() {
       <Modal open={!!editMN} onClose={() => setEditMN(null)} maxWidth="sm">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-800">
+            <h3 className="text-lg font-bold text-text-main">
               {editMN?.id ? 'Editar motivo' : 'Nuevo motivo'}
             </h3>
-            <button type="button" onClick={() => setEditMN(null)} className="text-slate-400 hover:text-slate-600">
+            <button type="button" onClick={() => setEditMN(null)} className="text-text-muted hover:text-text-main">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -1090,10 +1137,10 @@ export function TabGeneral() {
               <input className={inputClass} type="number" value={editMN?.orden || 0} onChange={e => setEditMN(prev => prev ? { ...prev, orden: Number(e.target.value) } : null)} />
             </div>
             <div className="flex items-center gap-3 pt-2">
-              <button type="submit" disabled={savingMN || !editMN?.codigo} className="px-5 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors">
+              <button type="submit" disabled={savingMN || !editMN?.codigo} className="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors">
                 {savingMN ? 'Guardando...' : 'Guardar'}
               </button>
-              <button type="button" onClick={() => setEditMN(null)} className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+              <button type="button" onClick={() => setEditMN(null)} className="px-5 py-2.5 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors">
                 Cancelar
               </button>
             </div>

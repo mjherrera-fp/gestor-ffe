@@ -15,13 +15,13 @@ export default function Pagination({ page, totalPages, limit, total, onPageChang
   if (totalPages <= 1 && total <= limit) return null;
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-slate-100 rounded-b-2xl">
-      <div className="flex items-center gap-2 text-xs text-slate-500">
+    <div className="flex items-center justify-between px-4 py-3 bg-surface-card border-t border-border-base rounded-b-2xl">
+      <div className="flex items-center gap-2 text-xs text-text-muted">
         <span>Mostrar</span>
         <select
           value={limit}
           onChange={e => onLimitChange(Number(e.target.value))}
-          className="border border-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-primary bg-white"
+          className="border border-border-base rounded-lg px-2 py-1 text-xs outline-none focus:border-primary bg-surface-card"
         >
           {LIMIT_OPTIONS.map(opt => (
             <option key={opt} value={opt}>{opt}</option>
@@ -34,17 +34,17 @@ export default function Pagination({ page, totalPages, limit, total, onPageChang
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 rounded-lg text-text-muted hover:text-text-main hover:bg-surface-subtle disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <span className="text-xs text-slate-500 font-medium px-2">
+        <span className="text-xs text-text-muted font-medium px-2">
           Página {page} de {totalPages}
         </span>
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 rounded-lg text-text-muted hover:text-text-main hover:bg-surface-subtle disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronRight className="h-4 w-4" />
         </button>

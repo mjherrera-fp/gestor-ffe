@@ -27,10 +27,10 @@ function FirmaSelector({ value, onChange }: { value?: FirmaTipo; onChange: (v: F
         onClick={() => onChange(next())}
         className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${
           firma === FirmaTipo.DIGITAL
-            ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
+            ? 'bg-primary-light text-primary border-primary-light hover:bg-primary/15'
             : firma === FirmaTipo.MANUAL
-            ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'
-            : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
+            ? 'bg-warning-soft text-warning-strong border-warning/20 hover:bg-warning/15'
+            : 'bg-surface-subtle text-text-muted border-border-base hover:bg-surface-hover'
         }`}
       >
         {FirmaTipoLabels[firma]}
@@ -46,8 +46,8 @@ export function ConvenioDetalle({
   if (!selectedConvenio) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-        <div className="bg-slate-50 p-6 rounded-full mb-4">
-          <FileText className="h-12 w-12 text-slate-200" />
+        <div className="bg-surface-subtle p-6 rounded-full mb-4">
+          <FileText className="h-12 w-12 text-text-muted" />
         </div>
         <h3 className="text-base font-bold text-text-main mb-2">Selecciona un convenio</h3>
         <p className="text-xs text-text-muted">
@@ -73,7 +73,7 @@ export function ConvenioDetalle({
         <div className="flex items-center justify-between">
           <div>
             <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Estado Actual</div>
-            <div className={`text-sm font-bold ${selectedConvenio.estado === ConvenioEstado.COMPLETADO ? 'text-emerald-500' : 'text-warning'}`}>
+            <div className={`text-sm font-bold ${selectedConvenio.estado === ConvenioEstado.COMPLETADO ? 'text-success' : 'text-warning'}`}>
               {ConvenioEstadoLabels[selectedConvenio.estado]}
             </div>
           </div>
@@ -105,7 +105,7 @@ export function ConvenioDetalle({
                 {statusBtn.label}
               </button>
             ) : (
-              <div className="p-3 bg-emerald-50 text-emerald-700 rounded-lg text-center font-bold text-xs flex items-center justify-center gap-2">
+              <div className="p-3 bg-success-soft text-success-strong rounded-lg text-center font-bold text-xs flex items-center justify-center gap-2">
                 <CheckCircle2 className="h-4 w-4" /> TRÁMITE COMPLETADO
               </div>
             )}
@@ -113,7 +113,7 @@ export function ConvenioDetalle({
             {selectedConvenio.estado !== ConvenioEstado.PENDIENTE_ENVIAR && (
               <button
                 onClick={() => onMoveBackStatus(selectedConvenio)}
-                className="w-full py-3 border border-border-base text-text-muted rounded-lg font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-50 transition-all"
+                className="w-full py-3 border border-border-base text-text-muted rounded-lg font-bold text-xs flex items-center justify-center gap-2 hover:bg-surface-subtle transition-all"
               >
                 <ArrowLeft className="h-3.5 w-3.5" /> Regresar Estado Anterior
               </button>

@@ -64,20 +64,20 @@ export function AlumnoGridCard({
   };
 
   return (<>
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group overflow-hidden flex flex-col h-full">
+    <div className="bg-surface-card rounded-xl border border-border-base shadow-sm hover:shadow-md transition-all group overflow-hidden flex flex-col h-full">
       <div className="p-6 flex flex-col grow">
 
         {/* Cabecera */}
         <div className="flex items-start justify-between mb-4">
-          <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 group-hover:bg-primary/5 transition-colors">
-            <User className="h-6 w-6 text-slate-400 group-hover:text-primary transition-colors" />
+          <div className="bg-surface-subtle p-3 rounded-lg border border-border-base group-hover:bg-primary/5 transition-colors">
+            <User className="h-6 w-6 text-text-muted group-hover:text-primary transition-colors" />
           </div>
           <div className="flex gap-1.5">
             {!isAssigned && (
               <Title text="Seleciona motivo para la no realización de las FFE">
                 <button
                   onClick={handleOpenFFEMotivo}
-                  className="p-1.5 text-slate-400 hover:text-amber-600 transition-colors hover:bg-amber-50 rounded-md"
+                  className="p-1.5 text-text-muted hover:text-warning-strong transition-colors hover:bg-warning-soft rounded-md"
                 >
                   <BadgeX className="h-4 w-4" />
                 </button>
@@ -86,7 +86,7 @@ export function AlumnoGridCard({
             <Title text="Enviar correo">
               <button
                 onClick={() => onEmail(alumno)}
-                className="p-1.5 text-slate-400 hover:text-blue-500 transition-colors hover:bg-blue-50 rounded-md"
+                className="p-1.5 text-text-muted hover:text-primary transition-colors hover:bg-primary-light rounded-md"
               >
                 <Mail className="h-4 w-4" />
               </button>
@@ -94,7 +94,7 @@ export function AlumnoGridCard({
             <Title text="Editar estudiante">
               <button
                 onClick={() => onEdit(alumno)}
-                className="p-1.5 text-slate-400 hover:text-primary transition-colors hover:bg-primary-light rounded-md"
+                className="p-1.5 text-text-muted hover:text-primary transition-colors hover:bg-primary-light rounded-md"
               >
                 <Edit2 className="h-4 w-4" />
               </button>
@@ -102,7 +102,7 @@ export function AlumnoGridCard({
             <Title text="Eliminar estudiante">
               <button
                 onClick={() => onDelete(alumno.id!)}
-                className="p-1.5 text-slate-400 hover:text-red-500 transition-colors hover:bg-red-50 rounded-md"
+                className="p-1.5 text-text-muted hover:text-danger transition-colors hover:bg-danger-soft rounded-md"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -112,18 +112,18 @@ export function AlumnoGridCard({
 
         {/* Nombre */}
         <div className="mb-4">
-          <h3 className="font-bold text-base text-slate-900 leading-tight mb-0.5">
+          <h3 className="font-bold text-base text-text-main leading-tight mb-0.5">
             {alumno.nombre} {alumno.apellidos}
           </h3>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">DNI: {alumno.dni}</p>
+          <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">DNI: {alumno.dni}</p>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             {!alumno.numSS?.trim() && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-danger-soft text-danger-strong border border-danger/20 rounded-full text-[9px] font-bold uppercase tracking-wide">
                 <TriangleAlert className="h-3 w-3" /> Falta NSS
               </span>
             )}
             {!!alumno.alumnoIncompleto && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-warning-soft text-warning-strong border border-warning/20 rounded-full text-[9px] font-bold uppercase tracking-wide">
                 <TriangleAlert className="h-3 w-3" /> Falta info estudiante
               </span>
             )}
@@ -131,29 +131,29 @@ export function AlumnoGridCard({
         </div>
 
         {/* Datos contacto + estado */}
-        <div className="space-y-2 border-t border-slate-50 pt-4 mt-auto">
-          <div className="flex items-center gap-2.5 text-xs text-slate-600 font-medium">
-            <Mail className="h-3.5 w-3.5 text-slate-300" />
+        <div className="space-y-2 border-t border-border-base pt-4 mt-auto">
+          <div className="flex items-center gap-2.5 text-xs text-text-main font-medium">
+            <Mail className="h-3.5 w-3.5 text-text-muted" />
             <span className="truncate">{alumno.emailEduca}</span>
           </div>
-          <div className="flex items-center gap-2.5 text-xs text-slate-600 font-medium">
-            <Phone className="h-3.5 w-3.5 text-slate-300" /> {alumno.tlfn}
+          <div className="flex items-center gap-2.5 text-xs text-text-main font-medium">
+            <Phone className="h-3.5 w-3.5 text-text-muted" /> {alumno.tlfn}
           </div>
           {(alumno.totalHorasFFE || 0) > 0 ? (
-            <div className="flex items-center gap-2.5 text-xs font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-md mt-1 border border-amber-100/50">
+            <div className="flex items-center gap-2.5 text-xs font-bold text-warning-strong bg-warning-soft px-2 py-1 rounded-md mt-1 border border-warning/20">
               <Clock className="h-3.5 w-3.5" /> {alumno.totalHorasFFE} Horas
             </div>
           ) : (
-            <div className="flex items-center gap-2.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md mt-1 border border-emerald-100/50">
+            <div className="flex items-center gap-2.5 text-xs font-bold text-success-strong bg-success-soft px-2 py-1 rounded-md mt-1 border border-success/20">
               <CheckCircle className="h-3.5 w-3.5" /> Completado
             </div>
           )}
           {isAssigned ? (
-            <div className="flex items-center gap-2.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md mt-1 border border-emerald-100/50">
+            <div className="flex items-center gap-2.5 text-xs font-bold text-success-strong bg-success-soft px-2 py-1 rounded-md mt-1 border border-success/20">
               <CheckCircle className="h-3.5 w-3.5" /> Alumno Asignado
             </div>
           ) : (
-            <div className="flex items-center gap-2.5 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-md mt-1 border border-amber-100/50">
+            <div className="flex items-center gap-2.5 text-xs font-bold text-warning-strong bg-warning-soft px-2 py-1 rounded-md mt-1 border border-warning/20">
               <Clock className="h-3.5 w-3.5" /> Pendiente de Asignación
             </div>
           )}
@@ -161,18 +161,18 @@ export function AlumnoGridCard({
       </div>
 
       {/* Footer: CV */}
-      <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between mt-auto">
+      <div className="px-6 py-4 bg-surface-subtle/50 border-t border-border-base flex items-center justify-between mt-auto">
         {alumno.cvPath ? (
           <div className="flex items-center gap-3">
             <button
               onClick={() => onViewCV(alumno)}
-              className="flex items-center gap-1.5 text-emerald-600 font-bold text-[10px] uppercase tracking-wider hover:text-emerald-700 transition-colors bg-emerald-50 px-2 py-1 rounded-md"
+              className="flex items-center gap-1.5 text-success font-bold text-[10px] uppercase tracking-wider hover:text-success-strong transition-colors bg-success-soft px-2 py-1 rounded-md"
             >
               <Eye className="h-4 w-4" /> Ver CV
             </button>
           </div>
         ) : (
-          <label className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-primary transition-colors">
+          <label className="flex items-center gap-2 text-text-muted font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-primary transition-colors">
             <FileUp className="h-4 w-4" />
             Subir CV (.pdf)
             <input
@@ -183,7 +183,7 @@ export function AlumnoGridCard({
             />
           </label>
         )}
-        <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest opacity-50">
+        <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-50">
           #{alumno.id}
         </div>
       </div>
@@ -194,35 +194,35 @@ export function AlumnoGridCard({
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
+            <div className="p-2 rounded-lg bg-warning-soft text-warning-strong">
               <BadgeX className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Sin relación</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Sin relación</h3>
+              <p className="text-sm text-text-muted">
                 {alumno.nombre} {alumno.apellidos}
               </p>
             </div>
           </div>
-          <button type="button" onClick={() => setFfeMotivoModal(false)} className="text-slate-400 hover:text-slate-600">
+          <button type="button" onClick={() => setFfeMotivoModal(false)} className="text-text-muted hover:text-text-main">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {loadingFFEMotivos ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
+            <Loader2 className="h-6 w-6 animate-spin text-warning-strong" />
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-xs text-slate-500">Selecciona el motivo por el que el alumno no cursa FFE:</p>
+            <p className="text-xs text-text-muted">Selecciona el motivo por el que el alumno no cursa FFE:</p>
             <div className="space-y-2">
               {ffeMotivos.map(m => (
                 <label
                   key={m.id}
                   className={`block p-3 rounded-xl border cursor-pointer transition-all ${ffeMotivoSelected === m.id
-                    ? 'border-amber-400 bg-amber-50'
-                    : 'border-slate-200 bg-white hover:bg-slate-50'
+                    ? 'border-warning/40 bg-warning-soft'
+                    : 'border-border-base bg-surface-card hover:bg-surface-hover'
                     }`}
                 >
                   <input
@@ -233,16 +233,16 @@ export function AlumnoGridCard({
                     onChange={() => setFfeMotivoSelected(m.id)}
                     className="sr-only"
                   />
-                  <span className="text-sm font-semibold text-slate-800">{m.codigo}</span>
-                  <span className="text-sm text-slate-500 ml-2">— {m.valor}</span>
+                  <span className="text-sm font-semibold text-text-main">{m.codigo}</span>
+                  <span className="text-sm text-text-muted ml-2">— {m.valor}</span>
                 </label>
               ))}
             </div>
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-base">
               <button
                 type="button"
                 onClick={() => setFfeMotivoModal(false)}
-                className="px-5 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+                className="px-5 py-2.5 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors"
               >
                 Cancelar
               </button>
@@ -250,7 +250,7 @@ export function AlumnoGridCard({
                 type="button"
                 onClick={handleSaveFFEMotivo}
                 disabled={savingFFEMotivo || ffeMotivoSelected === null}
-                className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 text-white text-sm font-semibold rounded-xl hover:bg-amber-700 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-5 py-2.5 bg-warning text-white text-sm font-semibold rounded-xl hover:bg-warning/90 disabled:opacity-50 transition-colors"
               >
                 {savingFFEMotivo ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeX className="h-4 w-4" />}
                 {savingFFEMotivo ? 'Guardando...' : 'Guardar motivo'}

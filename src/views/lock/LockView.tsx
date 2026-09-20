@@ -8,9 +8,9 @@ import { useFormValidation } from '../../hooks/useFormValidation.ts';
 
 const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true;
 
-const inputCls = 'block w-full pl-10 pr-3 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all';
-const inputErrCls = 'border-red-500 ring-2 ring-red-400/30';
-const errMsgCls = 'text-red-400 text-xs mt-1 italic font-medium';
+const inputCls = 'block w-full pl-10 pr-3 py-3 bg-surface-subtle border border-border-base rounded-xl text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all';
+const inputErrCls = 'border-danger ring-2 ring-danger/30';
+const errMsgCls = 'text-danger text-xs mt-1 italic font-medium';
 
 const RULES = {
   password: [required('Contraseña Maestra')],
@@ -37,31 +37,31 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-950 relative overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center bg-bg-base relative overflow-hidden">
       {/* Decoración de fondo */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900/20 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-900/10 rounded-full blur-[120px]" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-success/10 rounded-full blur-[120px]" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md p-8 relative z-10"
       >
-        <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+        <div className="bg-surface-card border border-border-base rounded-3xl p-8 shadow-2xl">
           <div className="flex flex-col items-center mb-8">
-            <div className="h-16 w-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/40 mb-4">
+            <div className="h-16 w-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/40 mb-4">
               <Lock className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Acceso Restringido</h1>
-            <p className="text-slate-400 text-sm mt-2 text-center">
-              La base de datos <span className="text-blue-400 font-mono">ffe_management.db</span> está cifrada. Introduce la clave para continuar.
+            <h1 className="text-2xl font-bold text-text-main">Acceso Restringido</h1>
+            <p className="text-text-muted text-sm mt-2 text-center">
+              La base de datos <span className="text-primary font-mono">ffe_management.db</span> está cifrada. Introduce la clave para continuar.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <KeyRound className="h-5 w-5 text-slate-500" />
+                <KeyRound className="h-5 w-5 text-text-muted" />
               </div>
               <input
                 type="password"
@@ -79,7 +79,7 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex items-center gap-2 text-red-400 text-sm bg-red-400/10 p-3 rounded-lg border border-red-400/20"
+                className="flex items-center gap-2 text-danger text-sm bg-danger/10 p-3 rounded-lg border border-danger/20"
               >
                 <ShieldAlert className="h-4 w-4" />
                 <span>{error}</span>
@@ -89,7 +89,7 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
             <button
               type="submit"
               disabled={isSubmitting || !password}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]"
+              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]"
             >
               {isSubmitting ? (
                 <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -103,15 +103,15 @@ export default function LockView({ onUnlock, error }: LockViewProps) {
           </form>
         </div>
 
-        <p className="text-center mt-6 text-slate-500 text-xs uppercase tracking-widest font-medium">
+        <p className="text-center mt-6 text-text-muted text-xs uppercase tracking-widest font-medium">
           Sistema de Gestión de las FFE
         </p>
         <p className="text-center mt-2 text-[10px] text-text-muted font-medium uppercase tracking-widest">
           v{packageJson.version}
-          {isDev && <span className="ml-1 text-orange-500 font-bold">dev</span>}
+          {isDev && <span className="ml-1 text-warning-strong font-bold">dev</span>}
         </p>
         <p className="text-center mt-2 text-[9px] text-text-muted font-medium tracking-widest">
-            <Copyright size={12} className="inline"/> <button onClick={() => setShowCopyright(true)} className="hover:text-blue-500 transition-colors cursor-pointer">mjherrera-fp</button>
+            <Copyright size={12} className="inline"/> <button onClick={() => setShowCopyright(true)} className="hover:text-primary transition-colors cursor-pointer">mjherrera-fp</button>
           </p>
       </motion.div>
 

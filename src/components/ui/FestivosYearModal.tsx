@@ -4,8 +4,8 @@ import { Modal } from './Modal.tsx';
 
 const MIN_YEAR = 2000;
 const MAX_YEAR = 2100;
-const labelClass = 'block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5';
-const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
+const inputClass = 'w-full bg-surface-card border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
 const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
 
 interface FestivosYearModalProps {
@@ -34,17 +34,17 @@ export function FestivosYearModal({ open, localidad, onConfirm, onClose }: Festi
   };
 
   return (
-    <Modal open={open} onClose={onClose} maxWidth="sm" zIndex={60} backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl">
-      <div className="flex items-center justify-between px-8 py-6 bg-slate-50 border-b border-slate-100 shrink-0">
+    <Modal open={open} onClose={onClose} maxWidth="sm" zIndex={60} backdropClass="bg-overlay backdrop-blur-md" cardClass="rounded-4xl">
+      <div className="flex items-center justify-between px-8 py-6 bg-surface-subtle border-b border-border-base shrink-0">
         <div>
-          <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
+          <h3 className="font-black text-text-main uppercase tracking-widest text-xs">
             Obtener festivos
           </h3>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-text-muted mt-1">
             {localidad || 'calendariosnacionales.com'}
           </p>
         </div>
-        <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+        <button onClick={onClose} className="text-text-muted hover:text-text-main">
           <X className="h-5 w-5" />
         </button>
       </div>
@@ -70,7 +70,7 @@ export function FestivosYearModal({ open, localidad, onConfirm, onClose }: Festi
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+            className="flex-1 bg-surface-hover text-text-main py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-surface-strong transition-all"
           >
             Cancelar
           </button>

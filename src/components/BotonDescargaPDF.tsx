@@ -46,7 +46,7 @@ export function BotonDescargaPDF({ url, name, showText = true, text, onClick, cl
     }
   };
 
-  const defaultStyles = "p-2.5 h-8 text-red-600 hover:text-red-700 transition-all hover:bg-red-50 rounded-xl border border-red-100 shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed";
+  const defaultStyles = "p-2.5 h-8 text-danger hover:text-danger/80 transition-all hover:bg-danger-soft rounded-xl border border-danger/20 shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
     <Title text="Descargar Anexo en PDF">

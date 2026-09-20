@@ -9,13 +9,13 @@ import { ConvenioEstado, ConvenioEstadoLabels } from '../../../types/index.ts';
 export const getStatusButton = (estado: ConvenioEstado) => {
   switch (estado) {
     case ConvenioEstado.PENDIENTE_ENVIAR:
-      return { label: 'Enviar a Empresa', icon: Send, color: 'bg-blue-600' };
+      return { label: 'Enviar a Empresa', icon: Send, color: 'bg-primary' };
     case ConvenioEstado.PENDIENTE_FIRMA_EMPRESA:
-      return { label: 'Recibido de Empresa', icon: Clock, color: 'bg-amber-500' };
+      return { label: 'Recibido de Empresa', icon: Clock, color: 'bg-warning' };
     case ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR:
-      return { label: 'Enviar a Dirección', icon: Send, color: 'bg-indigo-600' };
+      return { label: 'Enviar a Dirección', icon: Send, color: 'bg-primary' };
     case ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR:
-      return { label: 'Recibido de Dirección', icon: ShieldCheck, color: 'bg-emerald-600' };
+      return { label: 'Recibido de Dirección', icon: ShieldCheck, color: 'bg-success' };
     default:
       return null;
   }

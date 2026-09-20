@@ -95,7 +95,7 @@ export function AlumnosToolbar({
           <Title text="Descargar plantilla Excel">
             <button
               onClick={onDownloadTemplate}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-slate-200 transition-all border border-slate-200"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-surface-hover text-text-main px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-surface-strong transition-all border border-border-base"
             >
               <Download className="h-4 w-4" /> Plantilla
             </button>
@@ -104,7 +104,7 @@ export function AlumnosToolbar({
             <button
               onClick={onImportClick}
               disabled={isImporting}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-emerald-100 transition-all border border-emerald-100 disabled:opacity-50"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-success-soft text-success-strong px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-success/15 transition-all border border-success/20 disabled:opacity-50"
             >
               <FileSpreadsheet className="h-4 w-4" />
               {isImporting ? 'Importando...' : 'Importar Excel'}
@@ -113,7 +113,7 @@ export function AlumnosToolbar({
           <Title text="Instrucciones para importar CVs">
             <button
               onClick={() => setShowImportCVModal(true)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-purple-50 text-purple-700 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-purple-100 transition-all border border-purple-100"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary-light text-primary px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/15 transition-all border border-primary-light"
             >
               <FileArchive className="h-4 w-4" />
               Importar CVs
@@ -122,7 +122,7 @@ export function AlumnosToolbar({
           <Title text="Enviar correo a alumnos filtrados">
             <button
               onClick={onBulkEmail}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-50 text-blue-600 px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-blue-100 transition-all border border-blue-100"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary-light text-primary px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/15 transition-all border border-primary-light"
             >
               <Mail className="h-4 w-4" />
             </button>
@@ -137,7 +137,7 @@ export function AlumnosToolbar({
       </div>
 
       {/* Fila inferior: búsqueda + controles */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+      <div className="bg-surface-card p-4 rounded-xl border border-border-base shadow-sm space-y-4">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10 text-primary">
             <GraduationCap className="h-5 w-5" />
@@ -148,23 +148,23 @@ export function AlumnosToolbar({
 
           {/* Buscador */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
             <input
               type="text"
               placeholder="Buscar por nombre, apellidos, DNI, email..."
               value={searchTerm}
               onChange={e => onSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-sans"
+              className="w-full pl-10 pr-4 py-2 bg-surface-card border border-border-base rounded-lg text-sm text-text-main focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-sans"
             />
           </div>
 
           <div className="flex gap-2">
             {/* Toggle vista */}
-            <div className="flex bg-slate-100 p-1 rounded-lg">
+            <div className="flex bg-surface-hover p-1 rounded-lg">
               <Title text="Vista Cuadrícula">
                 <button
                   onClick={() => onViewModeChange('grid')}
-                  className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-surface-card text-primary shadow-sm' : 'text-text-muted hover:text-text-main'}`}
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </button>
@@ -172,7 +172,7 @@ export function AlumnosToolbar({
               <Title text="Vista Tabla">
                 <button
                   onClick={() => onViewModeChange('table')}
-                  className={`p-1.5 rounded-md transition-all ${viewMode === 'table' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  className={`p-1.5 rounded-md transition-all ${viewMode === 'table' ? 'bg-surface-card text-primary shadow-sm' : 'text-text-muted hover:text-text-main'}`}
                 >
                   <List className="h-4 w-4" />
                 </button>
@@ -190,8 +190,8 @@ export function AlumnosToolbar({
         </div>
 
         {/* Ordenación */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-          <span className="text-[10px] flex items-center uppercase tracking-wider text-slate-500 font-bold mr-2">
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border-base">
+          <span className="text-[10px] flex items-center uppercase tracking-wider text-text-muted font-bold mr-2">
             Ordenar por:
           </span>
           {SORT_OPTIONS.map(opt => (
@@ -200,8 +200,8 @@ export function AlumnosToolbar({
               onClick={() => onToggleSort(opt.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
                 sortBy === opt.id
-                  ? 'bg-blue-50 text-blue-600 border-blue-200 ring-4 ring-blue-500/5'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                  ? 'bg-primary-light text-primary border-primary-light ring-4 ring-primary/5'
+                  : 'bg-surface-card text-text-main border-border-base hover:border-border-base'
               }`}
             >
               {opt.label}
@@ -213,38 +213,38 @@ export function AlumnosToolbar({
         </div>
 
         {/* Filtros avanzados: envíos CV, empresas interesadas, match */}
-        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
-          <span className="text-[10px] flex items-center uppercase tracking-wider text-slate-500 font-bold mr-1">
+        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border-base">
+          <span className="text-[10px] flex items-center uppercase tracking-wider text-text-muted font-bold mr-1">
             Filtrar por:
           </span>
 
           {/* Más de X envíos */}
           <div className="flex items-center gap-1">
-            <Send className="h-3.5 w-3.5 text-slate-400" />
-            <span className="text-[11px] text-slate-500 font-semibold whitespace-nowrap">+ de</span>
+            <Send className="h-3.5 w-3.5 text-text-muted" />
+            <span className="text-[11px] text-text-muted font-semibold whitespace-nowrap">+ de</span>
             <input
               type="number"
               min={0}
               value={filterMinCVEnvios}
               onChange={e => onFilterMinCVEnviosChange(Math.max(0, Number(e.target.value)))}
-              className="w-14 px-2 py-1 text-xs font-bold text-center bg-slate-50 border border-slate-200 rounded-md focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+              className="w-14 px-2 py-1 text-xs font-bold text-center text-text-main bg-surface-card border border-border-base rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
             />
-            <span className="text-[11px] text-slate-500 font-semibold whitespace-nowrap">envíos</span>
+            <span className="text-[11px] text-text-muted font-semibold whitespace-nowrap">envíos</span>
           </div>
 
-          <span className="text-slate-200 select-none">|</span>
+          <span className="text-border-base select-none">|</span>
 
           {/* Empresas interesadas */}
           <div className="flex items-center gap-1">
-            <Building2 className="h-3.5 w-3.5 text-slate-400" />
+            <Building2 className="h-3.5 w-3.5 text-text-muted" />
             {EMPRESAS_INTERESADAS_OPTIONS.map(opt => (
               <button
                 key={opt.id}
                 onClick={() => onFilterEmpresasInteresadasChange(opt.id)}
                 className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border ${
                   filterEmpresasInteresadas === opt.id
-                    ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
-                    : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                    ? 'bg-primary-light text-primary border-primary-light'
+                    : 'bg-surface-card text-text-muted border-border-base hover:border-border-base'
                 }`}
               >
                 {opt.label}
@@ -252,19 +252,19 @@ export function AlumnosToolbar({
             ))}
           </div>
 
-          <span className="text-slate-200 select-none">|</span>
+          <span className="text-border-base select-none">|</span>
 
           {/* Relación */}
           <div className="flex items-center gap-1">
-            <GitPullRequest className="h-3.5 w-3.5 text-slate-400" />
+            <GitPullRequest className="h-3.5 w-3.5 text-text-muted" />
             {RELACION_STATUS_OPTIONS.map(opt => (
               <button
                 key={opt.id}
                 onClick={() => onFilterRelacionStatusChange(opt.id)}
                 className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border ${
                   filterRelacionStatus === opt.id
-                    ? 'bg-amber-50 text-amber-600 border-amber-200'
-                    : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                    ? 'bg-warning-soft text-warning-strong border-warning/20'
+                    : 'bg-surface-card text-text-muted border-border-base hover:border-border-base'
                 }`}
               >
                 {opt.label}
@@ -272,11 +272,11 @@ export function AlumnosToolbar({
             ))}
           </div>
 
-          <span className="text-slate-200 select-none">|</span>
+          <span className="text-border-base select-none">|</span>
 
           {/* NSS */}
           <div className="flex items-center gap-1">
-            <TriangleAlert className="h-3.5 w-3.5 text-slate-400" />
+            <TriangleAlert className="h-3.5 w-3.5 text-text-muted" />
             {NSS_OPTIONS.map(opt => (
               <button
                 key={opt.id}
@@ -284,9 +284,9 @@ export function AlumnosToolbar({
                 className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border ${
                   filterNSS === opt.id
                     ? opt.id === 'sin_nss'
-                      ? 'bg-red-50 text-red-600 border-red-200'
-                      : 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                    : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                      ? 'bg-danger-soft text-danger-strong border-danger/20'
+                      : 'bg-success-soft text-success-strong border-success/20'
+                    : 'bg-surface-card text-text-muted border-border-base hover:border-border-base'
                 }`}
               >
                 {opt.label}
@@ -294,11 +294,11 @@ export function AlumnosToolbar({
             ))}
           </div>
 
-          <span className="text-slate-200 select-none">|</span>
+          <span className="text-border-base select-none">|</span>
 
           {/* Horas FFE */}
           <div className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5 text-slate-400" />
+            <Clock className="h-3.5 w-3.5 text-text-muted" />
             <button
               onClick={() => onFilterHorasFFEChange(
                 filterHorasFFE.mode === 'exact' && filterHorasFFE.value === 500
@@ -307,8 +307,8 @@ export function AlumnosToolbar({
               )}
               className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border ${
                 filterHorasFFE.mode === 'exact' && filterHorasFFE.value === 500
-                  ? 'bg-amber-50 text-amber-700 border-amber-200'
-                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                  ? 'bg-warning-soft text-warning-strong border-warning/20'
+                  : 'bg-surface-card text-text-muted border-border-base hover:border-border-base'
               }`}
             >
               500h
@@ -321,13 +321,13 @@ export function AlumnosToolbar({
               )}
               className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all border ${
                 filterHorasFFE.mode === 'exact' && filterHorasFFE.value === 380
-                  ? 'bg-amber-50 text-amber-700 border-amber-200'
-                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                  ? 'bg-warning-soft text-warning-strong border-warning/20'
+                  : 'bg-surface-card text-text-muted border-border-base hover:border-border-base'
               }`}
             >
               380h
             </button>
-            <span className="text-[11px] text-slate-500 font-semibold whitespace-nowrap">≤</span>
+            <span className="text-[11px] text-text-muted font-semibold whitespace-nowrap">≤</span>
             <input
               type="number"
               min={0}
@@ -339,8 +339,8 @@ export function AlumnosToolbar({
                 if (e.target.value === '' || Number.isNaN(v) || v < 0) onFilterHorasFFEChange({ mode: 'off' });
                 else onFilterHorasFFEChange({ mode: 'lte', value: Math.floor(v) });
               }}
-              className={`w-14 px-2 py-1 text-xs font-bold text-center bg-slate-50 border rounded-md focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all ${
-                filterHorasFFE.mode === 'lte' ? 'border-amber-300 bg-amber-50/50' : 'border-slate-200'
+              className={`w-14 px-2 py-1 text-xs font-bold text-center text-text-main bg-surface-card border rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${
+                filterHorasFFE.mode === 'lte' ? 'border-warning/40 bg-warning-soft/50' : 'border-border-base'
               }`}
             />
           </div>
@@ -356,7 +356,7 @@ export function AlumnosToolbar({
                 onFilterHorasFFEChange({ mode: 'off' });
                 setLteInput('');
               }}
-              className="ml-auto px-2.5 py-1 rounded-md text-[11px] font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 transition-all"
+              className="ml-auto px-2.5 py-1 rounded-md text-[11px] font-bold text-danger border border-danger/20 bg-danger-soft hover:bg-danger/15 transition-all"
             >
               Limpiar filtros
             </button>
@@ -369,24 +369,24 @@ export function AlumnosToolbar({
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-100 text-purple-700">
+              <div className="p-2 rounded-lg bg-primary-light text-primary">
                 <FileArchive className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-bold text-slate-800">Importar CVs</h3>
+              <h3 className="text-lg font-bold text-text-main">Importar CVs</h3>
             </div>
-            <button onClick={() => setShowImportCVModal(false)} className="text-slate-400 hover:text-slate-600 p-1">
+            <button onClick={() => setShowImportCVModal(false)} className="text-text-muted hover:text-text-main p-1">
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="space-y-4 text-sm text-slate-600">
+          <div className="space-y-4 text-sm text-text-muted">
             <p>Para importar los CVs de los alumnos, sigue estos pasos:</p>
             <ol className="list-decimal list-inside space-y-2 pl-2">
               <li>Prepara un archivo <strong>.zip</strong> con los CVs en formato <strong>PDF</strong>.</li>
-              <li>Cada archivo PDF debe nombrarse con el <strong>DNI</strong> del alumno (ej: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono">12345678X.pdf</code>).</li>
+              <li>Cada archivo PDF debe nombrarse con el <strong>DNI</strong> del alumno (ej: <code className="bg-surface-hover px-1.5 py-0.5 rounded text-xs font-mono">12345678X.pdf</code>).</li>
               <li>El sistema buscará al alumno por su DNI y le asignará el CV automáticamente.</li>
             </ol>
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+            <div className="bg-warning-soft border border-warning/20 rounded-lg p-3 text-xs text-warning-strong">
               <strong>Nota:</strong> Los DNI deben coincidir exactamente con los registrados en el sistema (incluyendo letra).
             </div>
           </div>
@@ -395,14 +395,14 @@ export function AlumnosToolbar({
             <button
               onClick={() => { setShowImportCVModal(false); onImportZipClick(); }}
               disabled={isImportingZip}
-              className="flex-1 flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-purple-700 transition-all disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-primary/90 transition-all disabled:opacity-50"
             >
               <FileArchive className="h-4 w-4" />
               {isImportingZip ? 'Procesando...' : 'Seleccionar archivo ZIP'}
             </button>
             <button
               onClick={() => setShowImportCVModal(false)}
-              className="px-4 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition-all"
+              className="px-4 py-2.5 text-sm font-bold text-text-muted hover:bg-surface-hover rounded-lg transition-all"
             >
               Cancelar
             </button>

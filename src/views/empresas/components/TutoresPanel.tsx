@@ -18,8 +18,8 @@ export function TutoresPanel({
   if (!selectedEmpresa) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-        <div className="bg-slate-50 p-6 rounded-full mb-4">
-          <Building2 className="h-12 w-12 text-slate-200" />
+        <div className="bg-surface-subtle p-6 rounded-full mb-4">
+          <Building2 className="h-12 w-12 text-text-muted" />
         </div>
         <h3 className="text-base font-bold text-text-main mb-2">Selecciona una empresa</h3>
         <p className="text-xs text-text-muted leading-relaxed">
@@ -45,13 +45,13 @@ export function TutoresPanel({
         {tutores.map(tutor => (
           <div
             key={tutor.id}
-            className="p-4 bg-slate-50 border border-border-base rounded-lg shadow-sm"
+            className="p-4 bg-surface-subtle border border-border-base rounded-lg shadow-sm"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="font-bold text-sm text-text-main leading-tight">
                 {tutor.nombre} {tutor.apellidos}
                 {(!tutor.apellidos?.trim() || !tutor.nif?.trim() || !tutor.email?.trim() || !tutor.tlfn?.trim()) && (
-                  <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[9px] font-bold uppercase tracking-wide align-middle">
+                  <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-warning-soft text-warning-strong border border-warning/20 rounded-full text-[9px] font-bold uppercase tracking-wide align-middle">
                     <TriangleAlert className="h-2.5 w-2.5" /> Datos incompletos
                   </span>
                 )}
@@ -65,7 +65,7 @@ export function TutoresPanel({
                 </button>
                 <button
                   onClick={() => onDeleteTutor(tutor.id!)}
-                  className="text-text-muted hover:text-red-500 transition-colors"
+                  className="text-text-muted hover:text-danger transition-colors"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -87,14 +87,14 @@ export function TutoresPanel({
 
         {tutores.length === 0 && (
           <div className="py-12 text-center">
-            <UserPlus className="h-10 w-10 mx-auto text-slate-200 mb-3" />
+            <UserPlus className="h-10 w-10 mx-auto text-text-muted mb-3" />
             <p className="text-sm text-text-muted font-medium">Sin tutores asignados</p>
           </div>
         )}
       </div>
 
       {/* Footer: botón añadir */}
-      <div className="p-6 border-t border-border-base bg-slate-50/50">
+      <div className="p-6 border-t border-border-base bg-surface-subtle/50">
         <button
           onClick={onAddTutor}
           className="w-full bg-primary text-white py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-md shadow-primary/10"

@@ -30,7 +30,7 @@ export default function ConfiguracionView({ initialTab }: Props = {}) {
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 bg-surface-hover p-1 rounded-xl w-fit">
         {tabs.map(tab => {
           const Icon = tab.icon;
           return (
@@ -39,8 +39,8 @@ export default function ConfiguracionView({ initialTab }: Props = {}) {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                 activeTab === tab.id
-                  ? 'bg-white text-slate-800 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-surface-card text-text-main shadow-sm'
+                  : 'text-text-muted hover:text-text-main'
               }`}
             >
               <Icon className="h-4 w-4" />

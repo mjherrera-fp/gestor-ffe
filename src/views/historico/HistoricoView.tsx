@@ -19,10 +19,10 @@ export default function HistoricoView() {
 
   return (
     <div className="flex flex-col h-full bg-bg-base">
-      <div className="bg-white border-b border-border-base px-6 lg:px-8">
+      <div className="bg-surface-card border-b border-border-base px-6 lg:px-8">
         <div className="flex items-center gap-3 py-5">
           <History className="h-6 w-6 text-primary" />
-          <h2 className="text-xl font-black text-slate-900">Histórico de operaciones</h2>
+          <h2 className="text-xl font-black text-text-main">Histórico de operaciones</h2>
         </div>
 
         <div className="flex gap-1 -mb-px">
@@ -36,7 +36,7 @@ export default function HistoricoView() {
                 className={`flex items-center gap-2 px-5 py-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 ${
                   isActive
                     ? 'text-primary border-primary bg-primary/5'
-                    : 'text-slate-400 border-transparent hover:text-slate-600 hover:border-slate-300'
+                    : 'text-text-muted border-transparent hover:text-text-main hover:border-border-base'
                 }`}
               >
                 <Icon className="h-4 w-4" />

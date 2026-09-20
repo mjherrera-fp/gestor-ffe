@@ -10,9 +10,9 @@ export const COM_DAT_STATUS_LABELS: Record<string, string> = {
 export const getStatusButton = (estado: ComunicacionDATEstado) => {
     switch (estado) {
         case ComunicacionDATEstado.PENDIENTE_ENVIAR_DIRECTOR:
-            return {label: 'Enviar a Dirección', icon: Send, color: 'bg-indigo-600'};
+            return {label: 'Enviar a Dirección', icon: Send, color: 'bg-primary'};
         case ComunicacionDATEstado.PENDIENTE_FIRMA_DIRECTOR:
-            return {label: 'Recibido de Dirección', icon: ShieldCheck, color: 'bg-emerald-600'};
+            return {label: 'Recibido de Dirección', icon: ShieldCheck, color: 'bg-success'};
         default:
             return null;
     }

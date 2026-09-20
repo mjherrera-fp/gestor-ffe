@@ -403,20 +403,20 @@ export function GestorDocumentalModal({
 
     return (
         <Modal open={open} onClose={onClose} maxWidth="4xl" cardClass="rounded-3xl">
-            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-border-base">
                 <div className="flex items-center gap-3">
                     {viewingDoc && (
                         <button onClick={handleCloseView}
-                                className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors rounded-lg hover:bg-slate-100">
+                                className="p-1.5 text-text-muted hover:text-text-main transition-colors rounded-lg hover:bg-surface-hover">
                             <ArrowLeft className="h-5 w-5"/>
                         </button>
                     )}
                     <div>
-                        <h2 className="text-xl font-black text-slate-800">
+                        <h2 className="text-xl font-black text-text-main">
                             {viewingDoc ? viewingDoc.nombreFichero : 'Gestor Documental'}
                         </h2>
                         {!viewingDoc && (
-                            <p className="text-xs text-slate-400 font-medium mt-0.5">
+                            <p className="text-xs text-text-muted font-medium mt-0.5">
                                 {subtitleLabel === 'Comunicaciones DAT'
                                     ? `${subtitleLabel} - ${fechaComunicacion || entityNombre}`
                                     : subtitleLabel
@@ -428,7 +428,7 @@ export function GestorDocumentalModal({
                     </div>
                 </div>
                 <button onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-lg hover:bg-slate-100">
+                        className="p-2 text-text-muted hover:text-text-main transition-colors rounded-lg hover:bg-surface-hover">
                     <X className="h-5 w-5"/>
                 </button>
             </div>
@@ -437,11 +437,11 @@ export function GestorDocumentalModal({
                 <div className="p-6 flex flex-col gap-4 overflow-y-auto flex-1">
                     <iframe
                         src={`${apiBase}/${viewingDoc.id}/download`}
-                        className="w-full h-140 rounded-xl border border-slate-200"
+                        className="w-full h-140 rounded-xl border border-border-base"
                         title={viewingDoc.nombreFichero}
                     />
                     <div className="flex items-center justify-between">
-                        <div className="text-xs text-slate-400 font-medium">
+                        <div className="text-xs text-text-muted font-medium">
                             {viewingDoc.comentario && (
                                 <span className="italic">{viewingDoc.comentario}</span>
                             )}
@@ -449,7 +449,7 @@ export function GestorDocumentalModal({
                         <a
                             href={`${apiBase}/${viewingDoc.id}/download`}
                             download={viewingDoc.nombreFichero}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all"
+                            className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all"
                         >
                             <Download className="h-4 w-4"/> Descargar
                         </a>
@@ -468,8 +468,8 @@ export function GestorDocumentalModal({
                                 dragOver
                                     ? 'border-primary bg-primary/5'
                                     : file
-                                        ? 'border-emerald-300 bg-emerald-50'
-                                        : 'border-slate-200 bg-slate-50 hover:border-primary/40 hover:bg-primary/5'
+                                        ? 'border-success/30 bg-success-soft'
+                                        : 'border-border-base bg-surface-subtle hover:border-primary/40 hover:bg-primary/5'
                             }`}
                         >
                             <input
@@ -481,9 +481,9 @@ export function GestorDocumentalModal({
                             />
                             {file ? (
                                 <div className="flex flex-col items-center gap-2">
-                                    <FileText className="h-10 w-10 text-emerald-500"/>
-                                    <p className="text-sm font-bold text-emerald-700">{file.name}</p>
-                                    <p className="text-[10px] text-emerald-500 font-medium">
+                                    <FileText className="h-10 w-10 text-success"/>
+                                    <p className="text-sm font-bold text-success-strong">{file.name}</p>
+                                    <p className="text-[10px] text-success font-medium">
                                         {(file.size / 1024).toFixed(1)} KB
                                     </p>
                                     <button
@@ -492,32 +492,32 @@ export function GestorDocumentalModal({
                                             setFile(null);
                                             if (inputRef.current) inputRef.current.value = '';
                                         }}
-                                        className="text-xs text-red-500 hover:text-red-600 font-semibold underline"
+                                        className="text-xs text-danger hover:text-danger/90 font-semibold underline"
                                     >
                                         Quitar archivo
                                     </button>
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center gap-2">
-                                    <Upload className="h-10 w-10 text-slate-300"/>
-                                    <p className="text-sm font-bold text-slate-500">
+                                    <Upload className="h-10 w-10 text-text-muted"/>
+                                    <p className="text-sm font-bold text-text-muted">
                                         Arrastra el PDF aquí o haz clic para seleccionar
                                     </p>
-                                    <p className="text-[10px] text-slate-400 font-medium">Solo PDF</p>
+                                    <p className="text-[10px] text-text-muted font-medium">Solo PDF</p>
                                 </div>
                             )}
                         </div>
 
                         {file && (
                             <div>
-                                <label className="block text-[10px] font-bold text-slate-500 uppercase ml-1 mb-1">
+                                <label className="block text-[10px] font-bold text-text-muted uppercase ml-1 mb-1">
                                     Nombre del documento
                                 </label>
                                 <input
                                     type="text"
                                     value={nombreFichero}
                                     onChange={(e) => setNombreFichero(e.target.value)}
-                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                                    className="w-full bg-surface-card border border-border-base rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
                                 />
                             </div>
                         )}
@@ -527,7 +527,7 @@ export function GestorDocumentalModal({
                             value={comentario}
                             onChange={(e) => setComentario(e.target.value)}
                             rows={2}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all resize-none"
+                            className="w-full bg-surface-card border border-border-base rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all resize-none"
                         />
 
                         <button
@@ -535,7 +535,7 @@ export function GestorDocumentalModal({
                             disabled={!file || uploading || !nombreFichero.trim()}
                             className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
                                 !file || uploading || !nombreFichero.trim()
-                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                    ? 'bg-surface-hover text-text-muted cursor-not-allowed'
                                     : 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20'
                             }`}
                         >
@@ -550,18 +550,18 @@ export function GestorDocumentalModal({
 
                     {/* Histórico */}
                     <div>
-                        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                        <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-3">
                             Histórico de documentos
                         </h3>
 
                         {loading ? (
                             <div className="flex items-center justify-center py-8">
-                                <Loader2 className="h-5 w-5 text-slate-300 animate-spin"/>
+                                <Loader2 className="h-5 w-5 text-text-muted animate-spin"/>
                             </div>
                         ) : documentos.length === 0 ? (
-                            <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-100">
-                                <FileText className="h-8 w-8 text-slate-200 mx-auto mb-2"/>
-                                <p className="text-xs text-slate-400 font-medium italic">
+                            <div className="text-center py-8 bg-surface-subtle rounded-2xl border border-border-base">
+                                <FileText className="h-8 w-8 text-text-muted mx-auto mb-2"/>
+                                <p className="text-xs text-text-muted font-medium italic">
                                     No hay documentos subidos
                                 </p>
                             </div>
@@ -570,7 +570,7 @@ export function GestorDocumentalModal({
                                 {documentos.map((doc) => (
                                     <div
                                         key={doc.id}
-                                        className="flex items-center gap-3 bg-white border border-slate-100 rounded-xl px-4 py-3 hover:border-slate-200 transition-all"
+                                        className="flex items-center gap-3 bg-surface-card border border-border-base rounded-xl px-4 py-3 hover:border-border-base transition-all"
                                     >
                                         <div className="p-2 rounded-lg bg-primary/5 text-primary shrink-0">
                                             <FileText className="h-4 w-4"/>
@@ -580,16 +580,16 @@ export function GestorDocumentalModal({
                         <span className="text-[10px] font-black text-primary uppercase">
                           v{doc.version}
                         </span>
-                                                <span className="text-xs font-bold text-slate-700 truncate">
+                                                <span className="text-xs font-bold text-text-main truncate">
                           {doc.nombreFichero}
                         </span>
                                             </div>
                                             <div
-                                                className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
+                                                className="flex items-center gap-2 text-[10px] text-text-muted font-medium">
                                                 <span>{formatDate(doc.fechaSubida)}</span>
                                                 {doc.comentario && (
                                                     <>
-                                                        <span className="text-slate-200">|</span>
+                                                        <span className="text-text-muted">|</span>
                                                         <span className="truncate italic">{doc.comentario}</span>
                                                     </>
                                                 )}
@@ -598,7 +598,7 @@ export function GestorDocumentalModal({
                                         <div className="flex items-center gap-1 shrink-0">
                                             <button
                                                 onClick={() => handleView(doc)}
-                                                className="p-1.5 text-slate-400 hover:text-primary transition-all rounded-lg hover:bg-slate-50"
+                                                className="p-1.5 text-text-muted hover:text-primary transition-all rounded-lg hover:bg-surface-subtle"
                                                 title="Ver documento"
                                             >
                                                 <Eye className="h-4 w-4"/>
@@ -606,7 +606,7 @@ export function GestorDocumentalModal({
                                             {cloudConfigured && cloudAllowed && (
                                                 <button
                                                     onClick={() => openNextCloudConfirm(doc.id)}
-                                                    className="p-1.5 text-slate-400 hover:text-sky-600 transition-all rounded-lg hover:bg-slate-50"
+                                                    className="p-1.5 text-text-muted hover:text-primary transition-all rounded-lg hover:bg-surface-subtle"
                                                     title="Subir a NextCloud"
                                                 >
                                                     <Cloud className="h-4 w-4"/>
@@ -614,7 +614,7 @@ export function GestorDocumentalModal({
                                             )}
                                             <button
                                                 onClick={() => setDeleteConfirmId(doc.id)}
-                                                className="p-1.5 text-slate-400 hover:text-red-500 transition-all rounded-lg hover:bg-slate-50"
+                                                className="p-1.5 text-text-muted hover:text-danger transition-all rounded-lg hover:bg-surface-subtle"
                                                 title="Eliminar documento"
                                             >
                                                 <Trash2 className="h-4 w-4"/>
@@ -630,34 +630,34 @@ export function GestorDocumentalModal({
             {/* ── MODAL: Confirmar eliminación ── */}
             {deleteConfirmId !== null && (
                 <div
-                    className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-70 p-4">
+                    className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-center justify-center z-70 p-4">
                     <div
-                        className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative">
+                        className="bg-surface-card rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative">
                         <button
                             onClick={() => setDeleteConfirmId(null)}
-                            className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                            className="absolute top-6 right-6 p-2 text-text-muted hover:text-text-main transition-colors"
                         >
                             <X className="h-5 w-5"/>
                         </button>
                         <div className="p-8 text-center">
                             <div
-                                className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                                className="w-16 h-16 bg-danger-soft text-danger rounded-full flex items-center justify-center mx-auto mb-6">
                                 <Trash2 className="h-8 w-8"/>
                             </div>
-                            <h3 className="text-xl font-black text-slate-900 mb-3">¿Estás seguro?</h3>
-                            <p className="text-sm text-slate-500 font-medium mb-8">
+                            <h3 className="text-xl font-black text-text-main mb-3">¿Estás seguro?</h3>
+                            <p className="text-sm text-text-muted font-medium mb-8">
                                 Esta acción eliminará el documento de forma permanente y no se puede deshacer.
                             </p>
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setDeleteConfirmId(null)}
-                                    className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-all"
+                                    className="flex-1 py-3 text-sm font-bold text-text-muted hover:bg-surface-subtle rounded-xl border border-border-base transition-all"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     onClick={handleDeleteConfirm}
-                                    className="flex-1 py-3 bg-red-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
+                                    className="flex-1 py-3 bg-danger text-white text-sm font-bold rounded-xl shadow-lg shadow-danger/20 hover:bg-danger/90 transition-all"
                                 >
                                     Sí, eliminar
                                 </button>
@@ -670,16 +670,16 @@ export function GestorDocumentalModal({
             {/* ── MODAL: Confirmar subida a NextCloud ── */}
             {nextcloudConfirmOpen && (
                 <div
-                    className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-70 p-4">
+                    className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-center justify-center z-70 p-4">
                     <div
-                        className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative">
+                        className="bg-surface-card rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative">
                         <button
                             onClick={() => {
                                 setNextcloudConfirmOpen(false);
                                 setNextcloudDocId(null);
                                 setNextcloudResult(null);
                             }}
-                            className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                            className="absolute top-6 right-6 p-2 text-text-muted hover:text-text-main transition-colors"
                         >
                             <X className="h-5 w-5"/>
                         </button>
@@ -688,7 +688,7 @@ export function GestorDocumentalModal({
                             /* ── Resultado ── */
                             <div className="p-8 text-center">
                                 <div
-                                    className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${nextcloudResult.type === 'success' ? 'bg-emerald-50 text-emerald-500' : 'bg-red-50 text-red-500'}`}>
+                                    className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${nextcloudResult.type === 'success' ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'}`}>
                                     {nextcloudResult.type === 'success' ? (
                                         <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                              strokeWidth={2}>
@@ -702,17 +702,17 @@ export function GestorDocumentalModal({
                                         </svg>
                                     )}
                                 </div>
-                                <h3 className={`text-xl font-black mb-3 ${nextcloudResult.type === 'success' ? 'text-slate-900' : 'text-red-600'}`}>
+                                <h3 className={`text-xl font-black mb-3 ${nextcloudResult.type === 'success' ? 'text-text-main' : 'text-danger'}`}>
                                     {nextcloudResult.type === 'success' ? 'Subida completada' : 'Error de subida'}
                                 </h3>
-                                <p className="text-sm text-slate-500 font-medium mb-8">{nextcloudResult.message}</p>
+                                <p className="text-sm text-text-muted font-medium mb-8">{nextcloudResult.message}</p>
                                 <button
                                     onClick={() => {
                                         setNextcloudConfirmOpen(false);
                                         setNextcloudDocId(null);
                                         setNextcloudResult(null);
                                     }}
-                                    className="w-full py-3 bg-slate-900 text-white text-sm font-bold rounded-xl shadow-lg hover:bg-slate-800 transition-all"
+                                    className="w-full py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all"
                                 >
                                     Aceptar
                                 </button>
@@ -721,28 +721,28 @@ export function GestorDocumentalModal({
                             /* ── Subiendo ── */
                             <div className="p-8 text-center">
                                 <div
-                                    className="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    className="w-16 h-16 bg-primary-light text-primary rounded-full flex items-center justify-center mx-auto mb-6">
                                     <Loader2 className="h-8 w-8 animate-spin"/>
                                 </div>
-                                <h3 className="text-xl font-black text-slate-900 mb-3">Subiendo a NextCloud</h3>
-                                <p className="text-sm text-slate-500 font-medium">Por favor, espera mientras se sube el
+                                <h3 className="text-xl font-black text-text-main mb-3">Subiendo a NextCloud</h3>
+                                <p className="text-sm text-text-muted font-medium">Por favor, espera mientras se sube el
                                     documento...</p>
                             </div>
                         ) : (
                             /* ── Confirmación inicial ── */
                             <div className="p-8 text-center">
                                 <div
-                                    className="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    className="w-16 h-16 bg-primary-light text-primary rounded-full flex items-center justify-center mx-auto mb-6">
                                     <Cloud className="h-8 w-8"/>
                                 </div>
-                                <h3 className="text-xl font-black text-slate-900 mb-3">Subir a NextCloud</h3>
-                                <p className="text-sm text-slate-500 font-medium mb-4">
+                                <h3 className="text-xl font-black text-text-main mb-3">Subir a NextCloud</h3>
+                                <p className="text-sm text-text-muted font-medium mb-4">
                                     Se va a subir el documento seleccionado
                                     a {nextcloudFolderPaths.length > 1 ? `las ${nextcloudFolderPaths.length} carpetas` : 'la carpeta'} de
                                     NextCloud:
                                 </p>
                                 <div
-                                    className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-8 text-xs font-mono font-bold text-slate-600 break-all space-y-1 max-h-40 overflow-y-auto">
+                                    className="bg-surface-subtle border border-border-base rounded-xl px-4 py-3 mb-8 text-xs font-mono font-bold text-text-muted break-all space-y-1 max-h-40 overflow-y-auto">
                                     {nextcloudFolderPaths.map((p, i) => (
                                         <div key={i}>{p || '/'}</div>
                                     ))}
@@ -753,13 +753,13 @@ export function GestorDocumentalModal({
                                             setNextcloudConfirmOpen(false);
                                             setNextcloudDocId(null);
                                         }}
-                                        className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-all"
+                                        className="flex-1 py-3 text-sm font-bold text-text-muted hover:bg-surface-subtle rounded-xl border border-border-base transition-all"
                                     >
                                         Cancelar
                                     </button>
                                     <button
                                         onClick={handleUploadToNextCloud}
-                                        className="flex-1 py-3 bg-sky-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-sky-500/20 hover:bg-sky-600 transition-all"
+                                        className="flex-1 py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
                                     >
                                         Subir
                                     </button>

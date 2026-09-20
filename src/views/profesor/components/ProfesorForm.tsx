@@ -5,7 +5,7 @@ import { useFormValidation } from '../../../hooks/useFormValidation.ts';
 import { required, email, compose } from '../../../utils/validation.ts';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
-const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+const inputClass = 'w-full bg-surface-card border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
 const inputErrorClass = 'border-red-400 ring-2 ring-red-200';
 const errorMsgClass = 'text-red-500 text-xs mt-1 italic font-medium';
 
@@ -22,18 +22,18 @@ const FormSection = ({ title, icon: Icon, children }: {
   icon: React.ElementType;
   children: React.ReactNode;
 }) => (
-  <div className="bg-white rounded-xl border border-border-base shadow-sm overflow-hidden mb-6">
+  <div className="bg-surface-card rounded-xl border border-border-base shadow-sm overflow-hidden mb-6">
 
-    <div className="p-6 border-b border-slate-100 bg-slate-50">
+    <div className="p-6 border-b border-border-base bg-surface-subtle">
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
+        <div className="p-2 rounded-lg bg-primary-light text-primary">
           <Icon className="h-5 w-5" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-slate-800">
+          <h3 className="text-lg font-bold text-text-main">
             Información Personal
           </h3>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-text-muted">
             Configura tus datos personales.
           </p>
         </div>
@@ -80,8 +80,8 @@ export function ProfesorForm({ formData, setFormData, saving, success, onSubmit 
       </div>
 
       {success && (
-        <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 px-5 py-4 rounded-xl flex items-center gap-3 mb-8 shadow-sm">
-          <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+        <div className="bg-success-soft border border-success/20 text-success-strong px-5 py-4 rounded-xl flex items-center gap-3 mb-8 shadow-sm">
+          <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
           <span className="text-sm font-bold">Información personal actualizada.</span>
         </div>
       )}
@@ -138,7 +138,7 @@ export function ProfesorForm({ formData, setFormData, saving, success, onSubmit 
           />
           {errors.telefono && <p className={errorMsgClass}>{errors.telefono}</p>}
         </div>
-        <div className="col-span-1 md:col-span-2 lg:col-span-3 mt-2 pt-4 border-t border-slate-100">
+        <div className="col-span-1 md:col-span-2 lg:col-span-3 mt-2 pt-4 border-t border-border-base">
           <button
             type="submit"
             disabled={saving}

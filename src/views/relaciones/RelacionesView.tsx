@@ -71,8 +71,8 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         <div className="px-6 py-5 flex flex-col flex-1 min-h-0 gap-3">
 
             <div className="shrink-0">
-              <h3 className="text-lg font-bold text-slate-800">Seleccionar Documentación</h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <h3 className="text-lg font-bold text-text-main">Seleccionar Documentación</h3>
+              <p className="text-xs text-text-muted mt-1">
                 {ctx.modoCreacion === 'crear'
                   ? 'Elige qué documentos deseas generar y guardar en la carpeta docs/ para la relación actual.'
                   : 'Elige qué archivos deseas incluir en el paquete comprimido (.ZIP) de la relación actual.'}
@@ -91,11 +91,11 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
                   relacion: true,
                   carta: true
                 })}
-                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-wider"
+                className="text-[11px] font-bold text-primary hover:text-primary transition-colors uppercase tracking-wider"
               >
                 Seleccionar Todos
               </button>
-              <span className="text-slate-300 text-[11px]">|</span>
+              <span className="text-text-muted text-[11px]">|</span>
               <button
                 type="button"
                 onClick={() => ctx.setSelectedDocs({
@@ -106,7 +106,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
                   relacion: false,
                   carta: false
                 })}
-                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors uppercase tracking-wider"
+                className="text-[11px] font-bold text-text-muted hover:text-text-main transition-colors uppercase tracking-wider"
               >
                 Deseleccionar Todos
               </button>
@@ -115,99 +115,99 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
             {/* Checkboxes de opciones */}
             <div className="flex-1 overflow-y-auto min-h-0 space-y-3">
               {!ctx.anexoRelacionExterno && (
-                <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-border-base bg-surface-subtle/50 hover:bg-surface-subtle cursor-pointer transition-colors">
                   <input
                     type="checkbox"
                     checked={ctx.selectedDocs.relacion}
                     onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, relacion: e.target.checked })}
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-border-base text-primary focus:ring-primary"
                   />
                   <div>
-                    <p className="text-sm font-semibold text-slate-700">Relación de alumnos</p>
-                    <p className="text-[11px] text-slate-400">Documento en formato Word (.docx) y PDF con la relación de alumnos</p>
+                    <p className="text-sm font-semibold text-text-main">Relación de alumnos</p>
+                    <p className="text-[11px] text-text-muted">Documento en formato Word (.docx) y PDF con la relación de alumnos</p>
                   </div>
                 </label>
               )}
 
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-border-base bg-surface-subtle/50 hover:bg-surface-subtle cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={ctx.selectedDocs.plan}
                   onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, plan: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-border-base text-primary focus:ring-primary"
                 />
                 <div>
-                  <p className="text-sm font-semibold text-slate-700">Plan Formativo</p>
-                  <p className="text-[11px] text-slate-400">Documento por alumno en formato Word (.docx) y PDF</p>
+                  <p className="text-sm font-semibold text-text-main">Plan Formativo</p>
+                  <p className="text-[11px] text-text-muted">Documento por alumno en formato Word (.docx) y PDF</p>
                 </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-border-base bg-surface-subtle/50 hover:bg-surface-subtle cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={ctx.selectedDocs.seguimiento}
                   onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, seguimiento: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-border-base text-primary focus:ring-primary"
                 />
                 <div>
-                  <p className="text-sm font-semibold text-slate-700">Ficha de Seguimiento Periódico</p>
-                  <p className="text-[11px] text-slate-400">Plantilla editable por alumno en formato Word (.docx)</p>
+                  <p className="text-sm font-semibold text-text-main">Ficha de Seguimiento Periódico</p>
+                  <p className="text-[11px] text-text-muted">Plantilla editable por alumno en formato Word (.docx)</p>
                 </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-border-base bg-surface-subtle/50 hover:bg-surface-subtle cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={ctx.selectedDocs.valoracion}
                   onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, valoracion: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-border-base text-primary focus:ring-primary"
                 />
                 <div>
-                  <p className="text-sm font-semibold text-slate-700">Valoración Final</p>
-                  <p className="text-[11px] text-slate-400">Plantilla editable por alumno en formato Word (.docx)</p>
+                  <p className="text-sm font-semibold text-text-main">Valoración Final</p>
+                  <p className="text-[11px] text-text-muted">Plantilla editable por alumno en formato Word (.docx)</p>
                 </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-border-base bg-surface-subtle/50 hover:bg-surface-subtle cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={ctx.selectedDocs.calendario}
                   onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, calendario: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-border-base text-primary focus:ring-primary"
                 />
                 <div>
-                  <p className="text-sm font-semibold text-slate-700">Calendario de Prácticas</p>
-                  <p className="text-[11px] text-slate-400">Documento de asistencia por alumno en formato PDF</p>
+                  <p className="text-sm font-semibold text-text-main">Calendario de Prácticas</p>
+                  <p className="text-[11px] text-text-muted">Documento de asistencia por alumno en formato PDF</p>
                 </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors">
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-border-base bg-surface-subtle/50 hover:bg-surface-subtle cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={ctx.selectedDocs.carta}
                   onChange={(e) => ctx.setSelectedDocs({ ...ctx.selectedDocs, carta: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-border-base text-primary focus:ring-primary"
                 />
                 <div>
-                  <p className="text-sm font-semibold text-slate-700">Carta a la empresa</p>
-                  <p className="text-[11px] text-slate-400">Documento explicativo sobre las FFE</p>
+                  <p className="text-sm font-semibold text-text-main">Carta a la empresa</p>
+                  <p className="text-[11px] text-text-muted">Documento explicativo sobre las FFE</p>
                 </div>
               </label>
             </div>
 
             {/* Botones de acción del Modal */}
-            <div className="shrink-0 flex gap-3 justify-end pt-4 border-t border-slate-100">
+            <div className="shrink-0 flex gap-3 justify-end pt-4 border-t border-border-base">
               <button
                 type="button"
                 onClick={() => ctx.setTargetDownloadRelaciones([])}
-                className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+                className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-subtle rounded-xl transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={() => ctx.handleDescargarTodo(ctx.targetDownloadRelaciones)}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md shadow-blue-600/10 transition-all transform active:scale-98"
+                className="px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-xl shadow-md shadow-primary/10 transition-all transform active:scale-98"
               >
                 Aceptar y Generar
               </button>
@@ -219,8 +219,8 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
       <Modal open={ctx.targetEmailRelaciones.length > 0} onClose={() => ctx.setTargetEmailRelaciones([])} maxWidth="lg">
         <div className="px-6 py-5 flex flex-col flex-1 min-h-0 gap-3 mb-0">
           <div className="shrink-0">
-            <h3 className="text-lg font-bold text-slate-800">Seleccionar Plantilla</h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <h3 className="text-lg font-bold text-text-main">Seleccionar Plantilla</h3>
+            <p className="text-xs text-text-muted mt-1">
               Elige la plantilla de correo que deseas enviar.
             </p>
           </div>
@@ -236,11 +236,11 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
                 'pencil-ruler': PencilRuler,
               };
               const colorMap: Record<string, { border: string; bg: string; iconBg: string; iconText: string; btnText: string }> = {
-                blue: { border: 'border-blue-100', bg: 'bg-blue-50/50', iconBg: 'bg-blue-100', iconText: 'text-blue-600', btnText: 'text-blue-600' },
-                emerald: { border: 'border-emerald-100', bg: 'bg-emerald-50/50', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', btnText: 'text-emerald-600' },
-                amber: { border: 'border-amber-100', bg: 'bg-amber-50/50', iconBg: 'bg-amber-100', iconText: 'text-amber-600', btnText: 'text-amber-600' },
-                purple: { border: 'border-purple-100', bg: 'bg-purple-50/50', iconBg: 'bg-purple-100', iconText: 'text-purple-600', btnText: 'text-purple-600' },
-                slate: { border: 'border-slate-200', bg: 'bg-white', iconBg: 'bg-slate-100', iconText: 'text-slate-500', btnText: 'text-slate-500' },
+                blue: { border: 'border-primary-light', bg: 'bg-primary-light/50', iconBg: 'bg-primary-light', iconText: 'text-primary', btnText: 'text-primary' },
+                emerald: { border: 'border-success/20', bg: 'bg-success-soft/50', iconBg: 'bg-success-soft', iconText: 'text-success-strong', btnText: 'text-success-strong' },
+                amber: { border: 'border-warning/20', bg: 'bg-warning-soft/50', iconBg: 'bg-warning-soft', iconText: 'text-warning-strong', btnText: 'text-warning-strong' },
+                purple: { border: 'border-primary-light', bg: 'bg-primary-light/50', iconBg: 'bg-primary-light', iconText: 'text-primary', btnText: 'text-primary' },
+                slate: { border: 'border-border-base', bg: 'bg-surface-card', iconBg: 'bg-surface-hover', iconText: 'text-text-muted', btnText: 'text-text-muted' },
               };
               const sorted = [...plantillas]
                 .filter((p: any) => p.grupo === 'varios-registros' || !p.grupo)
@@ -255,15 +255,15 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
                   <React.Fragment key={p.id}>
                     <button
                       onClick={() => ctx.handleEmailConPlantilla(ctx.targetEmailRelaciones, p.plantillaId)}
-                      className={`w-full flex items-center gap-4 p-4 rounded-xl border hover:bg-slate-50 hover:border-slate-300 transition-all text-left ${c?.border || 'border-slate-200'} ${c?.bg || ''}`}
+                      className={`w-full flex items-center gap-4 p-4 rounded-xl border hover:bg-surface-hover hover:border-border-base transition-all text-left ${c?.border || 'border-border-base'} ${c?.bg || ''}`}
                       style={Object.keys(cardStyle).length ? cardStyle : undefined}
                     >
                       <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${c?.iconBg || ''} ${c?.iconText || ''}`} style={Object.keys(iconStyle).length ? iconStyle : undefined}>
                         <IconComponent className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-800">{p.name}</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">{p.description}</p>
+                        <p className="text-sm font-bold text-text-main">{p.name}</p>
+                        <p className="text-[11px] text-text-muted mt-0.5">{p.description}</p>
                       </div>
                       <span className={`text-[10px] font-bold uppercase shrink-0 ${c?.btnText || ''}`} style={isHex ? { color: p.color } : undefined}>Seleccionar</span>
                     </button>
@@ -273,11 +273,11 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
             })()}
           </div>
 
-          <div className="shrink-0 flex justify-end pt-4 border-t border-slate-100">
+          <div className="shrink-0 flex justify-end pt-4 border-t border-border-base">
             <button
               type="button"
               onClick={() => ctx.setTargetEmailRelaciones([])}
-              className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+              className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-subtle rounded-xl transition-colors"
             >
               Cancelar
             </button>
@@ -290,16 +290,16 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         <Modal open={ctx.isPreparingEmail} onClose={() => {}} maxWidth="sm">
           <div className="p-6">
             <div className="flex flex-col items-center text-center mt-2">
-              <div className="h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
+              <div className="h-12 w-12 bg-primary-light rounded-full flex items-center justify-center mb-4">
+                <Loader2 className="h-6 w-6 text-primary animate-spin" />
               </div>
-              <h3 className="text-lg font-bold text-slate-800">Preparando correo</h3>
-              <p className="text-sm text-slate-500 mt-2">
+              <h3 className="text-lg font-bold text-text-main">Preparando correo</h3>
+              <p className="text-sm text-text-muted mt-2">
                 Generando documentos para adjuntar...
               </p>
               <div className="w-full mt-6">
-                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                  <div className="bg-blue-600 h-2.5 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                <div className="w-full bg-surface-hover rounded-full h-2.5 overflow-hidden">
+                  <div className="bg-primary h-2.5 rounded-full animate-pulse" style={{ width: '60%' }}></div>
                 </div>
               </div>
             </div>
@@ -311,39 +311,39 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
       <Modal open={ctx.isDownloadingMasivo} onClose={() => {}} maxWidth="sm">
         <div className="p-6 relative overflow-hidden">
           {/* Decoración superior */}
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-100">
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-surface-hover">
             <div
-              className="h-full bg-blue-500 transition-all duration-300 ease-out"
+              className="h-full bg-primary transition-all duration-300 ease-out"
               style={{ width: `${ctx.downloadProgress}%` }}
             />
           </div>
 
           <div className="flex flex-col items-center text-center mt-2 pt-2">
-            <div className="h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+            <div className="h-12 w-12 bg-primary-light rounded-full flex items-center justify-center mb-4">
               {ctx.downloadProgress === 100 ? (
-                <FileArchive className="h-6 w-6 text-blue-600" />
+                <FileArchive className="h-6 w-6 text-primary" />
               ) : (
-                <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
+                <Loader2 className="h-6 w-6 text-primary animate-spin" />
               )}
             </div>
 
-            <h3 className="text-lg font-bold text-slate-800">
+            <h3 className="text-lg font-bold text-text-main">
               Descargando Documentación
             </h3>
 
-            <p className="text-sm text-slate-500 mt-2 min-h-10">
+            <p className="text-sm text-text-muted mt-2 min-h-10">
               {ctx.downloadStatus}
             </p>
 
             {/* Barra de progreso */}
             <div className="w-full mt-6">
-              <div className="flex justify-between text-xs font-semibold text-slate-600 mb-2">
+              <div className="flex justify-between text-xs font-semibold text-text-muted mb-2">
                 <span>Progreso</span>
                 <span>{Math.round(ctx.downloadProgress)}%</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-surface-hover rounded-full h-2.5 overflow-hidden">
                 <div
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                  className="bg-primary h-2.5 rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${ctx.downloadProgress}%` }}
                 ></div>
               </div>
@@ -355,10 +355,10 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
       {/* ── HEADER ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-xl lg:text-2xl font-bold text-text-main tracking-tight">
             Relación de Alumnos
           </h1>
-          <p className="text-xs lg:text-sm text-slate-500 mt-1">
+          <p className="text-xs lg:text-sm text-text-muted mt-1">
             Gestión de periodos de prácticas y horarios grupales.
           </p>
         </div>
@@ -408,7 +408,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         />
 
         {/* Columna derecha: detalle */}
-        <div className="w-full lg:w-96 lg:shrink-0 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+        <div className="w-full lg:w-96 lg:shrink-0 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-surface-card rounded-xl border border-border-base shadow-sm flex flex-col overflow-hidden">
           <RelacionDetalle
             selectedRelacion={ctx.selectedRelacion}
             alumnos={ctx.alumnos}
@@ -453,31 +453,31 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
 
       {/* ── MODAL: Confirmar eliminación ── */}
       {ctx.showDeleteConfirm !== null && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-60 p-4 text-center">
-          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative p-8 transition-all">
+        <div className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-center justify-center z-60 p-4 text-center">
+          <div className="bg-surface-card rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative p-8 transition-all">
             <button
               onClick={() => ctx.setShowDeleteConfirm(null)}
-              className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute top-6 right-6 p-2 text-text-muted hover:text-text-main transition-colors"
             >
               <Plus className="rotate-45 h-5 w-5" />
             </button>
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-danger-soft text-danger rounded-full flex items-center justify-center mx-auto mb-6">
               <Trash2 className="h-8 w-8" />
             </div>
-            <h3 className="text-xl font-black text-slate-900 mb-3">¿Eliminar relación?</h3>
-            <p className="text-sm text-slate-500 font-medium mb-8">
+            <h3 className="text-xl font-black text-text-main mb-3">¿Eliminar relación?</h3>
+            <p className="text-sm text-text-muted font-medium mb-8">
               Esta acción eliminará la relación de prácticas de forma permanente y no se puede deshacer.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => ctx.setShowDeleteConfirm(null)}
-                className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-all"
+                className="flex-1 py-3 text-sm font-bold text-text-muted hover:bg-surface-hover rounded-xl border border-border-base transition-all"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => ctx.handleDelete(ctx.showDeleteConfirm!)}
-                className="flex-1 py-3 bg-red-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
+                className="flex-1 py-3 bg-danger text-white text-sm font-bold rounded-xl shadow-lg shadow-danger/20 hover:bg-danger/90 transition-all"
               >
                 Sí, eliminar
               </button>

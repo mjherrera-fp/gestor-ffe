@@ -17,15 +17,15 @@ export function mostrarToast(mensaje: string, tipo: ToastType = 'success', durac
   };
 
   const bgColors: Record<ToastType, string> = {
-    success: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-    error: 'bg-red-50 border-red-200 text-red-700',
-    info: 'bg-blue-50 border-blue-200 text-blue-700'
+    success: 'bg-success-soft border-success/30 text-success-strong',
+    error: 'bg-danger-soft border-danger/30 text-danger-strong',
+    info: 'bg-info-soft border-primary/30 text-info-strong'
   };
 
   const iconColors: Record<ToastType, string> = {
-    success: 'bg-emerald-100 text-emerald-600',
-    error: 'bg-red-100 text-red-600',
-    info: 'bg-blue-100 text-blue-600'
+    success: 'bg-success/15 text-success',
+    error: 'bg-danger/15 text-danger',
+    info: 'bg-primary/15 text-primary'
   };
 
   const toast = document.createElement('div');

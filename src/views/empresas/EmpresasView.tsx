@@ -82,12 +82,12 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
         />
 
         {/* Columna derecha: detalle con tabs */}
-        <div className="w-full lg:w-85 lg:shrink-0 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-white rounded-xl border border-border-base shadow-sm flex flex-col overflow-hidden">
+        <div className="w-full lg:w-85 lg:shrink-0 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-surface-card rounded-xl border border-border-base shadow-sm flex flex-col overflow-hidden">
 
           {!ctx.selectedEmpresa ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-              <div className="bg-slate-50 p-6 rounded-full mb-4">
-                <Building2 className="h-12 w-12 text-slate-200" />
+              <div className="bg-surface-subtle p-6 rounded-full mb-4">
+                <Building2 className="h-12 w-12 text-text-muted" />
               </div>
               <h3 className="text-base font-bold text-text-main mb-2">Selecciona una empresa</h3>
               <p className="text-xs text-text-muted leading-relaxed">
@@ -102,7 +102,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
                   className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
                     ctx.activeTab === 'estadisticas'
                       ? 'text-primary border-b-2 border-primary bg-primary-light/30'
-                      : 'text-text-muted hover:text-text-main hover:bg-slate-50'
+                      : 'text-text-muted hover:text-text-main hover:bg-surface-hover'
                   }`}
                 >
                   <BarChart3 className="h-3.5 w-3.5" />
@@ -113,7 +113,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
                   className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
                     ctx.activeTab === 'tutores'
                       ? 'text-primary border-b-2 border-primary bg-primary-light/30'
-                      : 'text-text-muted hover:text-text-main hover:bg-slate-50'
+                      : 'text-text-muted hover:text-text-main hover:bg-surface-hover'
                   }`}
                 >
                   <Users className="h-3.5 w-3.5" />
@@ -146,19 +146,19 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
 
       {/* ── MODAL: Confirmar eliminación ── */}
       {ctx.showDeleteConfirm && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-60 p-4">
-          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative text-center p-8">
+        <div className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-center justify-center z-60 p-4">
+          <div className="bg-surface-card rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative text-center p-8">
             <button
               onClick={() => ctx.setShowDeleteConfirm(null)}
-              className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute top-6 right-6 p-2 text-text-muted hover:text-text-main transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-danger-soft text-danger rounded-full flex items-center justify-center mx-auto mb-6">
               <Trash2 className="h-8 w-8" />
             </div>
-            <h3 className="text-xl font-black text-slate-900 mb-3">¿Estás seguro?</h3>
-            <p className="text-sm text-slate-500 font-medium mb-8">
+            <h3 className="text-xl font-black text-text-main mb-3">¿Estás seguro?</h3>
+            <p className="text-sm text-text-muted font-medium mb-8">
               {ctx.showDeleteConfirm.type === 'empresa'
                 ? 'Esta acción eliminará la empresa y todos sus tutores asociados de forma permanente.'
                 : 'Esta acción eliminará al tutor de la empresa de forma permanente.'}
@@ -166,13 +166,13 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
             <div className="flex gap-3">
               <button
                 onClick={() => ctx.setShowDeleteConfirm(null)}
-                className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-all font-sans"
+                className="flex-1 py-3 text-sm font-bold text-text-muted hover:bg-surface-hover rounded-xl border border-border-base transition-all font-sans"
               >
                 Cancelar
               </button>
               <button
                 onClick={ctx.handleConfirmDelete}
-                className="flex-1 py-3 bg-red-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all font-sans"
+                className="flex-1 py-3 bg-danger text-white text-sm font-bold rounded-xl shadow-lg shadow-danger/20 hover:bg-danger/90 transition-all font-sans"
               >
                 Sí, eliminar
               </button>
@@ -208,20 +208,20 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
       {/* ── MODAL: Resultado importación ── */}
       <Modal open={!!ctx.importResult} onClose={() => ctx.setImportResult(null)} maxWidth="sm">
         <div className="p-6 text-center">
-          <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-full bg-success-soft text-success-strong flex items-center justify-center mx-auto mb-4">
             <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-slate-800 mb-4">Importación finalizada</h3>
-          <div className="space-y-2 text-sm text-slate-600">
-            <p><span className="font-bold text-emerald-600">{ctx.importResult?.success}</span> empresas nuevas</p>
-            <p><span className="font-bold text-blue-600">{ctx.importResult?.updated}</span> empresas actualizadas</p>
-            <p><span className="font-bold text-amber-600">{ctx.importResult?.duplicated}</span> empresas omitidas (CIF repetido en el archivo)</p>
+          <h3 className="text-lg font-bold text-text-main mb-4">Importación finalizada</h3>
+          <div className="space-y-2 text-sm text-text-muted">
+            <p><span className="font-bold text-success-strong">{ctx.importResult?.success}</span> empresas nuevas</p>
+            <p><span className="font-bold text-primary">{ctx.importResult?.updated}</span> empresas actualizadas</p>
+            <p><span className="font-bold text-warning-strong">{ctx.importResult?.duplicated}</span> empresas omitidas (CIF repetido en el archivo)</p>
           </div>
           <button
             onClick={() => ctx.setImportResult(null)}
-            className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+            className="mt-6 w-full py-2.5 bg-primary text-white rounded-xl font-semibold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
           >
             Aceptar
           </button>
@@ -232,8 +232,8 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
       <Modal open={ctx.showPlantillaSelector} onClose={() => ctx.setShowPlantillaSelector(false)} maxWidth="lg">
         <div className="px-6 py-5 flex flex-col flex-1 min-h-0 gap-3 mb-0">
           <div className="shrink-0">
-            <h3 className="text-lg font-bold text-slate-800">Seleccionar Plantilla</h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <h3 className="text-lg font-bold text-text-main">Seleccionar Plantilla</h3>
+            <p className="text-xs text-text-muted mt-1">
               Elige la plantilla de correo que deseas enviar.
             </p>
           </div>
@@ -249,9 +249,9 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
                 documento: FileText,
               };
               const colorMap: Record<string, { border: string; bg: string; iconBg: string; iconText: string; btnText: string }> = {
-                blue: { border: 'border-blue-100', bg: 'bg-blue-50/50', iconBg: 'bg-blue-100', iconText: 'text-blue-600', btnText: 'text-blue-600' },
-                emerald: { border: 'border-emerald-100', bg: 'bg-emerald-50/50', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', btnText: 'text-emerald-600' },
-                slate: { border: 'border-slate-200', bg: 'bg-white', iconBg: 'bg-slate-100', iconText: 'text-slate-500', btnText: 'text-slate-500' },
+                blue: { border: 'border-primary-light', bg: 'bg-primary-light/50', iconBg: 'bg-primary-light', iconText: 'text-primary', btnText: 'text-primary' },
+                emerald: { border: 'border-success/20', bg: 'bg-success-soft/50', iconBg: 'bg-success-soft', iconText: 'text-success-strong', btnText: 'text-success-strong' },
+                slate: { border: 'border-border-base', bg: 'bg-surface-card', iconBg: 'bg-surface-hover', iconText: 'text-text-muted', btnText: 'text-text-muted' },
               };
               const sorted = [...plantillas].sort((a, b) => a.plantillaId === 'otros' ? 1 : b.plantillaId === 'otros' ? -1 : 0);
               return sorted.map((p: any) => {
@@ -264,15 +264,15 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
                   <button
                     key={p.id}
                     onClick={() => ctx.handleEmailConPlantilla(p.plantillaId)}
-                    className={`w-full flex items-center gap-4 p-4 rounded-xl border hover:bg-slate-50 hover:border-slate-300 transition-all text-left ${c?.border || 'border-slate-200'} ${c?.bg || ''}`}
+                    className={`w-full flex items-center gap-4 p-4 rounded-xl border hover:bg-surface-hover hover:border-border-base transition-all text-left ${c?.border || 'border-border-base'} ${c?.bg || ''}`}
                     style={Object.keys(cardStyle).length ? cardStyle : undefined}
                   >
                     <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${c?.iconBg || ''} ${c?.iconText || ''}`} style={Object.keys(iconStyle).length ? iconStyle : undefined}>
                       <IconComponent className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-slate-800">{p.name}</p>
-                      <p className="text-[11px] text-slate-500 mt-0.5">{p.description}</p>
+                      <p className="text-sm font-bold text-text-main">{p.name}</p>
+                      <p className="text-[11px] text-text-muted mt-0.5">{p.description}</p>
                     </div>
                     <span className={`text-[10px] font-bold uppercase shrink-0 ${c?.btnText || ''}`} style={isHex ? { color: p.color } : undefined}>Seleccionar</span>
                   </button>
@@ -281,11 +281,11 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
             })()}
           </div>
 
-          <div className="shrink-0 flex justify-end pt-4 border-t border-slate-100">
+          <div className="shrink-0 flex justify-end pt-4 border-t border-border-base">
             <button
               type="button"
               onClick={() => ctx.setShowPlantillaSelector(false)}
-              className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
+              className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors"
             >
               Cancelar
             </button>
