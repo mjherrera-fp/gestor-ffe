@@ -132,9 +132,9 @@ export function RelacionesListado({
   };
 
   return (
-    <div className="w-full lg:flex-1 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-white rounded-xl lg:rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
+    <div className="w-full lg:flex-1 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-surface-card rounded-xl lg:rounded-2xl border border-border-base shadow-sm flex flex-col overflow-hidden">
       {/* Barra de filtros */}
-      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 space-y-3 shrink-0">
+      <div className="px-6 py-4 border-b border-border-base bg-surface-subtle/30 space-y-3 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -147,7 +147,7 @@ export function RelacionesListado({
             <Title text="Descargar todos los documentos">
               <button
                 onClick={() => { if (relaciones) setTargetDownloadRelaciones(relaciones); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-light text-primary hover:bg-primary/15 border border-primary-light rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
               >
                 {isDownloading ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
@@ -158,7 +158,7 @@ export function RelacionesListado({
             </Title>
             <button
               onClick={() => createRelacion(null)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold shadow-md shadow-blue-600/10 transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-semibold shadow-md shadow-primary/10 transition-all"
             >
               <Plus className="h-4 w-4" />
               <span>Crear Relación</span>
@@ -168,18 +168,18 @@ export function RelacionesListado({
 
         {/* Buscador */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
           <input
             type="text"
             placeholder="Buscar empresa, relación, o alumno..."
-            className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+            className="w-full bg-surface-card border border-border-base rounded-lg pl-9 pr-4 py-2 text-xs font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
             value={listSearchTerm}
             onChange={e => onListSearchChange(e.target.value)}
           />
           {listSearchTerm && (
             <button
               onClick={() => onListSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main transition-colors"
             >
               <X className="h-3 w-3" />
             </button>
@@ -191,29 +191,29 @@ export function RelacionesListado({
           <div className="flex items-center gap-3">
             <button
               onClick={() => setFilterOpen(!filterOpen)}
-              className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider hover:text-slate-700 transition-colors"
+              className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted uppercase tracking-wider hover:text-text-main transition-colors"
             >
               {filterOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
               Filtros
             </button>
             <button
               onClick={onClearFilters}
-              className="text-[9px] font-bold text-slate-400 hover:text-red-500 transition-colors underline"
+              className="text-[9px] font-bold text-text-muted hover:text-danger transition-colors underline"
             >
               Limpiar filtros
             </button>
           </div>
 
-          <div className="flex bg-white border border-slate-200 rounded-lg p-1">
+          <div className="flex bg-surface-card border border-border-base rounded-lg p-1">
             <button
               onClick={onSortByEmpresa}
-              className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all px-2 whitespace-nowrap ${sortBy === 'empresa' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all px-2 whitespace-nowrap ${sortBy === 'empresa' ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-main'}`}
             >
               Empresa {sortBy === 'empresa' && (sortOrder === 'asc' ? '↑' : '↓')}
             </button>
             <button
               onClick={onSortByEstado}
-              className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all px-2 whitespace-nowrap ${sortBy === 'estado' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`flex-1 text-[9px] font-black uppercase tracking-widest py-1.5 rounded-md transition-all px-2 whitespace-nowrap ${sortBy === 'estado' ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-main'}`}
             >
               Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
             </button>
@@ -229,7 +229,7 @@ export function RelacionesListado({
                 const f = statusFilters[tipo];
                 const options = getEstadoOptions(tipo);
                 return (
-                  <div key={tipo} className="bg-white border border-slate-200 rounded-lg px-1.5 py-0.5">
+                  <div key={tipo} className="bg-surface-card border border-border-base rounded-lg px-1.5 py-0.5">
                     <CustomSelect
                       prefix={tipoLabels[tipo]}
                       value={f.value}
@@ -242,8 +242,8 @@ export function RelacionesListado({
                           <button
                             onClick={() => onStatusFilterChange(tipo, f.value, !f.negate)}
                             className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all ${f.negate
-                                ? 'bg-red-50 text-red-500 border border-red-200'
-                                : 'bg-blue-50 text-blue-500 border border-blue-200'
+                                ? 'bg-danger-soft text-danger border border-danger/20'
+                                : 'bg-primary-light text-primary border border-primary-light'
                               }`}
                           >
                             {f.negate ? '≠' : '='}
@@ -258,7 +258,7 @@ export function RelacionesListado({
 
             {/* Fila 2: Filtros de fecha */}
             <div className="flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 whitespace-nowrap">
+              <label className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted whitespace-nowrap">
                 Inicia
                 <input
                   type="number"
@@ -266,12 +266,12 @@ export function RelacionesListado({
                   placeholder="0"
                   value={dateFilters.inicioDias || ''}
                   onChange={e => onDateFilterChange({ inicioDias: Math.max(0, parseInt(e.target.value) || 0) })}
-                  className="w-12 bg-white border border-slate-200 rounded px-1.5 py-1 text-[10px] font-bold text-center outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-12 bg-surface-card border border-border-base rounded px-1.5 py-1 text-[10px] font-bold text-center outline-none focus:ring-2 focus:ring-primary/20"
                 />
                 días
               </label>
 
-              <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 whitespace-nowrap">
+              <label className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted whitespace-nowrap">
                 Finaliza
                 <input
                   type="number"
@@ -279,19 +279,19 @@ export function RelacionesListado({
                   placeholder="0"
                   value={dateFilters.finDias || ''}
                   onChange={e => onDateFilterChange({ finDias: Math.max(0, parseInt(e.target.value) || 0) })}
-                  className="w-12 bg-white border border-slate-200 rounded px-1.5 py-1 text-[10px] font-bold text-center outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-12 bg-surface-card border border-border-base rounded px-1.5 py-1 text-[10px] font-bold text-center outline-none focus:ring-2 focus:ring-primary/20"
                 />
                 días
               </label>
 
-              <span className="text-[10px] text-slate-300 font-bold">|</span>
+              <span className="text-[10px] text-text-muted font-bold">|</span>
 
-              <span className="text-[10px] font-bold text-slate-500">Fecha específica</span>
+              <span className="text-[10px] font-bold text-text-muted">Fecha específica</span>
               <input
                 type="date"
                 value={dateFilters.especificaDate}
                 onChange={e => onDateFilterChange({ especificaDate: e.target.value })}
-                className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+                className="bg-surface-card border border-border-base rounded-lg px-2 py-1 text-[10px] font-semibold outline-none focus:ring-2 focus:ring-primary/20"
               />
               <div className="w-20">
                 <CustomSelect
@@ -325,16 +325,16 @@ export function RelacionesListado({
       <div className="flex-1 min-h-0 overflow-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-100">
-              <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-full">
+            <tr className="bg-surface-subtle border-b border-border-base">
+              <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-widest w-full">
                 Empresa / Alumnos
               </th>
-              <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">
+              <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-widest text-right">
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white">
+          <tbody className="bg-surface-card">
             {relaciones.length > 0 ? (
               relaciones.map(rel => {
                 const conv = convenios.find(c => c.id === rel.convenioId);
@@ -343,15 +343,15 @@ export function RelacionesListado({
                   <tr
                     key={rel.id}
                     onClick={() => onSelectRelacion(rel)}
-                    className={`cursor-pointer transition-colors group align-top border-b-12 border-slate-50 last:border-b-0 ${isSelected ? 'bg-primary/5' : 'hover:bg-slate-50/80'
-                      }`}
+className={`cursor-pointer transition-colors group align-top border-b-12 border-border-base last:border-b-0 ${isSelected ? 'bg-primary/5' : 'hover:bg-surface-subtle/80'
+                    }`}
                   >
                     <td colSpan={2} className="px-5 py-6 w-full">
 
                       {/* Cabecera fila */}
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex flex-col gap-1">
-                          <div className="text-[13px] font-black text-slate-800 leading-tight">
+                          <div className="text-[13px] font-black text-text-main leading-tight">
                             {conv?.empresaNombre}
                           </div>
                           <div className="flex items-center gap-2">
@@ -366,7 +366,7 @@ export function RelacionesListado({
                           <Title text="Estadísticas de la empresa">
                             <button
                               onClick={() => onOpenStats(rel)}
-                              className="p-2 text-slate-400 hover:text-amber-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                              className="p-2 text-text-muted hover:text-warning transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
                             >
                               <Star className="h-4 w-4" />
                             </button>
@@ -374,7 +374,7 @@ export function RelacionesListado({
                           <Title text="Editar relación">
                             <button
                               onClick={() => onEdit(rel)}
-                              className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                              className="p-2 text-text-muted hover:text-primary transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
                             >
                               <Edit2 className="h-4 w-4" />
                             </button>
@@ -382,7 +382,7 @@ export function RelacionesListado({
                           <Title text="Eliminar relación">
                             <button
                               onClick={() => onDeleteRequest(rel.id!)}
-                              className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                              className="p-2 text-text-muted hover:text-danger transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -395,22 +395,22 @@ export function RelacionesListado({
                         {rel.alumnos?.map(alumno => (
                           <div
                             key={alumno.id}
-                            className="bg-white border border-slate-100 p-2.5 rounded-lg w-full flex flex-col gap-1.5"
+                            className="bg-surface-card border border-border-base p-2.5 rounded-lg w-full flex flex-col gap-1.5"
                           >
                             <div className="flex items-center gap-1">
-                              <span className="text-[9px] text-slate-400 font-bold">PLA:</span>
+                              <span className="text-[9px] text-text-muted font-bold">PLA:</span>
                               <StatusBadge
                                 estado={(alumno as any).estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE}
                                 type="plan"
                                 tooltip={`Plan formativo: ${getStatusLabel((alumno as any).estadoPlanFormativo || PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE, 'plan')}`}
                               />
-                              <span className="text-[9px] text-slate-400 font-bold ml-0.5">SEG:</span>
+                              <span className="text-[9px] text-text-muted font-bold ml-0.5">SEG:</span>
                               <StatusBadge
                                 estado={(alumno as any).estadoSeguimiento || SeguimientoEstado.PENDIENTE}
                                 type="seguimiento"
                                 tooltip={`Seguimiento: ${getStatusLabel((alumno as any).estadoSeguimiento || SeguimientoEstado.PENDIENTE, 'seguimiento')}`}
                               />
-                              <span className="text-[9px] text-slate-400 font-bold ml-0.5">VAL:</span>
+                              <span className="text-[9px] text-text-muted font-bold ml-0.5">VAL:</span>
                               <StatusBadge
                                 estado={(alumno as any).estadoValoracion || ValoracionEstado.PENDIENTE}
                                 type="valoracion"
@@ -419,20 +419,20 @@ export function RelacionesListado({
                             </div>
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2 min-w-0">
-                                <span className="text-xs font-bold text-slate-700 truncate">
+                                <span className="text-xs font-bold text-text-main truncate">
                                   {alumno.nombre} {alumno.apellidos}
                                 </span>
                                 <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded shrink-0">
                                   {alumno.totalHorasFFE}h
                                 </span>
                               </div>
-                              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 shrink-0">
+                              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-text-muted shrink-0">
                                 <Calendar className="h-3 w-3" />
-                                <span className="text-blue-600">
+                                <span className="text-primary">
                                   {alumno.fechaInicio ? formatDate(alumno.fechaInicio) : '—'}
                                 </span>
-                                <span className="text-slate-300">-</span>
-                                <span className="text-emerald-600">
+                                <span className="text-text-muted">-</span>
+                                <span className="text-success">
                                   {alumno.fechaFin ? formatDate(alumno.fechaFin) : '—'}
                                 </span>
                               </div>
@@ -440,7 +440,7 @@ export function RelacionesListado({
                           </div>
                         ))}
                         {(!rel.alumnos || rel.alumnos.length === 0) && (
-                          <div className="text-xs text-slate-400 italic">Sin alumnos asignados</div>
+                          <div className="text-xs text-text-muted italic">Sin alumnos asignados</div>
                         )}
                       </div>
                     </td>
@@ -450,10 +450,10 @@ export function RelacionesListado({
             ) : (
               <tr>
                 <td colSpan={2} className="px-6 py-20 text-center">
-                  <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                  <div className="w-16 h-16 bg-surface-subtle text-text-muted rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border-base">
                     <FileText className="h-8 w-8" />
                   </div>
-                  <p className="text-sm text-slate-400 font-bold uppercase tracking-widest italic">
+                  <p className="text-sm text-text-muted font-bold uppercase tracking-widest italic">
                     No se encontraron relaciones
                   </p>
                 </td>

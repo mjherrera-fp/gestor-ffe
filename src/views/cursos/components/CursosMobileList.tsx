@@ -36,13 +36,13 @@ export function CursosMobileList({ cursos, onEdit, onDeleteRequest }: CursosMobi
             <div className="flex gap-2">
               <button
                 onClick={() => onEdit(curso)}
-                className="p-2 bg-white text-slate-500 border border-slate-200 rounded-lg shadow-sm transition-colors hover:text-primary"
+                className="p-2 bg-surface-card text-text-muted border border-border-base rounded-lg shadow-sm transition-colors hover:text-primary"
               >
                 <Edit2 className="h-4 w-4" />
               </button>
               <button
                 onClick={() => onDeleteRequest(curso.id!)}
-                className="p-2 bg-white text-red-500 border border-red-100 rounded-lg shadow-sm transition-colors"
+                className="p-2 bg-surface-card text-danger border border-border-base rounded-lg shadow-sm transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
               </button>

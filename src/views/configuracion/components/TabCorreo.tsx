@@ -67,7 +67,7 @@ import {ImageInsertButton} from '@/components/tiptap-ui/image-insert-button';
 import {WordCharacterCount} from '@/components/tiptap-ui/word-character-count';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
-const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+const inputClass = 'w-full bg-surface-card border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
 
 interface EmailConfig {
   smtp_host: string;
@@ -146,11 +146,11 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const COLOR_MAP: Record<string, { border: string; bg: string; iconBg: string; iconText: string; btn: string }> = {
-  blue: { border: 'border-blue-100', bg: 'bg-blue-50/50', iconBg: 'bg-blue-100', iconText: 'text-blue-600', btn: 'bg-blue-600 hover:bg-blue-700' },
-  emerald: { border: 'border-emerald-100', bg: 'bg-emerald-50/50', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', btn: 'bg-emerald-600 hover:bg-emerald-700' },
-  amber: { border: 'border-amber-100', bg: 'bg-amber-50/50', iconBg: 'bg-amber-100', iconText: 'text-amber-600', btn: 'bg-amber-600 hover:bg-amber-700' },
-  purple: { border: 'border-purple-100', bg: 'bg-purple-50/50', iconBg: 'bg-purple-100', iconText: 'text-purple-600', btn: 'bg-purple-600 hover:bg-purple-700' },
-  slate: { border: 'border-slate-200', bg: 'bg-white', iconBg: 'bg-slate-100', iconText: 'text-slate-500', btn: 'bg-slate-600 hover:bg-slate-700' },
+  blue: { border: 'border-primary/20', bg: 'bg-primary-light/40', iconBg: 'bg-primary-light', iconText: 'text-primary', btn: 'bg-primary hover:bg-primary/90' },
+  emerald: { border: 'border-success/20', bg: 'bg-success-soft/40', iconBg: 'bg-success-soft', iconText: 'text-success', btn: 'bg-success hover:bg-success/90' },
+  amber: { border: 'border-warning/20', bg: 'bg-warning-soft/40', iconBg: 'bg-warning-soft', iconText: 'text-warning-strong', btn: 'bg-warning hover:bg-warning/90' },
+  purple: { border: 'border-primary/30', bg: 'bg-primary-light/30', iconBg: 'bg-primary-light', iconText: 'text-primary', btn: 'bg-primary hover:bg-primary/90' },
+  slate: { border: 'border-border-base', bg: 'bg-surface-subtle', iconBg: 'bg-surface-hover', iconText: 'text-text-muted', btn: 'bg-surface-hover text-text-main hover:bg-surface-subtle' },
 };
 
 const ICON_OPTIONS = [
@@ -187,9 +187,9 @@ function Modal({ open, onClose, children, maxWidth = 'md' }: { open: boolean; on
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-sm p-4" onClick={onClose}>
       <div
-        className={`bg-white rounded-2xl shadow-2xl w-full max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden ${maxWidth}`}
+        className={`bg-surface-card rounded-2xl shadow-2xl w-full max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden ${maxWidth}`}
         onClick={e => e.stopPropagation()}
       >
         {children}
@@ -711,15 +711,15 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
   return (
     <div className="space-y-6">
       {/* Email Config Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-sky-100 text-sky-600">
+            <div className="p-2 rounded-lg bg-primary-light text-primary">
               <Mail className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Configuración de Correo</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Configuración de Correo</h3>
+              <p className="text-sm text-text-muted">
                 Credenciales necesarias para enviar notificaciones automáticas a alumnos y empresas.
               </p>
             </div>
@@ -727,10 +727,10 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
         </div>
         <div className="p-6">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">{error}</div>
+            <div className="mb-4 p-3 bg-danger-soft text-danger rounded-lg text-sm border border-danger/20">{error}</div>
           )}
           {success && (
-            <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+            <div className="mb-4 p-3 bg-success-soft text-success-strong rounded-lg text-sm border border-success/20">
               Configuración de correo guardada correctamente.
             </div>
           )}
@@ -762,7 +762,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main transition-colors"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -773,35 +773,35 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
 
             <input type="hidden" name="smtp_email" value={emailConfig.smtp_email} />
             {emailConfig.smtp_user ? (
-              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                <p className="text-xs text-slate-500 mb-1">El FROM de los correos será:</p>
-                <p className="text-sm font-semibold text-slate-800">
+              <div className="bg-surface-subtle rounded-lg p-4 border border-border-base">
+                <p className="text-xs text-text-muted mb-1">El FROM de los correos será:</p>
+                <p className="text-sm font-semibold text-text-main">
                   {profesorNombre && profesorApellidos ? `${profesorNombre} ${profesorApellidos}` : 'Nombre Apellidos'} &lt;{emailConfig.smtp_email}&gt;
                 </p>
               </div>
             ) : (
-              <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
-                <p className="text-xs text-amber-700 font-medium">Es necesario configurar el usuario de EducaMadrid</p>
+              <div className="bg-warning-soft rounded-lg p-4 border border-warning/20">
+                <p className="text-xs text-warning-strong font-medium">Es necesario configurar el usuario de EducaMadrid</p>
               </div>
             )}
 
             <button
               type="button"
               onClick={() => onChange({ ...emailConfig, smtp_secure: !emailConfig.smtp_secure })}
-              className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-left"
+              className="flex items-center gap-3 w-full p-3 rounded-xl bg-surface-subtle border border-border-base hover:bg-surface-hover transition-colors text-left"
             >
               {emailConfig.smtp_secure ? (
-                <CheckSquare className="h-5 w-5 text-blue-500 shrink-0" />
+                <CheckSquare className="h-5 w-5 text-primary shrink-0" />
               ) : (
-                <Square className="h-5 w-5 text-slate-400 shrink-0" />
+                <Square className="h-5 w-5 text-text-muted shrink-0" />
               )}
-              <span className="text-sm text-slate-700">
+              <span className="text-sm text-text-main">
                 Usar conexión segura SSL/TLS (Puerto 465). Dejar desmarcado para STARTTLS (Puerto 587).
               </span>
             </button>
 
-            <div className="pt-4 border-t border-slate-100">
-              <h4 className="text-sm font-bold text-slate-700 mb-3">Envío masivo</h4>
+            <div className="pt-4 border-t border-border-base">
+              <h4 className="text-sm font-bold text-text-main mb-3">Envío masivo</h4>
               <div className="max-w-xs">
                 <label className={labelClass}>Delay entre envíos (ms)</label>
                 <input
@@ -813,29 +813,29 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   min={0}
                   step={100}
                 />
-                <p className="text-[10px] text-slate-400 mt-1">
+                <p className="text-[10px] text-text-muted mt-1">
                   Tiempo de espera entre cada correo en envíos masivos. Valor recomendado: 1500ms (1.5 segundos).
                 </p>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100">
-              <h4 className="text-sm font-bold text-slate-700 mb-3">Guardar copia en el servidor (Enviados)</h4>
-              <p className="text-xs text-slate-500 mb-3">
+            <div className="pt-4 border-t border-border-base">
+              <h4 className="text-sm font-bold text-text-main mb-3">Guardar copia en el servidor (Enviados)</h4>
+              <p className="text-xs text-text-muted mb-3">
                 Al enviar un correo se guardará automáticamente una copia en la carpeta Enviados de tu webmail.
                 Es necesario que el servidor permita conexiones IMAP con las mismas credenciales.
               </p>
               <button
                 type="button"
                 onClick={() => onChange({ ...emailConfig, guardar_enviados: !emailConfig.guardar_enviados })}
-                className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-left"
+                className="flex items-center gap-3 w-full p-3 rounded-xl bg-surface-subtle border border-border-base hover:bg-surface-hover transition-colors text-left"
               >
                 {emailConfig.guardar_enviados ? (
-                  <CheckSquare className="h-5 w-5 text-blue-500 shrink-0" />
+                  <CheckSquare className="h-5 w-5 text-primary shrink-0" />
                 ) : (
-                  <Square className="h-5 w-5 text-slate-400 shrink-0" />
+                  <Square className="h-5 w-5 text-text-muted shrink-0" />
                 )}
-                <span className="text-sm text-slate-700">
+                <span className="text-sm text-text-main">
                   Guardar copia de los correos enviados en el servidor (carpeta Enviados)
                 </span>
               </button>
@@ -859,40 +859,40 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   <button
                     type="button"
                     onClick={() => onChange({ ...emailConfig, imap_secure: !emailConfig.imap_secure })}
-                    className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors text-left"
+                    className="flex items-center gap-3 w-full p-3 rounded-xl bg-surface-subtle border border-border-base hover:bg-surface-hover transition-colors text-left"
                   >
                     {emailConfig.imap_secure ? (
-                      <CheckSquare className="h-5 w-5 text-blue-500 shrink-0" />
+                      <CheckSquare className="h-5 w-5 text-primary shrink-0" />
                     ) : (
-                      <Square className="h-5 w-5 text-slate-400 shrink-0" />
+                      <Square className="h-5 w-5 text-text-muted shrink-0" />
                     )}
-                    <span className="text-sm text-slate-700">
+                    <span className="text-sm text-text-main">
                       Usar conexión IMAP segura SSL/TLS (Puerto 993). Dejar desmarcado para conexión sin cifrado.
                     </span>
                   </button>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px] text-text-muted">
                     Si el servidor no guarda la copia, el correo se enviará igualmente; solo se omitirá el guardado en Enviados.
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-              <button type="submit" disabled={saving} className="px-6 py-2.5 bg-sky-600 text-white text-sm font-semibold rounded-xl hover:bg-sky-800 disabled:opacity-50 transition-colors">
+            <div className="flex items-center gap-3 pt-4 border-t border-border-base">
+              <button type="submit" disabled={saving} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors">
                 <span className="flex items-center justify-center gap-2">
                   <Settings className="h-5 w-5" />
                   {saving ? 'Guardando...' : 'Guardar Configuración de Correo'}
                 </span>
               </button>
 
-              <button type="button" onClick={onTest} disabled={testing || !profesorEmail} className="px-6 py-2.5 bg-white text-sky-600 border border-sky-200 text-sm font-semibold rounded-xl hover:bg-sky-50 disabled:opacity-50 transition-colors">
+              <button type="button" onClick={onTest} disabled={testing || !profesorEmail} className="px-6 py-2.5 bg-surface-card text-primary border border-primary/25 text-sm font-semibold rounded-xl hover:bg-primary-light/50 disabled:opacity-50 transition-colors">
                 <span className="flex items-center justify-center gap-2">
                   {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   {testing ? 'Enviando...' : 'Probar Configuración'}
                 </span>
               </button>
 
-              <button type="button" onClick={handleDelete} className="px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl transition-colors ml-auto">
+              <button type="button" onClick={handleDelete} className="px-4 py-2.5 text-sm font-semibold text-danger hover:bg-danger-soft rounded-xl transition-colors ml-auto">
                 <span className="flex items-center justify-center gap-2">
                   <Trash2 className="h-4 w-4" />
                   Eliminar
@@ -904,8 +904,8 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
           {testResult && (
             <div className={`mt-4 p-3 rounded-lg text-sm border flex items-center gap-2 ${
               testResult.type === 'success'
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : 'bg-red-50 text-red-700 border-red-200'
+                ? 'bg-success-soft text-success-strong border-success/20'
+                : 'bg-danger-soft text-danger border-danger/20'
             }`}>
               {testResult.message}
             </div>
@@ -914,15 +914,15 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       </div>
 
       {/* Firma Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-violet-100 text-violet-600">
+            <div className="p-2 rounded-lg bg-primary-light text-primary">
               <Pencil className="h-5 w-5"/>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Firma de Correo</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Firma de Correo</h3>
+              <p className="text-sm text-text-muted">
                 Esta firma se añadirá al final de todos los correos electrónicos.
               </p>
             </div>
@@ -931,11 +931,11 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
         <div className="p-6">
           {successFirma && (
               <div
-                  className="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded-lg text-sm border border-emerald-100">
+                  className="mb-4 p-3 bg-success-soft text-success-strong rounded-lg text-sm border border-success/20">
                 Firma de correo guardada correctamente.
               </div>
           )}
-          <div className="border border-slate-200 rounded-lg overflow-hidden editor-body">
+          <div className="border border-border-base rounded-lg overflow-hidden editor-body">
             <style>{`.editor-body .ProseMirror p { margin-bottom: 0.75em; }`}</style>
             <EditorContext.Provider value={{editor: firmaEditor}}>
               <Toolbar variant="fixed">
@@ -987,7 +987,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 type="button"
                 onClick={handleSaveFirma}
                 disabled={savingFirma}
-                className="px-6 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-800 disabled:opacity-50 transition-colors"
+                className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
               <span className="flex items-center justify-center gap-2">
                 <Save className="h-5 w-5"/>
@@ -999,16 +999,16 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       </div>
 
       {/* Plantillas Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+              <div className="p-2 rounded-lg bg-primary-light text-primary">
                 <FileText className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-800">Plantillas de correo</h3>
-                <p className="text-sm text-slate-500">
+                <h3 className="text-lg font-bold text-text-main">Plantillas de correo</h3>
+                <p className="text-sm text-text-muted">
                   Gestiona las plantillas de correo electrónico.
                 </p>
               </div>
@@ -1016,7 +1016,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
             <button
               type="button"
               onClick={handleNewTemplate}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-colors"
             >
               <Plus className="h-4 w-4" />
               Nueva plantilla
@@ -1030,7 +1030,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
               type="button"
               onClick={() => { setFilterPlace(''); setFilterGroup(''); setFilterTipo(''); }}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                !filterPlace && !filterGroup ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                !filterPlace && !filterGroup ? 'bg-primary text-white shadow-sm' : 'bg-surface-hover text-text-muted hover:bg-surface-subtle'
               }`}
             >
               Todas
@@ -1041,33 +1041,33 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 type="button"
                 onClick={() => { setFilterPlace(filterPlace === place ? '' : place); setFilterGroup(''); }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  filterPlace === place ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  filterPlace === place ? 'bg-primary text-white shadow-sm' : 'bg-surface-hover text-text-muted hover:bg-surface-subtle'
                 }`}
               >
                 {place === 'empresa' ? 'Empresas' : place === 'relaciones' ? 'Relaciones' : 'Alumnos'}
               </button>
             ))}
-            {filterPlace === 'relaciones' && <span className="mx-1 text-slate-300">|</span>}
+            {filterPlace === 'relaciones' && <span className="mx-1 text-text-muted">|</span>}
             {filterPlace === 'relaciones' && ['varios-registros', 'registro-individual'].map(g => (
               <button
                 key={g}
                 type="button"
                 onClick={() => setFilterGroup(filterGroup === g ? '' : g)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  filterGroup === g ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  filterGroup === g ? 'bg-primary text-white shadow-sm' : 'bg-surface-hover text-text-muted hover:bg-surface-subtle'
                 }`}
               >
                 {g === 'varios-registros' ? 'Varios registros' : 'Registro individual'}
               </button>
             ))}
-            <span className="mx-1 text-slate-300">|</span>
+            <span className="mx-1 text-text-muted">|</span>
             {['sistema', 'personal'].map(t => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setFilterTipo(filterTipo === t ? '' : t)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  filterTipo === t ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  filterTipo === t ? 'bg-primary text-white shadow-sm' : 'bg-surface-hover text-text-muted hover:bg-surface-subtle'
                 }`}
               >
                 {t === 'sistema' ? 'Sistema' : 'Personales'}
@@ -1082,7 +1082,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
               if (filterTipo && p.tipo !== filterTipo) return false;
               return true;
             });
-            if (filtered.length === 0) return <p className="text-sm text-slate-400 text-center py-8">No hay plantillas para este ámbito.</p>;
+            if (filtered.length === 0) return <p className="text-sm text-text-muted text-center py-8">No hay plantillas para este ámbito.</p>;
             return (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filtered.map((p) => {
@@ -1103,7 +1103,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 return (
                   <div
                     key={p.id ?? p.plantillaId}
-                    className={`flex items-start gap-4 p-4 rounded-xl border cursor-pointer hover:bg-slate-50 hover:border-slate-300 transition-all text-left relative group ${p.plantillaId === 'otros' ? 'cursor-default hover:border-slate-200 hover:bg-transparent' : ''} ${c?.border || 'border-slate-200'} ${c?.bg || ''}`}
+                    className={`flex items-start gap-4 p-4 rounded-xl border cursor-pointer hover:bg-surface-subtle hover:border-border-base transition-all text-left relative group ${p.plantillaId === 'otros' ? 'cursor-default hover:border-border-base hover:bg-transparent' : ''} ${c?.border || 'border-border-base'} ${c?.bg || ''}`}
                     style={Object.keys(cardStyle).length ? cardStyle : undefined}
                     onClick={() => p.plantillaId !== 'otros' && handleEditTemplate(p)}
                   >
@@ -1112,23 +1112,23 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-slate-800">{p.name}</p>
+                        <p className="text-sm font-bold text-text-main">{p.name}</p>
                         {p.tipo === 'sistema' ? (
-                          <span className="text-[10px] font-semibold text-slate-400 bg-slate-200/60 px-1.5 py-0.5 rounded">Sistema</span>
+                          <span className="text-[10px] font-semibold text-text-muted bg-surface-hover/60 px-1.5 py-0.5 rounded">Sistema</span>
                         ) : (
-                          <span className="text-[10px] font-semibold text-blue-500 bg-blue-100 px-1.5 py-0.5 rounded">Personal</span>
+                          <span className="text-[10px] font-semibold text-primary bg-primary-light px-1.5 py-0.5 rounded">Personal</span>
                         )}
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2">{p.description}</p>
+                      <p className="text-[11px] text-text-muted mt-0.5 line-clamp-2">{p.description}</p>
                       <div className="flex items-center gap-1.5 mt-1.5">
-                        <span className="text-[10px] font-medium text-slate-400 bg-slate-200/50 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-medium text-text-muted bg-surface-hover/50 px-1.5 py-0.5 rounded">
                           {p.plantillaId === 'otros' ? 'Todos' : (placeLabels[p.place] || p.place)}
                         </span>
                         {p.grupo && groupLabels[p.grupo] && (
                           <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                             p.grupo === 'varios-registros'
-                              ? 'text-emerald-600 bg-emerald-50'
-                              : 'text-blue-600 bg-blue-50'
+                              ? 'text-success-strong bg-success-soft'
+                              : 'text-primary bg-primary-light'
                           }`}>
                             {groupLabels[p.grupo]}
                           </span>
@@ -1141,7 +1141,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                         className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={(e) => { e.stopPropagation(); handleEditTemplate(p); }}
                       >
-                        <Pencil className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                        <Pencil className="h-4 w-4 text-text-muted hover:text-text-main" />
                       </button>
                     )}
                     {p.tipo !== 'sistema' && (
@@ -1150,7 +1150,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                         className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ type: 'template', id: p.id! }); }}
                       >
-                        <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                        <Trash2 className="h-4 w-4 text-danger/70 hover:text-danger" />
                       </button>
                     )}
                   </div>
@@ -1163,24 +1163,24 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       </div>
 
       {/* Marcadores Personalizados Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+              <div className="p-2 rounded-lg bg-primary-light text-primary">
                 <CheckSquare className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-800">Marcadores personalizados</h3>
-                <p className="text-sm text-slate-500">
-                  Gestiona los marcadores globales <code className="text-xs bg-slate-200 px-1 py-0.5 rounded">{'{{per_nombre}}'}</code> para reutilizar en todas las plantillas.
+                <h3 className="text-lg font-bold text-text-main">Marcadores personalizados</h3>
+                <p className="text-sm text-text-muted">
+                  Gestiona los marcadores globales <code className="text-xs bg-surface-hover px-1 py-0.5 rounded">{'{{per_nombre}}'}</code> para reutilizar en todas las plantillas.
                 </p>
               </div>
             </div>
             <button
               type="button"
               onClick={handleNewMarker}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-colors"
             >
               <Plus className="h-4 w-4" />
               Añadir marcador
@@ -1189,28 +1189,28 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
         </div>
         <div className="p-6">
           {marcadores.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-8">No hay marcadores personalizados.</p>
+            <p className="text-sm text-text-muted text-center py-8">No hay marcadores personalizados.</p>
           ) : (
             <div className="space-y-3">
               {marcadores.map((m) => (
                 <div
                   key={m.id}
-                  className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/30 group cursor-pointer hover:bg-slate-50 transition-all"
+                  className="flex items-start gap-4 p-4 rounded-xl border border-border-base bg-surface-subtle/30 group cursor-pointer hover:bg-surface-subtle transition-all"
                   onClick={() => handleEditMarker(m)}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <code className="text-xs font-mono font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">{'{{per_' + m.nombre + '}}'}</code>
-                      <p className="text-xs text-slate-400 truncate">{m.descripcion}</p>
+                      <code className="text-xs font-mono font-bold text-primary bg-primary-light px-1.5 py-0.5 rounded">{'{{per_' + m.nombre + '}}'}</code>
+                      <p className="text-xs text-text-muted truncate">{m.descripcion}</p>
                     </div>
-                    <div className="mt-2 text-xs text-slate-500 line-clamp-2 font-mono bg-white rounded p-2 border border-slate-100" dangerouslySetInnerHTML={{ __html: m.valor }} />
+                    <div className="mt-2 text-xs text-text-muted line-clamp-2 font-mono bg-surface-card rounded p-2 border border-border-base" dangerouslySetInnerHTML={{ __html: m.valor }} />
                   </div>
                   <button
                     type="button"
                     className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => { e.stopPropagation(); handleEditMarker(m); }}
                   >
-                    <Pencil className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                    <Pencil className="h-4 w-4 text-text-muted hover:text-text-main" />
                   </button>
                   {m.id && (
                     <button
@@ -1218,7 +1218,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                       className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ type: 'marker', id: m.id! }); }}
                     >
-                      <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                      <Trash2 className="h-4 w-4 text-danger/70 hover:text-danger" />
                     </button>
                   )}
                 </div>
@@ -1229,16 +1229,16 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       </div>
 
       {/* Contactos Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
+              <div className="p-2 rounded-lg bg-primary-light text-primary">
                 <User className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-800">Contactos</h3>
-                <p className="text-sm text-slate-500">
+                <h3 className="text-lg font-bold text-text-main">Contactos</h3>
+                <p className="text-sm text-text-muted">
                   Gestiona tus contactos para usar en el autocompletado de correo.
                 </p>
               </div>
@@ -1247,7 +1247,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
               <button
                 type="button"
                 onClick={() => { setBatchContactos(''); setShowBatchContacto(true); }}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-indigo-200 text-indigo-600 text-sm font-semibold rounded-xl hover:bg-indigo-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-surface-card border border-primary/25 text-primary text-sm font-semibold rounded-xl hover:bg-primary-light/50 transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 Importar múltiples
@@ -1255,7 +1255,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
               <button
                 type="button"
                 onClick={() => setEditContacto({ id: 0, nombre: '', email: '', telefono: '' })}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 Nuevo contacto
@@ -1265,23 +1265,23 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
         </div>
         <div className="p-6">
           {contactos.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-8">No hay contactos.</p>
+            <p className="text-sm text-text-muted text-center py-8">No hay contactos.</p>
           ) : (
             <div className="space-y-3">
               {contactos.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/30 group cursor-pointer hover:bg-slate-50 transition-all"
+                  className="flex items-start gap-4 p-4 rounded-xl border border-border-base bg-surface-subtle/30 group cursor-pointer hover:bg-surface-subtle transition-all"
                   onClick={() => setEditContacto({ ...c })}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-slate-800">{c.nombre}</p>
+                      <p className="text-sm font-semibold text-text-main">{c.nombre}</p>
                     </div>
                     <div className="flex items-center gap-3 mt-1">
-                      <span className="text-xs text-indigo-600">{c.email}</span>
+                      <span className="text-xs text-primary">{c.email}</span>
                       {c.telefono && (
-                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <span className="text-xs text-text-muted flex items-center gap-1">
                           <Phone className="h-3 w-3" /> {c.telefono}
                         </span>
                       )}
@@ -1292,14 +1292,14 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                     className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => { e.stopPropagation(); setEditContacto({ ...c }); }}
                   >
-                    <Pencil className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                    <Pencil className="h-4 w-4 text-text-muted hover:text-text-main" />
                   </button>
                   <button
                     type="button"
                     className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ type: 'contacto', id: c.id }); }}
                   >
-                    <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                    <Trash2 className="h-4 w-4 text-danger/70 hover:text-danger" />
                   </button>
                 </div>
               ))}
@@ -1309,16 +1309,16 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       </div>
 
       {/* Grupos Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50">
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-rose-100 text-rose-600">
+              <div className="p-2 rounded-lg bg-primary-light text-primary">
                 <Users className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-800">Grupos de contactos</h3>
-                <p className="text-sm text-slate-500">
+                <h3 className="text-lg font-bold text-text-main">Grupos de contactos</h3>
+                <p className="text-sm text-text-muted">
                   Crea grupos de contactos para agilizar el envío de correos a múltiples destinatarios.
                 </p>
               </div>
@@ -1326,7 +1326,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
             <button
               type="button"
               onClick={() => { setEditGrupo({ nombre: '', miembros: [] }); setEditGrupoId(null); setGrupoSearchResults([]); }}
-              className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white text-sm font-semibold rounded-xl hover:bg-rose-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-colors"
             >
               <Plus className="h-4 w-4" />
               Nuevo grupo
@@ -1335,13 +1335,13 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
         </div>
         <div className="p-6">
           {grupos.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-8">No hay grupos de contactos.</p>
+            <p className="text-sm text-text-muted text-center py-8">No hay grupos de contactos.</p>
           ) : (
             <div className="space-y-3">
               {grupos.map((g) => (
                 <div
                   key={g.id}
-                  className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/30 group cursor-pointer hover:bg-slate-50 transition-all"
+                  className="flex items-start gap-4 p-4 rounded-xl border border-border-base bg-surface-subtle/30 group cursor-pointer hover:bg-surface-subtle transition-all"
                   onClick={() => {
                     setEditGrupo({
                       nombre: g.nombre,
@@ -1353,19 +1353,19 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-slate-800">{g.nombre}</p>
-                      <span className="text-[10px] font-semibold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded">
+                      <p className="text-sm font-semibold text-text-main">{g.nombre}</p>
+                      <span className="text-[10px] font-semibold text-primary bg-primary-light px-1.5 py-0.5 rounded">
                         {(g.miembros || []).length} miembros
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {(g.miembros || []).slice(0, 5).map((m, i) => (
-                        <span key={i} className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded truncate max-w-40">
+                        <span key={i} className="text-[10px] text-text-muted bg-surface-hover px-1.5 py-0.5 rounded truncate max-w-40">
                           {m.nombre}
                         </span>
                       ))}
                       {(g.miembros || []).length > 5 && (
-                        <span className="text-[10px] text-slate-400">+{g.miembros.length - 5} más</span>
+                        <span className="text-[10px] text-text-muted">+{g.miembros.length - 5} más</span>
                       )}
                     </div>
                   </div>
@@ -1382,14 +1382,14 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                       setGrupoSearchResults([]);
                     }}
                   >
-                    <Pencil className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                    <Pencil className="h-4 w-4 text-text-muted hover:text-text-main" />
                   </button>
                   <button
                     type="button"
                     className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ type: 'grupo', id: g.id }); }}
                   >
-                    <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                    <Trash2 className="h-4 w-4 text-danger/70 hover:text-danger" />
                   </button>
                 </div>
               ))}
@@ -1402,12 +1402,12 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       <Modal open={!!editTemplate} onClose={() => setEditTemplate(null)} maxWidth="max-w-5xl">
         {editTemplate && (
           <>
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
-              <h3 className="text-lg font-bold text-slate-800">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border-base bg-surface-subtle shrink-0">
+              <h3 className="text-lg font-bold text-text-main">
                 {editTemplate.id ? 'Editar plantilla' : 'Nueva plantilla personal'}
               </h3>
-              <button type="button" onClick={() => setEditTemplate(null)} className="p-1 rounded-lg hover:bg-slate-200 transition-colors">
-                <X className="h-5 w-5 text-slate-500" />
+              <button type="button" onClick={() => setEditTemplate(null)} className="p-1 rounded-lg hover:bg-surface-hover transition-colors">
+                <X className="h-5 w-5 text-text-muted" />
               </button>
             </div>
             <div className="p-6 overflow-y-auto space-y-5">
@@ -1430,11 +1430,11 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelClass}>Icono</label>
-                  <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50">
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-border-base bg-surface-subtle/50">
                     <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: editTemplate.color + '20', color: editTemplate.color }}>
                       <PencilRuler className="h-5 w-5" />
                     </div>
-                    <span className="text-xs text-slate-600">Personalizada</span>
+                    <span className="text-xs text-text-muted">Personalizada</span>
                   </div>
                 </div>
                 <div>
@@ -1444,9 +1444,9 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                       type="color"
                       value={editTemplate.color?.startsWith('#') ? editTemplate.color : '#3B82F6'}
                       onChange={e => setEditTemplate({ ...editTemplate, color: e.target.value })}
-                      className="h-10 w-14 rounded-lg border border-slate-200 cursor-pointer bg-white p-0.5"
+                      className="h-10 w-14 rounded-lg border border-border-base cursor-pointer bg-surface-card p-0.5"
                     />
-                    <span className="text-xs text-slate-500">{editTemplate.color?.startsWith('#') ? editTemplate.color : 'Personalizado'}</span>
+                    <span className="text-xs text-text-muted">{editTemplate.color?.startsWith('#') ? editTemplate.color : 'Personalizado'}</span>
                   </div>
                 </div>
               </div>
@@ -1483,7 +1483,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
 
               <div>
                 <label className={labelClass}>Cuerpo</label>
-                <div className="border border-slate-200 rounded-lg overflow-hidden editor-body">
+                <div className="border border-border-base rounded-lg overflow-hidden editor-body">
                   <style>{`.editor-body .ProseMirror p { margin-bottom: 1.25em; } .editor-body .ProseMirror ul { margin-bottom: 1.25em; }`}</style>
                   <EditorContext.Provider value={{ editor: templateEditor }}>
                     <Toolbar variant="fixed">
@@ -1563,19 +1563,19 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   const markers = allGroups[place] || allGroups.empresa;
                   return (
                     <div className="mt-2">
-                      <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1.5">Marcadores disponibles</p>
+                      <p className="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1.5">Marcadores disponibles</p>
                       <div className="flex flex-wrap gap-1.5">
                         {markers.map(m => (
                           <code
                             key={m}
-                            className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded cursor-pointer hover:bg-slate-200"
+                            className="text-[10px] bg-surface-hover text-text-muted px-1.5 py-0.5 rounded cursor-pointer hover:bg-surface-subtle"
                             onClick={() => templateEditor?.chain().focus().insertContent(m).run()}
                           >
                             {m}
                           </code>
                         ))}
                         <code
-                          className="text-[10px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded cursor-pointer hover:bg-purple-100"
+                          className="text-[10px] bg-primary-light text-primary px-1.5 py-0.5 rounded cursor-pointer hover:bg-primary-light/70"
                           onClick={() => templateEditor?.chain().focus().insertContent('{{per_...}}').run()}
                         >
                           {'{{per_...}}'}
@@ -1586,13 +1586,13 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 })()}
               </div>
             </div>
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-border-base bg-surface-subtle shrink-0">
               <div>
                 {editTemplate.id && editTemplate.tipo !== 'sistema' && (
                   <button
                     type="button"
                     onClick={() => { setEditTemplate(null); setDeleteConfirm({ type: 'template', id: editTemplate.id! }); }}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-danger hover:bg-danger-soft rounded-xl transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                     Eliminar
@@ -1600,14 +1600,14 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <button type="button" onClick={() => setEditTemplate(null)} className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                <button type="button" onClick={() => setEditTemplate(null)} className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors">
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveTemplate}
                   disabled={savingTemplate || !editTemplate.name}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   {savingTemplate ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   {savingTemplate ? 'Guardando...' : 'Guardar'}
@@ -1622,19 +1622,19 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       <Modal open={!!editMarker} onClose={() => setEditMarker(null)} maxWidth="max-w-3xl">
         {editMarker && (
           <>
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
-              <h3 className="text-lg font-bold text-slate-800">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border-base bg-surface-subtle shrink-0">
+              <h3 className="text-lg font-bold text-text-main">
                 {editMarker.id ? 'Editar marcador personalizado' : 'Nuevo marcador personalizado'}
               </h3>
-              <button type="button" onClick={() => setEditMarker(null)} className="p-1 rounded-lg hover:bg-slate-200 transition-colors">
-                <X className="h-5 w-5 text-slate-500" />
+              <button type="button" onClick={() => setEditMarker(null)} className="p-1 rounded-lg hover:bg-surface-hover transition-colors">
+                <X className="h-5 w-5 text-text-muted" />
               </button>
             </div>
             <div className="p-6 overflow-y-auto space-y-5">
               <div>
                 <label className={labelClass}>Nombre del marcador</label>
                 <div className="flex items-center gap-2">
-                  <code className="text-xs text-purple-600 bg-purple-50 px-1.5 py-1 rounded">{'{{per_'}</code>
+                  <code className="text-xs text-primary bg-primary-light px-1.5 py-1 rounded">{'{{per_'}</code>
                   <input
                     type="text"
                     value={editMarker.nombre}
@@ -1643,12 +1643,12 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                     placeholder="ej: nombre_centro"
                     required
                   />
-                  <code className="text-xs text-purple-600 bg-purple-50 px-1.5 py-1 rounded">{'}}'}</code>
+                  <code className="text-xs text-primary bg-primary-light px-1.5 py-1 rounded">{'}}'}</code>
                 </div>
               </div>
               <div>
                 <label className={labelClass}>Valor (HTML)</label>
-                <div className="border border-slate-200 rounded-lg overflow-hidden editor-body">
+                <div className="border border-border-base rounded-lg overflow-hidden editor-body">
                   <style>{`.editor-body .ProseMirror p { margin-bottom: 1.25em; } .editor-body .ProseMirror ul { margin-bottom: 1.25em; }`}</style>
                   <EditorContext.Provider value={{ editor: markerEditor }}>
                     <Toolbar variant="fixed">
@@ -1714,13 +1714,13 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-border-base bg-surface-subtle shrink-0">
               <div>
                 {editMarker.id && (
                   <button
                     type="button"
                     onClick={() => { setEditMarker(null); setDeleteConfirm({ type: 'marker', id: editMarker.id! }); }}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-danger hover:bg-danger-soft rounded-xl transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                     Eliminar
@@ -1728,14 +1728,14 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <button type="button" onClick={() => setEditMarker(null)} className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                <button type="button" onClick={() => setEditMarker(null)} className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors">
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveMarker}
                   disabled={savingMarker || !editMarker.nombre}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   {savingMarker ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   {savingMarker ? 'Guardando...' : 'Guardar'}
@@ -1750,12 +1750,12 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       <Modal open={!!editContacto} onClose={() => setEditContacto(null)} maxWidth="max-w-md">
         {editContacto && (
           <>
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
-              <h3 className="text-lg font-bold text-slate-800">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border-base bg-surface-subtle shrink-0">
+              <h3 className="text-lg font-bold text-text-main">
                 {editContacto.id ? 'Editar contacto' : 'Nuevo contacto'}
               </h3>
-              <button type="button" onClick={() => setEditContacto(null)} className="p-1 rounded-lg hover:bg-slate-200 transition-colors">
-                <X className="h-5 w-5 text-slate-500" />
+              <button type="button" onClick={() => setEditContacto(null)} className="p-1 rounded-lg hover:bg-surface-hover transition-colors">
+                <X className="h-5 w-5 text-text-muted" />
               </button>
             </div>
             <div className="p-6 space-y-5">
@@ -1790,13 +1790,13 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-border-base bg-surface-subtle shrink-0">
               <div>
                 {editContacto.id && (
                   <button
                     type="button"
                     onClick={() => { const id = editContacto.id; setEditContacto(null); setDeleteConfirm({ type: 'contacto', id }); }}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-danger hover:bg-danger-soft rounded-xl transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                     Eliminar
@@ -1804,14 +1804,14 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <button type="button" onClick={() => setEditContacto(null)} className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                <button type="button" onClick={() => setEditContacto(null)} className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors">
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveContacto}
                   disabled={savingContacto || !editContacto.nombre || !editContacto.email}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   {savingContacto ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   {savingContacto ? 'Guardando...' : 'Guardar'}
@@ -1826,12 +1826,12 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       <Modal open={!!editGrupo} onClose={() => { setEditGrupo(null); setEditGrupoId(null); setGrupoSearchResults([]); }} maxWidth="max-w-2xl">
         {editGrupo && (
           <>
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
-              <h3 className="text-lg font-bold text-slate-800">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border-base bg-surface-subtle shrink-0">
+              <h3 className="text-lg font-bold text-text-main">
                 {editGrupoId ? 'Editar grupo' : 'Nuevo grupo'}
               </h3>
-              <button type="button" onClick={() => { setEditGrupo(null); setEditGrupoId(null); setGrupoSearchResults([]); }} className="p-1 rounded-lg hover:bg-slate-200 transition-colors">
-                <X className="h-5 w-5 text-slate-500" />
+              <button type="button" onClick={() => { setEditGrupo(null); setEditGrupoId(null); setGrupoSearchResults([]); }} className="p-1 rounded-lg hover:bg-surface-hover transition-colors">
+                <X className="h-5 w-5 text-text-muted" />
               </button>
             </div>
             <div className="p-6 space-y-5 overflow-y-auto max-h-96">
@@ -1857,8 +1857,8 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                       onClick={() => { setGrupoSearchSource(src); setGrupoSearchTerm(''); setGrupoSearchResults([]); }}
                       className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
                         grupoSearchSource === src
-                          ? 'bg-rose-600 text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          ? 'bg-primary text-white'
+                          : 'bg-surface-hover text-text-muted hover:bg-surface-subtle'
                       }`}
                     >
                       {src === 'contacto' ? 'Contactos' : src === 'empresa' ? 'Empresas' : src === 'estudiante' ? 'Estudiantes' : 'Tutores'}
@@ -1873,12 +1873,12 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   className={inputClass}
                 />
                 {grupoSearchResults.length > 0 && (
-                  <div className="mt-2 border border-slate-200 rounded-lg max-h-40 overflow-y-auto">
+                  <div className="mt-2 border border-border-base rounded-lg max-h-40 overflow-y-auto">
                     {grupoSearchResults.map((r, i) => (
                       <button
                         key={`${r.tipoOrigen}-${r.origenId}`}
                         type="button"
-                        className="w-full text-left px-3 py-2 text-xs border-b border-slate-50 last:border-0 hover:bg-slate-50 flex items-center justify-between"
+                        className="w-full text-left px-3 py-2 text-xs border-b border-border-base last:border-0 hover:bg-surface-subtle flex items-center justify-between"
                         onClick={() => {
                           setEditGrupo({
                             ...editGrupo,
@@ -1889,7 +1889,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                         }}
                       >
                         <span>{r.label}</span>
-                        <Plus className="h-3 w-3 text-rose-500 shrink-0" />
+                        <Plus className="h-3 w-3 text-primary shrink-0" />
                       </button>
                     ))}
                   </div>
@@ -1900,16 +1900,16 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
               <div>
                 <label className={labelClass}>Miembros ({editGrupo.miembros.length})</label>
                 {editGrupo.miembros.length === 0 ? (
-                  <p className="text-xs text-slate-400">Aún no hay miembros. Busca y añade contactos arriba.</p>
+                  <p className="text-xs text-text-muted">Aún no hay miembros. Busca y añade contactos arriba.</p>
                 ) : (
                   <div className="space-y-2">
                     {editGrupo.miembros.map((m, i) => (
-                      <div key={`${m.tipoOrigen}-${m.origenId}`} className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
+                      <div key={`${m.tipoOrigen}-${m.origenId}`} className="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-subtle border border-border-base">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-semibold text-slate-400 uppercase bg-slate-200 px-1 py-0.5 rounded">
+                          <span className="text-[10px] font-semibold text-text-muted uppercase bg-surface-hover px-1 py-0.5 rounded">
                             {m.tipoOrigen === 'contacto' ? 'Contacto' : m.tipoOrigen === 'empresa' ? 'Empresa' : m.tipoOrigen === 'estudiante' ? 'Estudiante' : 'Tutor'}
                           </span>
-                          <span className="text-xs text-slate-700">{m.label}</span>
+                          <span className="text-xs text-text-main">{m.label}</span>
                         </div>
                         <button
                           type="button"
@@ -1917,9 +1917,9 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                             const nuevos = editGrupo.miembros.filter((_, idx) => idx !== i);
                             setEditGrupo({ ...editGrupo, miembros: nuevos });
                           }}
-                          className="p-1 rounded hover:bg-slate-200 transition-colors"
+                          className="p-1 rounded hover:bg-surface-hover transition-colors"
                         >
-                          <X className="h-3 w-3 text-slate-400" />
+                          <X className="h-3 w-3 text-text-muted" />
                         </button>
                       </div>
                     ))}
@@ -1927,13 +1927,13 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 )}
               </div>
             </div>
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-border-base bg-surface-subtle shrink-0">
               <div>
                 {editGrupoId && (
                   <button
                     type="button"
                     onClick={() => { const id = editGrupoId; setEditGrupo(null); setEditGrupoId(null); setDeleteConfirm({ type: 'grupo', id }); }}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-danger hover:bg-danger-soft rounded-xl transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                     Eliminar
@@ -1941,14 +1941,14 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <button type="button" onClick={() => { setEditGrupo(null); setEditGrupoId(null); setGrupoSearchResults([]); }} className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                <button type="button" onClick={() => { setEditGrupo(null); setEditGrupoId(null); setGrupoSearchResults([]); }} className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors">
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveGrupo}
                   disabled={savingGrupo || !editGrupo.nombre || editGrupo.miembros.length < 2}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-rose-600 text-white text-sm font-semibold rounded-xl hover:bg-rose-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   {savingGrupo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   {savingGrupo ? 'Guardando...' : 'Guardar'}
@@ -1961,40 +1961,40 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
 
       {/* Batch Import Contactos Modal */}
       <Modal open={showBatchContacto} onClose={() => { setShowBatchContacto(false); setBatchContactos(''); }} maxWidth="max-w-lg">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
-          <h3 className="text-lg font-bold text-slate-800">Importar múltiples contactos</h3>
-          <button type="button" onClick={() => { setShowBatchContacto(false); setBatchContactos(''); }} className="p-1 rounded-lg hover:bg-slate-200 transition-colors">
-            <X className="h-5 w-5 text-slate-500" />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-base bg-surface-subtle shrink-0">
+          <h3 className="text-lg font-bold text-text-main">Importar múltiples contactos</h3>
+          <button type="button" onClick={() => { setShowBatchContacto(false); setBatchContactos(''); }} className="p-1 rounded-lg hover:bg-surface-hover transition-colors">
+            <X className="h-5 w-5 text-text-muted" />
           </button>
         </div>
         <div className="p-6 space-y-5">
           <div>
             <label className={labelClass}>Introduce los contactos</label>
-            <p className="text-xs text-slate-500 mb-2">
-              Formato: <code className="text-[10px] bg-slate-100 px-1 py-0.5 rounded">Nombre Apellidos &lt;email&gt;</code>, separados por coma.
+            <p className="text-xs text-text-muted mb-2">
+              Formato: <code className="text-[10px] bg-surface-hover px-1 py-0.5 rounded">Nombre Apellidos &lt;email&gt;</code>, separados por coma.
             </p>
             <textarea
               value={batchContactos}
               onChange={e => setBatchContactos(e.target.value)}
-              className="w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans min-h-32 resize-y"
+              className="w-full bg-surface-card border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans min-h-32 resize-y"
               placeholder="Juan Pérez <juan@ejemplo.com>, María López <maria@ejemplo.com>, ..."
               rows={6}
             />
           </div>
-          <div className="bg-indigo-50 rounded-lg p-3 text-xs text-indigo-700">
+          <div className="bg-primary-light/40 rounded-lg p-3 text-xs text-primary">
             <strong>Ejemplo:</strong><br />
             <code className="text-[10px]">Juan Pérez &lt;juan.perez@email.com&gt;, Ana García &lt;ana.garcia@email.com&gt;, Carlos Rodríguez &lt;carlos@email.com&gt;</code>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 shrink-0">
-          <button type="button" onClick={() => { setShowBatchContacto(false); setBatchContactos(''); }} className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-base bg-surface-subtle shrink-0">
+          <button type="button" onClick={() => { setShowBatchContacto(false); setBatchContactos(''); }} className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors">
             Cancelar
           </button>
           <button
             type="button"
             onClick={handleBatchContactos}
             disabled={savingContacto || !batchContactos.trim()}
-            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {savingContacto ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {savingContacto ? 'Importando...' : 'Importar'}
@@ -2006,12 +2006,12 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       <Modal open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} maxWidth="max-w-sm">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-red-100 text-red-600">
+            <div className="p-2 rounded-lg bg-danger-soft text-danger">
               <Trash2 className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Confirmar eliminación</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-bold text-text-main">Confirmar eliminación</h3>
+              <p className="text-sm text-text-muted">
                 {deleteConfirm?.type === 'template'
                   ? '¿Estás seguro de que deseas eliminar esta plantilla? Esta acción no se puede deshacer.'
                   : deleteConfirm?.type === 'marker'
@@ -2026,7 +2026,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
             <button
               type="button"
               onClick={() => setDeleteConfirm(null)}
-              className="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+              className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-hover rounded-xl transition-colors"
             >
               Cancelar
             </button>
@@ -2040,7 +2040,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 else await handleDeleteContacto(deleteConfirm.id);
                 setDeleteConfirm(null);
               }}
-              className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-danger text-white text-sm font-semibold rounded-xl hover:bg-danger/90 transition-colors"
             >
               <Trash2 className="h-4 w-4" />
               Eliminar
@@ -2053,21 +2053,21 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
       <Modal open={!!message} onClose={() => setMessage(null)} maxWidth="max-w-sm">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className={`p-2 rounded-lg ${message?.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
+            <div className={`p-2 rounded-lg ${message?.type === 'error' ? 'bg-danger-soft text-danger' : 'bg-success-soft text-success-strong'}`}>
               {message?.type === 'error' ? <X className="h-5 w-5" /> : <CheckSquare className="h-5 w-5" />}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">
+              <h3 className="text-lg font-bold text-text-main">
                 {message?.type === 'error' ? 'Error' : 'Operación completada'}
               </h3>
-              <p className="text-sm text-slate-500">{message?.text}</p>
+              <p className="text-sm text-text-muted">{message?.text}</p>
             </div>
           </div>
           <div className="flex items-center justify-end mt-6">
             <button
               type="button"
               onClick={() => setMessage(null)}
-              className="px-4 py-2 text-sm font-semibold bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors"
+              className="px-4 py-2 text-sm font-semibold bg-surface-hover text-text-main rounded-xl hover:bg-surface-subtle transition-colors"
             >
               Aceptar
             </button>

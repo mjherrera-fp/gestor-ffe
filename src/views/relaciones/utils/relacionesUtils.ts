@@ -150,28 +150,28 @@ export const calculateStartDateFromEnd = (
 
 export const getStatusBadgeColor = (estado: string, type: string): string => {
   if (type === 'relacion') {
-    if (estado === RelacionEstado.PENDIENTE_ENVIAR_EMPRESA)  return 'bg-blue-50 text-blue-700 border-blue-100';
-    if (estado === RelacionEstado.PENDIENTE_FIRMA_EMPRESA)   return 'bg-amber-50 text-amber-700 border-amber-100';
-    if (estado === RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR) return 'bg-blue-50 text-blue-700 border-blue-100';
-    if (estado === RelacionEstado.PENDIENTE_FIRMA_DIRECTOR)  return 'bg-indigo-50 text-indigo-700 border-indigo-100';
-    if (estado === RelacionEstado.COMPLETADO)                return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    if (estado === RelacionEstado.PENDIENTE_ENVIAR_EMPRESA)  return 'bg-primary-light text-primary border-primary-light';
+    if (estado === RelacionEstado.PENDIENTE_FIRMA_EMPRESA)   return 'bg-warning-soft text-warning-strong border-warning/20';
+    if (estado === RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR) return 'bg-primary-light text-primary border-primary-light';
+    if (estado === RelacionEstado.PENDIENTE_FIRMA_DIRECTOR)  return 'bg-primary-light text-primary border-primary-light';
+    if (estado === RelacionEstado.COMPLETADO)                return 'bg-success-soft text-success-strong border-success/20';
   } else if (type === 'plan') {
-    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE)  return 'bg-blue-50 text-blue-700 border-blue-100';
-    if (estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE)  return 'bg-amber-50 text-amber-700 border-amber-100';
-    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA)     return 'bg-blue-50 text-blue-700 border-blue-100';
-    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA)      return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR)        return 'bg-teal-50 text-teal-700 border-teal-100';
-    if (estado === PlanFormativoEstado.COMPLETADO)                   return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE)  return 'bg-primary-light text-primary border-primary-light';
+    if (estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE)  return 'bg-warning-soft text-warning-strong border-warning/20';
+    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA)     return 'bg-primary-light text-primary border-primary-light';
+    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA)      return 'bg-success-soft text-success-strong border-success/20';
+    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR)        return 'bg-success-soft text-success-strong border-success/20';
+    if (estado === PlanFormativoEstado.COMPLETADO)                   return 'bg-success-soft text-success-strong border-success/20';
   } else if (type === 'seguimiento') {
-    if (estado === SeguimientoEstado.PENDIENTE) return 'bg-slate-50 text-slate-500 border-slate-200';
-    if (estado === SeguimientoEstado.ENVIADO_A_EMPRESA)   return 'bg-amber-50 text-amber-700 border-amber-100';
-    if (estado === SeguimientoEstado.RECIBIDO)  return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    if (estado === SeguimientoEstado.PENDIENTE) return 'bg-surface-subtle text-text-muted border-border-base';
+    if (estado === SeguimientoEstado.ENVIADO_A_EMPRESA)   return 'bg-warning-soft text-warning-strong border-warning/20';
+    if (estado === SeguimientoEstado.RECIBIDO)  return 'bg-success-soft text-success-strong border-success/20';
   } else if (type === 'valoracion') {
-    if (estado === ValoracionEstado.PENDIENTE) return 'bg-slate-50 text-slate-500 border-slate-200';
-    if (estado === ValoracionEstado.ENVIADO_A_EMPRESA)   return 'bg-amber-50 text-amber-700 border-amber-100';
-    if (estado === ValoracionEstado.RECIBIDO)  return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    if (estado === ValoracionEstado.PENDIENTE) return 'bg-surface-subtle text-text-muted border-border-base';
+    if (estado === ValoracionEstado.ENVIADO_A_EMPRESA)   return 'bg-warning-soft text-warning-strong border-warning/20';
+    if (estado === ValoracionEstado.RECIBIDO)  return 'bg-success-soft text-success-strong border-success/20';
   }
-  return 'bg-slate-50 text-slate-500 border-slate-200';
+  return 'bg-surface-subtle text-text-muted border-border-base';
 };
 
 export const getStatusLabel = (estado: string, type: string): string => {
@@ -189,10 +189,10 @@ export const getStatusLabel = (estado: string, type: string): string => {
 
 export const getAnexoStatusButton = (estado: string) => {
   switch (estado) {
-    case RelacionEstado.PENDIENTE_ENVIAR_EMPRESA:   return { label: 'Enviar Doc. a Empresa',  icon: Send,       color: 'bg-blue-600' };
-    case RelacionEstado.PENDIENTE_FIRMA_EMPRESA:    return { label: 'Recibido de Empresa',     icon: Clock,      color: 'bg-amber-500' };
-    case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR:  return { label: 'Enviar a Dirección',      icon: Send,       color: 'bg-indigo-600' };
-    case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR:   return { label: 'Recibido de Dirección',   icon: ShieldCheck,color: 'bg-emerald-600' };
+    case RelacionEstado.PENDIENTE_ENVIAR_EMPRESA:   return { label: 'Enviar Doc. a Empresa',  icon: Send,       color: 'bg-primary' };
+    case RelacionEstado.PENDIENTE_FIRMA_EMPRESA:    return { label: 'Recibido de Empresa',     icon: Clock,      color: 'bg-warning' };
+    case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR:  return { label: 'Enviar a Dirección',      icon: Send,       color: 'bg-primary' };
+    case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR:   return { label: 'Recibido de Dirección',   icon: ShieldCheck,color: 'bg-success' };
     default: return null;
   }
 };
@@ -200,31 +200,31 @@ export const getAnexoStatusButton = (estado: string) => {
 export const getPlanStatusButton = (estado: string) => {
   switch (estado) {
     case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE:
-    case 'PENDIENTE_ENVIAR_ESTUDIANTE':  return { label: 'Enviar Doc. a Estudiante', icon: Send,        color: 'bg-blue-600' };
+    case 'PENDIENTE_ENVIAR_ESTUDIANTE':  return { label: 'Enviar Doc. a Estudiante', icon: Send,        color: 'bg-primary' };
     case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
-    case 'PENDIENTE_FIRMAR_ESTUDIANTE': return { label: 'Recibir Firma Estudiante',  icon: Clock,       color: 'bg-amber-600' };
+    case 'PENDIENTE_FIRMAR_ESTUDIANTE': return { label: 'Recibir Firma Estudiante',  icon: Clock,       color: 'bg-warning' };
     case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
-    case 'PENDIENTE_ENVIAR_EMPRESA':    return { label: 'Enviar a Empresa',           icon: Send,        color: 'bg-indigo-600' };
+    case 'PENDIENTE_ENVIAR_EMPRESA':    return { label: 'Enviar a Empresa',           icon: Send,        color: 'bg-primary' };
     case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
-    case 'PENDIENTE_FIRMA_EMPRESA':     return { label: 'Recibir Firma Empresa',      icon: Clock,       color: 'bg-emerald-600' };
+    case 'PENDIENTE_FIRMA_EMPRESA':     return { label: 'Recibir Firma Empresa',      icon: Clock,       color: 'bg-success' };
     case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
-    case 'PENDIENTE_FIRMA_TUTOR':       return { label: 'Recibir Firma Tutor',        icon: ShieldCheck, color: 'bg-teal-600' };
+    case 'PENDIENTE_FIRMA_TUTOR':       return { label: 'Recibir Firma Tutor',        icon: ShieldCheck, color: 'bg-success' };
     default: return null;
   }
 };
 
 export const getSeguimientoStatusButton = (estado: string) => {
   switch (estado) {
-    case SeguimientoEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: 'bg-blue-600' };
-    case SeguimientoEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: 'bg-emerald-600' };
+    case SeguimientoEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: 'bg-primary' };
+    case SeguimientoEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: 'bg-success' };
     default: return null;
   }
 };
 
 export const getValoracionStatusButton = (estado: string) => {
   switch (estado) {
-    case ValoracionEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: 'bg-blue-600' };
-    case ValoracionEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: 'bg-emerald-600' };
+    case ValoracionEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: 'bg-primary' };
+    case ValoracionEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: 'bg-success' };
     default: return null;
   }
 };

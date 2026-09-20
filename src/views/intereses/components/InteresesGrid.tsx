@@ -29,7 +29,7 @@ function EmpresaMobileRow({ empresa, match, onToggle, onCreateRelacion }: Empres
   const showPartialA = partialIA && !iA;
   const showPartialE = partialIE && !iE;
   return (
-    <div className={`p-4 flex items-center justify-between gap-4 ${fullyMatched ? 'bg-emerald-50/30' : ''}`}>
+    <div className={`p-4 flex items-center justify-between gap-4 ${fullyMatched ? 'bg-success-soft/30' : ''}`}>
       <div className="min-w-0">
         <h4 className="font-bold text-sm text-text-main truncate">{empresa.nombre}</h4>
         <p className="text-[10px] text-text-muted">{empresa.ciudad}</p>
@@ -40,7 +40,7 @@ function EmpresaMobileRow({ empresa, match, onToggle, onCreateRelacion }: Empres
           className={`p-2 rounded-lg transition-all ${
             iA ? 'bg-primary text-white shadow-md' :
             showPartialA ? 'bg-primary/30 text-primary border border-primary/40' :
-            'text-text-muted bg-slate-50'
+            'text-text-muted bg-surface-subtle'
           }`}
         >
           {showPartialA ? <Minus className="h-4 w-4" /> : <Send className={`h-4 w-4 ${iA ? 'fill-current' : ''}`} />}
@@ -48,9 +48,9 @@ function EmpresaMobileRow({ empresa, match, onToggle, onCreateRelacion }: Empres
         <button
           onClick={() => onToggle(empresa.id!, 'empresa')}
           className={`p-2 rounded-lg transition-all ${
-            iE ? 'bg-emerald-600 text-white shadow-md' :
-            showPartialE ? 'bg-emerald-600/30 text-emerald-700 border border-emerald-400' :
-            'text-text-muted bg-slate-50'
+            iE ? 'bg-success text-white shadow-md' :
+            showPartialE ? 'bg-success/30 text-success-strong border border-success/40' :
+            'text-text-muted bg-surface-subtle'
           }`}
         >
           {showPartialE ? <Minus className="h-4 w-4" /> : <Briefcase className="h-4 w-4" />}
@@ -60,8 +60,8 @@ function EmpresaMobileRow({ empresa, match, onToggle, onCreateRelacion }: Empres
           disabled={!fullyMatched}
           className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
             fullyMatched
-              ? 'bg-emerald-100 text-emerald-700 animate-pulse cursor-pointer hover:bg-emerald-200'
-              : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+              ? 'bg-success-soft text-success-strong animate-pulse cursor-pointer hover:bg-success/15'
+              : 'bg-surface-hover text-text-muted cursor-not-allowed'
           }`}
           title={fullyMatched ? 'Crear relación con alumnos seleccionados' : 'Sin match completo'}
         >
@@ -81,7 +81,7 @@ function EmpresaTableRow({ empresa, match, onToggle, onCreateRelacion }: Empresa
   const showPartialA = partialIA && !iA;
   const showPartialE = partialIE && !iE;
   return (
-    <tr className={`transition-colors ${fullyMatched ? 'bg-emerald-50/50' : 'hover:bg-slate-50'}`}>
+    <tr className={`transition-colors ${fullyMatched ? 'bg-success-soft/50' : 'hover:bg-surface-subtle'}`}>
       <td className="px-6 py-4">
         <p className="font-bold text-sm text-text-main">{empresa.nombre}</p>
         <p className="text-[10px] text-text-muted">{empresa.ciudad}</p>
@@ -92,7 +92,7 @@ function EmpresaTableRow({ empresa, match, onToggle, onCreateRelacion }: Empresa
           className={`p-2 rounded-lg transition-all ${
             iA ? 'bg-primary text-white shadow-md shadow-primary/20 scale-110' :
             showPartialA ? 'bg-primary/30 text-primary border border-primary/40' :
-            'text-text-muted hover:bg-slate-100'
+            'text-text-muted hover:bg-surface-hover'
           }`}
         >
           {showPartialA ? <Minus className="h-5 w-5" /> : <Send className={`h-5 w-5 ${iA ? 'fill-current' : ''}`} />}
@@ -102,9 +102,9 @@ function EmpresaTableRow({ empresa, match, onToggle, onCreateRelacion }: Empresa
         <button
           onClick={() => onToggle(empresa.id!, 'empresa')}
           className={`p-2 rounded-lg transition-all ${
-            iE ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 scale-110' :
-            showPartialE ? 'bg-emerald-600/30 text-emerald-700 border border-emerald-400' :
-            'text-text-muted hover:bg-slate-100'
+            iE ? 'bg-success text-white shadow-md shadow-success/20 scale-110' :
+            showPartialE ? 'bg-success/30 text-success-strong border border-success/40' :
+            'text-text-muted hover:bg-surface-hover'
           }`}
         >
           {showPartialE ? <Minus className="h-5 w-5" /> : <Briefcase className="h-5 w-5" />}
@@ -116,8 +116,8 @@ function EmpresaTableRow({ empresa, match, onToggle, onCreateRelacion }: Empresa
           disabled={!fullyMatched}
           className={`inline-flex h-8 w-8 rounded-full items-center justify-center transition-all ${
             fullyMatched
-              ? 'bg-emerald-100 text-emerald-700 animate-bounce cursor-pointer hover:bg-emerald-200'
-              : 'bg-slate-50 text-slate-200 cursor-not-allowed'
+              ? 'bg-success-soft text-success-strong animate-bounce cursor-pointer hover:bg-success/15'
+              : 'bg-surface-subtle text-text-muted cursor-not-allowed'
           }`}
           title={fullyMatched ? 'Crear relación con alumnos seleccionados' : 'Sin match completo'}
         >
@@ -189,8 +189,8 @@ export function InteresesGrid({
 
   const emptySearch = (
     <div className="p-20 text-center">
-      <Search className="h-12 w-12 mx-auto text-slate-200 mb-4" />
-      <p className="text-slate-500 font-bold text-sm">No se encontraron empresas.</p>
+      <Search className="h-12 w-12 mx-auto text-text-muted mb-4" />
+      <p className="text-text-muted font-bold text-sm">No se encontraron empresas.</p>
     </div>
   );
 
@@ -200,7 +200,7 @@ export function InteresesGrid({
         <Send className="h-3 w-3 text-primary" /> Envío de CV
       </div>
       <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
-        <Briefcase className="h-3 w-3 text-emerald-500" /> Empresa
+        <Briefcase className="h-3 w-3 text-success" /> Empresa
       </div>
     </div>
   ) : (
@@ -209,7 +209,7 @@ export function InteresesGrid({
         <Send className="h-3 w-3 text-primary" /> Envío de CV del alumno
       </div>
       <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
-        <Briefcase className="h-3 w-3 text-emerald-500" /> Empresa
+        <Briefcase className="h-3 w-3 text-success" /> Empresa
       </div>
     </div>
   );
@@ -217,7 +217,7 @@ export function InteresesGrid({
   return (
     <>
       {/* Cabecera */}
-      <div className="p-6 border-b border-border-base bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-6 border-b border-border-base bg-surface-subtle/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           {selectedAlumno ? (
             <>
@@ -243,18 +243,18 @@ export function InteresesGrid({
           {leyenda}
           {/* Buscador empresa */}
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
             <input
               type="text"
               placeholder="Buscar empresa por nombre o ciudad..."
               value={searchEmpresa}
               onChange={e => onSearchEmpresaChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-sans"
+              className="w-full pl-10 pr-4 py-2 bg-surface-card border border-border-base rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-sans"
             />
             {searchEmpresa && (
               <button
                 onClick={() => onSearchEmpresaChange('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -285,7 +285,7 @@ export function InteresesGrid({
         <div className="hidden lg:block">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-border-base text-[10px] font-bold text-text-muted uppercase tracking-wider">
+              <tr className="bg-surface-subtle border-b border-border-base text-[10px] font-bold text-text-muted uppercase tracking-wider">
                 <th className="px-6 py-3">Empresa / Institución</th>
                 <th className="px-6 py-3 text-center">Envío de CV</th>
                 <th className="px-6 py-3 text-center">Interés Empresa</th>
@@ -309,10 +309,10 @@ export function InteresesGrid({
       </div>
 
       {/* Footer */}
-      <div className="p-6 bg-slate-50/50 text-center mt-auto">
+      <div className="p-6 bg-surface-subtle/50 text-center mt-auto">
         <p className="text-[10px] text-text-muted italic leading-relaxed">
           Las empresas marcadas en{' '}
-          <span className="text-emerald-600 font-bold">verde</span>{' '}
+          <span className="text-success-strong font-bold">verde</span>{' '}
           indican un "Match" (interés mutuo confirmado).
         </p>
       </div>

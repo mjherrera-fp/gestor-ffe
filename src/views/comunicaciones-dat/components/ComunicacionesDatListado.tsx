@@ -32,9 +32,9 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_BADGE_COLORS: Record<string, string> = {
-    PENDIENTE_ENVIAR_DIRECTOR: 'bg-amber-50 text-amber-600 border-amber-200',
-    PENDIENTE_FIRMA_DIRECTOR: 'bg-blue-50 text-blue-600 border-blue-200',
-    COMPLETADO: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+    PENDIENTE_ENVIAR_DIRECTOR: 'bg-warning-soft text-warning-strong border-warning/20',
+    PENDIENTE_FIRMA_DIRECTOR: 'bg-primary-light text-primary border-primary/20',
+    COMPLETADO: 'bg-success-soft text-success-strong border-success/20',
 };
 
 export function ComunicacionesDatListado({
@@ -55,7 +55,7 @@ export function ComunicacionesDatListado({
                                              onSortByEstado,
                                          }: Props) {
     return (
-        <div className="w-full lg:flex-1 bg-white rounded-xl border border-border-base shadow-sm flex flex-col h-full">
+        <div className="w-full lg:flex-1 bg-surface-card rounded-xl border border-border-base shadow-sm flex flex-col h-full">
 
             <div className="px-6 py-4 border-b border-border-base space-y-4 relative z-20">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -81,7 +81,7 @@ export function ComunicacionesDatListado({
                         <input
                             type="text"
                             placeholder="Buscar por fecha o estudiante..."
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+                            className="w-full bg-surface-subtle border border-border-base rounded-lg pl-9 pr-4 py-2 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
                             value={listSearchTerm}
                             onChange={e => onListSearchChange(e.target.value)}
                         />
@@ -101,16 +101,16 @@ export function ComunicacionesDatListado({
                         options={STATUS_OPTIONS}
                     />
 
-                    <div className="flex w-full bg-slate-50 border border-slate-200 rounded-lg p-1">
+                    <div className="flex w-full bg-surface-subtle border border-border-base rounded-lg p-1">
                         <button
                             onClick={onSortByFecha}
-                            className={`flex-1 text-[9px] font-bold uppercase tracking-tight py-1 rounded-md transition-all ${sortBy === 'fecha' ? 'bg-white shadow-sm text-primary' : 'text-text-muted'}`}
+                            className={`flex-1 text-[9px] font-bold uppercase tracking-tight py-1 rounded-md transition-all ${sortBy === 'fecha' ? 'bg-surface-card shadow-sm text-primary' : 'text-text-muted'}`}
                         >
                             Fecha {sortBy === 'fecha' && (sortOrder === 'asc' ? '↑' : '↓')}
                         </button>
                         <button
                             onClick={onSortByEstado}
-                            className={`flex-1 text-[9px] font-bold uppercase tracking-tight py-1 rounded-md transition-all ${sortBy === 'estado' ? 'bg-white shadow-sm text-primary' : 'text-text-muted'}`}
+                            className={`flex-1 text-[9px] font-bold uppercase tracking-tight py-1 rounded-md transition-all ${sortBy === 'estado' ? 'bg-surface-card shadow-sm text-primary' : 'text-text-muted'}`}
                         >
                             Estado {sortBy === 'estado' && (sortOrder === 'asc' ? '↑' : '↓')}
                         </button>
@@ -129,7 +129,7 @@ export function ComunicacionesDatListado({
                         <div
                             key={item.id}
                             onClick={() => onSelectItem(item)}
-                            className={`p-5 cursor-pointer transition-colors ${selectedItem?.id === item.id ? 'bg-primary-light/40' : 'hover:bg-slate-50'}`}
+                            className={`p-5 cursor-pointer transition-colors ${selectedItem?.id === item.id ? 'bg-primary-light/40' : 'hover:bg-surface-subtle'}`}
                         >
                             <div className="flex items-start justify-between gap-4">
                                 <div className="min-w-0">
@@ -137,7 +137,7 @@ export function ComunicacionesDatListado({
                                     <div className="flex flex-wrap gap-1 mt-1">
                                         {item.alumnos?.slice(0, 2).map(a => (
                                             <span key={a.id}
-                                                  className="text-[9px] bg-slate-50 text-text-muted px-1.5 py-0.5 rounded-md border border-slate-100">
+                                                  className="text-[9px] bg-surface-subtle text-text-muted px-1.5 py-0.5 rounded-md border border-border-base">
                         {a.apellidos}, {a.nombre}
                       </span>
                                         ))}
@@ -149,7 +149,7 @@ export function ComunicacionesDatListado({
                                 </div>
                                 <div className="shrink-0">
                   <span
-                      className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${STATUS_BADGE_COLORS[item.estado] || 'bg-slate-50 text-slate-400 border-slate-200'}`}>
+                      className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${STATUS_BADGE_COLORS[item.estado] || 'bg-surface-hover text-text-muted border-border-base'}`}>
                     {COM_DAT_STATUS_LABELS[item.estado] || item.estado}
                   </span>
                                 </div>
@@ -160,7 +160,7 @@ export function ComunicacionesDatListado({
                                         e.stopPropagation();
                                         onUploadDocument(item);
                                     }}
-                                    className="text-[10px] font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1"
+                                    className="text-[10px] font-bold text-text-muted hover:text-primary transition-colors flex items-center gap-1"
                                 >
                                     <Archive className="h-3 w-3"/> Documentos
                                 </button>
@@ -169,7 +169,7 @@ export function ComunicacionesDatListado({
                                         e.stopPropagation();
                                         onEdit(item);
                                     }}
-                                    className="text-[10px] font-bold text-slate-400 hover:text-amber-600 transition-colors flex items-center gap-1"
+                                    className="text-[10px] font-bold text-text-muted hover:text-warning transition-colors flex items-center gap-1"
                                 >
                                     <Pencil className="h-3 w-3"/> Editar
                                 </button>
@@ -178,7 +178,7 @@ export function ComunicacionesDatListado({
                                         e.stopPropagation();
                                         onDeleteRequest(item.id!);
                                     }}
-                                    className="text-[10px] font-bold text-slate-400 hover:text-red-600 transition-colors flex items-center gap-1"
+                                    className="text-[10px] font-bold text-text-muted hover:text-danger transition-colors flex items-center gap-1"
                                 >
                                     <Trash2 className="h-3 w-3"/> Eliminar
                                 </button>
@@ -197,7 +197,7 @@ export function ComunicacionesDatListado({
             <div className="hidden lg:block overflow-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                    <tr className="bg-slate-50 border-b border-border-base">
+                    <tr className="bg-surface-subtle border-b border-border-base">
                         <th
                             onClick={onSortByFecha}
                             className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider cursor-pointer hover:text-primary transition-colors"
@@ -228,7 +228,7 @@ export function ComunicacionesDatListado({
                             <tr
                                 key={item.id}
                                 onClick={() => onSelectItem(item)}
-                                className={`cursor-pointer transition-colors ${selectedItem?.id === item.id ? 'bg-primary-light' : 'hover:bg-slate-50'}`}
+                                className={`cursor-pointer transition-colors ${selectedItem?.id === item.id ? 'bg-primary-light' : 'hover:bg-surface-subtle'}`}
                             >
                                 <td className="px-5 py-4">
                                     <p className="font-bold text-text-main text-sm">{fechaStr}</p>
@@ -237,7 +237,7 @@ export function ComunicacionesDatListado({
                                     <div className="flex flex-wrap gap-1">
                                         {item.alumnos?.slice(0, 3).map(a => (
                                             <span key={a.id}
-                                                  className="text-[10px] bg-slate-50 text-text-muted px-1.5 py-0.5 rounded-md border border-slate-100 whitespace-nowrap">
+                                                  className="text-[10px] bg-surface-subtle text-text-muted px-1.5 py-0.5 rounded-md border border-border-base whitespace-nowrap">
                           {a.apellidos}, {a.nombre}
                         </span>
                                         ))}
@@ -249,7 +249,7 @@ export function ComunicacionesDatListado({
                                 </td>
                                 <td className="px-5 py-4">
                     <span
-                        className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${STATUS_BADGE_COLORS[item.estado] || 'bg-slate-50 text-slate-400 border-slate-200'}`}>
+                        className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${STATUS_BADGE_COLORS[item.estado] || 'bg-surface-hover text-text-muted border-border-base'}`}>
                       {COM_DAT_STATUS_LABELS[item.estado] || item.estado}
                     </span>
                                 </td>
@@ -258,7 +258,7 @@ export function ComunicacionesDatListado({
                                         <Title text="Subir documentos">
                                             <button
                                                 onClick={() => onUploadDocument(item)}
-                                                className="p-2 text-slate-400 hover:text-primary transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                                                className="p-2 text-text-muted hover:text-primary transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
                                             >
                                                 <Archive className="h-4 w-4"/>
                                             </button>
@@ -266,7 +266,7 @@ export function ComunicacionesDatListado({
                                         <Title text="Editar comunicación">
                                             <button
                                                 onClick={() => onEdit(item)}
-                                                className="p-2 text-slate-400 hover:text-amber-600 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                                                className="p-2 text-text-muted hover:text-warning transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
                                             >
                                                 <Pencil className="h-4 w-4"/>
                                             </button>
@@ -274,7 +274,7 @@ export function ComunicacionesDatListado({
                                         <Title text="Eliminar comunicación">
                                             <button
                                                 onClick={() => onDeleteRequest(item.id!)}
-                                                className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-white rounded-lg border border-transparent hover:border-slate-200"
+                                                className="p-2 text-text-muted hover:text-danger transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
                                             >
                                                 <Trash2 className="h-4 w-4"/>
                                             </button>

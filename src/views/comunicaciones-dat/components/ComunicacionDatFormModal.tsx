@@ -65,22 +65,22 @@ export function ComunicacionDatFormModal({open, editingItem, detalleAcademicoId,
         <Modal open={open} onClose={onClose} maxWidth="lg">
             <form onSubmit={handleSubmit} className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-black text-slate-800">
+                    <h3 className="text-lg font-black text-text-main">
                         {editingItem ? 'Editar comunicación' : 'Nueva comunicación'}
                     </h3>
                     <button type="button" onClick={onClose}
-                            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-all">
+                            className="p-1.5 text-text-muted hover:text-text-main rounded-lg hover:bg-surface-hover transition-all">
                         <X className="h-5 w-5"/>
                     </button>
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">Fecha de la comunicación</label>
+                    <label className="block text-xs font-bold text-text-main mb-1.5">Fecha de la comunicación</label>
                     <input
                         type="date"
                         value={fecha}
                         onChange={e => setFecha(e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
+                        className="w-full px-3 py-2 text-sm border border-border-base rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     />
                 </div>
 
@@ -89,37 +89,37 @@ export function ComunicacionDatFormModal({open, editingItem, detalleAcademicoId,
                         <input type="checkbox" checked={showConComunicacion} onChange={handleToggleConComunicacion}
                                className="sr-only peer"/>
                         <div
-                            className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"/>
+                            className="w-9 h-5 bg-border-base peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-success peer-focus:ring-2 peer-focus:ring-success/30"/>
                     </label>
                     <span
-                        className="text-[10px] font-medium text-slate-500">Mostrar estudiantes con comunicación previa</span>
+                        className="text-[10px] font-medium text-text-muted">Mostrar estudiantes con comunicación previa</span>
                 </div>
 
                 <div className="mb-2 flex items-center justify-between">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
             Estudiantes con relación completada {loading && <Loader2 className="h-3 w-3 animate-spin inline"/>}
           </span>
                     <button type="button" onClick={toggleAll}
-                            className="text-[9px] font-bold text-blue-600 hover:text-blue-800 uppercase">
+                            className="text-[9px] font-bold text-primary hover:text-primary/90 uppercase">
                         {alumnos.every(a => a.selected) ? 'Deseleccionar todos' : 'Seleccionar todos'}
                     </button>
                 </div>
 
-                <div className="max-h-60 overflow-y-auto space-y-1 border border-slate-100 rounded-xl p-2 mb-6">
+                <div className="max-h-60 overflow-y-auto space-y-1 border border-border-base rounded-xl p-2 mb-6">
                     {alumnos.length === 0 && (
-                        <p className="text-center text-[10px] text-slate-400 py-6">No hay estudiantes disponibles</p>
+                        <p className="text-center text-[10px] text-text-muted py-6">No hay estudiantes disponibles</p>
                     )}
                     {alumnos.map(a => (
                         <label key={a.id}
-                               className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                               className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface-subtle cursor-pointer transition-colors">
                             <input
                                 type="checkbox"
                                 checked={a.selected}
                                 onChange={() => toggleAlumno(a.id!)}
-                                className="rounded border-slate-300 text-blue-600 focus:ring-blue-200 h-3.5 w-3.5"
+                                className="rounded border-border-base text-primary focus:ring-primary/30 h-3.5 w-3.5"
                             />
-                            <span className="text-xs font-medium text-slate-700">{a.apellidos}, {a.nombre}</span>
-                            <span className="text-[10px] text-slate-400 ml-auto">{a.dni}</span>
+                            <span className="text-xs font-medium text-text-main">{a.apellidos}, {a.nombre}</span>
+                            <span className="text-[10px] text-text-muted ml-auto">{a.dni}</span>
                         </label>
                     ))}
                 </div>
@@ -127,7 +127,7 @@ export function ComunicacionDatFormModal({open, editingItem, detalleAcademicoId,
                 <button
                     type="submit"
                     disabled={!fecha || alumnos.filter(a => a.selected).length === 0}
-                    className="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                     {editingItem ? 'Guardar cambios' : 'Crear comunicación'}
                 </button>

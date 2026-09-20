@@ -6,8 +6,8 @@ import { Modal } from '../../../components/ui/Modal.tsx';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
 import { required } from '../../../utils/validation.ts';
 
-const labelClass = 'block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1';
-const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-widest ml-1 mb-1';
+const inputClass = 'w-full bg-surface-card border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
 const inputErrCls = 'border-red-400 ring-2 ring-red-200';
 const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
 
@@ -59,14 +59,14 @@ export function DetalleFormModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} maxWidth="2xl" backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl">
+    <Modal open={open} onClose={onClose} maxWidth="2xl" backdropClass="bg-overlay backdrop-blur-md" cardClass="rounded-4xl">
 
         {/* Header */}
-        <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
-          <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
+        <div className="px-8 py-6 bg-surface-subtle border-b border-border-base flex items-center justify-between shrink-0">
+          <h3 className="font-black text-text-main uppercase tracking-widest text-xs">
             Configuración de Ciclo (Detalle Académico)
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-text-muted hover:text-text-main">
             <Plus className="rotate-45 h-6 w-6" />
           </button>
         </div>
@@ -177,30 +177,30 @@ export function DetalleFormModal({
           </div>
 
           {/* ── Resultados de Aprendizaje ── */}
-          <div className="mt-6 pt-6 border-t border-slate-100">
+          <div className="mt-6 pt-6 border-t border-border-base">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-indigo-600" />
-                <h4 className="text-[11px] font-black text-slate-800 uppercase tracking-wider">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                <h4 className="text-[11px] font-black text-text-main uppercase tracking-wider">
                   Resultados de Aprendizaje
                 </h4>
               </div>
-              <span className="bg-indigo-50 px-2 py-0.5 rounded text-[9px] font-black text-indigo-600 uppercase">
+              <span className="bg-primary-light px-2 py-0.5 rounded text-[9px] font-black text-primary uppercase">
                 {formData.resultadosAprendizaje?.length || 0} RA
               </span>
             </div>
 
             {/* Formulario de nuevo RA */}
-            <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-200/60 space-y-3">
+            <div className="bg-surface-subtle/50 rounded-xl p-4 border border-border-base/60 space-y-3">
               {editingRAId && (
-                <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2">
-                  <span className="text-[9px] font-black text-indigo-600 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="flex items-center justify-between bg-primary-light border border-primary-light rounded-lg px-3 py-2">
+                  <span className="text-[9px] font-black text-primary uppercase tracking-wider flex items-center gap-1.5">
                     <Pencil className="h-3 w-3" /> Editando RA
                   </span>
                   <button
                     type="button"
                     onClick={onCancelEditRA}
-                    className="text-indigo-400 hover:text-indigo-700 p-1 rounded-md hover:bg-indigo-100 transition-colors"
+                    className="text-primary hover:text-primary p-1 rounded-md hover:bg-primary-light transition-colors"
                     title="Cancelar edición"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -209,52 +209,52 @@ export function DetalleFormModal({
               )}
               <div className="grid grid-cols-4 gap-2">
                 <input
-                  className="col-span-1 bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-indigo-400"
+                  className="col-span-1 bg-surface-card border border-border-base rounded-lg px-2 py-1.5 text-[10px] font-bold text-text-main outline-none focus:border-primary"
                   value={newRA.modulo}
                   onChange={e => onNewRAChange({ ...newRA, modulo: e.target.value })}
                   placeholder="Nombre del módulo"
                 />
                 <input
-                  className="col-span-1 bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-indigo-400"
+                  className="col-span-1 bg-surface-card border border-border-base rounded-lg px-2 py-1.5 text-[10px] font-bold text-text-main outline-none focus:border-primary"
                   value={newRA.codigo}
                   onChange={e => onNewRAChange({ ...newRA, codigo: e.target.value })}
                   placeholder="Cód.del módulo"
                 />
                 <input
-                  className="col-span-2 bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none focus:border-indigo-400"
+                  className="col-span-2 bg-surface-card border border-border-base rounded-lg px-2 py-1.5 text-[10px] font-bold text-text-main outline-none focus:border-primary"
                   value={newRA.ra}
                   onChange={e => onNewRAChange({ ...newRA, ra: e.target.value })}
                   placeholder="ID RA (Ej: RA1)"
                 />
               </div>
               <input
-                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-indigo-400"
+                className="w-full bg-surface-card border border-border-base rounded-lg px-3 py-2 text-[10px] font-bold text-text-main outline-none focus:border-primary"
                 value={newRA.nombre}
                 onChange={e => onNewRAChange({ ...newRA, nombre: e.target.value })}
                 placeholder="Nombre descriptivo del RA"
               />
               <textarea
-                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-indigo-400 resize-none h-16"
+                className="w-full bg-surface-card border border-border-base rounded-lg px-3 py-2 text-[10px] font-bold text-text-main outline-none focus:border-primary resize-none h-16"
                 value={newRA.actividadFormativa}
                 onChange={e => onNewRAChange({ ...newRA, actividadFormativa: e.target.value })}
                 placeholder="Ejemplo de Actividad Formativa (Opcional)..."
               />
               <div className="flex items-center gap-2">
-                <label className="flex items-center gap-2 cursor-pointer bg-white border border-slate-200 rounded-lg px-2 py-1.5 flex-1">
+                <label className="flex items-center gap-2 cursor-pointer bg-surface-card border border-border-base rounded-lg px-2 py-1.5 flex-1">
                   <input
                     type="checkbox"
-                    className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="w-3.5 h-3.5 rounded border-border-base text-primary focus:ring-primary"
                     checked={newRA.impartidoEmpresa}
                     onChange={e => onNewRAChange({ ...newRA, impartidoEmpresa: e.target.checked })}
                   />
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">
+                  <span className="text-[9px] font-bold text-text-muted uppercase tracking-tight">
                     Íntegro empresa
                   </span>
                 </label>
                 <button
                   type="button"
                   onClick={onAddRA}
-                  className={`${editingRAId ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white px-3 py-2 rounded-lg font-bold text-[9px] uppercase tracking-widest transition-all flex items-center gap-1`}
+                  className={`${editingRAId ? 'bg-success/90 hover:bg-success' : 'bg-primary hover:bg-primary/90'} text-white px-3 py-2 rounded-lg font-bold text-[9px] uppercase tracking-widest transition-all flex items-center gap-1`}
                 >
                   {editingRAId ? <CheckCircle className="h-3 w-3" /> : <Plus className="h-3 w-3" />} {editingRAId ? 'Guardar RA' : 'Añadir RA'}
                 </button>
@@ -266,22 +266,22 @@ export function DetalleFormModal({
               {formData.resultadosAprendizaje?.map(ra => (
                 <div
                   key={ra.id}
-                  className="bg-white border border-slate-100 rounded-lg p-3 shadow-sm flex items-start justify-between gap-3 group"
+                  className="bg-surface-card border border-border-base rounded-lg p-3 shadow-sm flex items-start justify-between gap-3 group"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-[8px] font-black text-indigo-600 uppercase bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                      <span className="text-[8px] font-black text-primary uppercase bg-primary-light px-1.5 py-0.5 rounded border border-primary-light">
                         {ra.modulo}:{ra.ra}
                       </span>
                       {ra.impartidoEmpresa && (
-                        <span className="text-[8px] font-black text-emerald-600 uppercase bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 flex items-center gap-0.5">
+                        <span className="text-[8px] font-black text-success uppercase bg-success-soft px-1.5 py-0.5 rounded border border-success/20 flex items-center gap-0.5">
                           <CheckCircle className="h-2.5 w-2.5" /> Empresa
                         </span>
                       )}
                     </div>
-                    <h5 className="text-[10px] font-black text-slate-800 leading-tight">{ra.nombre}</h5>
+                    <h5 className="text-[10px] font-black text-text-main leading-tight">{ra.nombre}</h5>
                     {ra.actividadFormativa && (
-                      <p className="text-[9px] text-slate-400 mt-1 italic line-clamp-2 leading-tight">
+                      <p className="text-[9px] text-text-muted mt-1 italic line-clamp-2 leading-tight">
                         {ra.actividadFormativa}
                       </p>
                     )}
@@ -290,7 +290,7 @@ export function DetalleFormModal({
                     <button
                       type="button"
                       onClick={() => onEditRA(ra)}
-                      className="text-slate-300 hover:text-indigo-500 p-1 rounded-md hover:bg-indigo-50 transition-colors"
+                      className="text-text-muted hover:text-primary p-1 rounded-md hover:bg-primary-light transition-colors"
                       title="Editar RA"
                     >
                       <Pencil className="h-3.5 w-3.5" />
@@ -298,7 +298,7 @@ export function DetalleFormModal({
                     <button
                       type="button"
                       onClick={() => onRemoveRA(ra.id)}
-                      className="text-slate-300 hover:text-red-500 p-1 rounded-md hover:bg-red-50 transition-colors"
+                      className="text-text-muted hover:text-danger p-1 rounded-md hover:bg-danger-soft transition-colors"
                       title="Eliminar RA"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -307,8 +307,8 @@ export function DetalleFormModal({
                 </div>
               ))}
               {(!formData.resultadosAprendizaje || formData.resultadosAprendizaje.length === 0) && (
-                <div className="text-center py-6 bg-slate-50/30 border border-dashed border-slate-200 rounded-xl">
-                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest italic opacity-60">
+                <div className="text-center py-6 bg-surface-subtle/30 border border-dashed border-border-base rounded-xl">
+                  <p className="text-[9px] text-text-muted font-bold uppercase tracking-widest italic opacity-60">
                     Sin RA definidos
                   </p>
                 </div>
@@ -319,7 +319,7 @@ export function DetalleFormModal({
           <div className="pt-6">
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-800 transition-all shadow-xl shadow-slate-900/10"
+              className="w-full bg-primary text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl shadow-primary/20"
             >
               Guardar Detalle Académico
             </button>

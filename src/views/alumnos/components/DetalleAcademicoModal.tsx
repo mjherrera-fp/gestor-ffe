@@ -52,9 +52,9 @@ export default function DetalleAcademicoModal({ open, alumno, onClose }: Props) 
 
   return (
     <Modal open={open} onClose={onClose} maxWidth="lg">
-        <div className="px-8 py-6 border-b border-border-base flex items-center justify-between bg-slate-50/50 shrink-0">
+        <div className="px-8 py-6 border-b border-border-base flex items-center justify-between bg-surface-subtle/50 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="bg-emerald-50 p-2 rounded-lg text-emerald-600">
+            <div className="bg-success-soft p-2 rounded-lg text-success">
               <GraduationCap className="h-5 w-5" />
             </div>
             <div>
@@ -62,7 +62,7 @@ export default function DetalleAcademicoModal({ open, alumno, onClose }: Props) 
               <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1">Para {alumno.nombre} {alumno.apellidos}</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-text-muted hover:text-text-main transition-colors p-2 hover:bg-slate-100 rounded-full">
+          <button onClick={onClose} className="text-text-muted hover:text-text-main transition-colors p-2 hover:bg-surface-hover rounded-full">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -70,7 +70,7 @@ export default function DetalleAcademicoModal({ open, alumno, onClose }: Props) 
         <form onSubmit={handleSubmit} className="p-8 overflow-y-auto flex-1">
           <div className="mb-6">
             <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2">Seleccionar Centro / Ciclo / Grupo</label>
-            <div className="bg-white rounded-xl overflow-visible"> {/* Cambiar hidden por visible */}
+            <div>
               <CustomSelect
                 value={selectedId}
                 onChange={setSelectedId}
@@ -83,12 +83,12 @@ export default function DetalleAcademicoModal({ open, alumno, onClose }: Props) 
             </div>
           </div>
 
-          <p className="text-xs text-text-muted leading-relaxed mb-8 bg-slate-50 p-4 rounded-xl border border-dashed border-border-base">
+          <p className="text-xs text-text-muted leading-relaxed mb-8 bg-surface-subtle p-4 rounded-xl border border-dashed border-border-base">
             Si no encuentras el detalle académico, créalo primero en la sección de <strong>Profesor</strong> del menú principal.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <button type="button" onClick={onClose} className="w-full py-3 border border-border-base rounded-xl font-bold text-xs uppercase tracking-widest text-text-muted hover:bg-slate-50 transition-all">
+            <button type="button" onClick={onClose} className="w-full py-3 border border-border-base rounded-xl font-bold text-xs uppercase tracking-widest text-text-muted hover:bg-surface-hover transition-all">
               Cancelar
             </button>
             <button type="submit" disabled={saving} className="w-full py-3 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-50">

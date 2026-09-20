@@ -8,8 +8,8 @@ import localidades from '../../../data/geo/localidades-madrid.json';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
 import { required, email, compose } from '../../../utils/validation.ts';
 
-const labelClass = 'block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5';
-const inputClass = 'w-full bg-white border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
+const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
+const inputClass = 'w-full bg-surface-card border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
 const inputErrCls = 'border-red-400 ring-2 ring-red-200';
 const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
 
@@ -133,14 +133,14 @@ export function CentroFormModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} maxWidth="lg" backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl">
+    <Modal open={open} onClose={onClose} maxWidth="lg" backdropClass="bg-overlay backdrop-blur-md" cardClass="rounded-4xl">
 
         {/* Header */}
-        <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
-          <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
+        <div className="px-8 py-6 bg-surface-subtle border-b border-border-base flex items-center justify-between shrink-0">
+          <h3 className="font-black text-text-main uppercase tracking-widest text-xs">
             {editing ? 'Editar Centro' : 'Añadir Nuevo Centro'}
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-text-muted hover:text-text-main">
             <Plus className="rotate-45 h-6 w-6" />
           </button>
         </div>
@@ -180,18 +180,18 @@ export function CentroFormModal({
                 onKeyDown={handleKeyDown}
               />
               {showDropdown && (
-                <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-surface-card border border-border-base rounded-lg shadow-xl max-h-60 overflow-y-auto">
                   {filtered.map((m, i) => (
                     <button
                       key={m.slug}
                       type="button"
                       onMouseDown={e => { e.preventDefault(); selectMunicipio(m.name, m.slug); }}
                       onMouseEnter={() => setHighlightedIndex(i)}
-                      className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-slate-50 last:border-0 ${
-                        i === highlightedIndex ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-border-base last:border-0 ${
+                        i === highlightedIndex ? 'bg-primary-light text-primary' : 'text-text-main hover:bg-surface-hover'
                       }`}
                     >
-                      <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <MapPin className="h-3.5 w-3.5 text-text-muted shrink-0" />
                       <span>{m.name}</span>
                     </button>
                   ))}
@@ -237,7 +237,7 @@ export function CentroFormModal({
                 type="button"
                 disabled={loadingFestivos}
                 onClick={() => { if (!loadingFestivos) setShowYearModal(true); }}
-                className="text-[9px] font-bold text-blue-600 hover:text-blue-800 underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className="text-[9px] font-bold text-primary hover:text-primary/80 underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 {loadingFestivos && <Loader2 className="h-3 w-3 animate-spin" />}
                 {loadingFestivos ? 'Obteniendo...' : 'Obtener festivos con calendariosnacionales.com'}
@@ -254,26 +254,26 @@ export function CentroFormModal({
         </form>
 
         {/* Agradecimiento API */}
-        <Modal open={showAgradecimiento} onClose={() => setShowAgradecimiento(false)} maxWidth="sm" zIndex={60} backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl p-8">
+        <Modal open={showAgradecimiento} onClose={() => setShowAgradecimiento(false)} maxWidth="sm" zIndex={60} backdropClass="bg-overlay backdrop-blur-md" cardClass="rounded-4xl p-8">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
+                <h3 className="font-black text-text-main uppercase tracking-widest text-xs">
                   Festivos añadidos
                 </h3>
-                <button onClick={() => setShowAgradecimiento(false)} className="text-slate-400 hover:text-slate-600">
+                <button onClick={() => setShowAgradecimiento(false)} className="text-text-muted hover:text-text-main">
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <p className="text-sm text-slate-600 mb-4">
+              <p className="text-sm text-text-muted mb-4">
                 Se han añadido <strong>{festivosImportados}</strong> días festivos.
                 Revise que todos los días sean correctos antes de guardar.
               </p>
-              <p className="text-xs text-slate-400 mb-6">
+              <p className="text-xs text-text-muted mb-6">
                 Servicio ofrecido por{' '}
                 <a
                   href="https://calendariosnacionales.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline underline-offset-2 inline-flex items-center gap-1"
+                  className="text-primary hover:text-primary/80 underline underline-offset-2 inline-flex items-center gap-1"
                 >
                   calendariosnacionales.com <ExternalLink className="h-3 w-3" />
                 </a>

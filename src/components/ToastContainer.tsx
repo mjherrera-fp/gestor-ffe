@@ -22,30 +22,30 @@ export default function ToastContainer({ avisos, onDescartar, onPosponer }: Toas
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 100, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="bg-white rounded-2xl border border-slate-200 shadow-xl p-4 pointer-events-auto"
+            className="bg-surface-card rounded-2xl border border-border-base shadow-xl p-4 pointer-events-auto"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-slate-900 uppercase">{aviso.asunto}</p>
-                <p className="text-xs text-slate-500 mt-1 whitespace-pre-line">{aviso.descripcion}</p>
+                <p className="text-xs font-bold text-text-main uppercase">{aviso.asunto}</p>
+                <p className="text-xs text-text-muted mt-1 whitespace-pre-line">{aviso.descripcion}</p>
               </div>
               <button
                 onClick={() => onPosponer(aviso.id)}
-                className="shrink-0 p-1 rounded-lg text-slate-300 hover:text-slate-500 hover:bg-slate-100 transition-colors"
+                className="shrink-0 p-1 rounded-lg text-text-muted hover:text-text-main hover:bg-surface-hover transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border-base">
               <button
                 onClick={() => onDescartar(aviso.id)}
-                className="flex-1 text-[10px] font-bold uppercase text-white bg-red-500 hover:bg-red-600 rounded-lg py-1.5 transition-colors"
+                className="flex-1 text-[10px] font-bold uppercase text-white bg-danger hover:bg-danger/90 rounded-lg py-1.5 transition-colors"
               >
                 Descartar
               </button>
               <button
                 onClick={() => onPosponer(aviso.id)}
-                className="flex-1 text-[10px] font-bold uppercase text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg py-1.5 transition-colors flex items-center justify-center gap-1"
+                className="flex-1 text-[10px] font-bold uppercase text-text-main bg-surface-hover hover:bg-surface-strong rounded-lg py-1.5 transition-colors flex items-center justify-center gap-1"
               >
                 <Clock className="h-3 w-3" />
                 Posponer

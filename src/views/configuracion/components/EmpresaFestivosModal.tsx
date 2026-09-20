@@ -63,15 +63,15 @@ export function EmpresaFestivosModal({ open, localidad, festivos, onSave, onClos
   };
 
   return (
-    <Modal open={open} onClose={onClose} maxWidth="lg" backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl">
-        <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
+    <Modal open={open} onClose={onClose} maxWidth="lg" backdropClass="bg-overlay backdrop-blur-md" cardClass="rounded-4xl">
+        <div className="px-8 py-6 bg-surface-subtle border-b border-border-base flex items-center justify-between shrink-0">
           <div>
-            <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
+            <h3 className="font-black text-text-main uppercase tracking-widest text-xs">
               Festivos de empresa
             </h3>
-            <p className="text-sm text-slate-500 mt-1">{localidad}</p>
+            <p className="text-sm text-text-muted mt-1">{localidad}</p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-text-muted hover:text-text-main">
             <Plus className="rotate-45 h-6 w-6" />
           </button>
         </div>
@@ -91,7 +91,7 @@ export function EmpresaFestivosModal({ open, localidad, festivos, onSave, onClos
                 type="button"
                 disabled={loadingFestivos}
                 onClick={() => { if (!loadingFestivos) setShowYearModal(true); }}
-                className="text-[9px] font-bold text-blue-600 hover:text-blue-800 underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className="text-[9px] font-bold text-primary hover:text-primary/90 underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 {loadingFestivos && <Loader2 className="h-3 w-3 animate-spin" />}
                 {loadingFestivos ? 'Obteniendo...' : 'Obtener festivos con calendariosnacionales.com'}
@@ -107,26 +107,26 @@ export function EmpresaFestivosModal({ open, localidad, festivos, onSave, onClos
           </button>
         </form>
 
-        <Modal open={showAgradecimiento} onClose={() => setShowAgradecimiento(false)} maxWidth="sm" zIndex={60} backdropClass="bg-slate-900/60 backdrop-blur-md" cardClass="rounded-4xl p-8">
+        <Modal open={showAgradecimiento} onClose={() => setShowAgradecimiento(false)} maxWidth="sm" zIndex={60} backdropClass="bg-overlay backdrop-blur-md" cardClass="rounded-4xl p-8">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">
+                <h3 className="font-black text-text-main uppercase tracking-widest text-xs">
                   Festivos añadidos
                 </h3>
-                <button onClick={() => setShowAgradecimiento(false)} className="text-slate-400 hover:text-slate-600">
+                <button onClick={() => setShowAgradecimiento(false)} className="text-text-muted hover:text-text-main">
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <p className="text-sm text-slate-600 mb-4">
+              <p className="text-sm text-text-muted mb-4">
                 Se han añadido <strong>{festivosImportados}</strong> días festivos.
                 Revise que todos los días sean correctos antes de guardar.
               </p>
-              <p className="text-xs text-slate-400 mb-6">
+              <p className="text-xs text-text-muted mb-6">
                 Servicio ofrecido por{' '}
                 <a
                   href="https://calendariosnacionales.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline underline-offset-2 inline-flex items-center gap-1"
+                  className="text-primary hover:text-primary/90 underline underline-offset-2 inline-flex items-center gap-1"
                 >
                   calendariosnacionales.com <ExternalLink className="h-3 w-3" />
                 </a>

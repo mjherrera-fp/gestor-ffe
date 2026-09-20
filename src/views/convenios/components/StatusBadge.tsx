@@ -4,11 +4,11 @@ import { ConvenioEstado, ConvenioEstadoLabels } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
 
 const STATUS_STYLES: Record<ConvenioEstado, string> = {
-  [ConvenioEstado.PENDIENTE_ENVIAR]:          'bg-orange-50 text-orange-700',
-  [ConvenioEstado.PENDIENTE_FIRMA_EMPRESA]:   'bg-amber-50 text-amber-700',
-  [ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'bg-blue-50 text-blue-700',
-  [ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR]:  'bg-indigo-50 text-indigo-700',
-  [ConvenioEstado.COMPLETADO]:                'bg-emerald-50 text-emerald-700',
+  [ConvenioEstado.PENDIENTE_ENVIAR]:          'bg-warning-soft text-warning-strong',
+  [ConvenioEstado.PENDIENTE_FIRMA_EMPRESA]:   'bg-warning-soft text-warning-strong',
+  [ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'bg-primary-light text-primary',
+  [ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR]:  'bg-primary-light text-primary',
+  [ConvenioEstado.COMPLETADO]:                'bg-success-soft text-success-strong',
 };
 
 export const StatusBadge = ({ estado }: { estado: ConvenioEstado }) => (

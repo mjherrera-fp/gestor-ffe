@@ -95,6 +95,9 @@ export const lockDatabase = (): boolean => {
 
 // Función para cifrar o cambiar la contraseña (se usa en el Perfil)
 export const encryptDatabase = (password: string) => {
+  db.pragma(`cipher='sqlcipher'`);
+  db.pragma(`legacy=4`);
+  db.pragma(`page_size=4096`);
   db.pragma(`rekey='${password}'`);
   sessionKeyApplied = true; // <--- Marcamos que ahora tiene clave
 };

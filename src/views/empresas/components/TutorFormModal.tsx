@@ -5,9 +5,9 @@ import { Modal } from '../../../components/ui/Modal.tsx';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
 import { required, email, phone } from '../../../utils/validation.ts';
 
-const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
+const inputCls = 'w-full bg-surface-subtle border border-border-base rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
 const inputErrCls = 'border-red-400 ring-2 ring-red-200';
-const labelCls = 'block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1';
+const labelCls = 'block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1';
 const errMsgCls = 'text-red-500 text-xs mt-1 italic font-medium';
 
 const RULES = {
@@ -43,11 +43,11 @@ export function TutorFormModal({ open, editing, formData, onChange, onSubmit, on
     <Modal open={open} onClose={onClose} maxWidth="md" cardClass="rounded-3xl">
 
         {/* Header */}
-        <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
-          <h3 className="text-xl font-black text-slate-900 tracking-tight">
+        <div className="px-8 py-6 border-b border-border-base bg-surface-subtle flex items-center justify-between shrink-0">
+          <h3 className="text-xl font-black text-text-main tracking-tight">
             {editing ? 'Editar Tutor' : 'Nuevo Tutor'}
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={onClose} className="text-text-muted hover:text-text-main transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -113,13 +113,13 @@ export function TutorFormModal({ open, editing, formData, onChange, onSubmit, on
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-2xl border border-slate-200 transition-all"
+              className="flex-1 py-3 text-sm font-bold text-text-muted hover:bg-surface-hover rounded-2xl border border-border-base transition-all"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 bg-blue-600 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+              className="flex-1 py-3 bg-primary text-white text-sm font-bold rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
             >
               Confirmar Tutor
             </button>

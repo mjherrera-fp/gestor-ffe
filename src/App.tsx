@@ -7,20 +7,27 @@ import {
   FileText,
   FolderUp,
   History,
+  Laptop,
   LayoutDashboard,
   Link,
   Lock,
   Menu,
+  Moon,
   Settings,
+  Sun,
   UserCircle,
   Users,
   X
 } from 'lucide-react';
 import {AnimatePresence, motion} from 'motion/react';
 import {Aviso, Curso, DetalleAcademico, Profesor} from './types/index.ts';
+import {useTheme, type ThemeMode} from './hooks/useTheme.tsx';
 import packageJson from '../package.json';
 
 const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true;
+
+const THEME_CYCLE: ThemeMode[] = ['claro', 'oscuro', 'sistema'];
+const THEME_LABEL: Record<ThemeMode, string> = { claro: 'Claro', oscuro: 'Oscuro', sistema: 'Sistema' };
 
 // Components
 import {Title} from './components/Title.tsx';
@@ -46,6 +53,7 @@ import UpdateButton from './views/updater/UpdateButton.tsx';
 import { UpdaterProvider } from './views/updater/useUpdaterStatus.tsx';
 
 export default function App() {
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [profesor, setProfesor] = useState<Profesor | null>(null);
   const [cursos, setCursos] = useState<Curso[]>([]);
@@ -226,6 +234,11 @@ export default function App() {
     }
   };
 
+  const handleCycleTheme = () => {
+    const idx = THEME_CYCLE.indexOf(theme);
+    setTheme(THEME_CYCLE[(idx + 1) % THEME_CYCLE.length]);
+  };
+
   // 4. Si isLocked es true, renderiza la pantalla de bloqueo en lugar de la app
   if (isLocked) {
     return <LockView onUnlock={handleUnlock} error={authError} />;
@@ -242,10 +255,10 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50">
+      <div className="flex h-screen items-center justify-center bg-bg-base">
         <div className="text-center">
-          <div className="h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600 font-medium">Cargando SGE-FFE...</p>
+          <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-text-muted font-medium">Cargando SGE-FFE...</p>
         </div>
       </div>
     );
@@ -262,14 +275,14 @@ export default function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-30 lg:hidden"
+            className="fixed inset-0 bg-overlay backdrop-blur-sm z-30 lg:hidden"
           />
         )}
       </AnimatePresence>
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 w-64 bg-white border-r border-border-base flex flex-col shadow-xl z-40 transition-transform duration-300 lg:translate-x-0 lg:static lg:w-60 lg:shadow-sm
+        fixed inset-y-0 left-0 w-64 bg-surface-card border-r border-border-base flex flex-col shadow-xl z-40 transition-transform duration-300 lg:translate-x-0 lg:static lg:w-60 lg:shadow-sm
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="p-6 shrink-0 flex items-center justify-between">
@@ -287,7 +300,7 @@ export default function App() {
           </div>
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden p-2 text-text-muted hover:bg-slate-50 rounded-lg"
+            className="lg:hidden p-2 text-text-muted hover:bg-surface-hover rounded-lg"
           >
             <X className="h-5 w-5" />
           </button>
@@ -308,7 +321,7 @@ export default function App() {
                 ? 'bg-primary-light text-primary'
                 : item.disabled
                   ? 'opacity-40 cursor-not-allowed text-text-muted'
-                  : 'text-text-muted hover:bg-slate-50 hover:text-text-main'
+                  : 'text-text-muted hover:bg-surface-hover hover:text-text-main'
                 }`}
             >
               <item.icon className="h-5 w-5" />
@@ -317,13 +330,13 @@ export default function App() {
           ))}
         </nav>
 
-        <div className="p-6 mt-auto border-t border-slate-50">
+        <div className="p-6 mt-auto border-t border-border-base">
           <p className="text-[10px] text-text-muted font-medium uppercase tracking-widest">
             v{packageJson.version}
-            {isDev && <span className="ml-1 text-orange-500 font-bold">dev</span>}
+            {isDev && <span className="ml-1 text-warning-strong font-bold">dev</span>}
           </p>
-          <p className="text-[9px] text-slate-400 mt-1">
-            <Copyright size={12} className="inline"/> <button onClick={() => setShowCopyright(true)} className="hover:text-blue-500 transition-colors cursor-pointer">mjherrera-fp</button>
+          <p className="text-[9px] text-text-muted mt-1">
+            <Copyright size={12} className="inline"/> <button onClick={() => setShowCopyright(true)} className="hover:text-primary transition-colors cursor-pointer">mjherrera-fp</button>
           </p>
         </div>
       </aside>
@@ -331,11 +344,11 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 bg-bg-base overflow-hidden relative">
         {/* Header */}
-        <header className="h-18 lg:h-20 bg-white border-b border-border-base flex items-center justify-between px-4 lg:px-8 z-10 shrink-0">
+        <header className="h-18 lg:h-20 bg-surface-card border-b border-border-base flex items-center justify-between px-4 lg:px-8 z-10 shrink-0">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 text-text-main hover:bg-slate-50 rounded-lg"
+              className="lg:hidden p-2 text-text-main hover:bg-surface-hover rounded-lg"
             >
               <Menu className="h-6 w-6" />
             </button>
@@ -361,16 +374,16 @@ export default function App() {
               <div className="relative">
                 <button
                   onClick={() => setShowGroupSelector(prev => !prev)}
-                  className="flex items-center gap-1.5 lg:gap-2 bg-emerald-50 text-emerald-800 px-2 lg:px-3 py-1.5 rounded-full text-[9px] lg:text-[10px] font-bold border border-emerald-100/50 hover:bg-emerald-100 transition-all"
+                  className="flex items-center gap-1.5 lg:gap-2 bg-success-soft text-success-strong px-2 lg:px-3 py-1.5 rounded-full text-[9px] lg:text-[10px] font-bold border border-success/20 hover:bg-success/20 transition-all"
                 >
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse shrink-0" />
                   {activeCurso && (
                     <span className="uppercase hidden md:inline">{activeCurso.descripcion}:</span>
                   )}
                   <span className="max-w-40 truncate">
                     {(activeDetalle as any).nombreCorto || (activeDetalle as any).codigoGrupo} <span className="hidden md:inline">({(activeDetalle as any).centroNombre || ''})</span>
                   </span>
-                  <svg className="h-3 w-3 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <svg className="h-3 w-3 shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
@@ -378,7 +391,7 @@ export default function App() {
                 {showGroupSelector && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowGroupSelector(false)} />
-                    <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl border border-slate-200 shadow-xl z-50 py-1 max-h-60 overflow-y-auto">
+                    <div className="absolute right-0 top-full mt-2 w-72 bg-surface-card rounded-xl border border-border-base shadow-xl z-50 py-1 max-h-60 overflow-y-auto">
                       {detallesAcademicos.map(d => {
                         const isActive = d.id === activeDetalle.id;
                         return (
@@ -387,13 +400,13 @@ export default function App() {
                             onClick={() => { setActiveDetalle(d); setShowGroupSelector(false); }}
                             className={`w-full text-left px-4 py-2.5 text-sm transition-all ${
                               isActive
-                                ? 'bg-emerald-50 text-emerald-800 font-bold'
-                                : 'text-slate-700 hover:bg-slate-50 font-medium'
+                                ? 'bg-success-soft text-success-strong font-bold'
+                                : 'text-text-main hover:bg-surface-hover font-medium'
                             }`}
                           >
                             <span className="block truncate">{(d as any).nombreCorto || (d as any).codigoGrupo}</span>
                             {(d as any).centroNombre && (
-                              <span className="block text-[11px] text-slate-400 truncate">
+                              <span className="block text-[11px] text-text-muted truncate">
                                 {(d as any).centroNombre}
                               </span>
                             )}
@@ -410,7 +423,7 @@ export default function App() {
               <Title text="Bloquear Aplicación">
                 <button
                   onClick={handleLock}
-                  className="p-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all flex items-center justify-center"
+                  className="p-2 rounded-full text-text-muted hover:text-primary hover:bg-surface-hover transition-all flex items-center justify-center"
                 >
                   <Lock className="h-5 w-5" />
                 </button>
@@ -419,9 +432,17 @@ export default function App() {
             <Title text="Histórico">
               <button
                 onClick={() => setActiveTab('historico')}
-                className="p-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all flex items-center justify-center"
+                className="p-2 rounded-full text-text-muted hover:text-primary hover:bg-surface-hover transition-all flex items-center justify-center"
               >
                 <History className="h-5 w-5" />
+              </button>
+            </Title>
+            <Title text={`Tema: ${THEME_LABEL[theme]} — cambiar`}>
+              <button
+                onClick={handleCycleTheme}
+                className="p-2 rounded-full text-text-muted hover:text-primary hover:bg-surface-hover transition-all flex items-center justify-center"
+              >
+                {theme === 'claro' ? <Sun className="h-5 w-5" /> : theme === 'oscuro' ? <Moon className="h-5 w-5" /> : <Laptop className="h-5 w-5" />}
               </button>
             </Title>
             <NotificationBell
@@ -433,7 +454,7 @@ export default function App() {
             <Title text="Configuración">
               <button
                 onClick={() => setActiveTab('configuracion')}
-                className="p-2 rounded-full text-slate-400 hover:text-indigo-500 hover:bg-sky-50 transition-all flex items-center justify-center"
+                className="p-2 rounded-full text-text-muted hover:text-primary hover:bg-surface-hover transition-all flex items-center justify-center"
               >
                 <Settings className="h-5 w-5" />
               </button>
@@ -452,8 +473,8 @@ export default function App() {
           <div className="max-w-7xl mx-auto pb-20">
             {/* Gate: sin profesor */}
             {!tieneProfesor && activeTab !== 'dashboard' && activeTab !== 'configuracion' && (
-              <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 mb-6">
-                <p className="text-sm text-amber-800 font-medium">
+              <div className="bg-warning-soft rounded-xl p-6 border border-warning/20 mb-6">
+                <p className="text-sm text-warning-strong font-medium">
                   Primero debes configurar tus datos como profesor en la sección <strong>Profesor</strong>.
                 </p>
               </div>
@@ -461,8 +482,8 @@ export default function App() {
 
             {/* Gate: profesor sí, sin curso */}
             {tieneProfesor && !tieneCurso && activeTab !== 'dashboard' && activeTab !== 'cursos' && activeTab !== 'configuracion' && (
-              <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 mb-6">
-                <p className="text-sm text-amber-800 font-medium">
+              <div className="bg-warning-soft rounded-xl p-6 border border-warning/20 mb-6">
+                <p className="text-sm text-warning-strong font-medium">
                   Primero debes crear un curso académico en la sección <strong>Cursos</strong>.
                 </p>
               </div>

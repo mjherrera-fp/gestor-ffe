@@ -60,18 +60,18 @@ export function SeguridadSocialTable({ data }: Props) {
   const rowSelected = (id: number) => selectedRowId === id;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col" style={{ maxHeight: '70vh' }}>
+    <div className="bg-surface-card rounded-xl border border-border-base shadow-sm flex flex-col" style={{ maxHeight: '70vh' }}>
       <div className="overflow-auto flex-1">
         <table className="w-full text-sm border-collapse">
           <thead className="sticky top-0 z-10">
-            <tr className="bg-slate-50">
-              <th className="px-4 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-left sticky left-0 bg-slate-50 z-20 min-w-40">
+            <tr className="bg-surface-subtle">
+              <th className="px-4 py-3 text-[11px] font-bold text-text-muted uppercase tracking-wider text-left sticky left-0 bg-surface-subtle z-20 min-w-40">
                 Alumno
               </th>
-              <th className="px-3 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center min-w-22.5">
+              <th className="px-3 py-3 text-[11px] font-bold text-text-muted uppercase tracking-wider text-center min-w-22.5">
                 F. Inicio
               </th>
-              <th className="px-3 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center min-w-22.5">
+              <th className="px-3 py-3 text-[11px] font-bold text-text-muted uppercase tracking-wider text-center min-w-22.5">
                 F. Fin
               </th>
               {data.meses.map(mes => (
@@ -79,47 +79,47 @@ export function SeguridadSocialTable({ data }: Props) {
                   key={mes}
                   className={`px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-center min-w-15 transition-colors ${
                     selectedMes === mes
-                      ? 'text-blue-700 bg-blue-100'
-                      : 'text-slate-500 bg-slate-50'
+                      ? 'text-primary bg-primary-light'
+                      : 'text-text-muted bg-surface-subtle'
                   }`}
                 >
                   {formatMesLabel(mes)}
                 </th>
               ))}
-              <th className="px-3 py-3 text-[11px] font-bold text-slate-600 uppercase tracking-wider text-center min-w-15 bg-slate-100">
+              <th className="px-3 py-3 text-[11px] font-bold text-text-main uppercase tracking-wider text-center min-w-15 bg-surface-hover">
                 Total
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border-base">
             {data.alumnos.map(alumno => (
               <tr
                 key={alumno.id}
                 className={`cursor-pointer transition-colors ${
                   rowSelected(alumno.id)
-                    ? 'bg-blue-50'
-                    : 'hover:bg-slate-50/50'
+                    ? 'bg-primary-light'
+                    : 'hover:bg-surface-subtle/50'
                 }`}
               >
                 <td
                   onClick={() => handleRowClick(alumno.id)}
                   className={`px-4 py-2.5 font-semibold whitespace-nowrap sticky left-0 z-10 transition-colors ${
                     rowSelected(alumno.id)
-                      ? 'text-blue-900 bg-blue-50'
-                      : 'text-slate-900 bg-white'
+                      ? 'text-primary bg-primary-light'
+                      : 'text-text-main bg-surface-card'
                   }`}
                 >
                   {alumno.apellidos}, {alumno.nombre}
                 </td>
                 <td
                   onClick={() => handleRowClick(alumno.id)}
-                  className="px-3 py-2.5 text-center text-xs text-slate-600 whitespace-nowrap"
+                  className="px-3 py-2.5 text-center text-xs text-text-muted whitespace-nowrap"
                 >
                   {formatDate(alumno.fechaInicio) || '—'}
                 </td>
                 <td
                   onClick={() => handleRowClick(alumno.id)}
-                  className="px-3 py-2.5 text-center text-xs text-slate-600 whitespace-nowrap"
+                  className="px-3 py-2.5 text-center text-xs text-text-muted whitespace-nowrap"
                 >
                   {formatDate(alumno.fechaFin) || '—'}
                 </td>
@@ -134,14 +134,14 @@ export function SeguridadSocialTable({ data }: Props) {
                       onClick={() => handleMonthCellClick(alumno.id, mes)}
                       className={`px-3 py-2.5 text-center text-sm font-semibold transition-colors ${
                         isMesSelected && isRowSel
-                          ? 'text-blue-800 bg-blue-200'
+                          ? 'text-primary bg-primary-light'
                           : isMesSelected
-                          ? 'text-blue-700 bg-blue-100'
+                          ? 'text-primary bg-primary-light'
                           : isRowSel
-                          ? 'text-slate-500'
+                          ? 'text-text-main'
                           : dias > 0
-                          ? 'text-emerald-700 bg-emerald-50/30'
-                          : 'text-slate-300'
+                          ? 'text-success-strong bg-success-soft/30'
+                          : 'text-text-muted'
                       }`}
                     >
                       {dias > 0 ? dias : '—'}
@@ -152,8 +152,8 @@ export function SeguridadSocialTable({ data }: Props) {
                   onClick={() => handleRowClick(alumno.id)}
                   className={`px-3 py-2.5 text-center text-sm font-bold transition-colors ${
                     rowSelected(alumno.id)
-                      ? 'text-blue-800 bg-blue-100'
-                      : 'text-slate-800 bg-slate-50/50'
+                      ? 'text-primary bg-primary-light'
+                      : 'text-text-main bg-surface-subtle/50'
                   }`}
                 >
                   {totalesPorAlumno[alumno.id] || '—'}
@@ -162,11 +162,11 @@ export function SeguridadSocialTable({ data }: Props) {
             ))}
           </tbody>
           <tfoot>
-            <tr className="bg-slate-100 font-semibold">
-              <td className="px-4 py-3 text-[11px] font-bold text-slate-600 uppercase tracking-wider sticky left-0 bg-slate-100 z-10">
+            <tr className="bg-surface-hover font-semibold">
+              <td className="px-4 py-3 text-[11px] font-bold text-text-main uppercase tracking-wider sticky left-0 bg-surface-hover z-10">
                 Total
               </td>
-              <td colSpan={2} className="px-3 py-3 text-center text-xs text-slate-400">
+              <td colSpan={2} className="px-3 py-3 text-center text-xs text-text-muted">
                 —
               </td>
               {data.meses.map(mes => (
@@ -174,14 +174,14 @@ export function SeguridadSocialTable({ data }: Props) {
                   key={mes}
                   className={`px-3 py-3 text-center text-sm font-bold transition-colors ${
                     selectedMes === mes
-                      ? 'text-blue-800 bg-blue-200'
-                      : 'text-slate-700'
+                      ? 'text-primary bg-primary-light'
+                      : 'text-text-main'
                   }`}
                 >
                   {totalesPorMes[mes] || 0}
                 </td>
               ))}
-              <td className="px-3 py-3 text-center text-sm font-bold text-blue-700 bg-blue-50">
+              <td className="px-3 py-3 text-center text-sm font-bold text-primary bg-primary-light">
                 {granTotal}
               </td>
             </tr>

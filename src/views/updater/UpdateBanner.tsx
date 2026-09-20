@@ -9,7 +9,7 @@ interface UpdateStatus {
   message?: string;
 }
 
-const SUBTLE_TEXT = 'font-bold text-slate-700 uppercase tracking-wider';
+const SUBTLE_TEXT = 'font-bold text-text-main uppercase tracking-wider';
 
 export function UpdateBanner() {
   const { status, visible, dismiss } = useUpdaterStatus();
@@ -19,18 +19,18 @@ export function UpdateBanner() {
   if (status.state === 'available' || status.state === 'ready') {
     const isReady = status.state === 'ready';
     return (
-      <div className="fixed bottom-5 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div className="fixed bottom-5 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-border-base overflow-hidden">
         <div className="px-5 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                <Download className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 rounded-full bg-primary-light flex items-center justify-center shrink-0">
+                <Download className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="font-bold text-sm text-slate-800 leading-tight">
+                <p className="font-bold text-sm text-text-main leading-tight">
                   Nueva versión disponible
                 </p>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-text-muted mt-0.5">
                   {isReady
                     ? `La versión ${status.version} está descargada y lista.`
                     : `Existe la versión ${status.version}.`}
@@ -39,7 +39,7 @@ export function UpdateBanner() {
             </div>
             <button
               onClick={() => dismiss(status.version)}
-              className="text-slate-400 hover:text-slate-600 p-1 -m-1"
+              className="text-text-muted hover:text-text-main p-1 -m-1"
               aria-label="Descartar"
             >
               <X className="h-4 w-4" />
@@ -64,7 +64,7 @@ export function UpdateBanner() {
             </button>
             <button
               onClick={() => dismiss(status.version)}
-              className="px-4 py-2.5 rounded-xl text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:bg-slate-50 transition-all"
+              className="px-4 py-2.5 rounded-xl text-[10px] font-bold text-text-muted uppercase tracking-widest hover:bg-surface-subtle transition-all"
             >
               Más tarde
             </button>
@@ -79,28 +79,28 @@ export function UpdateBanner() {
       ? Math.min(100, Math.round(((status.received || 0) / status.total) * 100))
       : 0;
     return (
-      <div className="fixed bottom-5 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 p-5">
+      <div className="fixed bottom-5 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-border-base p-5">
         <p className={`text-xs ${SUBTLE_TEXT} mb-2`}>
           Descargando actualización {status.version}
         </p>
-        <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+        <div className="h-2 rounded-full bg-surface-hover overflow-hidden">
           <div
             className="h-full bg-primary transition-all"
             style={{ width: `${pct}%` }}
           />
         </div>
-        <p className="text-[10px] text-slate-400 mt-1.5">{pct}%</p>
+        <p className="text-[10px] text-text-muted mt-1.5">{pct}%</p>
       </div>
     );
   }
 
   if (status.state === 'error') {
     return (
-      <div className="fixed bottom-5 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-red-100 p-5">
-        <p className={`text-xs ${SUBTLE_TEXT} text-[10px] text-red-700 mb-1`}>
+      <div className="fixed bottom-5 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-danger/20 p-5">
+        <p className={`text-xs ${SUBTLE_TEXT} text-[10px] text-danger mb-1`}>
           No se pudo descargar la actualización
         </p>
-        <p className="text-[11px] text-slate-500 mb-3 break-words">
+        <p className="text-[11px] text-text-muted mb-3 break-words">
           {status.message || 'Error desconocido'}
         </p>
         <div className="flex gap-2">
@@ -113,7 +113,7 @@ export function UpdateBanner() {
           </button>
           <button
             onClick={() => dismiss(status.version)}
-            className="px-4 py-2 rounded-xl text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:bg-slate-50 transition-all"
+            className="px-4 py-2 rounded-xl text-[10px] font-bold text-text-muted uppercase tracking-widest hover:bg-surface-subtle transition-all"
           >
             Cerrar
           </button>

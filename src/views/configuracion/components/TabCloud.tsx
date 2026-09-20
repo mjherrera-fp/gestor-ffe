@@ -70,19 +70,19 @@ function FolderPickerModal({open, onClose, onSelect, serverUrl, username, passwo
 
     return (
         <Modal open={open} onClose={onClose} maxWidth="lg" cardClass="rounded-3xl">
-            <div className="px-6 pt-6 pb-4 border-b border-slate-100 flex items-center justify-between">
-                <h3 className="text-lg font-black text-slate-800">Seleccionar carpeta</h3>
+            <div className="px-6 pt-6 pb-4 border-b border-border-base flex items-center justify-between">
+                <h3 className="text-lg font-black text-text-main">Seleccionar carpeta</h3>
                 <button onClick={onClose}
-                        className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-all">
+                        className="p-1.5 text-text-muted hover:text-text-main rounded-lg hover:bg-surface-hover transition-all">
                     <X className="h-5 w-5"/>
                 </button>
             </div>
             <div className="p-6 space-y-4">
                 {/* Breadcrumb */}
-                <div className="flex items-center gap-1 text-xs font-bold text-slate-500">
+                <div className="flex items-center gap-1 text-xs font-bold text-text-muted">
                     {breadcrumbs.map((part, i) => (
                         <span key={i} className="flex items-center gap-1">
-              {i > 0 && <span className="text-slate-300">/</span>}
+              {i > 0 && <span className="text-text-muted">/</span>}
                             <button
                                 onClick={() => navigateTo(i === 0 ? '/' : breadcrumbs.slice(1, i + 1).join('/'))}
                                 className="hover:text-primary transition-colors"
@@ -95,29 +95,29 @@ function FolderPickerModal({open, onClose, onSelect, serverUrl, username, passwo
 
                 {error && (
                     <div
-                        className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs font-medium text-red-600">
+                        className="bg-danger-soft border border-danger/20 rounded-xl px-4 py-3 text-xs font-medium text-danger">
                         {error}
                     </div>
                 )}
 
                 {/* Lista de carpetas */}
-                <div className="border border-slate-200 rounded-2xl overflow-hidden max-h-64 overflow-y-auto">
+                <div className="border border-border-base rounded-2xl overflow-hidden max-h-64 overflow-y-auto">
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
-                            <Loader2 className="h-5 w-5 text-slate-300 animate-spin"/>
+                            <Loader2 className="h-5 w-5 text-border-base animate-spin"/>
                         </div>
                     ) : folders.length === 0 ? (
-                        <div className="py-8 text-center text-xs text-slate-400 font-medium italic">
+                        <div className="py-8 text-center text-xs text-text-muted font-medium italic">
                             No hay subcarpetas
                         </div>
                     ) : (
-                        <div className="divide-y divide-slate-100">
+                        <div className="divide-y divide-border-base">
                             {currentPath !== '/' && (
                                 <button
                                     onClick={goUp}
-                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 transition-colors text-left"
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-text-muted hover:bg-surface-subtle transition-colors text-left"
                                 >
-                                    <FolderOpen className="h-4 w-4 text-slate-400"/>
+                                    <FolderOpen className="h-4 w-4 text-text-muted"/>
                                     ..
                                 </button>
                             )}
@@ -125,9 +125,9 @@ function FolderPickerModal({open, onClose, onSelect, serverUrl, username, passwo
                                 <button
                                     key={folder.path}
                                     onClick={() => navigateTo(folder.path)}
-                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-text-main hover:bg-surface-subtle transition-colors text-left"
                                 >
-                                    <FolderOpen className="h-4 w-4 text-amber-500"/>
+                                    <FolderOpen className="h-4 w-4 text-warning-strong"/>
                                     {folder.name}
                                 </button>
                             ))}
@@ -137,7 +137,7 @@ function FolderPickerModal({open, onClose, onSelect, serverUrl, username, passwo
 
                 <div className="flex gap-3">
                     <button onClick={onClose}
-                            className="flex-1 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-all">
+                            className="flex-1 py-2.5 text-sm font-bold text-text-muted hover:bg-surface-hover rounded-xl border border-border-base transition-all">
                         Cancelar
                     </button>
                     <button
@@ -253,55 +253,55 @@ export function TabCloud() {
     };
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100 flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-sky-50 text-sky-600">
+        <div className="bg-surface-card rounded-2xl border border-border-base overflow-hidden">
+            <div className="px-6 py-5 border-b border-border-base flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary-light text-primary">
                     <Cloud className="h-5 w-5"/>
                 </div>
                 <div>
-                    <h2 className="text-lg font-bold text-slate-800">Configuración de NextCloud</h2>
-                    <p className="text-sm text-slate-500">Integración con NextCloud para almacenar documentos</p>
+                    <h2 className="text-lg font-bold text-text-main">Configuración de NextCloud</h2>
+                    <p className="text-sm text-text-muted">Integración con NextCloud para almacenar documentos</p>
                 </div>
             </div>
 
             <div className="p-6 space-y-5">
                 {/* Servidor */}
                 <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase ml-1 mb-1">Servidor
+                    <label className="block text-[10px] font-bold text-text-muted uppercase ml-1 mb-1">Servidor
                         URL</label>
                     <input
                         type="text"
                         value={serverUrl}
                         onChange={e => setServerUrl(e.target.value)}
                         placeholder="https://nextcloud.midominio.es"
-                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                        className="w-full bg-surface-card border border-border-base rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
                     />
                 </div>
 
                 {/* Usuario */}
                 <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase ml-1 mb-1">Usuario</label>
+                    <label className="block text-[10px] font-bold text-text-muted uppercase ml-1 mb-1">Usuario</label>
                     <input
                         type="text"
                         value={username}
                         onChange={e => setUsername(e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                        className="w-full bg-surface-card border border-border-base rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
                     />
                 </div>
 
                 {/* Contraseña */}
                 <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase ml-1 mb-1">Contraseña</label>
+                    <label className="block text-[10px] font-bold text-text-muted uppercase ml-1 mb-1">Contraseña</label>
                     <div className="relative">
                         <input
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={e => setPassword(e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-xs font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                            className="w-full bg-surface-card border border-border-base rounded-xl px-4 py-2.5 pr-10 text-xs font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
                         />
                         <button
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main"
                             tabIndex={-1}
                         >
                             {showPassword ? <EyeOff className="h-4 w-4"/> : <Eye className="h-4 w-4"/>}
@@ -310,9 +310,9 @@ export function TabCloud() {
                 </div>
 
                 {/* Aviso contraseña app */}
-                <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
-                    <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5"/>
-                    <div className="text-xs text-amber-800 leading-relaxed">
+                <div className="bg-warning-soft border border-warning/20 rounded-xl px-4 py-3 flex items-start gap-3">
+                    <Info className="h-4 w-4 text-warning-strong shrink-0 mt-0.5"/>
+                    <div className="text-xs text-warning-strong leading-relaxed">
                         <p className="font-bold mb-1">Necesitas una contraseña de aplicación</p>
                         <p>
                             NextCloud no acepta la contraseña de tu cuenta para conexiones desde aplicaciones externas.
@@ -323,16 +323,16 @@ export function TabCloud() {
                 </div>
 
                 {/* Separador */}
-                <hr className="border-slate-100"/>
+                <hr className="border-border-base"/>
 
                 {/* Carpetas por grupo */}
                 <div>
-                    <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Carpetas por
+                    <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-3">Carpetas por
                         ciclo</h3>
                     <div className="space-y-2">
                         {detalles.map(d => (
                             <div key={d.id} className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap min-w-40 truncate"
+                <span className="text-[10px] font-bold text-text-muted whitespace-nowrap min-w-40 truncate"
                       title={getDetalleLabel(d)}>
                   {getDetalleLabel(d)}
                 </span>
@@ -341,7 +341,7 @@ export function TabCloud() {
                                     value={folders[d.id] || ''}
                                     onChange={e => setFolders(prev => ({...prev, [d.id]: e.target.value}))}
                                     placeholder="/NextCloud/Ruta"
-                                    className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[11px] font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+                                    className="flex-1 bg-surface-card border border-border-base rounded-lg px-3 py-1.5 text-[11px] font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
                                 />
                                 <button
                                     onClick={async () => {
@@ -349,7 +349,7 @@ export function TabCloud() {
                                         setFolderPickerTarget(d.id);
                                         setFolderPickerOpen(true);
                                     }}
-                                    className="p-1.5 text-slate-400 hover:text-primary transition-all rounded-lg hover:bg-slate-50"
+                                    className="p-1.5 text-text-muted hover:text-primary transition-all rounded-lg hover:bg-surface-subtle"
                                     title="Seleccionar carpeta"
                                 >
                                     <FolderOpen className="h-4 w-4"/>
@@ -357,19 +357,19 @@ export function TabCloud() {
                             </div>
                         ))}
                         {detalles.length === 0 && (
-                            <p className="text-xs text-slate-400 italic font-medium">No hay ciclos disponibles</p>
+                            <p className="text-xs text-text-muted italic font-medium">No hay ciclos disponibles</p>
                         )}
                     </div>
                 </div>
 
                 {/* Carpeta enviar a dirección */}
                 <div>
-                    <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Carpeta enviar a
+                    <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-3">Carpeta enviar a
                         dirección</h3>
                     <div className="space-y-2">
                         {Object.entries(SEND_ADDRESS_KEYS).map(([key, label]) => (
                             <div key={key} className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap min-w-40 truncate">
+                <span className="text-[10px] font-bold text-text-muted whitespace-nowrap min-w-40 truncate">
                   {label}
                 </span>
                                 <input
@@ -377,7 +377,7 @@ export function TabCloud() {
                                     value={sendAddressFolders[key] || ''}
                                     onChange={e => setSendAddressFolders(prev => ({...prev, [key]: e.target.value}))}
                                     placeholder="/NextCloud/Ruta"
-                                    className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[11px] font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+                                    className="flex-1 bg-surface-card border border-border-base rounded-lg px-3 py-1.5 text-[11px] font-medium outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
                                 />
                                 <button
                                     onClick={async () => {
@@ -385,7 +385,7 @@ export function TabCloud() {
                                         setFolderPickerTarget(key);
                                         setFolderPickerOpen(true);
                                     }}
-                                    className="p-1.5 text-slate-400 hover:text-primary transition-all rounded-lg hover:bg-slate-50"
+                                    className="p-1.5 text-text-muted hover:text-primary transition-all rounded-lg hover:bg-surface-subtle"
                                     title="Seleccionar carpeta"
                                 >
                                     <FolderOpen className="h-4 w-4"/>
@@ -405,7 +405,7 @@ export function TabCloud() {
                         {saving ? <Loader2 className="h-4 w-4 animate-spin"/> : <Save className="h-4 w-4"/>}
                         {saving ? 'Guardando...' : 'Guardar configuración'}
                     </button>
-                    {success && <span className="text-xs text-emerald-600 font-bold">Configuración guardada correctamente</span>}
+                    {success && <span className="text-xs text-success font-bold">Configuración guardada correctamente</span>}
                 </div>
             </div>
 

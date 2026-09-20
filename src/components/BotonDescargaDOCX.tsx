@@ -45,7 +45,7 @@ export function BotonDescargaDOCX({ url, name, showText = true, onClick, classNa
     }
   };
 
-  const defaultStyles = "p-2.5 h-8 text-blue-600 hover:text-blue-700 transition-all hover:bg-blue-50 rounded-xl border border-blue-100 shadow-sm flex items-center gap-1.5 disabled:opacity-50";
+  const defaultStyles = "p-2.5 h-8 text-primary hover:text-primary/80 transition-all hover:bg-primary-light rounded-xl border border-primary/20 shadow-sm flex items-center gap-1.5 disabled:opacity-50";
 
   return (
     <Title text="Descargar Word">

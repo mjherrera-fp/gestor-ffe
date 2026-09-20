@@ -96,32 +96,32 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
 
       {/* ── MODAL: Confirmar eliminación ── */}
       {ctx.showDeleteConfirm !== null && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-60 p-4">
-          <div className="bg-white rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative">
+        <div className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-center justify-center z-60 p-4">
+          <div className="bg-surface-card rounded-4xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 relative">
             <button
               onClick={() => ctx.setShowDeleteConfirm(null)}
-              className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute top-6 right-6 p-2 text-text-muted hover:text-text-main transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
             <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-danger-soft text-danger-strong rounded-full flex items-center justify-center mx-auto mb-6">
                 <Trash2 className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-black text-slate-900 mb-3">¿Eliminar alumno?</h3>
-              <p className="text-sm text-slate-500 font-medium mb-8">
+              <h3 className="text-xl font-black text-text-main mb-3">¿Eliminar alumno?</h3>
+              <p className="text-sm text-text-muted font-medium mb-8">
                 Esta acción eliminará el expediente del alumno de forma permanente y no se puede deshacer.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => ctx.setShowDeleteConfirm(null)}
-                  className="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-200 transition-all font-sans"
+                  className="flex-1 py-3 text-sm font-bold text-text-muted hover:bg-surface-hover rounded-xl border border-border-base transition-all font-sans"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={() => ctx.handleDelete(ctx.showDeleteConfirm!)}
-                  className="flex-1 py-3 bg-red-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all font-sans"
+                  className="flex-1 py-3 bg-danger text-white text-sm font-bold rounded-xl shadow-lg shadow-danger/20 hover:bg-danger/90 transition-all font-sans"
                 >
                   Sí, eliminar
                 </button>
@@ -188,28 +188,28 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
       {/* ── MODAL: Resultado importación ── */}
       <Modal open={!!ctx.importResult} onClose={() => ctx.setImportResult(null)} maxWidth="md">
         <div className="p-6">
-          <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-full bg-success-soft text-success flex items-center justify-center mx-auto mb-4">
             <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">Importación finalizada</h3>
-          <div className="space-y-2 text-sm text-slate-600 text-center">
-            <p><span className="font-bold text-emerald-600">{ctx.importResult?.success}</span> alumnos importados</p>
+          <h3 className="text-lg font-bold text-text-main mb-4 text-center">Importación finalizada</h3>
+          <div className="space-y-2 text-sm text-text-muted text-center">
+            <p><span className="font-bold text-success">{ctx.importResult?.success}</span> alumnos importados</p>
           </div>
           {ctx.importResult?.errors && ctx.importResult.errors.length > 0 && (
-            <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100">
-              <p className="text-sm font-bold text-red-700 mb-2">Errores ({ctx.importResult.errors.length}):</p>
+            <div className="mt-4 p-4 bg-danger-soft rounded-xl border border-danger/20">
+              <p className="text-sm font-bold text-danger-strong mb-2">Errores ({ctx.importResult.errors.length}):</p>
               <ul className="space-y-1 max-h-40 overflow-y-auto">
                 {ctx.importResult.errors.map((err, i) => (
-                  <li key={i} className="text-xs text-red-600 leading-relaxed">• {err}</li>
+                  <li key={i} className="text-xs text-danger-strong leading-relaxed">• {err}</li>
                 ))}
               </ul>
             </div>
           )}
           <button
             onClick={() => ctx.setImportResult(null)}
-            className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+            className="mt-6 w-full py-2.5 bg-primary text-white rounded-xl font-semibold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
           >
             Aceptar
           </button>
@@ -220,26 +220,26 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
       <Modal open={!!ctx.zipResult} onClose={() => ctx.setZipResult(null)} maxWidth="md">
         <div className="p-6">
           <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 ${
-            ctx.zipResult?.errores && ctx.zipResult.errores > 0 ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
+            ctx.zipResult?.errores && ctx.zipResult.errores > 0 ? 'bg-warning-soft text-warning-strong' : 'bg-success-soft text-success'
           }`}>
             {ctx.zipResult?.errores && ctx.zipResult.errores > 0
               ? <AlertTriangle className="h-7 w-7" />
               : <CheckCircle2 className="h-7 w-7" />
             }
           </div>
-          <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">Importación de CVs</h3>
-          <div className="space-y-2 text-sm text-slate-600 text-center">
-            <p><span className="font-bold text-emerald-600">{ctx.zipResult?.procesados}</span> CVs importados</p>
+          <h3 className="text-lg font-bold text-text-main mb-4 text-center">Importación de CVs</h3>
+          <div className="space-y-2 text-sm text-text-muted text-center">
+            <p><span className="font-bold text-success">{ctx.zipResult?.procesados}</span> CVs importados</p>
             {ctx.zipResult && ctx.zipResult.errores > 0 && (
-              <p><span className="font-bold text-red-600">{ctx.zipResult.errores}</span> errores</p>
+              <p><span className="font-bold text-danger-strong">{ctx.zipResult.errores}</span> errores</p>
             )}
           </div>
           {ctx.zipResult?.results && ctx.zipResult.results.filter(r => !r.ok).length > 0 && (
-            <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100">
-              <p className="text-sm font-bold text-red-700 mb-2">Errores detallados:</p>
+            <div className="mt-4 p-4 bg-danger-soft rounded-xl border border-danger/20">
+              <p className="text-sm font-bold text-danger-strong mb-2">Errores detallados:</p>
               <ul className="space-y-1 max-h-40 overflow-y-auto">
                 {ctx.zipResult.results.filter(r => !r.ok).map((r, i) => (
-                  <li key={i} className="text-xs text-red-600 leading-relaxed">
+                  <li key={i} className="text-xs text-danger-strong leading-relaxed">
                     • DNI <span className="font-mono font-bold">{r.dni}</span>: {r.error}
                   </li>
                 ))}
@@ -248,7 +248,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
           )}
           <button
             onClick={() => ctx.setZipResult(null)}
-            className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+            className="mt-6 w-full py-2.5 bg-primary text-white rounded-xl font-semibold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
           >
             Aceptar
           </button>
@@ -280,27 +280,27 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
+                <div className="p-2 rounded-lg bg-success-soft text-success">
                   <FileText className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800">CV de {viewingCV.nombre} {viewingCV.apellidos}</h3>
+                  <h3 className="text-lg font-bold text-text-main">CV de {viewingCV.nombre} {viewingCV.apellidos}</h3>
                 </div>
               </div>
-              <button type="button" onClick={() => setViewingCV(null)} className="text-slate-400 hover:text-slate-600">
+              <button type="button" onClick={() => setViewingCV(null)} className="text-text-muted hover:text-text-main">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <iframe
               src={getCVBlobUrl(viewingCV)}
-              className="w-full h-140 rounded-xl border border-slate-200"
+              className="w-full h-140 rounded-xl border border-border-base"
               title="CV"
             />
             <div className="flex items-center justify-end gap-3 mt-4">
               <Title text="Eliminar CV">
                 <button
                   onClick={() => handleDeleteCV(viewingCV)}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 text-sm font-semibold rounded-xl hover:bg-red-100 transition-all border border-red-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-danger-soft text-danger-strong text-sm font-semibold rounded-xl hover:bg-danger/15 transition-all border border-danger/20"
                 >
                   <Trash className="h-4 w-4" /> Eliminar CV
                 </button>
@@ -308,7 +308,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
               <a
                 href={getCVBlobUrl(viewingCV)}
                 download={`${viewingCV.nombre.replace(/\s+/g, '_')}_${viewingCV.apellidos.replace(/\s+/g, '_')}_cv.pdf`}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all"
               >
                 <Eye className="h-4 w-4" /> Descargar CV
               </a>

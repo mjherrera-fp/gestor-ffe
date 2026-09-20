@@ -40,7 +40,7 @@ export function Modal({
   children,
   maxWidth = 'md',
   zIndex = 50,
-  backdropClass = 'bg-slate-900/40 backdrop-blur-sm mb-0',
+  backdropClass = 'bg-overlay backdrop-blur-sm mb-0',
   cardClass = '',
 }: ModalProps) {
   usePreventBodyScroll(open)
@@ -64,7 +64,7 @@ export function Modal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={e => e.stopPropagation()}
-            className={`bg-white rounded-2xl shadow-2xl w-full max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden ${maxWidthMap[maxWidth] || maxWidth} ${cardClass}`}
+            className={`bg-surface-card rounded-2xl shadow-2xl w-full max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden ${maxWidthMap[maxWidth] || maxWidth} ${cardClass}`}
           >
             {children}
           </motion.div>

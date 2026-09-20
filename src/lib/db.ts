@@ -55,24 +55,32 @@ export const initDB = () => {
  * Desbloqueo manual con contraseña (llamado desde /api/auth/unlock)
  */
 export const unlockDB = (password: string) => {
-  const newDb = new Database(dbPath);
+  // El formato de cifrado es cipher='sqlcipher' + legacy=4 + page_size=4096.
+  // Lo intentamos en primer lugar; como respaldo se prueba solo con el key
+  // (por si alguna instalación quedó cifrada con los defaults del addon).
+  const configs: Array<Array<string>> = [
+    [`cipher='sqlcipher'`, `legacy=4`, `page_size=4096`, `key='${password}'`],
+    [`key='${password}'`],
+  ];
 
-  // Aplicamos los PRAGMAS que ya tenías en tu código original
-  newDb.pragma(`cipher='sqlcipher'`);
-  newDb.pragma(`legacy=4`);
-  newDb.pragma(`page_size=4096`);
-  newDb.pragma(`key='${password}'`);
-
-  try {
-    // Validamos la clave
-    newDb.prepare("SELECT count(*) FROM sqlite_master").run();
-    db = newDb;
-    isDbEncrypted = true; // Ahora sabemos que está cifrada
-    setupTables();
-  } catch (error) {
-    newDb.close();
-    throw new Error("Contraseña incorrecta");
+  for (const pragmas of configs) {
+    let newDb: any = null;
+    try {
+      newDb = new Database(dbPath);
+      for (const p of pragmas) newDb.pragma(p);
+      // Validamos la clave
+      newDb.prepare("SELECT count(*) FROM sqlite_master").run();
+      db = newDb;
+      isDbEncrypted = true; // Ahora sabemos que está cifrada
+      setupTables();
+      return;
+    } catch (error) {
+      if (newDb) {
+        try { newDb.close(); } catch {}
+      }
+    }
   }
+  throw new Error("Contraseña incorrecta");
 };
 
 /**

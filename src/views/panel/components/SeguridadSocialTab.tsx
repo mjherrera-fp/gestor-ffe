@@ -20,7 +20,7 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
   if (!ctx.ssData) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-slate-400 font-medium">No hay datos de seguridad social</p>
+        <p className="text-text-muted font-medium">No hay datos de seguridad social</p>
       </div>
     );
   }
@@ -28,7 +28,7 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
   if (ctx.ssData.meses.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-slate-400 font-medium">No hay alumnos con prácticas en este curso</p>
+        <p className="text-text-muted font-medium">No hay alumnos con prácticas en este curso</p>
       </div>
     );
   }
@@ -72,11 +72,11 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-bold text-slate-900">Seguridad Social</h3>
-        <p className="text-xs text-slate-500 mt-1">
+        <h3 className="text-lg font-bold text-text-main">Seguridad Social</h3>
+        <p className="text-xs text-text-muted mt-1">
           Días trabajados por alumno en cada mes del período de prácticas.
         </p>
-        <ul className="text-xs text-slate-500 mt-1 checklist list-emerald-600 pl-5">
+        <ul className="text-xs text-text-muted mt-1 checklist list-emerald-600 pl-5">
           <li>Sólo se contabilizan los días según lo establecido en la relación de alumnos.</li>
           <li>Se contabilizarán o no los días festivos según la configuración establecida.</li>
         </ul>
@@ -84,17 +84,17 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
           <input
             type="text"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Buscar alumno..."
-            className="pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            className="pl-9 pr-4 py-2 text-sm bg-surface-card border border-border-base rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
           />
         </div>
 
-        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+        <div className="flex items-center gap-1 bg-surface-hover p-0.5 rounded-lg">
           {([
             { id: 'todos' as FilterType, label: 'Todos' },
             { id: 'conFFE' as FilterType, label: 'Con FFE' },
@@ -104,8 +104,8 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
               key={opt.id}
               onClick={() => setFilterType(opt.id)}
               className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${filterType === opt.id
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-surface-card text-text-main shadow-sm'
+                  : 'text-text-muted hover:text-text-main'
                 }`}
             >
               {opt.label}
@@ -113,7 +113,7 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
           ))}
         </div>
 
-        <p className="text-xs text-slate-400 font-medium">
+        <p className="text-xs text-text-muted font-medium">
           {filteredAlumnos.length} alumno{filteredAlumnos.length !== 1 ? 's' : ''}
         </p>
       </div>

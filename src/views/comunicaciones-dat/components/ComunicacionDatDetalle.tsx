@@ -14,8 +14,8 @@ export function ComunicacionDatDetalle({item, onOpenDocManager, onAdvanceStatus,
     if (!item) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-                <div className="bg-slate-50 p-6 rounded-full mb-4">
-                    <FileText className="h-12 w-12 text-slate-200"/>
+                <div className="bg-surface-subtle p-6 rounded-full mb-4">
+                    <FileText className="h-12 w-12 text-border-base"/>
                 </div>
                 <h3 className="text-base font-bold text-text-main mb-2">Selecciona una comunicación</h3>
                 <p className="text-xs text-text-muted">
@@ -44,13 +44,13 @@ export function ComunicacionDatDetalle({item, onOpenDocManager, onAdvanceStatus,
                             Actual
                         </div>
                         <div
-                            className={`text-sm font-bold ${item.estado === ComunicacionDATEstado.COMPLETADO ? 'text-emerald-500' : 'text-warning'}`}>
+                            className={`text-sm font-bold ${item.estado === ComunicacionDATEstado.COMPLETADO ? 'text-success' : 'text-warning'}`}>
                             {COM_DAT_STATUS_LABELS[item.estado] || item.estado}
                         </div>
                     </div>
                     <button
                         onClick={() => onOpenDocManager(item)}
-                        className="h-8 px-2.5 flex items-center justify-center gap-1 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200 text-[10px] font-bold uppercase"
+                        className="h-8 px-2.5 flex items-center justify-center gap-1 bg-surface-subtle text-text-main rounded-lg hover:bg-surface-hover transition-colors border border-border-base text-[10px] font-bold uppercase"
                     >
                         <Archive className="h-3.5 w-3.5"/> DOCS
                     </button>
@@ -62,7 +62,7 @@ export function ComunicacionDatDetalle({item, onOpenDocManager, onAdvanceStatus,
                     <div className="space-y-1">
                         {item.alumnos?.map(a => (
                             <div key={a.id}
-                                 className="flex items-center justify-between bg-white border border-slate-100 rounded-lg px-3 py-1.5">
+                                 className="flex items-center justify-between bg-surface-subtle border border-border-base rounded-lg px-3 py-1.5">
                                 <span className="text-xs font-medium text-text-main">{a.apellidos}, {a.nombre}</span>
                                 <span className="text-[10px] text-text-muted">{a.dni}</span>
                             </div>
@@ -88,7 +88,7 @@ export function ComunicacionDatDetalle({item, onOpenDocManager, onAdvanceStatus,
                             </button>
                         ) : (
                             <div
-                                className="p-3 bg-emerald-50 text-emerald-700 rounded-lg text-center font-bold text-xs flex items-center justify-center gap-2">
+                                className="p-3 bg-success-soft text-success-strong rounded-lg text-center font-bold text-xs flex items-center justify-center gap-2">
                                 <CheckCircle2 className="h-4 w-4"/> TRÁMITE COMPLETADO
                             </div>
                         )}
@@ -96,7 +96,7 @@ export function ComunicacionDatDetalle({item, onOpenDocManager, onAdvanceStatus,
                         {item.estado !== ComunicacionDATEstado.PENDIENTE_ENVIAR_DIRECTOR && (
                             <button
                                 onClick={() => onMoveBackStatus(item)}
-                                className="w-full py-3 border border-border-base text-text-muted rounded-lg font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-50 transition-all"
+                                className="w-full py-3 border border-border-base text-text-muted rounded-lg font-bold text-xs flex items-center justify-center gap-2 hover:bg-surface-hover transition-all"
                             >
                                 <ArrowLeft className="h-3.5 w-3.5"/> Regresar Estado Anterior
                             </button>
