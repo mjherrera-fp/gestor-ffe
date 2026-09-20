@@ -76,6 +76,11 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
 
+  // Limpiar preload de relación al salir de la pestaña "relaciones"
+  useEffect(() => {
+    if (activeTab !== 'relaciones') setPreloadRelacion(null);
+  }, [activeTab]);
+
   const generarAvisos = async () => {
     try {
       const res = await fetch('/api/avisos/generate', { method: 'POST' });
