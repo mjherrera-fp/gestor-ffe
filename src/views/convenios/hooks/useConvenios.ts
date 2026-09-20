@@ -27,6 +27,7 @@ export function useConvenios(cursoId: number, centroId?: number) {
   const [convenios, setConvenios] = useState<ConvenioExtendido[]>([]);
   const [empresas,  setEmpresas]  = useState<Empresa[]>([]);
   const [centros,   setCentros]   = useState<CentroEducativo[]>([]);
+  const [conveniosUrl, setConveniosUrl] = useState('');
 
   // ── UI listado ──
   const [selectedConvenio,  setSelectedConvenio]  = useState<ConvenioExtendido | null>(null);
@@ -92,6 +93,14 @@ export function useConvenios(cursoId: number, centroId?: number) {
       setSelectedCentro(centrosData[0].id!);
     }
   };
+
+  // Cargar configuración de convenios (URL externa)
+  useEffect(() => {
+    fetch('/api/profesor/config/convenios')
+      .then(r => r.json())
+      .then(data => setConveniosUrl(data.url || ''))
+      .catch(() => {});
+  }, []);
 
   // ─────────────────────────────────────────
   //  HANDLERS: FORMULARIO
@@ -253,6 +262,7 @@ export function useConvenios(cursoId: number, centroId?: number) {
     // Datos
     convenios, empresas, centros,
     filteredAndSortedConvenios, filteredEmpresas,
+    conveniosUrl,
     // Listado UI
     selectedConvenio, setSelectedConvenio,
     showDeleteConfirm, setShowDeleteConfirm,

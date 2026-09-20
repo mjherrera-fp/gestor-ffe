@@ -42,6 +42,7 @@ export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: P
           else { ctx.setBy('estado'); ctx.setSortOrder('asc'); }
         }}
         onUploadDocument={ctx.handleOpenDocManager}
+        conveniosUrl={ctx.conveniosUrl}
       />
 
       {/* ── COLUMNA DERECHA: Detalle ── */}

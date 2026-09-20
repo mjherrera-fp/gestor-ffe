@@ -1,5 +1,5 @@
 import React from 'react';
-import {Archive, Edit2, FileText, Plus, Search, Trash2, Upload, X, TriangleAlert} from 'lucide-react';
+import {Archive, Edit2, ExternalLink, FileText, Plus, Search, Trash2, Upload, X, TriangleAlert} from 'lucide-react';
 import {ConvenioEstado, ConvenioEstadoLabels} from '../../../types/index.ts';
 import {CustomSelect} from '../../../components/CustomSelect.tsx';
 import {ConvenioExtendido, SortField, SortOrder} from '../hooks/useConvenios.ts';
@@ -14,6 +14,7 @@ interface ConveniosListadoProps {
   onDeleteRequest: (id: number) => void;
   onNew: () => void;
   onUploadDocument?: (conv: ConvenioExtendido) => void;
+  conveniosUrl?: string;
   listSearchTerm: string;
   onListSearchChange: (v: string) => void;
   statusFilter: string;
@@ -26,7 +27,7 @@ interface ConveniosListadoProps {
 
 export function ConveniosListado({
   convenios, selectedConvenio,
-                                   onSelectConvenio, onEdit, onDeleteRequest, onNew, onUploadDocument,
+                                   onSelectConvenio, onEdit, onDeleteRequest, onNew, onUploadDocument, conveniosUrl,
   listSearchTerm, onListSearchChange,
   statusFilter, onStatusFilterChange,
   sortBy, sortOrder, onSortByEmpresa, onSortByEstado,
@@ -53,12 +54,24 @@ export function ConveniosListado({
               Listado de Convenios
             </span>
           </div>
-          <button
-            onClick={onNew}
-            className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-          >
-            <Plus className="h-4 w-4" /> Nuevo Convenio
-          </button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            {conveniosUrl && (
+              <a
+                href={conveniosUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-surface-subtle border border-border-base text-primary px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary-light/40 hover:border-primary/30 transition-all"
+              >
+                <ExternalLink className="h-4 w-4" /> URL convenios
+              </a>
+            )}
+            <button
+              onClick={onNew}
+              className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+            >
+              <Plus className="h-4 w-4" /> Nuevo Convenio
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center w-full">

@@ -177,6 +177,9 @@ export function useConfiguracion() {
 
   // ── Handlers: Cifrado ──
 
+  const [isDecrypting, setIsDecrypting] = useState(false);
+  const [showDecryptModal, setShowDecryptModal] = useState(false);
+
   const handleEncryptDatabase = () => {
     if (newPassword !== confirmPassword) {
       setMessage({ type: 'error', text: 'Las contraseñas no coinciden.' });
@@ -213,6 +216,26 @@ export function useConfiguracion() {
     }
   };
 
+  const executeDecryption = async () => {
+    setIsDecrypting(true);
+    try {
+      const res = await fetch('/api/auth/decrypt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'Cifrado eliminado. La aplicación se recargará.' });
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        throw new Error('Error al eliminar el cifrado');
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'No se pudo eliminar el cifrado de la base de datos.' });
+      setIsDecrypting(false);
+      setShowDecryptModal(false);
+    }
+  };
+
   return {
     // Email
     emailConfig, setEmailConfig,
@@ -226,8 +249,9 @@ export function useConfiguracion() {
     newPassword, setNewPassword,
     confirmPassword, setConfirmPassword,
     isEncrypting, isEncrypted,
+    isDecrypting, showDecryptModal, setShowDecryptModal,
     showConfirmModal, setShowConfirmModal,
     message,
-    handleEncryptDatabase, executeEncryption,
+    handleEncryptDatabase, executeEncryption, executeDecryption,
   };
 }

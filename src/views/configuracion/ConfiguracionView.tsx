@@ -1,15 +1,17 @@
 import React, {useEffect, useState} from 'react';
-import {Cloud, Mail, Settings, ShieldCheck} from 'lucide-react';
+import {Cloud, FileText, Mail, Settings, ShieldCheck} from 'lucide-react';
 import {useConfiguracion} from './hooks/useConfiguracion.ts';
 import {TabGeneral} from './components/TabGeneral.tsx';
+import {TabDocumentos} from './components/TabDocumentos.tsx';
 import {TabCorreo} from './components/TabCorreo.tsx';
 import {TabSeguridad} from './components/TabSeguridad.tsx';
 import {TabCloud} from './components/TabCloud.tsx';
 
-type TabId = 'general' | 'correo' | 'seguridad' | 'cloud';
+type TabId = 'general' | 'documentos' | 'correo' | 'seguridad' | 'cloud';
 
 const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'general', label: 'General', icon: Settings },
+  { id: 'documentos', label: 'Documentos', icon: FileText },
   { id: 'correo', label: 'Correo', icon: Mail },
   {id: 'cloud', label: 'Cloud', icon: Cloud},
   { id: 'seguridad', label: 'Seguridad', icon: ShieldCheck },
@@ -52,6 +54,7 @@ export default function ConfiguracionView({ initialTab }: Props = {}) {
 
       {/* Contenido */}
       {activeTab === 'general' && <TabGeneral />}
+      {activeTab === 'documentos' && <TabDocumentos />}
       {activeTab === 'correo' && (
         <TabCorreo
           emailConfig={ctx.emailConfig}
@@ -73,15 +76,20 @@ export default function ConfiguracionView({ initialTab }: Props = {}) {
         <TabSeguridad
           isEncrypted={ctx.isEncrypted}
           isEncrypting={ctx.isEncrypting}
+          isDecrypting={ctx.isDecrypting}
           newPassword={ctx.newPassword}
           confirmPassword={ctx.confirmPassword}
           message={ctx.message}
           showConfirmModal={ctx.showConfirmModal}
+          showDecryptModal={ctx.showDecryptModal}
           onNewPasswordChange={ctx.setNewPassword}
           onConfirmPasswordChange={ctx.setConfirmPassword}
           onEncrypt={ctx.handleEncryptDatabase}
           onExecuteEncryption={ctx.executeEncryption}
           onCloseConfirmModal={() => ctx.setShowConfirmModal(false)}
+          onDecrypt={() => ctx.setShowDecryptModal(true)}
+          onExecuteDecryption={ctx.executeDecryption}
+          onCloseDecryptModal={() => ctx.setShowDecryptModal(false)}
         />
       )}
     </div>

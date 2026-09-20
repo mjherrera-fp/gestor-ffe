@@ -102,6 +102,13 @@ export const encryptDatabase = (password: string) => {
   sessionKeyApplied = true; // <--- Marcamos que ahora tiene clave
 };
 
+// Función para eliminar el cifrado de la base de datos (se usa en el Perfil)
+export const decryptDatabase = () => {
+  db.pragma("rekey=''");
+  sessionKeyApplied = false;
+  databaseHadKeyAtStartup = false;
+};
+
 export const ProfesorDAO = {
   get: () => db.prepare('SELECT * FROM profesores LIMIT 1').get() as Profesor | undefined,
   create: (profesor: Profesor) => {

@@ -32,6 +32,7 @@ import {
   EmpresaEstadisticaDAO,
   EmpresaFestivosDAO,
   encryptDatabase,
+  decryptDatabase,
   FFEEvaluacionDAO,
   FFEInformeDAO,
   FFEMotivoNoRealizacionDAO,
@@ -308,6 +309,21 @@ async function startServer() {
 
     try {
       encryptDatabase(password);
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/auth/decrypt', (req, res) => {
+    try {
+      if (isDatabaseLocked()) {
+        return res.status(400).json({ error: 'La base de datos está bloqueada. Desbloquéala antes de eliminar el cifrado.' });
+      }
+      if (!isDatabaseEncrypted()) {
+        return res.status(400).json({ error: 'La base de datos ya no está cifrada.' });
+      }
+      decryptDatabase();
       res.json({ success: true });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
