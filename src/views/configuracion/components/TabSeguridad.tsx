@@ -4,6 +4,7 @@ import { Lock, ShieldCheck, RefreshCw, AlertTriangle, Eye, EyeOff } from 'lucide
 import { createPortal } from 'react-dom';
 import { required } from '../../../utils/validation.ts';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
+import { getPasswordStrength } from '../../../utils/passwordStrength.ts';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-surface-card border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
@@ -23,23 +24,29 @@ interface Message {
 interface TabSeguridadProps {
   isEncrypted: boolean;
   isEncrypting: boolean;
+  isDecrypting: boolean;
   newPassword: string;
   confirmPassword: string;
   message: Message;
   showConfirmModal: boolean;
+  showDecryptModal: boolean;
   onNewPasswordChange: (v: string) => void;
   onConfirmPasswordChange: (v: string) => void;
   onEncrypt: () => void;
   onExecuteEncryption: () => Promise<void>;
   onCloseConfirmModal: () => void;
+  onDecrypt: () => void;
+  onExecuteDecryption: () => Promise<void>;
+  onCloseDecryptModal: () => void;
 }
 
 export function TabSeguridad({
-  isEncrypted, isEncrypting,
+  isEncrypted, isEncrypting, isDecrypting,
   newPassword, confirmPassword,
-  message, showConfirmModal,
+  message, showConfirmModal, showDecryptModal,
   onNewPasswordChange, onConfirmPasswordChange,
   onEncrypt, onExecuteEncryption, onCloseConfirmModal,
+  onDecrypt, onExecuteDecryption, onCloseDecryptModal,
 }: TabSeguridadProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -49,6 +56,7 @@ export function TabSeguridad({
     if (!validateAll({ newPassword, confirmPassword })) return;
     onEncrypt();
   };
+  const strength = getPasswordStrength(newPassword);
   return (
     <>
       <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
@@ -118,6 +126,23 @@ export function TabSeguridad({
                 </button>
               </div>
               {errors.newPassword && <p className={errMsgCls}>{errors.newPassword}</p>}
+              {newPassword && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex gap-1 flex-1 mr-3">
+                      {[1, 2, 3, 4].map(seg => (
+                        <div
+                          key={seg}
+                          className={`h-1.5 flex-1 rounded-full transition-colors ${seg <= Math.max(1, strength.score) ? strength.color : 'bg-border-base'}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted whitespace-nowrap">
+                      {strength.label}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             <div>
               <label className={labelClass}>Confirmar Contraseña<span className="text-red-500 ml-0.5">*</span></label>
@@ -143,7 +168,7 @@ export function TabSeguridad({
             </div>
           </div>
 
-          <div className="flex justify-start pt-4 border-t border-border-base">
+          <div className="flex justify-start pt-4 border-t border-border-base flex-wrap gap-3">
             <button
               onClick={handleEncrypt}
               disabled={isEncrypting || !newPassword}
@@ -159,6 +184,16 @@ export function TabSeguridad({
                 </>
               )}
             </button>
+            {isEncrypted && (
+              <button
+                onClick={onDecrypt}
+                disabled={isDecrypting || isEncrypting}
+                className="flex items-center justify-center gap-2 text-danger border border-danger/40 hover:bg-danger-soft px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                {isDecrypting ? <RefreshCw className="h-5 w-5 animate-spin" /> : <Lock className="h-5 w-5" />}
+                Eliminar Cifrado
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -196,7 +231,7 @@ export function TabSeguridad({
                             : 'Toda la base de datos se encriptará. Si olvidas esta contraseña en el futuro, los datos serán totalmente irrecuperables.'}
                         </p>
                         {!isEncrypted && (
-                            <p className='mt-2 text-sm text-text-muted leading-relaxed'>Una vez cifrada, la base de datos permanecerá cifrada para siempre. Esta operación <span className='text-warning-strong font-bold'>NO</span> se puede revertir</p>)}
+                            <p className='mt-2 text-sm text-text-muted leading-relaxed'>Una vez cifrada, la base de datos se bloqueará en cada inicio y necesitarás la contraseña maestra. Si la pierdes, los datos serán <span className='text-warning-strong font-bold'>irrecuperables</span>. Si no la quieres, aún puedes eliminar el cifrado desde este mismo panel.</p>)}
                       </div>
                     </div>
                   </div>
@@ -212,6 +247,62 @@ export function TabSeguridad({
                       className="px-4 py-2 text-sm font-bold text-white bg-warning-strong hover:bg-warning-strong/90 rounded-lg transition-colors shadow-sm"
                     >
                       {isEncrypted ? 'Sí, actualizar clave' : 'Sí, cifrar datos'}
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {createPortal(
+        <AnimatePresence mode="wait">
+          {showDecryptModal && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-overlay backdrop-blur-sm z-9999"
+                onClick={onCloseDecryptModal}
+              />
+              <div className="fixed inset-0 flex items-center justify-center z-9999 pointer-events-none px-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  className="bg-surface-card rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto overflow-hidden"
+                >
+                  <div className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 h-12 w-12 rounded-full bg-danger-soft flex items-center justify-center">
+                        <AlertTriangle className="h-6 w-6 text-danger" />
+                      </div>
+                      <div className="flex-1 pt-1">
+                        <h3 className="text-xl font-bold text-text-main">¿Eliminar el cifrado?</h3>
+                        <p className="mt-2 text-sm text-text-muted leading-relaxed">
+                          La base de datos quedará <strong className="text-text-main">sin cifrar</strong> y dejará de
+                          pedir contraseña en cada inicio. Cualquier persona con acceso al fichero podrá leer los datos.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-6 py-4 bg-surface-subtle border-t border-border-base flex justify-end gap-3">
+                    <button
+                      onClick={onCloseDecryptModal}
+                      disabled={isDecrypting}
+                      className="px-4 py-2 text-sm font-semibold text-text-muted hover:bg-surface-hover bg-surface-hover rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={onExecuteDecryption}
+                      disabled={isDecrypting}
+                      className="px-4 py-2 text-sm font-bold text-white bg-danger hover:bg-danger/90 rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isDecrypting ? 'Eliminando...' : 'Sí, eliminar cifrado'}
                     </button>
                   </div>
                 </motion.div>
