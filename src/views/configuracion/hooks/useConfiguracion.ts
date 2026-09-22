@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { crearCredencialBiometrica, plataformaBiometricaDisponible } from '../../../utils/webauthn.ts';
 
 export type Message = { type: 'success' | 'error' | ''; text: string };
 
@@ -54,10 +55,21 @@ export function useConfiguracion() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [message, setMessage] = useState<Message>({ type: '', text: '' });
 
+  // ── Desbloqueo biométrico ──
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricCredentialId, setBiometricCredentialId] = useState<string | null>(null);
+  const [biometricBusy, setBiometricBusy] = useState(false);
+  const [biometricPassword, setBiometricPassword] = useState('');
+  const [showBiometricEnableModal, setShowBiometricEnableModal] = useState(false);
+  const [showBiometricDisableModal, setShowBiometricDisableModal] = useState(false);
+  const [biometricMessage, setBiometricMessage] = useState<Message>({ type: '', text: '' });
+
   // ── Efectos ──
 
   useEffect(() => {
     checkEncryptionStatus();
+    checkBiometricStatus();
     loadEmailConfig();
   }, []);
 
@@ -102,6 +114,119 @@ export function useConfiguracion() {
     } catch {
       console.error('Error al comprobar estado de cifrado');
     }
+  };
+
+  // ── Handlers: Desbloqueo biométrico ──
+
+  const checkBiometricStatus = async () => {
+    if (!window.biometric) {
+      setBiometricAvailable(false);
+      return;
+    }
+    try {
+      const status = await window.biometric.status();
+      setBiometricAvailable(status.available);
+      setBiometricEnabled(status.enabled);
+      setBiometricCredentialId(status.credentialId);
+    } catch {
+      setBiometricAvailable(false);
+    }
+  };
+
+  const requestEnableBiometric = async () => {
+    setBiometricMessage({ type: '', text: '' });
+    if (!window.biometric || !biometricAvailable) {
+      setBiometricMessage({ type: 'error', text: 'Windows Hello / almacenamiento seguro no está disponible en este equipo.' });
+      return;
+    }
+    const plataforma = await plataformaBiometricaDisponible();
+    if (!plataforma) {
+      setBiometricMessage({ type: 'error', text: 'No se ha configurado ningún dato biométrico (PIN, huella o rostro) en Windows.' });
+      return;
+    }
+    setBiometricPassword('');
+    setShowBiometricEnableModal(true);
+  };
+
+  const cancelEnableBiometric = () => {
+    setShowBiometricEnableModal(false);
+    setBiometricPassword('');
+  };
+
+  const executeEnableBiometric = async () => {
+    if (!biometricPassword) {
+      setBiometricMessage({ type: 'error', text: 'Introduce tu contraseña maestra.' });
+      return;
+    }
+    setBiometricBusy(true);
+    try {
+      const res = await fetch('/api/auth/unlock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: biometricPassword }),
+      });
+      if (!res.ok) {
+        setBiometricMessage({ type: 'error', text: 'La contraseña maestra no es correcta.' });
+        return;
+      }
+
+      const cred = await crearCredencialBiometrica();
+      if (!cred.ok) {
+        setBiometricMessage({
+          type: 'error',
+          text: cred.error === 'cancelado'
+            ? 'Se canceló el registro biométrico.'
+            : 'No se pudo crear la credencial biométrica en este equipo.',
+        });
+        return;
+      }
+
+      const saved = await window.biometric!.save({
+        credentialId: cred.credentialId!,
+        password: biometricPassword,
+      });
+      if (!saved.ok) {
+        setBiometricMessage({ type: 'error', text: saved.error || 'No se pudo guardar la configuración biométrica.' });
+        return;
+      }
+
+      setBiometricEnabled(true);
+      setBiometricCredentialId(cred.credentialId!);
+      setBiometricMessage({ type: 'success', text: 'Desbloqueo biométrico activado. Podrás desbloquear la aplicación con Windows Hello.' });
+      cancelEnableBiometric();
+    } catch {
+      setBiometricMessage({ type: 'error', text: 'Error al activar el desbloqueo biométrico.' });
+    } finally {
+      setBiometricBusy(false);
+    }
+  };
+
+  const executeDisableBiometric = async () => {
+    setBiometricBusy(true);
+    try {
+      const deleted = await window.biometric!.delete();
+      if (!deleted.ok) {
+        setBiometricMessage({ type: 'error', text: deleted.error || 'No se pudo desactivar el desbloqueo biométrico.' });
+        return;
+      }
+      setBiometricEnabled(false);
+      setBiometricCredentialId(null);
+      setBiometricMessage({ type: 'success', text: 'Desbloqueo biométrico desactivado. La contraseña maestra protegida se ha eliminado.' });
+      setShowBiometricDisableModal(false);
+    } catch {
+      setBiometricMessage({ type: 'error', text: 'Error al desactivar el desbloqueo biométrico.' });
+    } finally {
+      setBiometricBusy(false);
+    }
+  };
+
+  const requestDisableBiometric = () => {
+    setBiometricMessage({ type: '', text: '' });
+    setShowBiometricDisableModal(true);
+  };
+
+  const cancelDisableBiometric = () => {
+    setShowBiometricDisableModal(false);
   };
 
   // ── Handlers: Email ──
@@ -201,7 +326,19 @@ export function useConfiguracion() {
         body: JSON.stringify({ password: newPassword }),
       });
       if (res.ok) {
-        setMessage({ type: 'success', text: 'Base de datos cifrada correctamente. Se requerirá en el próximo inicio.' });
+        if (biometricEnabled && biometricCredentialId && window.biometric) {
+          const saved = await window.biometric.save({ credentialId: biometricCredentialId, password: newPassword });
+          if (!saved.ok) {
+            await window.biometric.delete();
+            setBiometricEnabled(false);
+            setBiometricCredentialId(null);
+            setMessage({ type: 'error', text: 'Contraseña actualizada. No se pudo actualizar el desbloqueo biométrico y se ha desactivado; vuelve a activarlo en esta pestaña.' });
+          } else {
+            setMessage({ type: 'success', text: 'Base de datos cifrada correctamente. Se requerirá en el próximo inicio.' });
+          }
+        } else {
+          setMessage({ type: 'success', text: 'Base de datos cifrada correctamente. Se requerirá en el próximo inicio.' });
+        }
         setNewPassword('');
         setConfirmPassword('');
         setIsEncrypted(true);
@@ -224,6 +361,11 @@ export function useConfiguracion() {
         headers: { 'Content-Type': 'application/json' },
       });
       if (res.ok) {
+        if (biometricEnabled && window.biometric) {
+          await window.biometric.delete();
+          setBiometricEnabled(false);
+          setBiometricCredentialId(null);
+        }
         setMessage({ type: 'success', text: 'Cifrado eliminado. La aplicación se recargará.' });
         setTimeout(() => window.location.reload(), 1200);
       } else {
@@ -253,5 +395,12 @@ export function useConfiguracion() {
     showConfirmModal, setShowConfirmModal,
     message,
     handleEncryptDatabase, executeEncryption, executeDecryption,
+    // Desbloqueo biométrico
+    biometricEnabled, biometricAvailable, biometricBusy,
+    biometricPassword, setBiometricPassword,
+    biometricMessage,
+    showBiometricEnableModal, showBiometricDisableModal,
+    requestEnableBiometric, cancelEnableBiometric, executeEnableBiometric,
+    requestDisableBiometric, cancelDisableBiometric, executeDisableBiometric,
   };
 }

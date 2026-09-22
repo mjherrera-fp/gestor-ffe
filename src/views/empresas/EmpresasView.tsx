@@ -9,6 +9,7 @@ import { TutorFormModal }             from './components/TutorFormModal.tsx';
 import { EmpresaEstadisticasPanel }   from './components/EmpresaEstadisticasPanel.tsx';
 import { EmailModal }                 from '../../components/EmailModal.tsx';
 import { Modal }                      from '../../components/ui/Modal.tsx';
+import { CalendarioEventoModal }      from '../../components/CalendarioEventoModal.tsx';
 
 
 interface Props {
@@ -58,6 +59,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
           onDeleteRequest={id => ctx.setShowDeleteConfirm({ id, type: 'empresa' })}
           onIndividualEmail={ctx.handleOpenIndividualEmail}
           onBulkEmail={ctx.handleOpenBulkEmail}
+          onCalendar={ctx.handleOpenCalendar}
           onDownloadTemplate={ctx.downloadTemplate}
           onImportClick={() => ctx.fileInputRef.current?.click()}
           isImporting={ctx.isImporting}
@@ -305,6 +307,13 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
         perRecipientData={ctx.perRecipientData}
         onGoToConfig={onGoToConfig}
         contextualContactIds={ctx.contextualContactIds}
+      />
+
+      {/* ── MODAL: Añadir a calendario ── */}
+      <CalendarioEventoModal
+        open={ctx.calendarioEmpresaId !== null}
+        empresaId={ctx.calendarioEmpresaId}
+        onClose={() => ctx.setCalendarioEmpresaId(null)}
       />
 
     </>

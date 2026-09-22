@@ -16,3 +16,24 @@ contextBridge.exposeInMainWorld('updater', {
     ipcRenderer.send('updater-download');
   },
 });
+
+contextBridge.exposeInMainWorld('calendar', {
+  createIcsEvent(content, filename) {
+    return ipcRenderer.invoke('calendar-save-ics', { content, filename });
+  },
+});
+
+contextBridge.exposeInMainWorld('biometric', {
+  status() {
+    return ipcRenderer.invoke('biometric-status');
+  },
+  save({ credentialId, password }) {
+    return ipcRenderer.invoke('biometric-save', { credentialId, password });
+  },
+  getPassword() {
+    return ipcRenderer.invoke('biometric-get-password');
+  },
+  delete() {
+    return ipcRenderer.invoke('biometric-delete');
+  },
+});

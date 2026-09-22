@@ -15,4 +15,13 @@ interface Window {
     checkNow: () => void;
     download: () => void;
   };
+  calendar?: {
+    createIcsEvent: (content: string, filename?: string) => Promise<{ ok: boolean; path?: string; error?: string }>;
+  };
+  biometric?: {
+    status: () => Promise<{ available: boolean; enabled: boolean; credentialId: string | null }>;
+    save: (params: { credentialId: string; password: string }) => Promise<{ ok: boolean; error?: string }>;
+    getPassword: () => Promise<{ ok: boolean; password?: string; error?: string }>;
+    delete: () => Promise<{ ok: boolean; error?: string }>;
+  };
 }

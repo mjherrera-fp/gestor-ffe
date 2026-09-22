@@ -22,6 +22,7 @@ import {calculateEndDateForHours} from './utils/relacionesUtils.ts';
 import {EmailModal} from '../../components/EmailModal.tsx';
 import {GestorDocumentalModal} from '../../components/GestorDocumentalModal.tsx';
 import {Modal} from '../../components/ui/Modal.tsx';
+import {CalendarioEventoModal} from '../../components/CalendarioEventoModal.tsx';
 
 
 interface Props {
@@ -35,6 +36,7 @@ interface Props {
 export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConfig, profesor, preloadRelacion }: Props) {
   const ctx = useRelaciones(cursoId, detalleAcademicoId, profesor, preloadRelacion);
   const [plantillas, setPlantillas] = useState<any[]>([]);
+  const [calendarioRelacion, setCalendarioRelacion] = useState<RelacionAlumno | null>(null);
     const [showDocManager, setShowDocManager] = useState(false);
     const [docManagerTarget, setDocManagerTarget] = useState<{
         rel: RelacionAlumno;
@@ -378,6 +380,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
           onEdit={ctx.handleOpenForm}
           onDeleteRequest={ctx.setShowDeleteConfirm}
           onOpenStats={ctx.handleOpenEstadistica}
+          onCalendar={setCalendarioRelacion}
           listSearchTerm={ctx.listSearchTerm}
           onListSearchChange={ctx.setListSearchTerm}
           statusFilters={ctx.statusFilters}
@@ -583,6 +586,14 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
                 onEntityUpdated={ctx.fetchData}
             />
         )}
+
+        {/* ── MODAL: Añadir evento a calendario ── */}
+        <CalendarioEventoModal
+          open={!!calendarioRelacion}
+          empresaId={calendarioRelacion ? (ctx.convenios.find(c => c.id === calendarioRelacion.convenioId)?.empresaId ?? null) : null}
+          tutorPreseleccionadoId={calendarioRelacion?.tutorEmpresaId ?? null}
+          onClose={() => setCalendarioRelacion(null)}
+        />
     </div>
   );
 }

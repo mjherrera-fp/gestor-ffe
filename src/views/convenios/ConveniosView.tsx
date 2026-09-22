@@ -1,11 +1,12 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Trash2, X} from 'lucide-react';
 
-import {useConvenios} from './hooks/useConvenios.ts';
+import {useConvenios, ConvenioExtendido} from './hooks/useConvenios.ts';
 import {ConveniosListado} from './components/ConveniosListado.tsx';
 import {ConvenioDetalle} from './components/ConvenioDetalle.tsx';
 import {ConvenioFormModal} from './components/ConvenioFormModal.tsx';
 import {GestorDocumentalModal} from '../../components/GestorDocumentalModal.tsx';
+import {CalendarioEventoModal} from '../../components/CalendarioEventoModal.tsx';
 
 interface Props {
   cursoId: number;
@@ -15,6 +16,7 @@ interface Props {
 
 export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: Props) {
   const ctx = useConvenios(cursoId, centroId);
+  const [calendarioConvenio, setCalendarioConvenio] = useState<ConvenioExtendido | null>(null);
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start">
@@ -27,6 +29,7 @@ export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: P
         onEdit={ctx.handleEdit}
         onDeleteRequest={ctx.setShowDeleteConfirm}
         onNew={ctx.handleOpenNew}
+        onCalendar={setCalendarioConvenio}
         listSearchTerm={ctx.listSearchTerm}
         onListSearchChange={ctx.setListSearchTerm}
         statusFilter={ctx.statusFilter}
@@ -139,6 +142,13 @@ export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: P
                 onEntityUpdated={ctx.fetchData}
             />
         )}
+
+        {/* ── MODAL: Añadir evento a calendario ── */}
+        <CalendarioEventoModal
+          open={!!calendarioConvenio}
+          empresaId={calendarioConvenio?.empresaId ?? null}
+          onClose={() => setCalendarioConvenio(null)}
+        />
     </div>
   );
 }

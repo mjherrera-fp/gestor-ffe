@@ -22,6 +22,7 @@ import {
 import {AnimatePresence, motion} from 'motion/react';
 import {Aviso, Curso, DetalleAcademico, Profesor} from './types/index.ts';
 import {useTheme, type ThemeMode} from './hooks/useTheme.tsx';
+import {verificarCredencialBiometrica} from './utils/webauthn.ts';
 import packageJson from '../package.json';
 
 const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true;
@@ -75,6 +76,9 @@ export default function App() {
   const [isEncrypted, setIsEncrypted] = useState(false);
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [biometricCredentialId, setBiometricCredentialId] = useState<string | null>(null);
+  const [biometricBusy, setBiometricBusy] = useState(false);
 
   // Limpiar preload de relación al salir de la pestaña "relaciones"
   useEffect(() => {
@@ -184,7 +188,20 @@ export default function App() {
 
   useEffect(() => {
     fetchData();
+    checkBiometricStatus();
   }, []);
+
+  const checkBiometricStatus = async () => {
+    if (!window.biometric) return;
+    try {
+      const status = await window.biometric.status();
+      setBiometricEnabled(status.enabled);
+      setBiometricCredentialId(status.credentialId);
+    } catch {
+      setBiometricEnabled(false);
+      setBiometricCredentialId(null);
+    }
+  };
 
   const tieneProfesor = profesor !== null;
   const tieneCurso = activeCurso !== null;
@@ -202,7 +219,7 @@ export default function App() {
 
   // 3. Función para intentar desbloquear
   // Función para desbloquear (recibe directamente el string del componente)
-  const handleUnlock = async (password: string) => {
+  const aplicarDesbloqueo = async (password: string) => {
     try {
       const res = await fetch('/api/auth/unlock', {
         method: 'POST',
@@ -220,6 +237,46 @@ export default function App() {
       }
     } catch (err) {
       setAuthError('Error de comunicación con el servidor.');
+    }
+  };
+
+  const handleUnlock = async (password: string) => {
+    await aplicarDesbloqueo(password);
+  };
+
+  const handleBiometricUnlock = async () => {
+    if (!window.biometric || biometricBusy) return;
+    setBiometricBusy(true);
+    setAuthError('');
+    try {
+      let credentialId = biometricCredentialId;
+      if (!credentialId) {
+        const status = await window.biometric.status();
+        if (!status.enabled || !status.credentialId) {
+          setAuthError('El desbloqueo biométrico no está configurado.');
+          return;
+        }
+        credentialId = status.credentialId;
+      }
+      const verificado = await verificarCredencialBiometrica(credentialId);
+      if (!verificado.ok) {
+        setAuthError(
+          verificado.error === 'cancelado'
+            ? 'Verificación biométrica cancelada. Puedes usar el botón inferior o escribir tu contraseña.'
+            : 'No se pudo verificar tu gesto biométrico.'
+        );
+        return;
+      }
+      const res = await window.biometric.getPassword();
+      if (!res.ok || !res.password) {
+        setAuthError('No se pudo recuperar la contraseña protegida.');
+        return;
+      }
+      await aplicarDesbloqueo(res.password);
+    } catch (err) {
+      setAuthError('Error al desbloquear mediante Windows Hello.');
+    } finally {
+      setBiometricBusy(false);
     }
   };
 
@@ -246,7 +303,15 @@ export default function App() {
 
   // 4. Si isLocked es true, renderiza la pantalla de bloqueo en lugar de la app
   if (isLocked) {
-    return <LockView onUnlock={handleUnlock} error={authError} />;
+    return (
+      <LockView
+        onUnlock={handleUnlock}
+        error={authError}
+        biometricEnabled={biometricEnabled}
+        biometricBusy={biometricBusy}
+        onBiometricUnlock={handleBiometricUnlock}
+      />
+    );
   }
 
   if (showTerms) {

@@ -90,6 +90,20 @@ export default function ConfiguracionView({ initialTab }: Props = {}) {
           onDecrypt={() => ctx.setShowDecryptModal(true)}
           onExecuteDecryption={ctx.executeDecryption}
           onCloseDecryptModal={() => ctx.setShowDecryptModal(false)}
+          biometricEnabled={ctx.biometricEnabled}
+          biometricAvailable={ctx.biometricAvailable}
+          biometricBusy={ctx.biometricBusy}
+          biometricPassword={ctx.biometricPassword}
+          biometricMessage={ctx.biometricMessage}
+          showBiometricEnableModal={ctx.showBiometricEnableModal}
+          showBiometricDisableModal={ctx.showBiometricDisableModal}
+          onBiometricPasswordChange={ctx.setBiometricPassword}
+          onRequestEnableBiometric={ctx.requestEnableBiometric}
+          onCancelEnableBiometric={ctx.cancelEnableBiometric}
+          onExecuteEnableBiometric={ctx.executeEnableBiometric}
+          onRequestDisableBiometric={ctx.requestDisableBiometric}
+          onCancelDisableBiometric={ctx.cancelDisableBiometric}
+          onExecuteDisableBiometric={ctx.executeDisableBiometric}
         />
       )}
     </div>
