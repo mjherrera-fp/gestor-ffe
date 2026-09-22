@@ -55,11 +55,12 @@ export interface IcsEventInput {
   summary: string;
   location?: string;
   description?: string;
+  categories?: string;
   start: string; // "YYYY-MM-DDTHH:MM" local
   end: string;   // "YYYY-MM-DDTHH:MM" local
 }
 
-export function buildIcsEvent({ summary, location, description, start, end }: IcsEventInput): string {
+export function buildIcsEvent({ summary, location, description, categories, start, end }: IcsEventInput): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -74,6 +75,7 @@ export function buildIcsEvent({ summary, location, description, start, end }: Ic
     `SUMMARY:${escapeIcs(summary)}`,
   ];
   if (location) lines.push(`LOCATION:${escapeIcs(location)}`);
+  if (categories) lines.push(`CATEGORIES:${escapeIcs(categories)}`);
   if (description) lines.push(`DESCRIPTION:${escapeIcs(description)}`);
   lines.push('END:VEVENT', 'END:VCALENDAR');
   return foldIcs(lines.join('\r\n'));

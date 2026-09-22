@@ -15,9 +15,14 @@ interface CalendarioEventoModalProps {
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-const hoyLocal = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const horariosPorDefecto = () => {
+  const inicio = new Date(Date.now() + 30 * 60000);
+  const fin = new Date(inicio.getTime() + 30 * 60000);
+  return {
+    fecha: `${inicio.getFullYear()}-${pad(inicio.getMonth() + 1)}-${pad(inicio.getDate())}`,
+    horaInicio: `${pad(inicio.getHours())}:${pad(inicio.getMinutes())}`,
+    horaFin: `${pad(fin.getHours())}:${pad(fin.getMinutes())}`,
+  };
 };
 
 function buildCuerpo(emp: Empresa, tutor?: TutorEmpresa): string {
@@ -46,9 +51,10 @@ export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId 
   const [fecha, setFecha] = useState('');
   const [horaInicio, setHoraInicio] = useState('10:00');
   const [horaFin, setHoraFin] = useState('11:00');
-  const [tipoLugar, setTipoLugar] = useState<'calle' | 'online' | 'otro'>('online');
+  const [tipoLugar, setTipoLugar] = useState<'calle' | 'online' | 'telefonica' | 'otro'>('online');
   const [lugar, setLugar] = useState('');
   const [asunto, setAsunto] = useState('');
+  const [etiqueta, setEtiqueta] = useState('');
   const [cuerpo, setCuerpo] = useState('');
   const [errorCarga, setErrorCarga] = useState(false);
 
@@ -67,9 +73,10 @@ export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId 
       tutorSel = (tutoresDeEmpresa.find(t => t.email?.trim() && t.tlfn?.trim()) ?? tutoresDeEmpresa[0])?.id ?? '';
     }
 
-    setFecha(hoyLocal());
-    setHoraInicio('10:00');
-    setHoraFin('11:00');
+    const horarios = horariosPorDefecto();
+    setFecha(horarios.fecha);
+    setHoraInicio(horarios.horaInicio);
+    setHoraFin(horarios.horaFin);
     setTipoLugar(direccion ? 'calle' : 'online');
     setLugar(lugarDef);
     setAsunto(asuntoDef);
@@ -77,12 +84,16 @@ export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId 
     setCuerpo(buildCuerpo(emp, tutoresDeEmpresa.find(t => t.id === tutorSel)));
   };
 
-  const seleccionarTipoLugar = (tipo: 'calle' | 'online' | 'otro') => {
+  const seleccionarTipoLugar = (tipo: 'calle' | 'online' | 'telefonica' | 'otro') => {
     setTipoLugar(tipo);
     if (tipo === 'calle' && empresa) {
       setLugar(direccionEmpresa(empresa));
     } else if (tipo === 'online') {
       setLugar('ONLINE');
+    } else if (tipo === 'telefonica') {
+      setLugar('TELEFÓNICA');
+    } else if (tipo === 'otro') {
+      setLugar('');
     }
   };
 
@@ -125,6 +136,12 @@ export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId 
 
   useEffect(() => {
     if (open && empresaId) cargarEmpresa();
+    if (open) {
+      fetch('/api/profesor/config/calendario')
+        .then(r => r.json())
+        .then(data => setEtiqueta(data.etiqueta || ''))
+        .catch(() => setEtiqueta(''));
+    }
     if (!open) {
       setEmpresa(null);
       setTutores([]);
@@ -150,6 +167,7 @@ export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId 
       summary: asunto.trim(),
       location: lugar.trim(),
       description: cuerpo,
+      categories: etiqueta.trim() || undefined,
       start: inicio,
       end: fin,
     });
@@ -241,27 +259,18 @@ export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId 
             {/* Lugar */}
             <div>
               <label className={labelCls}>Lugar</label>
-              <div className="grid grid-cols-3 gap-2">
-                {([
-                  { key: 'calle' as const, label: 'Calle', disabled: !empresa.direccion?.trim() },
-                  { key: 'online' as const, label: 'Online' },
-                  { key: 'otro' as const, label: 'Otro' },
-                ]).map(op => (
-                  <button
-                    key={op.key}
-                    type="button"
-                    disabled={op.disabled}
-                    onClick={() => seleccionarTipoLugar(op.key)}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-all disabled:opacity-35 disabled:cursor-not-allowed ${
-                      tipoLugar === op.key
-                        ? 'bg-primary text-white border-primary shadow-sm'
-                        : 'bg-surface-subtle text-text-muted border-border-base hover:text-text-main hover:border-primary/40'
-                    }`}
-                  >
-                    {op.label}
-                  </button>
-                ))}
-              </div>
+              <CustomSelect
+                options={[
+                  ...(empresa.direccion?.trim() ? [{ id: 'calle' as const, label: 'Sede de la empresa' }] : []),
+                  { id: 'online' as const, label: 'Online' },
+                  { id: 'telefonica' as const, label: 'Telefónica' },
+                  { id: 'otro' as const, label: 'Otro' },
+                ]}
+                value={tipoLugar}
+                onChange={v => seleccionarTipoLugar(v as 'calle' | 'online' | 'telefonica' | 'otro')}
+                wrapperClassName="w-full"
+                classListboxButton="!text-xs"
+              />
 
               {tipoLugar === 'otro' && (
                 <input
@@ -277,7 +286,7 @@ export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId 
                 <p className="text-[10px] text-text-muted mt-1">{lugar}</p>
               )}
               {!empresa.direccion?.trim() && (
-                <p className="text-[10px] text-text-muted mt-1">La empresa no tiene dirección informada: usa Online o escribe un lugar.</p>
+                <p className="text-[10px] text-text-muted mt-1">La empresa no tiene dirección informada: elige Online, Telefónica u Otro.</p>
               )}
             </div>
 

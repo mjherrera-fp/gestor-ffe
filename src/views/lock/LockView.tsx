@@ -9,11 +9,10 @@ import { useFormValidation } from '../../hooks/useFormValidation.ts';
 const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true;
 
 const inputCls = 'block w-full pl-10 pr-3 py-3 bg-surface-subtle border border-border-base rounded-xl text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all';
-const inputErrCls = 'border-danger ring-2 ring-danger/30';
 const errMsgCls = 'text-danger text-xs mt-1 italic font-medium';
 
 const RULES = {
-  password: [required('Contraseña Maestra')],
+  password: [],
 };
 
 interface LockViewProps {
@@ -34,10 +33,7 @@ export default function LockView({
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCopyright, setShowCopyright] = useState(false);
-  const [usarPassword, setUsarPassword] = useState(false);
-  const { errors, onBlur, validateAll } = useFormValidation(RULES);
-
-  const mostrarBiometrico = biometricEnabled && !!onBiometricUnlock;
+  const { onBlur, validateAll } = useFormValidation(RULES);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,105 +62,79 @@ export default function LockView({
             </div>
             <h1 className="text-2xl font-bold text-text-main">Acceso Restringido</h1>
             <p className="text-text-muted text-sm mt-2 text-center">
-              {mostrarBiometrico && !usarPassword
-                ? <>La base de datos <span className="text-primary font-mono">ffe_management.db</span> está cifrada. Pulsa desbloquear y toca el lector para entrar.</>
-                : <>La base de datos <span className="text-primary font-mono">ffe_management.db</span> está cifrada. Introduce la clave para continuar.</>}
+              La base de datos <span className="text-primary font-mono">ffe_management.db</span> está cifrada. Introduce la clave para continuar.
             </p>
           </div>
 
-          {mostrarBiometrico && !usarPassword ? (
-            <div className="space-y-4">
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-2 text-danger text-sm bg-danger/10 p-3 rounded-lg border border-danger/20"
-                >
-                  <ShieldAlert className="h-4 w-4" />
-                  <span>{error}</span>
-                </motion.div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <KeyRound className="h-5 w-5 text-text-muted" />
+              </div>
+              <input
+                type="password"
+                autoFocus
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Contraseña Maestra"
+                className={inputCls}
+                onBlur={() => onBlur('password', password)}
+              />
+            </div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-2 text-danger text-sm bg-danger/10 p-3 rounded-lg border border-danger/20"
+              >
+                <ShieldAlert className="h-4 w-4" />
+                <span>{error}</span>
+              </motion.div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting || !password}
+              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]"
+            >
+              {isSubmitting ? (
+                <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  Desbloquear Datos
+                  <ArrowRight className="h-5 w-5" />
+                </>
               )}
+            </button>
+          </form>
+
+          {biometricEnabled && onBiometricUnlock && (
+            <>
+              <div className="flex items-center gap-3 my-5">
+                <div className="flex-1 h-px bg-border-base" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">o</span>
+                <div className="flex-1 h-px bg-border-base" />
+              </div>
 
               <button
                 type="button"
                 onClick={onBiometricUnlock}
                 disabled={biometricBusy}
-                className="w-full py-3 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]"
+                className="w-full py-3 px-4 bg-surface-hover hover:bg-surface-card border border-border-base text-text-main font-bold rounded-xl flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {biometricBusy ? (
-                  <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="h-5 w-5 border-2 border-border-base border-t-text-main rounded-full animate-spin" />
                 ) : (
                   <Fingerprint className="h-5 w-5" />
                 )}
-                {biometricBusy ? 'Lanzando verificador...' : 'Desbloquear'}
+                {biometricBusy ? 'Lanzando Windows Hello...' : 'Desbloquear con Windows Hello'}
               </button>
 
-              <p className="text-center text-xs text-text-muted">
-                Toca el lector o usa tu PIN/rostro cuando aparezca la ventana de Windows Hello.
+              <p className="text-center mt-3 text-xs text-text-muted">
+                Coloca tu dedo en el lector cuando aparezca la ventana de Windows Hello.
               </p>
-
-              <button
-                type="button"
-                onClick={() => setUsarPassword(true)}
-                className="w-full text-xs font-semibold text-text-muted hover:text-primary transition-colors"
-              >
-                Usar contraseña en su lugar
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <KeyRound className="h-5 w-5 text-text-muted" />
-                </div>
-                <input
-                  type="password"
-                  autoFocus
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Contraseña Maestra"
-                  className={`${inputCls} ${errors.password ? inputErrCls : ''}`}
-                  onBlur={() => onBlur('password', password)}
-                />
-                {errors.password && <p className={errMsgCls}>{errors.password}</p>}
-              </div>
-
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-2 text-danger text-sm bg-danger/10 p-3 rounded-lg border border-danger/20"
-                >
-                  <ShieldAlert className="h-4 w-4" />
-                  <span>{error}</span>
-                </motion.div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting || !password}
-                className="w-full py-3 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]"
-              >
-                {isSubmitting ? (
-                  <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    Desbloquear Datos
-                    <ArrowRight className="h-5 w-5" />
-                  </>
-                )}
-              </button>
-
-              {mostrarBiometrico && (
-                <button
-                  type="button"
-                  onClick={() => setUsarPassword(false)}
-                  className="w-full text-xs font-semibold text-text-muted hover:text-primary transition-colors"
-                >
-                  Usar Windows Hello
-                </button>
-              )}
-            </form>
+            </>
           )}
         </div>
 
