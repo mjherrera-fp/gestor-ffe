@@ -87,6 +87,12 @@ export function useEmpresas(cursoId: number) {
   const [empresaIdsConConvenio, setEmpresaIdsConConvenio] = useState<number[]>([]);
   const [modoCreacion, setModoCreacion] = useState('descargar');
 
+  // ── Modal calendario ──
+  const [calendarioEmpresaId, setCalendarioEmpresaId] = useState<number | null>(null);
+  const handleOpenCalendar = (emp: Empresa) => {
+    if (emp.id != null) setCalendarioEmpresaId(emp.id);
+  };
+
   // ─────────────────────────────────────────
   //  EFECTOS
   // ─────────────────────────────────────────
@@ -679,5 +685,9 @@ export function useEmpresas(cursoId: number) {
     showEmailModal, setShowEmailModal,
     emailTo, emailBcc, emailAttachments, emailSubject, emailBody, perRecipientData, setPerRecipientData, contextualContactIds,
     handleOpenIndividualEmail, handleOpenBulkEmail, handleEmailConPlantilla,
+    // Calendario
+    calendarioEmpresaId,
+    handleOpenCalendar,
+    setCalendarioEmpresaId,
   };
 }

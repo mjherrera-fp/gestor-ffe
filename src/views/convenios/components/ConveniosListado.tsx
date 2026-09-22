@@ -1,5 +1,5 @@
 import React from 'react';
-import {Archive, Edit2, ExternalLink, FileText, Plus, Search, Trash2, Upload, X, TriangleAlert} from 'lucide-react';
+import {Archive, CalendarPlus, Edit2, ExternalLink, FileText, Plus, Search, Trash2, Upload, X, TriangleAlert} from 'lucide-react';
 import {ConvenioEstado, ConvenioEstadoLabels} from '../../../types/index.ts';
 import {CustomSelect} from '../../../components/CustomSelect.tsx';
 import {ConvenioExtendido, SortField, SortOrder} from '../hooks/useConvenios.ts';
@@ -14,6 +14,7 @@ interface ConveniosListadoProps {
   onDeleteRequest: (id: number) => void;
   onNew: () => void;
   onUploadDocument?: (conv: ConvenioExtendido) => void;
+  onCalendar: (conv: ConvenioExtendido) => void;
   conveniosUrl?: string;
   listSearchTerm: string;
   onListSearchChange: (v: string) => void;
@@ -27,7 +28,7 @@ interface ConveniosListadoProps {
 
 export function ConveniosListado({
   convenios, selectedConvenio,
-                                   onSelectConvenio, onEdit, onDeleteRequest, onNew, onUploadDocument, conveniosUrl,
+                                   onSelectConvenio, onEdit, onDeleteRequest, onNew, onUploadDocument, onCalendar, conveniosUrl,
   listSearchTerm, onListSearchChange,
   statusFilter, onStatusFilterChange,
   sortBy, sortOrder, onSortByEmpresa, onSortByEstado,
@@ -225,6 +226,14 @@ export function ConveniosListado({
                           </button>
                         </Title>
                     )}
+                    <Title text="Añadir a calendario">
+                      <button
+                        onClick={() => onCalendar(conv)}
+                        className="p-2 text-text-muted hover:text-primary transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
+                      >
+                        <CalendarPlus className="h-4 w-4" />
+                      </button>
+                    </Title>
                     <Title text="Editar convenio">
                       <button
                         onClick={() => onEdit(conv)}

@@ -1058,6 +1058,13 @@ async function startServer() {
     res.json({ success: true, recalculadas });
   });
 
+  // Empresa por id (para detalle puntual p.ej. generación de eventos de calendario)
+  app.get('/api/empresas/:id', (req, res) => {
+    const emp = EmpresaDAO.getById(Number(req.params.id));
+    if (!emp) return res.status(404).json({ error: 'Empresa no encontrada' });
+    res.json(emp);
+  });
+
   // Tutores Empresa
   app.get('/api/empresas/:empresaId/tutores', (req, res) => res.json(TutorEmpresaDAO.getAllByEmpresa(Number(req.params.empresaId))));
   app.post('/api/tutores-empresa', (req, res) => res.json({ id: TutorEmpresaDAO.create(req.body) }));

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, X, Edit2, Trash2, Calendar, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3, ChevronDown, ChevronUp, Star, Mail } from 'lucide-react';
+import { Search, X, Edit2, Trash2, Calendar, CalendarPlus, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3, ChevronDown, ChevronUp, Star, Mail } from 'lucide-react';
 import {
   RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels,
   PlanFormativoEstado, PlanFormativoEstadoLabels,
@@ -47,6 +47,7 @@ interface RelacionesListadoProps {
   onEdit: (rel: RelacionAlumno) => void;
   onDeleteRequest: (id: number) => void;
   onOpenStats: (rel: RelacionAlumno) => void;
+  onCalendar: (rel: RelacionAlumno) => void;
   listSearchTerm: string;
   onListSearchChange: (val: string) => void;
   statusFilters: {
@@ -86,7 +87,7 @@ interface RelacionesListadoProps {
 
 export function RelacionesListado({
   relaciones, convenios, createRelacion, selectedRelacion,
-  onSelectRelacion, onEdit, onDeleteRequest, onOpenStats,
+  onSelectRelacion, onEdit, onDeleteRequest, onOpenStats, onCalendar,
   listSearchTerm, onListSearchChange,
   statusFilters, onStatusFilterChange,
   dateFilters, onDateFilterChange,
@@ -369,6 +370,14 @@ className={`cursor-pointer transition-colors group align-top border-b-12 border-
                               className="p-2 text-text-muted hover:text-warning transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
                             >
                               <Star className="h-4 w-4" />
+                            </button>
+                          </Title>
+                          <Title text="Añadir a calendario">
+                            <button
+                              onClick={() => onCalendar(rel)}
+                              className="p-2 text-text-muted hover:text-primary transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
+                            >
+                              <CalendarPlus className="h-4 w-4" />
                             </button>
                           </Title>
                           <Title text="Editar relación">

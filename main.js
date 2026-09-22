@@ -1,5 +1,6 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, safeStorage } from 'electron';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { fork } from 'child_process';
 import {
@@ -96,7 +97,7 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false);
 
   // 3. INTENTAMOS CARGAR LA RUTA (Y LE PASAMOS EL SPLASH PARA QUE LO CIERRE AL TERMINAR)
-  cargarURLConReintentos(mainWindow, splash, `http://127.0.0.1:${serverPort}`);
+  cargarURLConReintentos(mainWindow, splash, `http://localhost:${serverPort}`);
 
   mainWindow.on('closed', function () {
     mainWindow = null;
@@ -213,5 +214,87 @@ app.on('before-quit', () => {
   ipcMain.on('updater-apply', () => {
     if (applyUpdateAndRestart()) {
       app.quit();
+    }
+  });
+
+  // Genera un archivo .ics y lo abre con el calendario por defecto del sistema
+  ipcMain.handle('calendar-save-ics', async (_event, { content, filename }) => {
+    try {
+      const safeName = (filename || 'cita.ics').replace(/[^a-zA-Z0-9._-]/g, '_');
+      const dir = path.join(app.getPath('userData'), 'eventos-ics');
+      fs.mkdirSync(dir, { recursive: true });
+      const filePath = path.join(dir, safeName);
+      fs.writeFileSync(filePath, content, 'utf8');
+      const err = await shell.openPath(filePath);
+      if (err) return { ok: false, error: err };
+      return { ok: true, path: filePath };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  });
+
+  // ── Desbloqueo biométrico (Windows Hello) ─────────────────────────────
+  // Guarda la contraseña maestra cifrada con safeStorage (DPAPI en Windows)
+  // y la entrega únicamente tras una verificación biométrica satisfactoria
+  // en el renderer (WebAuthn). El fichero vive en userData.
+  const vaultPath = () => path.join(app.getPath('userData'), 'ffe-biometric-vault.json');
+
+  const readVault = () => {
+    try {
+      if (!fs.existsSync(vaultPath())) return null;
+      return JSON.parse(fs.readFileSync(vaultPath(), 'utf8'));
+    } catch {
+      return null;
+    }
+  };
+
+  ipcMain.handle('biometric-status', () => {
+    const vault = readVault();
+    return {
+      available: safeStorage.isEncryptionAvailable(),
+      enabled: !!vault,
+      credentialId: vault?.credentialId || null,
+    };
+  });
+
+  ipcMain.handle('biometric-save', (_event, { credentialId, password }) => {
+    if (!safeStorage.isEncryptionAvailable()) {
+      return { ok: false, error: 'El almacenamiento seguro del sistema no está disponible.' };
+    }
+    if (!credentialId || !password) {
+      return { ok: false, error: 'Faltan datos para configurar el desbloqueo biométrico.' };
+    }
+    try {
+      const payload = {
+        version: 1,
+        rpId: 'localhost',
+        credentialId,
+        password: safeStorage.encryptString(password).toString('base64'),
+        createdAt: new Date().toISOString(),
+      };
+      fs.writeFileSync(vaultPath(), JSON.stringify(payload, null, 2), 'utf8');
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  });
+
+  ipcMain.handle('biometric-get-password', () => {
+    const vault = readVault();
+    if (!vault) return { ok: false, error: 'El desbloqueo biométrico no está configurado.' };
+    try {
+      const password = safeStorage.decryptString(Buffer.from(vault.password, 'base64'));
+      return { ok: true, password };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  });
+
+  ipcMain.handle('biometric-delete', () => {
+    try {
+      if (fs.existsSync(vaultPath())) fs.unlinkSync(vaultPath());
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: String(e) };
     }
   });

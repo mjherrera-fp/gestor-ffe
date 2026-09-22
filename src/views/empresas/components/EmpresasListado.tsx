@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, Hash, Plus, Edit2, Trash2, Mail, Phone, X, Star, Filter, Download, FileSpreadsheet, Loader2, TriangleAlert } from 'lucide-react';
+import { Building, Hash, Plus, Edit2, Trash2, Mail, Phone, X, Star, Filter, Download, FileSpreadsheet, Loader2, TriangleAlert, CalendarPlus } from 'lucide-react';
 import { Empresa } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
@@ -16,6 +16,8 @@ interface EmpresasListadoProps {
   // Email
   onIndividualEmail: (emp: Empresa) => void;
   onBulkEmail: () => void;
+  // Calendario
+  onCalendar: (emp: Empresa) => void;
   // Excel
   onDownloadTemplate: () => void | Promise<void>;
   onImportClick: () => void;
@@ -37,6 +39,7 @@ export function EmpresasListado({
   searchTerm, onSearchChange,
   onSelectEmpresa, onNew, onEdit, onDeleteRequest,
   onIndividualEmail, onBulkEmail,
+  onCalendar,
   onDownloadTemplate, onImportClick, isImporting,
   filterValoracion, onFilterValoracionChange,
   filterUltimosCursos, onFilterUltimosCursosChange,
@@ -235,6 +238,14 @@ export function EmpresasListado({
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <Title text="Añadir a calendario">
+                  <button
+                    onClick={e => { e.stopPropagation(); onCalendar(emp); }}
+                    className="p-2 text-text-muted hover:text-primary"
+                  >
+                    <CalendarPlus className="h-4 w-4" />
+                  </button>
+                </Title>
                 <Title text="Enviar correo">
                   <button
                     onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
@@ -307,6 +318,14 @@ export function EmpresasListado({
                 </td>
                 <td className="px-5 py-4 text-right">
                   <div className="flex items-center gap-2 justify-end">
+                    <Title text="Añadir a calendario">
+                      <button
+                        onClick={e => { e.stopPropagation(); onCalendar(emp); }}
+                        className="p-1.5 text-text-muted hover:text-primary transition-colors"
+                      >
+                        <CalendarPlus className="h-4 w-4" />
+                      </button>
+                    </Title>
                     <Title text="Enviar correo">
                       <button
                         onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
