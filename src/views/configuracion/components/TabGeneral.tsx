@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, Trash2, Pencil, FileBadge, X, Sun, Moon, Laptop } from 'lucide-react';
+import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, Trash2, Pencil, FileBadge, X, Sun, Moon, Laptop, Tag } from 'lucide-react';
 import { EmpresaFestivosModal } from './EmpresaFestivosModal.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { useTheme } from '../../../hooks/useTheme.tsx';
@@ -74,6 +74,42 @@ export function TabGeneral() {
       .then(data => setEmpresaFestivos(data))
       .catch(() => {});
   }, []);
+
+  // ── Estado etiqueta evento calendario ──
+  const [etiquetaEvento, setEtiquetaEvento] = useState('');
+  const [savingEtiqueta, setSavingEtiqueta] = useState(false);
+  const [successEtiqueta, setSuccessEtiqueta] = useState('');
+  const [errorEtiqueta, setErrorEtiqueta] = useState('');
+
+  useEffect(() => {
+    fetch('/api/profesor/config/calendario')
+      .then(r => r.json())
+      .then(data => setEtiquetaEvento(data.etiqueta || ''))
+      .catch(() => setErrorEtiqueta('Error al cargar la etiqueta'));
+  }, []);
+
+  const handleSubmitEtiqueta = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingEtiqueta(true);
+    setSuccessEtiqueta('');
+    setErrorEtiqueta('');
+    try {
+      const res = await fetch('/api/profesor/config/calendario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ etiqueta: etiquetaEvento.trim() }),
+      });
+      if (res.ok) {
+        setSuccessEtiqueta('Etiqueta guardada correctamente.');
+      } else {
+        setErrorEtiqueta('Error al guardar la etiqueta');
+      }
+    } catch {
+      setErrorEtiqueta('Error de conexión');
+    } finally {
+      setSavingEtiqueta(false);
+    }
+  };
 
   // ── Handlers avisos ──
   const handleChangeAvisos = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -615,6 +651,56 @@ export function TabGeneral() {
             </div>
           </div>
 
+        </div>
+      </div>
+
+      {/* ─── SECCIÓN ETIQUETA EVENTO CALENDARIO ─── */}
+      <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
+        <div className="p-6 border-b border-border-base bg-surface-subtle">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary-light text-primary">
+              <Tag className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-text-main">Etiqueta de eventos de calendario</h3>
+              <p className="text-sm text-text-muted">
+                Etiqueta (categoría) que se añade a los eventos creados al añadir una cita al calendario desde la aplicación.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          {errorEtiqueta && (
+            <div className="mb-4 p-3 bg-danger-soft text-danger rounded-lg text-sm border border-danger/20">{errorEtiqueta}</div>
+          )}
+          {successEtiqueta && (
+            <div className="mb-4 p-3 bg-success-soft text-success-strong rounded-lg text-sm border border-success/20">
+              {successEtiqueta}
+            </div>
+          )}
+          <form onSubmit={handleSubmitEtiqueta} className="space-y-4">
+            <div>
+              <label className={labelClass}>Etiqueta</label>
+              <input
+                className={inputClass}
+                value={etiquetaEvento}
+                onChange={e => setEtiquetaEvento(e.target.value)}
+                placeholder="Ej: Tutoría"
+                maxLength={50}
+              />
+              <p className="text-[10px] text-text-muted mt-1">
+                Vacía para no añadir etiqueta a los eventos.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t border-border-base">
+              <button type="submit" disabled={savingEtiqueta} className="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                <span className="flex items-center justify-center gap-2">
+                  <Tag className="h-5 w-5" />
+                  {savingEtiqueta ? 'Guardando...' : 'Guardar Etiqueta'}
+                </span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
