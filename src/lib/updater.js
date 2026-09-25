@@ -206,6 +206,7 @@ async function resolveLatestCandidate() {
       version: tagVersion,
       url: assetApiUrl(asset),
       fileName: path.basename(asset.name),
+      releaseUrl: release.html_url,
     };
   }
   return latestCandidate;
@@ -232,11 +233,11 @@ export async function checkForUpdates({ send } = {}) {
     // Reutilizamos una descarga previa del mismo candidato
     const pending = readPending();
     if (pending && pending.version === candidate.version && fs.existsSync(pending.exePath)) {
-      return send && send({ state: 'ready', version: candidate.version });
+      return send && send({ state: 'ready', version: candidate.version, releaseUrl: candidate.releaseUrl });
     }
 
     // Hay una versión nueva: avisamos y esperamos a que el usuario apruebe
-    send && send({ state: 'available', version: candidate.version });
+    send && send({ state: 'available', version: candidate.version, releaseUrl: candidate.releaseUrl });
   } catch (err) {
     console.error('[updater] error en la comprobación', err);
     send && send({ state: 'error', message: String((err && err.message) || err) });
@@ -253,19 +254,19 @@ export async function startAvailableDownload({ send } = {}) {
 
     const pending = readPending();
     if (pending && pending.version === candidate.version && fs.existsSync(pending.exePath)) {
-      return send && send({ state: 'ready', version: candidate.version });
+      return send && send({ state: 'ready', version: candidate.version, releaseUrl: candidate.releaseUrl });
     }
 
     const fileName = candidate.fileName || `${candidate.version}.exe`;
     const dest = path.join(tmpDir(), fileName);
-    send && send({ state: 'downloading', version: candidate.version, received: 0, total: 0 });
+    send && send({ state: 'downloading', version: candidate.version, releaseUrl: candidate.releaseUrl, received: 0, total: 0 });
     await downloadUpdate(candidate.url, dest, (received, total) => {
-      send && send({ state: 'downloading', version: candidate.version, received, total });
+      send && send({ state: 'downloading', version: candidate.version, releaseUrl: candidate.releaseUrl, received, total });
     });
 
     savePending(candidate.version, dest, fileName);
     latestCandidate = null;
-    send && send({ state: 'ready', version: candidate.version });
+    send && send({ state: 'ready', version: candidate.version, releaseUrl: candidate.releaseUrl });
   } catch (err) {
     console.error('[updater] error en la descarga', err);
     send && send({ state: 'error', message: String((err && err.message) || err) });

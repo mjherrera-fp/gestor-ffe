@@ -6,6 +6,7 @@ interface UpdateStatus {
   received?: number;
   total?: number;
   message?: string;
+  releaseUrl?: string;
 }
 
 interface Window {
