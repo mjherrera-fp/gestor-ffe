@@ -7,10 +7,22 @@ interface Ctx {
   ssData: SeguridadSocialData | null;
 }
 
-type FilterType = 'todos' | 'conFFE' | 'iniciadas';
+type FilterType = 'todos' | 'conFFE' | 'enCurso';
 
 function alumnoTieneFFE(alumnoId: number, datos: Record<string, number>): boolean {
   return Object.entries(datos).some(([key, val]) => key.startsWith(`${alumnoId}_`) && val > 0);
+}
+
+function hoyLocalISO(): string {
+  const d = new Date();
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const dia = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
+function alumnoEnCurso(alumno: { fechaInicio: string | null; fechaFin: string | null }, hoy: string): boolean {
+  if (!alumno.fechaInicio || !alumno.fechaFin) return false;
+  return alumno.fechaInicio <= hoy && hoy <= alumno.fechaFin;
 }
 
 export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
@@ -38,8 +50,9 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
 
     if (filterType === 'conFFE') {
       result = result.filter(a => alumnoTieneFFE(a.id, ctx.ssData!.datos));
-    } else if (filterType === 'iniciadas') {
-      result = result.filter(a => a.fechaInicio !== null);
+    } else if (filterType === 'enCurso') {
+      const hoy = hoyLocalISO();
+      result = result.filter(a => alumnoEnCurso(a, hoy));
     }
 
     if (searchTerm.trim()) {
@@ -98,7 +111,7 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
           {([
             { id: 'todos' as FilterType, label: 'Todos' },
             { id: 'conFFE' as FilterType, label: 'Con FFE' },
-            { id: 'iniciadas' as FilterType, label: 'Iniciadas' },
+            { id: 'enCurso' as FilterType, label: 'En curso' },
           ]).map(opt => (
             <button
               key={opt.id}

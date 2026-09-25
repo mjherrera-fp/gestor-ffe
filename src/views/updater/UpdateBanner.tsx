@@ -1,4 +1,4 @@
-import { Download, RefreshCw, X } from 'lucide-react';
+import { Download, ExternalLink, RefreshCw, X } from 'lucide-react';
 import { useUpdaterStatus } from './useUpdaterStatus.tsx';
 
 interface UpdateStatus {
@@ -7,6 +7,7 @@ interface UpdateStatus {
   received?: number;
   total?: number;
   message?: string;
+  releaseUrl?: string;
 }
 
 const SUBTLE_TEXT = 'font-bold text-text-main uppercase tracking-wider';
@@ -35,6 +36,17 @@ export function UpdateBanner() {
                     ? `La versión ${status.version} está descargada y lista.`
                     : `Existe la versión ${status.version}.`}
                 </p>
+                {status.releaseUrl && (
+                  <a
+                    href={status.releaseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[10px] font-bold text-primary hover:underline underline-offset-2 mt-1"
+                  >
+                    Ver notas de la versión
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
               </div>
             </div>
             <button
