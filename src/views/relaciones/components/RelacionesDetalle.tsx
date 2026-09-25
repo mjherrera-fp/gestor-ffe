@@ -340,10 +340,12 @@ export function RelacionDetalle({
                       onClick={() => onDescargarRelacion('docx')}
                       showText={true}
                     />
-                    <BotonDescargaPDF
-                      onClick={() => onDescargarRelacion('pdf')}
-                      showText={true}
-                    />
+                    <Title text="Descargar PDF">
+                      <BotonDescargaPDF
+                        onClick={() => onDescargarRelacion('pdf')}
+                        showText={true}
+                      />
+                    </Title>
                   </>
                 )}
                 <Title text="Enviar por correo">
@@ -438,11 +440,13 @@ export function RelacionDetalle({
                             showText={true}
                             className="h-8 px-2 bg-surface-card border border-border-base text-primary rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-primary-light transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
                           />
-                          <BotonDescargaPDF
-                            onClick={async () => onDescargarPlanFormativo('pdf', alumno)}
-                            showText={true}
-                            className="h-8 px-2 bg-surface-card border border-border-base text-danger rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-danger-soft transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
-                          />
+                          <Title text="Descargar PDF">
+                            <BotonDescargaPDF
+                              onClick={async () => onDescargarPlanFormativo('pdf', alumno)}
+                              showText={true}
+                              className="h-8 px-2 bg-surface-card border border-border-base text-danger rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-danger-soft transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
+                            />
+                          </Title>
                           <Title text="Enviar por correo">
                             <button
                               onClick={async () => { const key = `plan-${alumno.id}`; setSendingEmail(key); try { await onEmailPlanFormativo('pdf', alumno); } finally { setSendingEmail(null); } }}
