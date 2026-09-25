@@ -13,6 +13,7 @@ import {db} from './src/lib/db.ts';
 import {
   AceptacionUsoDAO,
   AlumnoDAO,
+  AnulacionFFEDAO,
   AvisosDAO,
   CentroDAO,
   ComunicacionDATDAO,
@@ -638,10 +639,14 @@ async function startServer() {
   });
 
   // Alumnos
-  app.get('/api/alumnos', (req, res) => res.json(AlumnoDAO.getAll(
-    req.query.cursoId ? Number(req.query.cursoId) : undefined,
-    req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
-  )));
+  app.get('/api/alumnos', (req, res) => {
+    const alumnos = AlumnoDAO.getAll(
+      req.query.cursoId ? Number(req.query.cursoId) : undefined,
+      req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
+    );
+    const counts = HistoricoDAO.countAnulacionesPorAlumno(alumnos.map(a => a.id!));
+    res.json(alumnos.map(a => ({ ...a, anulacionesCount: counts[a.id!] || 0 })));
+  });
   app.post('/api/alumnos', (req, res) => {
     const { dni, emailEduca, emailPersonal, tlfn } = req.body;
     const dups = AlumnoDAO.findByDNIEmailPhone(dni, emailEduca, emailPersonal, tlfn);
@@ -703,6 +708,36 @@ async function startServer() {
   app.delete('/api/alumnos/:id', (req, res) => {
     AlumnoDAO.delete(Number(req.params.id));
     res.json({ success: true });
+  });
+
+  // ─── ANULACIÓN FFE ─────────────────────────────────────
+  app.post('/api/alumnos/:id/anular-ffe/preview', (req, res) => {
+    const alumnoId = Number(req.params.id);
+    let fechaStr = '';
+    if (typeof req.body?.fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.body.fecha)) {
+      fechaStr = req.body.fecha;
+    } else {
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, '0');
+      fechaStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    }
+    const [y, m, d] = fechaStr.split('-').map(Number);
+    const preview = AnulacionFFEDAO.preview(alumnoId, new Date(y, m - 1, d));
+    if (!preview) return res.status(404).json({ error: 'El alumno no tiene una relación activa' });
+    res.json(preview);
+  });
+
+  app.post('/api/alumnos/:id/anular-ffe', (req, res) => {
+    const alumnoId = Number(req.params.id);
+    const fechaAnulacion = typeof req.body?.fecha === 'string' ? req.body.fecha : '';
+    const motivo = typeof req.body?.motivo === 'string' ? req.body.motivo : '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaAnulacion)) {
+      return res.status(400).json({ error: 'Fecha de anulación no válida' });
+    }
+    const result = AnulacionFFEDAO.anular(alumnoId, fechaAnulacion, motivo);
+    if (!result.ok) return res.status(400).json({ error: result.error });
+    try { HistoricoDAO.logOperacionRelacion('ANULAR_FFE', result.relacionId, result.referencia || `Alumno ${alumnoId}`); } catch {}
+    res.json({ success: true, horasRealizadas: result.horasRealizadas, totalHorasNuevo: result.totalHorasNuevo });
   });
 
   // CV Upload
@@ -1676,6 +1711,13 @@ async function startServer() {
   });
   app.get('/api/historico/estados', (req, res) => {
     res.json(HistoricoDAO.getCambiosEstado(req.query as any));
+  });
+  app.get('/api/historico/anulaciones/counts', (req, res) => {
+    const ids = String(req.query.alumnoIds || '').split(',').map(s => Number(s)).filter(n => !Number.isNaN(n));
+    res.json(HistoricoDAO.countAnulacionesPorAlumno(ids));
+  });
+  app.get('/api/historico/anulaciones', (req, res) => {
+    res.json(HistoricoDAO.getAnulacionesFFE(req.query as any));
   });
 
   // ─── AVISOS ──────────────────────────────────────────
@@ -2809,7 +2851,9 @@ async function startServer() {
 
   // Panel
   app.get('/api/panel/resumen', (req, res) => {
+    const profesor = ProfesorDAO.get();
     res.json(PanelDAO.resumen(
+      profesor?.id,
       req.query.cursoId ? Number(req.query.cursoId) : undefined,
       req.query.detalleAcademicoId ? Number(req.query.detalleAcademicoId) : undefined
     ));

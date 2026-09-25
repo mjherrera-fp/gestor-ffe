@@ -18,11 +18,13 @@ import {RelacionesListado} from './components/RelacionesListado.tsx';
 import {RelacionDetalle} from './components/RelacionesDetalle.tsx';
 import {RelacionFormModal} from './components/RelacionesFormModal.tsx';
 import {RelacionEstadisticaFormModal} from './components/RelacionEstadisticaFormModal.tsx';
+import {AnulacionFFEModal} from './components/AnulacionFFEModal.tsx';
 import {calculateEndDateForHours} from './utils/relacionesUtils.ts';
 import {EmailModal} from '../../components/EmailModal.tsx';
 import {GestorDocumentalModal} from '../../components/GestorDocumentalModal.tsx';
 import {Modal} from '../../components/ui/Modal.tsx';
 import {CalendarioEventoModal} from '../../components/CalendarioEventoModal.tsx';
+import {mostrarToast} from '../../utils/toast.ts';
 
 
 interface Props {
@@ -381,6 +383,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
           onDeleteRequest={ctx.setShowDeleteConfirm}
           onOpenStats={ctx.handleOpenEstadistica}
           onCalendar={setCalendarioRelacion}
+          onAnularRelacion={(rel, alumno) => ctx.setAnularAlumno({ rel, alumnoId: alumno.id! })}
           listSearchTerm={ctx.listSearchTerm}
           onListSearchChange={ctx.setListSearchTerm}
           statusFilters={ctx.statusFilters}
@@ -594,6 +597,20 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
           tutorPreseleccionadoId={calendarioRelacion?.tutorEmpresaId ?? null}
           alumnos={calendarioRelacion?.alumnos}
           onClose={() => setCalendarioRelacion(null)}
+        />
+
+        {/* ── MODAL: Anular FFE ── */}
+        <AnulacionFFEModal
+          open={!!ctx.anularAlumno}
+          rel={ctx.anularAlumno?.rel ?? null}
+          alumnoId={ctx.anularAlumno?.alumnoId ?? null}
+          onClose={() => ctx.setAnularAlumno(null)}
+          onPreview={ctx.previewAnulacionFFE}
+          onSubmit={async (alumnoId, fecha, motivo) => {
+            const data = await ctx.handleAnularFFE(alumnoId, fecha, motivo);
+            mostrarToast('FFE anulada correctamente');
+            return data;
+          }}
         />
     </div>
   );

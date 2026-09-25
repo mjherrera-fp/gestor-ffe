@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Search, X, Edit2, Trash2, Calendar, CalendarPlus, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3, ChevronDown, ChevronUp, Star, Mail } from 'lucide-react';
+import { Search, X, Edit2, Trash2, Calendar, CalendarPlus, FileText, ArrowLeftRight, Plus, FolderArchive, Loader2, Download, BarChart3, ChevronDown, ChevronUp, Star, Mail, Ban } from 'lucide-react';
 import {
-  RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels,
+  Alumno, RelacionAlumno, Convenio, RelacionEstado, RelacionEstadoLabels,
   PlanFormativoEstado, PlanFormativoEstadoLabels,
   SeguimientoEstado, SeguimientoEstadoLabels,
   ValoracionEstado, ValoracionEstadoLabels,
@@ -48,6 +48,7 @@ interface RelacionesListadoProps {
   onDeleteRequest: (id: number) => void;
   onOpenStats: (rel: RelacionAlumno) => void;
   onCalendar: (rel: RelacionAlumno) => void;
+  onAnularRelacion?: (rel: RelacionAlumno, alumno: Alumno) => void;
   listSearchTerm: string;
   onListSearchChange: (val: string) => void;
   statusFilters: {
@@ -88,6 +89,7 @@ interface RelacionesListadoProps {
 export function RelacionesListado({
   relaciones, convenios, createRelacion, selectedRelacion,
   onSelectRelacion, onEdit, onDeleteRequest, onOpenStats, onCalendar,
+  onAnularRelacion,
   listSearchTerm, onListSearchChange,
   statusFilters, onStatusFilterChange,
   dateFilters, onDateFilterChange,
@@ -425,6 +427,17 @@ className={`cursor-pointer transition-colors group align-top border-b-12 border-
                                 type="valoracion"
                                 tooltip={`Valoración: ${getStatusLabel((alumno as any).estadoValoracion || ValoracionEstado.PENDIENTE, 'valoracion')}`}
                               />
+                              {onAnularRelacion && (
+                                <Title text="Anular FFE de este alumno" className="ml-auto flex">
+                                  <button
+                                    onClick={e => { e.stopPropagation(); onAnularRelacion(rel, alumno); }}
+                                    className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-danger bg-danger-soft/60 hover:bg-danger-soft px-2 py-0.5 rounded-md transition-colors"
+                                  >
+                                    <Ban className="h-3 w-3" />
+                                    Anular
+                                  </button>
+                                </Title>
+                              )}
                             </div>
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2 min-w-0">

@@ -30,9 +30,10 @@ interface Props {
   cursoId: number;
   detalleAcademicoId?: number;
   onGoToConfig?: () => void;
+  onGoToAnulaciones?: (alumnoId: number) => void;
 }
 
-export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig }: Props) {
+export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig, onGoToAnulaciones }: Props) {
   const ctx = useAlumnos(cursoId, detalleAcademicoId);
 
   const [viewingCV, setViewingCV] = useState<Alumno | null>(null);
@@ -159,6 +160,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
               onFileUpload={ctx.handleFileUpload}
               onFileDelete={ctx.handleFileDelete}
               onViewCV={setViewingCV}
+              onGoToAnulaciones={alumno => onGoToAnulaciones?.(alumno.id!)}
             />
           ))}
         </div>
@@ -172,6 +174,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig 
           onFileUpload={ctx.handleFileUpload}
           onFileDelete={ctx.handleFileDelete}
           onViewCV={setViewingCV}
+          onGoToAnulaciones={onGoToAnulaciones}
         />
       )}
 

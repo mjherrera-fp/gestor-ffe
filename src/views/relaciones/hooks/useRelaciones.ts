@@ -2,6 +2,7 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import JSZip from 'jszip';
 import {
     Alumno,
+    AnulacionPreview,
     Convenio,
     Curso,
     EmpresaEstadistica,
@@ -74,6 +75,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     // ── UI de listado ──
     const [selectedRelacion, setSelectedRelacion] = useState<RelacionAlumno | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
+    const [anularAlumno, setAnularAlumno] = useState<{ rel: RelacionAlumno; alumnoId: number } | null>(null);
     const [listSearchTerm, setListSearchTerm] = useState('');
     const [statusFilters, setStatusFilters] = useState({
         relacion: { value: 'all', negate: false },
@@ -442,6 +444,36 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             console.error(error);
             alert('Error al eliminar la relación.');
         }
+    };
+
+    // ── ANULACIÓN FFE ──
+    const previewAnulacionFFE = async (alumnoId: number, fecha: string): Promise<AnulacionPreview | null> => {
+        try {
+            const res = await fetch(`/api/alumnos/${alumnoId}/anular-ffe/preview`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fecha }),
+            });
+            if (!res.ok) return null;
+            return await res.json();
+        } catch {
+            return null;
+        }
+    };
+
+    const handleAnularFFE = async (alumnoId: number, fecha: string, motivo: string) => {
+        const res = await fetch(`/api/alumnos/${alumnoId}/anular-ffe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fecha, motivo }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al anular la FFE');
+        // Si el alumno anulado estaba en la relación seleccionada, la cerramos
+        if (selectedRelacion?.alumnos?.some(a => a.id === alumnoId)) setSelectedRelacion(null);
+        setAnularAlumno(null);
+        await fetchData();
+        return data;
     };
 
     // ─────────────────────────────────────────
@@ -1941,6 +1973,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         // Listado UI
         selectedRelacion, setSelectedRelacion,
         showDeleteConfirm, setShowDeleteConfirm,
+        anularAlumno, setAnularAlumno,
+        previewAnulacionFFE, handleAnularFFE,
         listSearchTerm, setListSearchTerm,
         statusFilters, setStatusFilters,
         dateFilters, setDateFilters, clearFilters,

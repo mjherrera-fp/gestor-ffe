@@ -298,7 +298,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     if (!newFestivo) return;
     setCentroFormData(prev => ({
       ...prev,
-      festivos: [...(prev.festivos || []), newFestivo],
+      festivos: [...new Set([...(prev.festivos || []), newFestivo])].sort(),
     }));
     setNewFestivo('');
   };
