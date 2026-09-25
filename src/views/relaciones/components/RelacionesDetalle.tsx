@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import {
   Alumno,
+  FFEResultadoRA,
   FFEValoracionFinal,
   FirmaTipo,
   FirmaTipoLabels,
@@ -40,6 +41,15 @@ import {Modal} from '../../../components/ui/Modal.tsx';
 import {mostrarToast} from '../../../utils/toast.ts';
 
 const FIRMA_CICLO: FirmaTipo[] = [FirmaTipo.SIN_ASIGNAR, FirmaTipo.DIGITAL, FirmaTipo.MANUAL];
+const COMPARADOR_NATURAL = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
+
+interface FFERAEstado {
+  modulo: string;
+  codigoModulo: string;
+  numeroRa: string;
+  nombreRa: string;
+  aprobado: boolean;
+}
 
 function FirmaSelector({ value, onChange }: { value?: FirmaTipo; onChange: (v: FirmaTipo) => void }) {
   const firma = value || FirmaTipo.SIN_ASIGNAR;
@@ -129,7 +139,7 @@ export function RelacionDetalle({
   const [sendingEmail, setSendingEmail] = useState<string | null>(null);
   const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
   const [ffeModalAlumno, setFfeModalAlumno] = useState<Alumno | null>(null);
-  const [ffeRAs, setFfeRAs] = useState<Array<{ modulo: string; codigoRa: string; nombreRa: string; aprobado: boolean }>>([]);
+  const [ffeRAs, setFfeRAs] = useState<FFERAEstado[]>([]);
   const [ffeValoraciones, setFfeValoraciones] = useState<FFEValoracionFinal[]>([]);
   const [ffeValoracionFinalId, setFfeValoracionFinalId] = useState<number | null>(null);
   const [loadingFFE, setLoadingFFE] = useState(false);
@@ -153,13 +163,20 @@ export function RelacionDetalle({
       const raList: ResultadoAprendizaje[] = detalle?.resultadosAprendizaje || [];
       const valoraciones: FFEValoracionFinal[] = await valoracionesRes.json();
       const evaluacion = evRes.ok ? await evRes.json() : null;
-      const savedRAs = raRes && raRes.ok ? await raRes.json() : [];
+      const savedRAs: FFEResultadoRA[] = raRes && raRes.ok ? await raRes.json() : [];
+      const orderedRAs = [...raList].sort((a, b) =>
+        COMPARADOR_NATURAL.compare(a.codigo, b.codigo)
+        || COMPARADOR_NATURAL.compare(a.ra, b.ra)
+        || COMPARADOR_NATURAL.compare(a.modulo, b.modulo)
+      );
 
-      setFfeRAs(raList.map((ra: ResultadoAprendizaje) => {
-        const saved = savedRAs.find((s: any) => s.modulo === ra.modulo && s.codigoRa === (ra.codigo || ra.ra));
+      setFfeRAs(orderedRAs.map((ra: ResultadoAprendizaje) => {
+        const saved = savedRAs.find((s) => s.modulo === ra.modulo && s.codigoRa === ra.ra)
+          || savedRAs.find((s) => s.modulo === ra.modulo && s.codigoRa === ra.codigo && s.nombreRa === ra.nombre);
         return {
           modulo: ra.modulo,
-          codigoRa: ra.codigo || ra.ra,
+          codigoModulo: ra.codigo,
+          numeroRa: ra.ra,
           nombreRa: ra.nombre,
           aprobado: saved ? !!saved.aprobado : true,
         };
@@ -178,7 +195,14 @@ export function RelacionDetalle({
         await fetch(`/api/ffe/ra-resultados/${alumno.id}/${alumno.relacionId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ entries: ffeRAs }),
+          body: JSON.stringify({
+            entries: ffeRAs.map(({ modulo, numeroRa, nombreRa, aprobado }) => ({
+              modulo,
+              codigoRa: numeroRa,
+              nombreRa,
+              aprobado,
+            })),
+          }),
         });
       }
       await fetch(`/api/ffe/evaluaciones/${alumno.id}`, {
@@ -316,10 +340,12 @@ export function RelacionDetalle({
                       onClick={() => onDescargarRelacion('docx')}
                       showText={true}
                     />
-                    <BotonDescargaPDF
-                      onClick={() => onDescargarRelacion('pdf')}
-                      showText={true}
-                    />
+                    <Title text="Descargar PDF">
+                      <BotonDescargaPDF
+                        onClick={() => onDescargarRelacion('pdf')}
+                        showText={true}
+                      />
+                    </Title>
                   </>
                 )}
                 <Title text="Enviar por correo">
@@ -414,11 +440,13 @@ export function RelacionDetalle({
                             showText={true}
                             className="h-8 px-2 bg-surface-card border border-border-base text-primary rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-primary-light transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
                           />
-                          <BotonDescargaPDF
-                            onClick={async () => onDescargarPlanFormativo('pdf', alumno)}
-                            showText={true}
-                            className="h-8 px-2 bg-surface-card border border-border-base text-danger rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-danger-soft transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
-                          />
+                          <Title text="Descargar PDF">
+                            <BotonDescargaPDF
+                              onClick={async () => onDescargarPlanFormativo('pdf', alumno)}
+                              showText={true}
+                              className="h-8 px-2 bg-surface-card border border-border-base text-danger rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-danger-soft transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
+                            />
+                          </Title>
                           <Title text="Enviar por correo">
                             <button
                               onClick={async () => { const key = `plan-${alumno.id}`; setSendingEmail(key); try { await onEmailPlanFormativo('pdf', alumno); } finally { setSendingEmail(null); } }}
@@ -785,11 +813,12 @@ export function RelacionDetalle({
                     <p className="text-xs text-text-muted italic">No hay RA definidos para este alumno.</p>
                   )}
                   {ffeRAs.map((ra, i) => (
-                    <div key={`${ra.modulo}-${ra.codigoRa}`} className="flex items-center justify-between p-3 rounded-xl border border-border-base bg-surface-subtle/50">
+                    <div key={`${ra.modulo}-${ra.codigoModulo}-${ra.numeroRa}-${i}`} className="flex items-center justify-between p-3 rounded-xl border border-border-base bg-surface-subtle/50">
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold text-text-main">
-                          <span className="text-primary">{ra.modulo} {ra.codigoRa}</span>
-                          {ra.nombreRa && <span className="text-text-muted font-normal"> — {ra.nombreRa}</span>}
+                          <span className="text-primary">{ra.modulo} ({ra.codigoModulo})</span>
+                          <span className="text-text-muted font-normal"> — {ra.numeroRa}</span>
+                          {ra.nombreRa && <span className="text-text-muted font-normal">: {ra.nombreRa}</span>}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-3">

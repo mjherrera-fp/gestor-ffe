@@ -49,7 +49,7 @@ export function BotonDescargaPDF({ url, name, showText = true, text, onClick, cl
   const defaultStyles = "p-2.5 h-8 text-danger hover:text-danger/80 transition-all hover:bg-danger-soft rounded-xl border border-danger/20 shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
-    <Title text="Descargar Anexo en PDF">
+
       <button 
         onClick={descargarPDF}
         disabled={isDownloading}
@@ -62,6 +62,5 @@ export function BotonDescargaPDF({ url, name, showText = true, text, onClick, cl
         )}
         {showText && <span className="text-[9px] font-bold truncate">{text || 'PDF'}</span>}
       </button>
-    </Title>
   );
 }

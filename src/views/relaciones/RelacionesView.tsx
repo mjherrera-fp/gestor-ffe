@@ -592,6 +592,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
           open={!!calendarioRelacion}
           empresaId={calendarioRelacion ? (ctx.convenios.find(c => c.id === calendarioRelacion.convenioId)?.empresaId ?? null) : null}
           tutorPreseleccionadoId={calendarioRelacion?.tutorEmpresaId ?? null}
+          alumnos={calendarioRelacion?.alumnos}
           onClose={() => setCalendarioRelacion(null)}
         />
     </div>

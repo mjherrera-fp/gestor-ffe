@@ -63,9 +63,9 @@ export function SeguridadSocialTable({ data }: Props) {
     <div className="bg-surface-card rounded-xl border border-border-base shadow-sm flex flex-col" style={{ maxHeight: '70vh' }}>
       <div className="overflow-auto flex-1">
         <table className="w-full text-sm border-collapse">
-          <thead className="sticky top-0 z-10">
+          <thead className="sticky top-0 z-20">
             <tr className="bg-surface-subtle">
-              <th className="px-4 py-3 text-[11px] font-bold text-text-muted uppercase tracking-wider text-left sticky left-0 bg-surface-subtle z-20 min-w-40">
+              <th className="px-4 py-3 text-[11px] font-bold text-text-muted uppercase tracking-wider text-left sticky left-0 bg-surface-subtle z-30 border-r border-border-base min-w-40">
                 Alumno
               </th>
               <th className="px-3 py-3 text-[11px] font-bold text-text-muted uppercase tracking-wider text-center min-w-22.5">
@@ -95,7 +95,7 @@ export function SeguridadSocialTable({ data }: Props) {
             {data.alumnos.map(alumno => (
               <tr
                 key={alumno.id}
-                className={`cursor-pointer transition-colors ${
+                className={`group cursor-pointer transition-colors ${
                   rowSelected(alumno.id)
                     ? 'bg-primary-light'
                     : 'hover:bg-surface-subtle/50'
@@ -103,10 +103,10 @@ export function SeguridadSocialTable({ data }: Props) {
               >
                 <td
                   onClick={() => handleRowClick(alumno.id)}
-                  className={`px-4 py-2.5 font-semibold whitespace-nowrap sticky left-0 z-10 transition-colors ${
+                  className={`px-4 py-2.5 font-semibold whitespace-nowrap sticky left-0 z-10 border-r border-border-base transition-colors ${
                     rowSelected(alumno.id)
                       ? 'text-primary bg-primary-light'
-                      : 'text-text-main bg-surface-card'
+                      : 'text-text-main bg-surface-card group-hover:bg-surface-subtle/50'
                   }`}
                 >
                   {alumno.apellidos}, {alumno.nombre}
@@ -163,7 +163,7 @@ export function SeguridadSocialTable({ data }: Props) {
           </tbody>
           <tfoot>
             <tr className="bg-surface-hover font-semibold">
-              <td className="px-4 py-3 text-[11px] font-bold text-text-main uppercase tracking-wider sticky left-0 bg-surface-hover z-10">
+              <td className="px-4 py-3 text-[11px] font-bold text-text-main uppercase tracking-wider sticky left-0 bg-surface-hover z-10 border-r border-border-base">
                 Total
               </td>
               <td colSpan={2} className="px-3 py-3 text-center text-xs text-text-muted">
