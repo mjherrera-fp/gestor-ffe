@@ -222,7 +222,14 @@ export function EstadoResumenTable({ resumen, columns, sort, toggleSort, filters
               {columns.map(col => {
                 const hasFilter = !!filters[col.id];
                 return (
-                  <th key={col.id} className="px-4 py-3 text-left whitespace-nowrap relative">
+                  <th
+                    key={col.id}
+                    className={`px-4 py-3 text-left whitespace-nowrap ${
+                      col.id === 'alumno'
+                        ? 'sticky left-0 z-30 bg-surface-subtle border-r border-border-base min-w-40'
+                        : 'relative'
+                    }`}
+                  >
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => toggleSort(col.id)}
@@ -263,14 +270,25 @@ export function EstadoResumenTable({ resumen, columns, sort, toggleSort, filters
                 <tr
                   key={row.alumnoId}
                   onClick={() => setSelectedRowId(selectedRowId === row.alumnoId ? null : row.alumnoId)}
-                  className={`cursor-pointer transition-colors ${
+                  className={`group cursor-pointer transition-colors ${
                     selectedRowId === row.alumnoId
                       ? 'bg-primary-light hover:bg-primary-light'
                       : 'hover:bg-surface-subtle/50'
                   }`}
                 >
                   {columns.map(col => (
-                    <td key={col.id} className="px-4 py-3">
+                    <td
+                      key={col.id}
+                      className={`px-4 py-3 ${
+                        col.id === 'alumno'
+                          ? `sticky left-0 z-10 border-r border-border-base transition-colors ${
+                              selectedRowId === row.alumnoId
+                                ? 'bg-primary-light hover:bg-primary-light'
+                                : 'bg-surface-card group-hover:bg-surface-subtle/50'
+                            }`
+                          : ''
+                      }`}
+                    >
                       <CellContent row={row} col={col} formatDate={formatDate} />
                     </td>
                   ))}

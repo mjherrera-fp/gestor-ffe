@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CalendarPlus, X, Loader2, TriangleAlert } from 'lucide-react';
-import { Empresa, TutorEmpresa } from '../types/index.ts';
+import { Alumno, Empresa, TutorEmpresa } from '../types/index.ts';
+import { formatDate } from '../lib/dateUtils.ts';
 import { Modal } from './ui/Modal.tsx';
 import { CustomSelect } from './CustomSelect.tsx';
 import { mostrarToast } from '../utils/toast.ts';
@@ -10,6 +11,7 @@ interface CalendarioEventoModalProps {
   open: boolean;
   empresaId: number | null;
   tutorPreseleccionadoId?: number | null;
+  alumnos?: Alumno[];
   onClose: () => void;
 }
 
@@ -25,10 +27,10 @@ const horariosPorDefecto = () => {
   };
 };
 
-function buildCuerpo(emp: Empresa, tutor?: TutorEmpresa): string {
+function buildCuerpo(emp: Empresa, tutor?: TutorEmpresa, alumnos?: Alumno[]): string {
   const contacto = emp.personaContacto?.trim() || 'la empresa';
   const nomTutor = tutor && `${tutor.nombre?.trim() || ''} ${tutor.apellidos?.trim() || ''}`.trim();
-  return [
+  const lineas = [
     `Reunión con ${contacto} de la empresa ${emp.nombre}`,
     'Datos de contacto:',
     ` - email: ${emp.email?.trim() || 'No informado'}`,
@@ -38,10 +40,28 @@ function buildCuerpo(emp: Empresa, tutor?: TutorEmpresa): string {
     ` - nombre: ${nomTutor || 'No informado'}`,
     ` - email: ${tutor?.email?.trim() || 'No informado'}`,
     ` - teléfono: ${tutor?.tlfn?.trim() || 'No informado'}`,
-  ].join('\n');
+  ];
+
+  if (alumnos) {
+    lineas.push('', `Alumnos de la relación (${alumnos.length}):`);
+    if (alumnos.length === 0) {
+      lineas.push(' - No hay alumnos en la relación.');
+    } else {
+      lineas.push(...alumnos.flatMap((alumno, i) => [
+        `${i + 1}. ${alumno.nombre} ${alumno.apellidos}`,
+        ` - email educativo: ${alumno.emailEduca?.trim() || 'No informado'}`,
+        ` - email personal: ${alumno.emailPersonal?.trim() || 'No informado'}`,
+        ` - teléfono: ${alumno.tlfn?.trim() || 'No informado'}`,
+        ` - periodo FFE: ${formatDate(alumno.fechaInicio) || 'No informado'} - ${formatDate(alumno.fechaFin) || 'No informado'}`,
+        ` - horas FFE: ${alumno.totalHorasFFE ?? 'No informado'}`,
+      ]));
+    }
+  }
+
+  return lineas.join('\n');
 }
 
-export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId = null, onClose }: CalendarioEventoModalProps) {
+export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId = null, alumnos, onClose }: CalendarioEventoModalProps) {
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [tutores, setTutores] = useState<TutorEmpresa[]>([]);
   const [tutorId, setTutorId] = useState<number | ''>('');
@@ -81,7 +101,7 @@ export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId 
     setLugar(lugarDef);
     setAsunto(asuntoDef);
     setTutorId(tutorSel);
-    setCuerpo(buildCuerpo(emp, tutoresDeEmpresa.find(t => t.id === tutorSel)));
+    setCuerpo(buildCuerpo(emp, tutoresDeEmpresa.find(t => t.id === tutorSel), alumnos));
   };
 
   const seleccionarTipoLugar = (tipo: 'calle' | 'online' | 'telefonica' | 'otro') => {
@@ -152,7 +172,7 @@ export function CalendarioEventoModal({ open, empresaId, tutorPreseleccionadoId 
 
   const cambiarTutor = (id: number | '') => {
     setTutorId(id);
-    if (empresa) setCuerpo(buildCuerpo(empresa, tutores.find(t => t.id === id)));
+    if (empresa) setCuerpo(buildCuerpo(empresa, tutores.find(t => t.id === id), alumnos));
   };
 
   const guardar = async () => {
