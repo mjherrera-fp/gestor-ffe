@@ -622,6 +622,15 @@ async function startServer() {
     if (!curso) return res.status(404).json({ error: 'Curso no encontrado' });
     res.json(curso);
   });
+  app.post('/api/cursos/reemplazar', (req, res) => {
+    try {
+      const id = CursoDAO.replaceAll(req.body);
+      res.json({ id });
+    } catch (error) {
+      console.error("Error replacing cursos:", error);
+      res.status(500).json({ error: "No se pudo crear el nuevo curso. No se ha eliminado nada." });
+    }
+  });
   app.post('/api/cursos', (req, res) => res.json({ id: CursoDAO.create(req.body) }));
   app.put('/api/cursos/:id', (req, res) => {
     CursoDAO.update(Number(req.params.id), req.body);

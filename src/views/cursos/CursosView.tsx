@@ -110,7 +110,8 @@ export default function CursosView({ cursos, onUpdate }: Props) {
         formData={ctx.formData}
         setFormData={ctx.setFormData}
         onSubmit={ctx.handleSubmit}
-        onClose={() => ctx.setShowForm(false)}
+        onClose={ctx.cerrarFormulario}
+        saving={ctx.saving}
       />
 
       {/* TABLA / LISTADO */}

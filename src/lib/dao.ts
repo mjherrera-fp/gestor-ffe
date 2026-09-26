@@ -626,6 +626,32 @@ export const CursoDAO = {
       delCurso.run(id);
     })();
   },
+  /**
+   * Sustituye todos los cursos por uno nuevo en una sola transaccion.
+   *
+   * Es lo que permite que el formulario de nuevo curso se pueda cancelar sin
+   * perdida: el borrado ocurre aqui, al guardar, y si algo falla se deshace
+   * entero. Antes se borraba al abrir el formulario, de modo que cancelar
+   * dejaba la aplicacion sin curso y con los alumnos ya perdidos.
+   *
+   * A diferencia de `delete`, aqui NO se borra la configuracion de
+   * `festivos_empresa`: es un ajuste global de la aplicacion, no del curso, y
+   * su borrado en `delete` es un error que queda pendiente de revisar.
+   */
+  replaceAll: (curso: Curso) => {
+    const delRelaciones = db.prepare(
+      'DELETE FROM relaciones WHERE convenioId IN (SELECT id FROM convenios WHERE cursoId IN (SELECT id FROM cursos))'
+    );
+    const delAlumnos = db.prepare('DELETE FROM alumnos WHERE cursoId IN (SELECT id FROM cursos)');
+    const delCurso = db.prepare('DELETE FROM cursos');
+    const insCurso = db.prepare('INSERT INTO cursos (descripcion, fechaInicio, fechaFin) VALUES (?, ?, ?)');
+    return db.transaction(() => {
+      delRelaciones.run();
+      delAlumnos.run();
+      delCurso.run();
+      return insCurso.run(curso.descripcion, curso.fechaInicio, curso.fechaFin).lastInsertRowid;
+    })();
+  },
 };
 
 export const AlumnoDAO = {
