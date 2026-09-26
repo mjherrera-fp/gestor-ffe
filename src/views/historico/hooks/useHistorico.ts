@@ -28,6 +28,13 @@ interface FiltrosCambiosEstado {
   fechaHasta: string;
 }
 
+interface FiltrosAnulaciones {
+  alumnoId: string;
+  texto: string;
+  fechaDesde: string;
+  fechaHasta: string;
+}
+
 const FILTROS_INICIALES_COMUNICACIONES: FiltrosComunicaciones = {
   destinatario: '', fechaDesde: '', fechaHasta: '', correo: '', tieneAdjuntos: '',
 };
@@ -38,6 +45,10 @@ const FILTROS_INICIALES_OPERACIONES: FiltrosOperaciones = {
 
 const FILTROS_INICIALES_ESTADOS: FiltrosCambiosEstado = {
   tipoProceso: '', fechaDesde: '', fechaHasta: '',
+};
+
+const FILTROS_INICIALES_ANULACIONES: FiltrosAnulaciones = {
+  alumnoId: '', texto: '', fechaDesde: '', fechaHasta: '',
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,4 +107,8 @@ export function useHistoricoRelaciones() {
 
 export function useHistoricoEstados() {
   return useTab<any>('estados', FILTROS_INICIALES_ESTADOS);
+}
+
+export function useHistoricoAnulaciones() {
+  return useTab<any>('anulaciones', FILTROS_INICIALES_ANULACIONES);
 }

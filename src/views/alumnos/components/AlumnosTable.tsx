@@ -13,9 +13,10 @@ interface AlumnosTableProps {
   onFileUpload: (id: number, file: File) => void;
   onFileDelete: (id: number) => void;
   onViewCV: (a: Alumno) => void;
+  onGoToAnulaciones?: (alumnoId: number) => void;
 }
 
-export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV }: AlumnosTableProps) {
+export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV, onGoToAnulaciones }: AlumnosTableProps) {
   const [ffeModalAlumnoId, setFfeModalAlumnoId] = useState<number | null>(null);
   const [ffeMotivos, setFfeMotivos] = useState<FFEMotivoNoRealizacion[]>([]);
   const [ffeMotivoSelected, setFfeMotivoSelected] = useState<number | null>(null);
@@ -221,15 +222,27 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
 
                 {/* Estado asignación */}
                 <td className="px-6 py-4 border-b border-border-base">
-                  {isAssigned ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success-soft text-success-strong text-[9px] font-bold uppercase tracking-tight border border-success/20">
-                      Asignado
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-warning-soft text-warning-strong text-[9px] font-bold uppercase tracking-tight border border-warning/20">
-                      Pdte. Asignar
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {isAssigned ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success-soft text-success-strong text-[9px] font-bold uppercase tracking-tight border border-success/20">
+                        Asignado
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-warning-soft text-warning-strong text-[9px] font-bold uppercase tracking-tight border border-warning/20">
+                        Pdte. Asignar
+                      </span>
+                    )}
+                    {!!alumno.anulacionesCount && onGoToAnulaciones && (
+                      <Title text="Ver anulaciones de FFE en el histórico">
+                        <button
+                          onClick={() => onGoToAnulaciones(alumno.id!)}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-danger-soft text-danger-strong text-[9px] font-black uppercase tracking-tight border border-danger/20 hover:bg-danger/15 transition-colors"
+                        >
+                          {alumno.anulacionesCount} A
+                        </button>
+                      </Title>
+                    )}
+                  </div>
                 </td>
 
                 {/* Horas FFE */}

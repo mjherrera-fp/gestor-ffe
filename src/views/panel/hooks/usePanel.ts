@@ -14,6 +14,7 @@ import {formatDate} from '../../../lib/dateUtils.ts';
 export type ColumnId =
   | 'alumno' | 'fechaInicio' | 'fechaFin' | 'empresa'
   | 'numConvenio' | 'numRelacion'
+  | 'horasFFE' | 'horasRealizadas' | 'horasPendientes'
   | 'estadoConvenio' | 'estadoRelacion' | 'estadoPlanFormativo'
     | 'estadoSeguimiento' | 'estadoValoracion'
     | 'fechaEnvioDAT' | 'estadoDAT';
@@ -25,7 +26,7 @@ export interface SortConfig {
   dir: SortDir;
 }
 
-export type FilterType = 'text' | 'date' | 'status';
+export type FilterType = 'text' | 'date' | 'status' | 'number';
 
 export interface ColumnFilter {
   type: FilterType;
@@ -45,6 +46,8 @@ export interface ColumnMeta {
   getValue: (r: PanelResumenRow) => string | null | undefined;
 }
 
+const fmtHoras = (n?: number | null) => (n == null ? '' : Number.isInteger(n) ? String(n) : n.toFixed(1));
+
 export const COLUMNS: ColumnMeta[] = [
   { id: 'alumno', label: 'Alumno', type: 'text', getValue: r => `${r.apellidos}, ${r.nombre}` },
   { id: 'fechaInicio', label: 'Inicio', type: 'date', getValue: r => r.fechaInicio },
@@ -52,6 +55,9 @@ export const COLUMNS: ColumnMeta[] = [
   { id: 'empresa', label: 'Empresa', type: 'text', getValue: r => r.empresaNombre },
   { id: 'numConvenio', label: 'Nº Convenio', type: 'text', getValue: r => r.numConvenio },
   { id: 'numRelacion', label: 'Nº Relación', type: 'text', getValue: r => r.numRelacion },
+  { id: 'horasFFE', label: 'Horas FFE', type: 'number', getValue: r => fmtHoras(r.totalHorasFFE) },
+  { id: 'horasRealizadas', label: 'Horas Realizadas FFE', type: 'number', getValue: r => fmtHoras(r.horasRealizadas) },
+  { id: 'horasPendientes', label: 'Horas Pendientes FFE', type: 'number', getValue: r => fmtHoras(r.horasPendientes) },
   {id: 'fechaEnvioDAT', label: 'Fecha Envío DAT', type: 'date', getValue: r => r.fechaEnvioDAT},
   { id: 'estadoConvenio', label: 'Estado Convenio', type: 'status', statusLabels: ConvenioEstadoLabels, getValue: r => r.estadoConvenio },
   { id: 'estadoRelacion', label: 'Estado Relación', type: 'status', statusLabels: RelacionEstadoLabels, getValue: r => r.estadoRelacion },
@@ -67,14 +73,18 @@ export const COLUMNS: ColumnMeta[] = [
   { id: 'estadoValoracion', label: 'Valoración', type: 'status', statusLabels: ValoracionEstadoLabels, getValue: r => r.estadoValoracion },
 ];
 
+const HORAS_COLS: ColumnId[] = ['horasFFE', 'horasRealizadas', 'horasPendientes'];
+
 function compareValues(a: string | null | undefined, b: string | null | undefined, col: ColumnId, dir: SortDir): number {
-  const va = a ?? '';
-  const vb = b ?? '';
   let cmp = 0;
-  if (col === 'fechaInicio' || col === 'fechaFin' || col === 'fechaEnvioDAT') {
+  if (HORAS_COLS.includes(col)) {
+    const na = a === null || a === undefined || a === '' ? Number.NEGATIVE_INFINITY : Number(a);
+    const nb = b === null || b === undefined || b === '' ? Number.NEGATIVE_INFINITY : Number(b);
+    cmp = na - nb;
+  } else if (col === 'fechaInicio' || col === 'fechaFin' || col === 'fechaEnvioDAT') {
     cmp = (a || '').localeCompare(b || '');
   } else {
-    cmp = va.localeCompare(vb, 'es', { sensitivity: 'base' });
+    cmp = (a || '').localeCompare(b || '', 'es', { sensitivity: 'base' });
   }
   return dir === 'asc' ? cmp : -cmp;
 }
@@ -99,6 +109,12 @@ function applyFilters(rows: PanelResumenRow[], filters: FilterState, columns: Co
           toDate.setHours(23, 59, 59, 999);
           if (dateVal > toDate) return false;
         }
+      }
+
+      if (f.type === 'number') {
+        const numVal = val !== null && val !== undefined && val !== '' ? Number(val) : Number.NaN;
+        if (f.from !== undefined && f.from !== '' && !Number.isNaN(numVal) && numVal < Number(f.from)) return false;
+        if (f.to !== undefined && f.to !== '' && !Number.isNaN(numVal) && numVal > Number(f.to)) return false;
       }
 
       if (f.type === 'status' && f.selected && f.selected.length > 0) {

@@ -476,6 +476,26 @@ function setupTables() {
       referencia TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS historico_anulaciones_ffe (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      alumno_id INTEGER,
+      nombre_alumno TEXT NOT NULL,
+      apellidos_alumno TEXT NOT NULL,
+      dni_alumno TEXT NOT NULL,
+      total_horas_original INTEGER NOT NULL,
+      horas_realizadas INTEGER NOT NULL,
+      total_horas_nuevo INTEGER NOT NULL,
+      empresa TEXT,
+      cif TEXT,
+      tutor TEXT,
+      ref_relacion TEXT,
+      fecha_inicio TEXT,
+      fecha_anulacion TEXT NOT NULL,
+      motivo TEXT,
+      fecha_hora TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY(alumno_id) REFERENCES alumnos(id) ON DELETE SET NULL
+    );
+
     CREATE TABLE IF NOT EXISTS comunicaciones_dat (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       fecha TEXT NOT NULL,

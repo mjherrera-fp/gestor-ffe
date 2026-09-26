@@ -105,6 +105,34 @@ function FilterDropdown({
         </>
       )}
 
+      {column.type === 'number' && (
+        <>
+          <div>
+            <label className="text-[11px] font-bold text-text-muted uppercase tracking-wider block mb-1">Mínimo</label>
+            <input
+              type="number"
+              step="any"
+              value={local.from || ''}
+              onChange={e => setLocal({ ...local, from: e.target.value })}
+              placeholder="Ej: 0"
+              className="w-full px-3 py-2 text-sm bg-surface-card border border-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="text-[11px] font-bold text-text-muted uppercase tracking-wider block mb-1">Máximo</label>
+            <input
+              type="number"
+              step="any"
+              value={local.to || ''}
+              onChange={e => setLocal({ ...local, to: e.target.value })}
+              placeholder="Ej: 500"
+              className="w-full px-3 py-2 text-sm bg-surface-card border border-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
+          </div>
+        </>
+      )}
+
       {column.type === 'status' && (
         <div className="max-h-48 overflow-y-auto space-y-1">
           {(() => {
@@ -179,6 +207,10 @@ function CellContent({ row, col, formatDate }: { row: PanelResumenRow; col: Colu
 
   if (col.id === 'fechaInicio' || col.id === 'fechaFin' || col.id === 'fechaEnvioDAT') {
     return <span className="text-text-muted text-xs whitespace-nowrap">{formatDate(val)}</span>;
+  }
+
+  if (col.type === 'number') {
+    return <span className="text-text-main font-semibold whitespace-nowrap text-right">{val === '' || val == null ? '—' : val}</span>;
   }
 
   const display = val || '—';

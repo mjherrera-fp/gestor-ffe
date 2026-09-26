@@ -1,21 +1,27 @@
 import { useState } from 'react';
-import { Mail, FileText, ArrowLeftRight, Repeat, History } from 'lucide-react';
+import { Mail, FileText, ArrowLeftRight, Repeat, History, Ban } from 'lucide-react';
 import TabComunicaciones from './components/TabComunicaciones.tsx';
 import TabOperacionesConvenio from './components/TabOperacionesConvenio.tsx';
 import TabOperacionesRelacion from './components/TabOperacionesRelacion.tsx';
 import TabCambiosEstado from './components/TabCambiosEstado.tsx';
+import TabAnulacionesFFE from './components/TabAnulacionesFFE.tsx';
 
-type TabId = 'comunicaciones' | 'convenios' | 'relaciones' | 'estados';
+type TabId = 'comunicaciones' | 'convenios' | 'relaciones' | 'estados' | 'anulaciones';
 
 const tabs: { id: TabId; label: string; icon: React.ComponentType<any> }[] = [
   { id: 'comunicaciones', label: 'Comunicaciones', icon: Mail },
   { id: 'convenios', label: 'Convenios', icon: FileText },
   { id: 'relaciones', label: 'Relaciones', icon: ArrowLeftRight },
   { id: 'estados', label: 'Cambios de Estado', icon: Repeat },
+  { id: 'anulaciones', label: 'Anulaciones FFE', icon: Ban },
 ];
 
-export default function HistoricoView() {
-  const [activeTab, setActiveTab] = useState<TabId>('comunicaciones');
+interface Props {
+  initialAnulacionesAlumnoId?: number | null;
+}
+
+export default function HistoricoView({ initialAnulacionesAlumnoId }: Props) {
+  const [activeTab, setActiveTab] = useState<TabId>(initialAnulacionesAlumnoId ? 'anulaciones' : 'comunicaciones');
 
   return (
     <div className="flex flex-col h-full bg-bg-base">
@@ -52,6 +58,7 @@ export default function HistoricoView() {
         {activeTab === 'convenios' && <TabOperacionesConvenio />}
         {activeTab === 'relaciones' && <TabOperacionesRelacion />}
         {activeTab === 'estados' && <TabCambiosEstado />}
+        {activeTab === 'anulaciones' && <TabAnulacionesFFE initialAlumnoId={initialAnulacionesAlumnoId} />}
       </div>
     </div>
   );

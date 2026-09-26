@@ -97,6 +97,7 @@ export interface Alumno {
   tieneMatch?: number;
   alumnoIncompleto?: number;
   comunicacionDAT?: number;
+  anulacionesCount?: number;
 }
 
 export interface RelacionAlumno {
@@ -357,6 +358,8 @@ export interface PanelResumenRow {
   fechaInicio: string | null;
   fechaFin: string | null;
   totalHorasFFE: number;
+  horasRealizadas: number;
+  horasPendientes: number;
   relacionId: number | null;
   empresaNombre: string | null;
   numConvenio: string | null;
@@ -438,4 +441,30 @@ export interface FFEInformeRow {
   relacionId: number | null;
   resultadoFFE: string;
   notaFinal: string;
+}
+
+export interface AnulacionFFE {
+  id: number;
+  alumnoId: number | null;
+  nombreAlumno: string;
+  apellidosAlumno: string;
+  dniAlumno: string;
+  totalHorasOriginal: number;
+  horasRealizadas: number;
+  totalHorasNuevo: number;
+  empresa: string | null;
+  cif: string | null;
+  tutor: string | null;
+  refRelacion: string | null;
+  fechaInicio: string | null;
+  fechaAnulacion: string;
+  motivo: string | null;
+  fechaHora: string;
+}
+
+export interface AnulacionPreview {
+  totalHoras: number;
+  horasRealizadas: number;
+  horasPendientes: number;
+  fechaInicio: string | null;
 }

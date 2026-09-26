@@ -71,6 +71,7 @@ export default function App() {
   const [showCreateNotification, setShowCreateNotification] = useState(false);
   const [preloadRelacion, setPreloadRelacion] = useState<{ empresaId: number; alumnoIds: number[] } | null>(null);
   const [datNecesario, setDatNecesario] = useState(true);
+  const [historicoAnulacionAlumnoId, setHistoricoAnulacionAlumnoId] = useState<number | null>(null);
 
   const [isLocked, setIsLocked] = useState(false);
   const [isEncrypted, setIsEncrypted] = useState(false);
@@ -83,6 +84,7 @@ export default function App() {
   // Limpiar preload de relación al salir de la pestaña "relaciones"
   useEffect(() => {
     if (activeTab !== 'relaciones') setPreloadRelacion(null);
+    if (activeTab !== 'historico') setHistoricoAnulacionAlumnoId(null);
   }, [activeTab]);
 
   const generarAvisos = async () => {
@@ -579,6 +581,7 @@ export default function App() {
                 cursoId={activeCurso.id!}
                 detalleAcademicoId={activeDetalle?.id}
                 onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }}
+                onGoToAnulaciones={(alumnoId) => { setHistoricoAnulacionAlumnoId(alumnoId); setActiveTab('historico'); }}
               />
             )}
             {activeTab === 'empresas' && activeCurso && (
@@ -614,7 +617,7 @@ export default function App() {
             {activeTab === 'comunicaciones-dat' && activeCurso && (
                 <ComunicacionesDatView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id}/>
             )}
-          {activeTab === 'historico' && <HistoricoView />}
+          {activeTab === 'historico' && <HistoricoView initialAnulacionesAlumnoId={historicoAnulacionAlumnoId} />}
           {activeTab === 'configuracion' && <ConfiguracionView initialTab={configTab} />}
           </div>
         </section>

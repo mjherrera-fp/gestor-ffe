@@ -1,6 +1,8 @@
 import {db, lockDB, unlockDB} from './db.ts';
 import {
   Alumno,
+  AnulacionFFE,
+  AnulacionPreview,
   Aviso,
   CentroEducativo,
   Convenio,
@@ -45,6 +47,114 @@ const safeParse = (str: any, fallback: any) => {
   } catch (e) {
     return fallback;
   }
+};
+
+// --- HORAS REALIZADAS DE FFE ---
+
+const formatDateLocalStr = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+const HORARIO_DIAS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'] as const;
+
+const horasDelDia = (horario: any, dayOfWeek: number): number => {
+  if (!horario || typeof horario !== 'object') return 0;
+  const key = HORARIO_DIAS[dayOfWeek];
+  return Number(horario[key]?.horas) || 0;
+};
+
+interface FFEHorasContext {
+  fechaInicio?: string | null;
+  totalHorasFFE: number;
+  horario: any;
+  festivosSkip: Set<string>;
+}
+
+// Suma las horas programadas en el horario de la relación desde fechaInicio
+// hasta "hasta" (ambos inclusive), saltando festivos de centro/empresa según
+// configuración, sin superar las horas totales.
+function calcularHorasRealizadasFFE(ctx: FFEHorasContext, hasta: Date): number {
+  const { fechaInicio, totalHorasFFE, horario, festivosSkip } = ctx;
+  const total = Number(totalHorasFFE) || 0;
+  if (!fechaInicio || total <= 0) return 0;
+  const startParts = fechaInicio.split('-').map(Number);
+  if (startParts.length < 3) return 0;
+  const start = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+  const top = new Date(hasta.getFullYear(), hasta.getMonth(), hasta.getDate());
+  if (start > top) return 0;
+
+  let horas = 0;
+  const current = new Date(start);
+  const MAX_DIAS = 1100;
+  let iter = 0;
+  while (current <= top && iter < MAX_DIAS) {
+    if (!festivosSkip.has(formatDateLocalStr(current))) {
+      horas += horasDelDia(horario, current.getDay());
+      if (horas >= total) return total;
+    }
+    current.setDate(current.getDate() + 1);
+    iter++;
+  }
+  return Math.min(horas, total);
+}
+
+interface FestivosCache {
+  centroFestivosByConvenio: Record<number, string[] | undefined>;
+  empresaCiudadByConvenio: Record<number, string>;
+  festivosSkipByConvenio: Record<number, Set<string>>;
+}
+
+const createFestivosCache = (): FestivosCache => ({
+  centroFestivosByConvenio: {},
+  empresaCiudadByConvenio: {},
+  festivosSkipByConvenio: {},
+});
+
+// Calcula (y cachea) el conjunto de festivos a saltar para un convenio,
+// combinando los festivos del centro y los de la ciudad de la empresa según
+// configuración. El cache debe ser compartido entre llamadas de una misma petición.
+function getFestivosSkipConvenio(
+  cache: FestivosCache,
+  convenioId: number | null | undefined,
+  usarFestivos: boolean,
+  usarFestivosEmpresa: boolean,
+  empresaFestivosByCiudad: Record<string, string[]>
+): Set<string> {
+  if (convenioId == null) return new Set<string>();
+  if (cache.festivosSkipByConvenio[convenioId]) return cache.festivosSkipByConvenio[convenioId];
+  const set = new Set<string>();
+  if (cache.centroFestivosByConvenio[convenioId] === undefined) {
+    const conv = db.prepare('SELECT centroId, empresaId FROM convenios WHERE id = ?').get(convenioId) as any;
+    if (conv) {
+      cache.centroFestivosByConvenio[convenioId] = [];
+      if (conv.centroId) {
+        const centro = db.prepare('SELECT festivos FROM centros_educativos WHERE id = ?').get(conv.centroId) as any;
+        cache.centroFestivosByConvenio[convenioId] = centro?.festivos ? safeParse(centro.festivos, []) : [];
+      }
+      if (conv.empresaId) {
+        const empresa = db.prepare('SELECT ciudad FROM empresas WHERE id = ?').get(conv.empresaId) as any;
+        if (empresa?.ciudad) cache.empresaCiudadByConvenio[convenioId] = empresa.ciudad;
+      }
+    } else {
+      cache.centroFestivosByConvenio[convenioId] = [];
+    }
+  }
+  if (usarFestivos) (cache.centroFestivosByConvenio[convenioId] || []).forEach(f => set.add(f));
+  if (usarFestivosEmpresa) {
+    const ciudad = cache.empresaCiudadByConvenio[convenioId];
+    if (ciudad) (empresaFestivosByCiudad[ciudad] || []).forEach(f => set.add(f));
+  }
+  cache.festivosSkipByConvenio[convenioId] = set;
+  return set;
+}
+
+const parseFechaLocal = (iso: string): Date | null => {
+  const parts = iso.split('-').map(Number);
+  if (parts.length < 3 || parts.some(p => Number.isNaN(p))) return null;
+  return new Date(parts[0], parts[1] - 1, parts[2]);
 };
 
 // --- LÓGICA DE CIFRADO ---
@@ -378,6 +488,47 @@ export const HistoricoDAO = {
     const { sql, countParams, total, page, limit } = buildPaginacion(baseSql, countSql, params, filtros);
     const data = db.prepare(sql).all(...countParams, limit, (page - 1) * limit) as any[];
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  },
+
+  getAnulacionesFFE(filtros: PaginacionFiltros): PaginacionResultado<AnulacionFFE> {
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    if (filtros.alumnoId) {
+      conditions.push("alumno_id = ?");
+      params.push(filtros.alumnoId);
+    }
+    if (filtros.texto) {
+      conditions.push("(nombre_alumno LIKE ? OR apellidos_alumno LIKE ? OR dni_alumno LIKE ? OR empresa LIKE ? OR tutor LIKE ? OR motivo LIKE ?)");
+      const q = `%${filtros.texto}%`;
+      params.push(q, q, q, q, q, q);
+    }
+    if (filtros.fechaDesde) {
+      conditions.push("fecha_anulacion >= ?");
+      params.push(filtros.fechaDesde);
+    }
+    if (filtros.fechaHasta) {
+      conditions.push("fecha_anulacion <= ?");
+      params.push(filtros.fechaHasta);
+    }
+
+    const where = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+    const baseSql = `SELECT * FROM historico_anulaciones_ffe${where} ORDER BY fecha_anulacion DESC, id DESC`;
+    const countSql = `SELECT count(*) as total FROM historico_anulaciones_ffe${where}`;
+    const { sql, countParams, total, page, limit } = buildPaginacion(baseSql, countSql, params, filtros);
+    const data = db.prepare(sql).all(...countParams, limit, (page - 1) * limit) as any[];
+    return { data: data.map(mapAnulacionRow), total, page, limit, totalPages: Math.ceil(total / limit) };
+  },
+
+  countAnulacionesPorAlumno(alumnoIds: number[]): Record<number, number> {
+    if (!alumnoIds.length) return {};
+    const placeholders = alumnoIds.map(() => '?').join(',');
+    const rows = db.prepare(
+      `SELECT alumno_id, count(*) as total FROM historico_anulaciones_ffe WHERE alumno_id IN (${placeholders}) GROUP BY alumno_id`
+    ).all(...alumnoIds) as { alumno_id: number; total: number }[];
+    const counts: Record<number, number> = {};
+    for (const row of rows) counts[row.alumno_id] = row.total;
+    return counts;
   },
 };
 
@@ -1129,15 +1280,15 @@ export const RelacionAlumnoDAO = {
 };
 
 export const PanelDAO = {
-  resumen: (cursoId?: number, detalleAcademicoId?: number): PanelResumenRow[] => {
+  resumen: (profesorId?: number, cursoId?: number, detalleAcademicoId?: number): PanelResumenRow[] => {
     const baseQuery = `SELECT 
         a.id as alumnoId, a.nombre, a.apellidos,
         a.fechaInicio, a.fechaFin, a.totalHorasFFE, a.relacionId,
         a.estadoPlanFormativo, a.estadoSeguimiento, a.estadoValoracion,
         e.nombre as empresaNombre,
-        c.numConvenio, c.estado as estadoConvenio,
+        c.numConvenio, c.estado as estadoConvenio, c.id as convenioId,
         c.tipoFirma as tipoFirmaConvenio,
-        r.numRelacion, r.estado as estadoRelacion,
+        r.numRelacion, r.estado as estadoRelacion, r.horario,
         cd.fecha as fechaEnvioDAT, cd.estado as estadoDAT,
         r.firmaRelacion, r.firmaPlanFormativo, r.firmaSeguimiento,
         r.firmaValoracion
@@ -1151,7 +1302,33 @@ export const PanelDAO = {
     if (cursoId) { conditions.push('a.cursoId = ?'); params.push(cursoId); }
     if (detalleAcademicoId) { conditions.push('a.detalleAcademicoId = ?'); params.push(detalleAcademicoId); }
     const query = conditions.length > 0 ? baseQuery + ' WHERE ' + conditions.join(' AND ') : baseQuery;
-    return db.prepare(query).all(...params) as PanelResumenRow[];
+    const rows = db.prepare(query).all(...params) as any[];
+
+    const pid = profesorId || 0;
+    const config = ConfiguracionDAO.getConfig(pid, 'festivos');
+    const usarFestivos = config.usar_festivos !== '0';
+    const usarFestivosEmpresa = config.usar_festivos_empresa === '1';
+    const empresaFestivosByCiudad = usarFestivosEmpresa ? EmpresaFestivosDAO.getAll(pid) : {};
+    const festivosCache = createFestivosCache();
+
+    const hoy = new Date();
+    return rows.map(r => {
+      const total = Number(r.totalHorasFFE) || 0;
+      let realizadas = 0;
+      if (r.relacionId) {
+        realizadas = calcularHorasRealizadasFFE({
+          fechaInicio: r.fechaInicio,
+          totalHorasFFE: total,
+          horario: safeParse(r.horario, {}),
+          festivosSkip: getFestivosSkipConvenio(festivosCache, r.convenioId, usarFestivos, usarFestivosEmpresa, empresaFestivosByCiudad),
+        }, hoy);
+      }
+      return {
+        ...r,
+        horasRealizadas: realizadas,
+        horasPendientes: Math.max(0, total - realizadas),
+      };
+    });
   },
 
   seguridadSocial: (cursoId: number, detalleAcademicoId?: number): SeguridadSocialData => {
@@ -1550,6 +1727,141 @@ export const FFEEvaluacionDAO = {
     } else {
       db.prepare('INSERT INTO ffe_evaluaciones (alumnoId, relacionId, fechaEvaluacion, valoracionFinalId, motivoNoRealizacionId) VALUES (?, ?, ?, ?, ?)').run(alumnoId, relacionId, fechaEvaluacion, valoracionFinalId, motivoNoRealizacionId);
     }
+  },
+};
+
+// ─────────────────────────────────────────
+//  FFE - ANULACIONES
+// ─────────────────────────────────────────
+
+const mapAnulacionRow = (r: any): AnulacionFFE => ({
+  id: r.id,
+  alumnoId: r.alumno_id,
+  nombreAlumno: r.nombre_alumno,
+  apellidosAlumno: r.apellidos_alumno,
+  dniAlumno: r.dni_alumno,
+  totalHorasOriginal: r.total_horas_original,
+  horasRealizadas: r.horas_realizadas,
+  totalHorasNuevo: r.total_horas_nuevo,
+  empresa: r.empresa,
+  cif: r.cif,
+  tutor: r.tutor,
+  refRelacion: r.ref_relacion,
+  fechaInicio: r.fecha_inicio,
+  fechaAnulacion: r.fecha_anulacion,
+  motivo: r.motivo,
+  fechaHora: r.fecha_hora,
+});
+
+const ANULACION_SNAPSHOT_SQL = `
+  SELECT a.id as alumnoId, a.nombre, a.apellidos, a.dni, a.fechaInicio, a.fechaFin,
+         a.totalHorasFFE, a.relacionId, a.cursoId,
+         r.numRelacion, r.horario, r.convenioId, r.tutorEmpresaId,
+         e.nombre as empresaNombre, e.cif,
+         t.nombre as tutorNombre, t.apellidos as tutorApellidos
+  FROM alumnos a
+  JOIN relaciones r ON a.relacionId = r.id
+  LEFT JOIN convenios c ON r.convenioId = c.id
+  LEFT JOIN empresas e ON c.empresaId = e.id
+  LEFT JOIN empresa_tutores t ON r.tutorEmpresaId = t.id
+  WHERE a.id = ?
+`;
+
+const horasRealizadasHasta = (row: any, hasta: Date): number => {
+  const total = Number(row.totalHorasFFE) || 0;
+  if (!row.horario || total <= 0) return 0;
+  const profesor = ProfesorDAO.get();
+  const pid = profesor?.id || 0;
+  const config = ConfiguracionDAO.getConfig(pid, 'festivos');
+  const usarFestivos = config.usar_festivos !== '0';
+  const usarFestivosEmpresa = config.usar_festivos_empresa === '1';
+  const empresaFestivosByCiudad = usarFestivosEmpresa ? EmpresaFestivosDAO.getAll(pid) : {};
+  const festivosSkip = getFestivosSkipConvenio(
+    createFestivosCache(),
+    row.convenioId,
+    usarFestivos,
+    usarFestivosEmpresa,
+    empresaFestivosByCiudad
+  );
+  return calcularHorasRealizadasFFE({
+    fechaInicio: row.fechaInicio,
+    totalHorasFFE: total,
+    horario: safeParse(row.horario, {}),
+    festivosSkip,
+  }, hasta);
+};
+
+export const AnulacionFFEDAO = {
+  preview: (alumnoId: number, hasta: Date): AnulacionPreview | null => {
+    const row = db.prepare(ANULACION_SNAPSHOT_SQL).get(alumnoId) as any;
+    if (!row) return null;
+    const totalHoras = Number(row.totalHorasFFE) || 0;
+    const realizadas = horasRealizadasHasta(row, hasta);
+    return {
+      totalHoras,
+      horasRealizadas: realizadas,
+      horasPendientes: Math.max(0, totalHoras - realizadas),
+      fechaInicio: row.fechaInicio ?? null,
+    };
+  },
+
+  anular: (alumnoId: number, fechaAnulacion: string, motivo: string): { ok: boolean; error?: string; horasRealizadas?: number; totalHorasNuevo?: number; relacionId?: number; referencia?: string | null } => {
+    const motivoTrim = (motivo || '').trim();
+    if (!motivoTrim) return { ok: false, error: 'El motivo es obligatorio' };
+
+    const alumno = db.prepare('SELECT id, relacionId, fechaInicio FROM alumnos WHERE id = ?').get(alumnoId) as any;
+    if (!alumno) return { ok: false, error: 'Alumno no encontrado' };
+    if (!alumno.relacionId) return { ok: false, error: 'El alumno no tiene una relación activa' };
+
+    if (alumno.fechaInicio && fechaAnulacion < alumno.fechaInicio) {
+      return { ok: false, error: 'La fecha de anulación no puede ser anterior al inicio de la relación' };
+    }
+    const hoyLocal = formatDateLocalStr(new Date());
+    if (fechaAnulacion > hoyLocal) {
+      return { ok: false, error: 'La fecha de anulación no puede ser posterior a hoy' };
+    }
+
+    const row = db.prepare(ANULACION_SNAPSHOT_SQL).get(alumnoId) as any;
+    if (!row) return { ok: false, error: 'Alumno no encontrado' };
+
+    const totalHoras = Number(row.totalHorasFFE) || 0;
+    const hastaDate = parseFechaLocal(fechaAnulacion);
+    const realizadas = hastaDate ? horasRealizadasHasta(row, hastaDate) : 0;
+    const horasPendientes = Math.max(0, totalHoras - realizadas);
+
+    db.transaction(() => {
+      db.prepare(`
+        INSERT INTO historico_anulaciones_ffe
+          (alumno_id, nombre_alumno, apellidos_alumno, dni_alumno, total_horas_original,
+           horas_realizadas, total_horas_nuevo, empresa, cif, tutor, ref_relacion,
+           fecha_inicio, fecha_anulacion, motivo)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        alumnoId, row.nombre, row.apellidos, row.dni, totalHoras, realizadas, horasPendientes,
+        row.empresaNombre || null, row.cif || null,
+        row.tutorNombre ? `${row.tutorNombre} ${row.tutorApellidos || ''}`.trim() : null,
+        row.numRelacion || null,
+        row.fechaInicio || null,
+        fechaAnulacion,
+        motivoTrim
+      );
+
+      db.prepare(`
+        UPDATE alumnos SET
+          totalHorasFFE = ?,
+          relacionId = NULL,
+          fechaInicio = NULL,
+          fechaFin = NULL,
+          estadoPlanFormativo = 'PENDIENTE_ENVIAR_ESTUDIANTE',
+          estadoSeguimiento = 'PENDIENTE',
+          estadoValoracion = 'PENDIENTE'
+        WHERE id = ?
+      `).run(horasPendientes, alumnoId);
+
+      if (row.convenioId) syncEmpresaEstadistica(row.convenioId);
+    })();
+
+    return { ok: true, horasRealizadas: realizadas, totalHorasNuevo: horasPendientes, relacionId: row.relacionId ?? undefined, referencia: row.numRelacion ?? null };
   },
 };
 

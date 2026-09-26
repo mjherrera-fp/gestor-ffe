@@ -16,10 +16,11 @@ interface AlumnoGridCardProps {
   onFileUpload: (id: number, file: File) => void;
   onFileDelete: (id: number) => void;
   onViewCV: (a: Alumno) => void;
+  onGoToAnulaciones?: (a: Alumno) => void;
 }
 
 export function AlumnoGridCard({
-  alumno, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV
+  alumno, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV, onGoToAnulaciones
 }: AlumnoGridCardProps) {
   const isAssigned = alumno.relacionId !== null;
   const [ffeMotivoModal, setFfeMotivoModal] = useState(false);
@@ -117,6 +118,16 @@ export function AlumnoGridCard({
           </h3>
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">DNI: {alumno.dni}</p>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {!!alumno.anulacionesCount && onGoToAnulaciones && (
+              <Title text="Ver anulaciones de FFE en el histórico">
+                <button
+                  onClick={() => onGoToAnulaciones(alumno)}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-danger-soft text-danger-strong border border-danger/20 rounded-full text-[9px] font-black uppercase tracking-wide hover:bg-danger/15 transition-colors"
+                >
+                  {alumno.anulacionesCount} A
+                </button>
+              </Title>
+            )}
             {!alumno.numSS?.trim() && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-danger-soft text-danger-strong border border-danger/20 rounded-full text-[9px] font-bold uppercase tracking-wide">
                 <TriangleAlert className="h-3 w-3" /> Falta NSS
