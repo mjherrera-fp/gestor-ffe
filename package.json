@@ -17,6 +17,8 @@
     "clean": "npx rimraf dist dist-server release",
     "postinstall": "patch-package",
     "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "pack:win": "npm run clean && npm run build && npm run build:server && npm run rebuild:electron && electron-builder --win --x64",
     "pack:win:portable": "npm run clean && npm run build && npm run build:server && npx rimraf node_modules/better-sqlite3-multiple-ciphers/build && npm run rebuild:electron && electron-builder --win --x64 -c.win.target=portable"
   },
@@ -93,6 +95,7 @@
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.4.3",
+    "vitest": "^5.0.2",
     "wait-on": "^9.0.5"
   },
   "build": {
