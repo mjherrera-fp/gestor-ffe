@@ -5,7 +5,8 @@ dist-server/
 binarios/
 release/
 coverage/
-docs/
+docs/**
+!docs/*.md
 !templates/docs/
 .DS_Store
 *.log
