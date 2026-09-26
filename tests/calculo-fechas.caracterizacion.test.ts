@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateEndDateForHours,
   calculateStartDateFromEnd,
+  horarioTieneHoras,
   DEFAULT_HORARIO,
 } from '../src/views/relaciones/utils/relacionesUtils.ts';
 import type { HorarioSemanal, HorarioDia } from '../src/types/index.ts';
@@ -185,17 +186,65 @@ describe('entradas invalidas', () => {
 });
 
 describe('limite de iteraciones', () => {
-  it('con 0 horas en los 7 dias devuelve la fecha 365 dias despues', () => {
-    // Comportamiento actual deducido: el bucle esta acotado a 365 vueltas
-    // (iterations < 365) y remainingHoras nunca baja, asi que agota el tope
-    // y devuelve una fecha sin relacion con las horas pedidas.
-    // Riesgo real: un horario vacio produce una fecha fin de un ano despues
-    // sin ningun aviso. Pendiente de decision en el Lote 4.
-    const resultado = calculateEndDateForHours('2026-01-05', 40, SIN_HORAS, []);
-    expect(resultado).toBe('2027-01-05');
+  // ESTOS DOS TESTS CAMBIARON DE FORMA DELIBERADA.
+  //
+  // Antes de fijarlos, ambos devolvian una fecha: 2026-01-05 + 365 dias. Eso
+  // era un numero sin significado que, en useRelaciones.ts:515, Sobrescribia
+  // la fecha fin real del alumno y se guardaba en la base de datos.
+  // Ahora devuelven null, que es el contrato que los cinco puntos de llamada
+  // ya contemplaban con su `|| valorAnterior`.
+
+  it('con 0 horas en los 7 dias devuelve null en vez de una fecha inventada', () => {
+    expect(calculateEndDateForHours('2026-01-05', 40, SIN_HORAS, [])).toBeNull();
   });
 
-  it('tambien en el retroceso: exactamente 365 dias antes', () => {
-    expect(calculateStartDateFromEnd('2026-01-05', 40, SIN_HORAS, [])).toBe('2025-01-05');
+  it('tambien en el retroceso', () => {
+    expect(calculateStartDateFromEnd('2026-01-05', 40, SIN_HORAS, [])).toBeNull();
+  });
+
+  it('devuelve null si las horas son tantas que no caben en un ano', () => {
+    // Error de tecleo tipico: 10000 horas en lugar de 1000. Con un ano de
+    // 8 h/dia laborable se consumen unas 2080, asi que no converge.
+    expect(calculateEndDateForHours('2026-01-05', 10000, LUN_VIE, [])).toBeNull();
+  });
+
+  it('sigue calculando con normalidad las horas que si caben', () => {
+    // 1000 h con 8 h de lunes a viernes son 125 dias laborables: 25 semanas
+    // justas desde el lunes 2026-01-05, que terminan el viernes 2026-06-26.
+    expect(calculateEndDateForHours('2026-01-05', 1000, LUN_VIE, [])).toBe('2026-06-26');
+  });
+});
+
+describe('horarioTieneHoras', () => {
+  it('detecta un horario con dias con horas', () => {
+    expect(horarioTieneHoras(LUN_VIE)).toBe(true);
+  });
+
+  it('detecta un horario con dias sueltos a cero horas', () => {
+    const solo_jueves = {
+      ...SIN_HORAS,
+      jueves: { inicio: '08:00', fin: '17:00', horas: 4 },
+    };
+    expect(horarioTieneHoras(solo_jueves)).toBe(true);
+  });
+
+  it('detecta un horario completamente vacio', () => {
+    expect(horarioTieneHoras(SIN_HORAS)).toBe(false);
+  });
+
+  it('detecta la ausencia de horario', () => {
+    expect(horarioTieneHoras(undefined)).toBe(false);
+  });
+
+  it('sin dias con horas no hay fecha calculable', () => {
+    // Esta es justo la condicion que hace que el calculo devuelva null, y la
+    // que usa la interfaz para avisar en lugar de mostrar un guion.
+    expect(horarioTieneHoras(SIN_HORAS)).toBe(false);
+    expect(calculateEndDateForHours('2026-01-05', 40, SIN_HORAS, [])).toBeNull();
+  });
+
+  it('con dias con horas si hay fecha calculable', () => {
+    expect(horarioTieneHoras(LUN_VIE)).toBe(true);
+    expect(calculateEndDateForHours('2026-01-05', 40, LUN_VIE, [])).not.toBeNull();
   });
 });

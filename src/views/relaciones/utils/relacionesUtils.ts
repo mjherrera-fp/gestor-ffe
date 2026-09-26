@@ -60,6 +60,17 @@ const festivosSet = (festivos: string[], empresaFestivos: string[], usarFestivos
   return set;
 };
 
+const DIAS_SEMANA = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'] as const;
+
+/**
+ * Indica si el horario tiene al menos un dia con horas. Si no tiene ninguno,
+ * no existe fecha fin calculable por horas: las horas nunca se consumen.
+ */
+export const horarioTieneHoras = (horario: HorarioSemanal | undefined): boolean => {
+  if (!horario) return false;
+  return DIAS_SEMANA.some(dia => (horario[dia]?.horas ?? 0) > 0);
+};
+
 export const calculateEndDateForHours = (
   startDate: string,
   totalHours: number,
@@ -98,6 +109,12 @@ export const calculateEndDateForHours = (
     if (remainingHoras > 0) current.setDate(current.getDate() + 1);
     iterations++;
   }
+
+  // Si el bucle se agota, el horario no aporta horas suficientes para
+  // consumir las pedidas y no existe un ultimo dia al que llegar. Antes se
+  // devolvia la fecha en la que se agotaron las 365 vueltas (inicio + 365
+  // dias), que no significa nada y ademas sobrescribia la fecha fin real.
+  if (remainingHoras > 0) return null;
 
   return formatDateLocal(current);
 };
@@ -140,6 +157,9 @@ export const calculateStartDateFromEnd = (
     if (remainingHoras > 0) current.setDate(current.getDate() - 1);
     iterations++;
   }
+
+  // Mismo criterio que en calculateEndDateForHours: si no converge, null.
+  if (remainingHoras > 0) return null;
 
   return formatDateLocal(current);
 };
