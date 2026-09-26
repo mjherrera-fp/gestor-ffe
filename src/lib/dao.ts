@@ -602,6 +602,22 @@ export const DetalleAcademicoDAO = {
   delete: (id: number) => db.prepare('DELETE FROM detalles_academicos WHERE id = ?').run(id)
 };
 
+/**
+ * Los festivos son datos del curso, no ajustes permanentes: al empezar un
+ * curso nuevo hay que reaplicarlos, porque los del curso anterior ya no valen.
+ * Se limpian los dos origenes:
+ *
+ *   - `configuracion.tipo = 'festivos_empresa'`, indexados por ciudad.
+ *   - `centros_educativos.festivos`, los del centro de trabajo.
+ *
+ * Se vacia solo la lista de festivos del centro: la fila se conserva, con su
+ * nombre, codigo y datos de contacto, porque eso no es del curso anterior.
+ */
+const limpiarFestivos = () => {
+  db.prepare('DELETE FROM configuracion WHERE tipo = ?').run('festivos_empresa');
+  db.prepare("UPDATE centros_educativos SET festivos = '[]'").run();
+};
+
 export const CursoDAO = {
   getAll: () => db.prepare('SELECT * FROM cursos').all() as Curso[],
   getById: (id: number) => db.prepare('SELECT * FROM cursos WHERE id = ?').get(id) as Curso | undefined,
@@ -617,12 +633,11 @@ export const CursoDAO = {
   delete: (id: number) => {
     const delRelaciones = db.prepare('DELETE FROM relaciones WHERE convenioId IN (SELECT id FROM convenios WHERE cursoId = ?)');
     const delAlumnos = db.prepare('DELETE FROM alumnos WHERE cursoId = ?');
-    const delFestivosEmpresa = db.prepare('DELETE FROM configuracion WHERE tipo = ?');
     const delCurso = db.prepare('DELETE FROM cursos WHERE id = ?');
     db.transaction(() => {
       delRelaciones.run(id);
       delAlumnos.run(id);
-      delFestivosEmpresa.run('festivos_empresa');
+      limpiarFestivos();
       delCurso.run(id);
     })();
   },
@@ -634,9 +649,8 @@ export const CursoDAO = {
    * entero. Antes se borraba al abrir el formulario, de modo que cancelar
    * dejaba la aplicacion sin curso y con los alumnos ya perdidos.
    *
-   * A diferencia de `delete`, aqui NO se borra la configuracion de
-   * `festivos_empresa`: es un ajuste global de la aplicacion, no del curso, y
-   * su borrado en `delete` es un error que queda pendiente de revisar.
+   * Comparte `limpiarFestivos` con `delete`: las dos rutas dejan la aplicacion
+   * lista para el curso nuevo, con los festivos por reaplicar.
    */
   replaceAll: (curso: Curso) => {
     const delRelaciones = db.prepare(
@@ -648,6 +662,7 @@ export const CursoDAO = {
     return db.transaction(() => {
       delRelaciones.run();
       delAlumnos.run();
+      limpiarFestivos();
       delCurso.run();
       return insCurso.run(curso.descripcion, curso.fechaInicio, curso.fechaFin).lastInsertRowid;
     })();
