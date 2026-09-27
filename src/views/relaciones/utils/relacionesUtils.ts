@@ -225,12 +225,31 @@ export const getStatusLabel = (estado: string, type: string): string => {
   return estado;
 };
 
+// Los botones de accion se tinen por el TIPO de accion, no por el estado que
+// dejan. El flujo de cada tramite alterna enviar (saca el documento) y recibir
+// (lo recoge firmado), asi que la paleta es de dos colores y el ritmo se lee
+// de un vistazo:
+//
+//   ENVIAR    saca el documento hacia fuera   -> azul
+//   COMPLETAR confirma la recepcion           -> verde
+//
+// El badge y el boton miden cosas distintas a proposito: el badge dice donde
+// estas y el boton que va a pasar al pulsarlo. Por eso un boton verde puede
+// aparecer bajo un badge amarillo, y no es una contradiccion.
+//
+// Antes cada boton repetia su propia cadena de clases y dos se quedaron
+// fuera del criterio: "Recibido de Empresa" y "Recibir Firma Estudiante"
+// estaban en amarillo mientras sus equivalentes ("Recibido de Direccion",
+// "Recibir Firma Empresa") estaban en verde.
+const COLOR_BOTON_ENVIAR    = 'bg-primary';
+const COLOR_BOTON_COMPLETAR = 'bg-success';
+
 export const getAnexoStatusButton = (estado: string) => {
   switch (estado) {
-    case RelacionEstado.PENDIENTE_ENVIAR_EMPRESA:   return { label: 'Enviar Doc. a Empresa',  icon: Send,       color: 'bg-primary' };
-    case RelacionEstado.PENDIENTE_FIRMA_EMPRESA:    return { label: 'Recibido de Empresa',     icon: Clock,      color: 'bg-warning' };
-    case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR:  return { label: 'Enviar a Dirección',      icon: Send,       color: 'bg-primary' };
-    case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR:   return { label: 'Recibido de Dirección',   icon: ShieldCheck,color: 'bg-success' };
+    case RelacionEstado.PENDIENTE_ENVIAR_EMPRESA:   return { label: 'Enviar Doc. a Empresa',  icon: Send,       color: COLOR_BOTON_ENVIAR };
+    case RelacionEstado.PENDIENTE_FIRMA_EMPRESA:    return { label: 'Recibido de Empresa',     icon: Clock,      color: COLOR_BOTON_COMPLETAR };
+    case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR:  return { label: 'Enviar a Dirección',      icon: Send,       color: COLOR_BOTON_ENVIAR };
+    case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR:   return { label: 'Recibido de Dirección',   icon: ShieldCheck,color: COLOR_BOTON_COMPLETAR };
     default: return null;
   }
 };
@@ -240,27 +259,27 @@ export const getPlanStatusButton = (estado: string) => {
     // Los enums de estado son strings cuyo valor es su propia clave, asi que
     // antes cada caso tenia delante un duplicado con el mismo literal, que
     // nunca se evaluaba.
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE: return { label: 'Enviar Doc. a Estudiante', icon: Send,        color: 'bg-primary' };
-    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE: return { label: 'Recibir Firma Estudiante',  icon: Clock,       color: 'bg-warning' };
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:    return { label: 'Enviar a Empresa',           icon: Send,        color: 'bg-primary' };
-    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:     return { label: 'Recibir Firma Empresa',      icon: Clock,       color: 'bg-success' };
-    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:       return { label: 'Recibir Firma Tutor',        icon: ShieldCheck, color: 'bg-success' };
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE: return { label: 'Enviar Doc. a Estudiante', icon: Send,        color: COLOR_BOTON_ENVIAR };
+    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE: return { label: 'Recibir Firma Estudiante',  icon: Clock,       color: COLOR_BOTON_COMPLETAR };
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:    return { label: 'Enviar a Empresa',           icon: Send,        color: COLOR_BOTON_ENVIAR };
+    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:     return { label: 'Recibir Firma Empresa',      icon: Clock,       color: COLOR_BOTON_COMPLETAR };
+    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:       return { label: 'Recibir Firma Tutor',        icon: ShieldCheck, color: COLOR_BOTON_COMPLETAR };
     default: return null;
   }
 };
 
 export const getSeguimientoStatusButton = (estado: string) => {
   switch (estado) {
-    case SeguimientoEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: 'bg-primary' };
-    case SeguimientoEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: 'bg-success' };
+    case SeguimientoEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: COLOR_BOTON_ENVIAR };
+    case SeguimientoEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: COLOR_BOTON_COMPLETAR };
     default: return null;
   }
 };
 
 export const getValoracionStatusButton = (estado: string) => {
   switch (estado) {
-    case ValoracionEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: 'bg-primary' };
-    case ValoracionEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: 'bg-success' };
+    case ValoracionEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: COLOR_BOTON_ENVIAR };
+    case ValoracionEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: COLOR_BOTON_COMPLETAR };
     default: return null;
   }
 };
@@ -295,32 +314,22 @@ export const getPrevRelacionEstado = (estado: RelacionEstado): RelacionEstado =>
 
 export const getNextPlanEstado = (estado: PlanFormativoEstado | string): PlanFormativoEstado | string => {
   switch (estado) {
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE:
-    case 'PENDIENTE_ENVIAR_ESTUDIANTE':  return PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
-    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
-    case 'PENDIENTE_FIRMAR_ESTUDIANTE': return PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA;
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
-    case 'PENDIENTE_ENVIAR_EMPRESA':    return PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA;
-    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
-    case 'PENDIENTE_FIRMA_EMPRESA':     return PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR;
-    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
-    case 'PENDIENTE_FIRMA_TUTOR':       return PlanFormativoEstado.COMPLETADO;
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE: return PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
+    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE: return PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA;
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:    return PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA;
+    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:     return PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR;
+    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:       return PlanFormativoEstado.COMPLETADO;
     default: return estado;
   }
 };
 
 export const getPrevPlanEstado = (estado: PlanFormativoEstado | string): PlanFormativoEstado | string => {
   switch (estado) {
-    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
-    case 'PENDIENTE_FIRMAR_ESTUDIANTE': return PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
-    case 'PENDIENTE_ENVIAR_EMPRESA':    return PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
-    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
-    case 'PENDIENTE_FIRMA_EMPRESA':     return PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA;
-    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
-    case 'PENDIENTE_FIRMA_TUTOR':       return PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA;
-    case PlanFormativoEstado.COMPLETADO:
-    case 'COMPLETADO':                  return PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR;
+    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE: return PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:    return PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
+    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:     return PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA;
+    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:       return PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA;
+    case PlanFormativoEstado.COMPLETADO:                  return PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR;
     default: return estado;
   }
 };
