@@ -190,10 +190,13 @@ function EmailAutocompleteField({ value, onChange, placeholder, contacts, grupos
       } else {
         handleSelect(item as unknown as EmailContact);
       }
-    } else if (e.key === 'Escape') {
-      setHighlightedIndex(-1);
-      onBlur();
-    }
+      } else if (e.key === 'Escape') {
+        // Se consume la tecla: sin esto seguiria hasta document y cerraria
+        // el modal entero, perdiendo el correo a medio escribir.
+        e.stopPropagation();
+        setHighlightedIndex(-1);
+        onBlur();
+      }
   };
 
   const handleFocus = () => {

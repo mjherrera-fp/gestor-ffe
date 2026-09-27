@@ -131,15 +131,6 @@
     "mac": {
       "target": "zip"
     },
-    "extraResources": [
-      {
-        "from": "binarios/${os}",
-        "to": "binarios/${os}",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,

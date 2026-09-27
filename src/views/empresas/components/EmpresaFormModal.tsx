@@ -105,7 +105,7 @@ export function EmpresaFormModal({
     if (e.key === 'ArrowDown') { e.preventDefault(); setComunidadHighlighted(prev => Math.min(prev + 1, filteredComunidades.length - 1)); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setComunidadHighlighted(prev => Math.max(prev - 1, 0)); }
     else if (e.key === 'Enter' && comunidadHighlighted >= 0) { e.preventDefault(); const m = filteredComunidades[comunidadHighlighted]; selectComunidad(m.name, m.slug); }
-    else if (e.key === 'Escape') setComunidadFocused(false);
+      else if (e.key === 'Escape') { e.stopPropagation(); setComunidadFocused(false); }
   };
 
   /* ── Provincia ── */
@@ -142,7 +142,7 @@ export function EmpresaFormModal({
     if (e.key === 'ArrowDown') { e.preventDefault(); setProvinciaHighlighted(prev => Math.min(prev + 1, filteredProvincias.length - 1)); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setProvinciaHighlighted(prev => Math.max(prev - 1, 0)); }
     else if (e.key === 'Enter' && provinciaHighlighted >= 0) { e.preventDefault(); const m = filteredProvincias[provinciaHighlighted]; selectProvincia(m.name, m.slug, m.ccaaSlug, m.ccaaName); }
-    else if (e.key === 'Escape') setProvinciaFocused(false);
+      else if (e.key === 'Escape') { e.stopPropagation(); setProvinciaFocused(false); }
   };
 
   /* ── Localidad ── */
@@ -178,7 +178,7 @@ export function EmpresaFormModal({
     if (e.key === 'ArrowDown') { e.preventDefault(); setLocalidadHighlighted(prev => Math.min(prev + 1, filteredLocalidades.length - 1)); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setLocalidadHighlighted(prev => Math.max(prev - 1, 0)); }
     else if (e.key === 'Enter' && localidadHighlighted >= 0) { e.preventDefault(); const m = filteredLocalidades[localidadHighlighted]; selectLocalidad(m.name, m.provinciaSlug, m.provinciaName, m.ccaaSlug, m.ccaaName); }
-    else if (e.key === 'Escape') setLocalidadFocused(false);
+      else if (e.key === 'Escape') { e.stopPropagation(); setLocalidadFocused(false); }
   };
 
   const { errors, onBlur, validateAll, setFieldError } = useFormValidation(RULES);

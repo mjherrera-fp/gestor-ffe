@@ -12,7 +12,13 @@ export default function ToastContainer({ avisos, onDescartar, onPosponer }: Toas
   const pendientes = avisos.filter(a => a.estado === 'pendiente');
 
   return (
-    <div className="fixed bottom-4 right-4 z-100 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    // Los avisos van abajo a la IZQUIERDA a proposito. El banner de
+    // actualizacion ocupa abajo a la derecha de forma permanente, y ambos
+    // competed por la misma esquina: con el aviso delante (z-100 frente a
+    // z-[70]) el banner quedaba tapado y sus botones, incluido el de
+    // descargar, eran inalcanzables. Separarlos por esquina evita tener que
+    // coordinar alturas ni compartir estado entre los dos.
+    <div className="fixed bottom-4 left-4 z-100 flex flex-col gap-2 w-full max-w-[min(24rem,calc(100vw-2rem))] pointer-events-none">
       <AnimatePresence mode="popLayout">
         {pendientes.map(aviso => (
           <motion.div
