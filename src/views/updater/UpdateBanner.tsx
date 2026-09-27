@@ -1,14 +1,10 @@
 import { Download, ExternalLink, RefreshCw, X } from 'lucide-react';
 import { useUpdaterStatus } from './useUpdaterStatus.tsx';
 
-interface UpdateStatus {
-  state: 'checking' | 'none' | 'available' | 'downloading' | 'ready' | 'error' | 'check-failed';
-  version?: string;
-  received?: number;
-  total?: number;
-  message?: string;
-  releaseUrl?: string;
-}
+// UpdateStatus es un tipo global declarado en src/global.d.ts. Aquí no hace
+// falta redeclararlo: esta copia local además inventaba un estado 'check-failed'
+// que ni el updater del proceso principal emite nunca, así que las dos
+// definiciones podian divergir sin que nada lo detectara.
 
 const SUBTLE_TEXT = 'font-bold text-text-main uppercase tracking-wider';
 
