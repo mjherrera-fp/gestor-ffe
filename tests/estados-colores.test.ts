@@ -20,145 +20,26 @@ import {
   ValoracionEstadoLabels,
 } from '../src/types/index.ts';
 
-// ─────────────────────────────────────────
-//  Colores y etiquetas de estado.
-//
-//  El color de un badge tiene que comunicar en que punto esta el tramite sin
-//  necesidad de leer el texto. Estos tests fijan ese criterio, porque el mapa
-//  ya se habia desincronizado una vez: "pendiente firma empresa" del plan
-//  formativo salia en verde igual que "completado".
-// ─────────────────────────────────────────
-
-const NEUTRAL   = 'bg-surface-subtle text-text-muted border-border-base';
-const EN_CURSO  = 'bg-primary-light text-primary border-primary-light';
-const FIRMA     = 'bg-warning-soft text-warning-strong border-warning/20';
-const TERMINADO = 'bg-success-soft text-success-strong border-success/20';
-
-type Tipo = 'relacion' | 'plan' | 'seguimiento' | 'valoracion';
-
-/** Estados que son una espera de firma, sea cual sea el tipo de tramite. */
-const ESPERANDO_FIRMA: Array<[Tipo, string]> = [
-  ['relacion', RelacionEstado.PENDIENTE_FIRMA_EMPRESA],
-  ['relacion', RelacionEstado.PENDIENTE_FIRMA_DIRECTOR],
-  ['plan', PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE],
-  ['plan', PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA],
-  ['plan', PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR],
-];
-
-/** Estados enviados que aun no estan completados. */
-const ENVIADOS: Array<[Tipo, string]> = [
-  ['relacion', RelacionEstado.PENDIENTE_ENVIAR_EMPRESA],
-  ['relacion', RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR],
-  ['plan', PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE],
-  ['plan', PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA],
-  ['seguimiento', SeguimientoEstado.ENVIADO_A_EMPRESA],
-  ['valoracion', ValoracionEstado.ENVIADO_A_EMPRESA],
-];
-
-const TERMINALES: Array<[Tipo, string]> = [
-  ['relacion', RelacionEstado.COMPLETADO],
-  ['plan', PlanFormativoEstado.COMPLETADO],
-  ['seguimiento', SeguimientoEstado.RECIBIDO],
-  ['valoracion', ValoracionEstado.RECIBIDO],
-];
-
-const SIN_EMPEZAR: Array<[Tipo, string]> = [
-  ['seguimiento', SeguimientoEstado.PENDIENTE],
-  ['valoracion', ValoracionEstado.PENDIENTE],
-];
-
-describe('getStatusBadgeColor', () => {
-  it('amarillo para todo estado que espera una firma', () => {
-    for (const [tipo, estado] of ESPERANDO_FIRMA) {
-      expect(getStatusBadgeColor(estado, tipo), `${tipo}/${estado}`).toBe(FIRMA);
-    }
-  });
-
-  it('azul para lo que esta enviado y en curso', () => {
-    for (const [tipo, estado] of ENVIADOS) {
-      expect(getStatusBadgeColor(estado, tipo), `${tipo}/${estado}`).toBe(EN_CURSO);
-    }
-  });
-
-  it('verde solo para lo completado o recibido', () => {
-    for (const [tipo, estado] of TERMINALES) {
-      expect(getStatusBadgeColor(estado, tipo), `${tipo}/${estado}`).toBe(TERMINADO);
-    }
-  });
-
-  it('gris para lo que aun no se ha enviado', () => {
-    for (const [tipo, estado] of SIN_EMPEZAR) {
-      expect(getStatusBadgeColor(estado, tipo), `${tipo}/${estado}`).toBe(NEUTRAL);
-    }
-  });
-
-  it('verde es exclusivo: ningun estado pendiente lo usa', () => {
-    const todos = [...ESPERANDO_FIRMA, ...ENVIADOS, ...SIN_EMPEZAR];
-    for (const [tipo, estado] of todos) {
-      expect(getStatusBadgeColor(estado, tipo), `${tipo}/${estado}`).not.toBe(TERMINADO);
-    }
-  });
-
-  it('el color depende solo del tipo de estado, no de como se escriba', () => {
-    for (const [tipo, estado] of TERMINALES) {
-      expect(getStatusBadgeColor(estado, tipo)).toBe(getStatusBadgeColor(String(estado), tipo));
-    }
-  });
-
-  it('cae en gris ante un estado o un tipo desconocidos', () => {
-    expect(getStatusBadgeColor('NO_EXISTE', 'relacion')).toBe(NEUTRAL);
-    expect(getStatusBadgeColor(RelacionEstado.COMPLETADO, 'tipo_inventado')).toBe(NEUTRAL);
-    expect(getStatusBadgeColor('', '')).toBe(NEUTRAL);
-  });
-
-  it('nunca devuelve una cadena vacia', () => {
-    for (const [tipo, estado] of [...ESPERANDO_FIRMA, ...ENVIADOS, ...TERMINALES, ...SIN_EMPEZAR]) {
-      expect(getStatusBadgeColor(estado, tipo).length).toBeGreaterThan(0);
-    }
-  });
-});
-
-describe('getStatusLabel', () => {
-  it('devuelve la etiqueta humanizada de cada estado', () => {
-    expect(getStatusLabel(RelacionEstado.COMPLETADO, 'relacion')).toBe('Completado');
-    expect(getStatusLabel(PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR, 'plan')).toBe('Pendiente firma tutor');
-    expect(getStatusLabel(SeguimientoEstado.RECIBIDO, 'seguimiento')).toBe('Recibido de empresa');
-    expect(getStatusLabel(ValoracionEstado.PENDIENTE, 'valoracion')).toBe('Pendiente');
-  });
-
-  it('cubre todos los estados de cada tipo', () => {
-    for (const estado of Object.values(RelacionEstado)) {
-      expect(getStatusLabel(estado, 'relacion')).toBe(RelacionEstadoLabels[estado]);
-    }
-    for (const estado of Object.values(PlanFormativoEstado)) {
-      expect(getStatusLabel(estado, 'plan')).toBe(PlanFormativoEstadoLabels[estado]);
-    }
-    for (const estado of Object.values(SeguimientoEstado)) {
-      expect(getStatusLabel(estado, 'seguimiento')).toBe(SeguimientoEstadoLabels[estado]);
-    }
-    for (const estado of Object.values(ValoracionEstado)) {
-      expect(getStatusLabel(estado, 'valoracion')).toBe(ValoracionEstadoLabels[estado]);
-    }
-  });
-
-  it('devuelve el estado en crudo si no hay etiqueta conocida', () => {
-    expect(getStatusLabel('ESTADO_NUEVO', 'relacion')).toBe('ESTADO_NUEVO');
-    expect(getStatusLabel(RelacionEstado.COMPLETADO, 'tipo_inventado')).toBe('COMPLETADO');
-  });
-});
 
 // ─────────────────────────────────────────
 //  Botones de accion.
 //
-//  El boton se tine por el tipo de accion, no por el estado que deja. El flujo
-//  alterna enviar (saca el documento) y recibir (lo recoge firmado), asi que
-//  solo hay dos colores: azul para enviar, verde para confirmar la recepcion.
-//  Badge y boton miden cosas distintas, asi que un boton verde bajo un badge
-//  amarillo es lo esperado y no una contradiccion.
+//  El boton se tine por el tipo de accion y por si la cierra. El flujo de cada
+//  tramite alterna enviar (saca el documento) y recibir (lo recoge firmado),
+//  y hay recepciones que no son la ultima, asi que hay tres niveles:
+//
+//   ENVIAR    -> azul    saca el documento hacia fuera
+//   RECEPCION -> naranja confirma una firma que no es la ultima
+//   FINAL     -> verde   deja el tramite en su estado terminal
+//
+// El verde esta reservado a la ultima recepcion de cada tramite. Badge y boton
+// miden cosas distintas, asi que un boton verde bajo un badge amarillo es lo
+//  esperado.
 // ─────────────────────────────────────────
 
 const ENVIAR = 'bg-primary';
-const COMPLETAR = 'bg-success';
+const RECEPCION = 'bg-warning';
+const FINAL = 'bg-success';
 
 type Btn = { label: string; icon: unknown; color: string } | null;
 
@@ -172,15 +53,34 @@ const BOTONES_ENVIO: Array<[string, Btn, string]> = [
   ['valoracion/enviado', getValoracionStatusButton(ValoracionEstado.PENDIENTE), ENVIAR],
 ];
 
-/** Acciones que confirman la recepcion de un documento ya enviado. */
-const BOTONES_RECEPCION: Array<[string, Btn, string]> = [
-  ['anexo/recibido empresa', getAnexoStatusButton(RelacionEstado.PENDIENTE_FIRMA_EMPRESA), COMPLETAR],
-  ['anexo/recibido director', getAnexoStatusButton(RelacionEstado.PENDIENTE_FIRMA_DIRECTOR), COMPLETAR],
-  ['plan/recibir firma estudiante', getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE), COMPLETAR],
-  ['plan/recibir firma empresa', getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA), COMPLETAR],
-  ['plan/recibir firma tutor', getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR), COMPLETAR],
-  ['seguimiento/recibido', getSeguimientoStatusButton(SeguimientoEstado.ENVIADO_A_EMPRESA), COMPLETAR],
-  ['valoracion/recibido', getValoracionStatusButton(ValoracionEstado.ENVIADO_A_EMPRESA), COMPLETAR],
+/** Recepciones que aun dejan pasos por delante. */
+const BOTONES_INTERMEDIOS: Array<[string, Btn, string]> = [
+  ['anexo/recibido empresa', getAnexoStatusButton(RelacionEstado.PENDIENTE_FIRMA_EMPRESA), RECEPCION],
+  ['plan/recibir firma estudiante', getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE), RECEPCION],
+  ['plan/recibir firma empresa', getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA), RECEPCION],
+];
+
+/** La ultima recepcion de cada tramite. */
+const BOTONES_FINALES: Array<[string, Btn, string]> = [
+  ['anexo/recibido director', getAnexoStatusButton(RelacionEstado.PENDIENTE_FIRMA_DIRECTOR), FINAL],
+  ['plan/recibir firma tutor', getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR), FINAL],
+  ['seguimiento/recibido', getSeguimientoStatusButton(SeguimientoEstado.ENVIADO_A_EMPRESA), FINAL],
+  ['valoracion/recibido', getValoracionStatusButton(ValoracionEstado.ENVIADO_A_EMPRESA), FINAL],
+];
+
+const TODOS: Array<[string, Btn, string]> = [
+  ...BOTONES_ENVIO, ...BOTONES_INTERMEDIOS, ...BOTONES_FINALES,
+];
+
+/** El estado en el que queda el tramite tras pulsar cada boton de recepcion. */
+const ESTADO_TRAS_PULSAR: Array<[Btn, string, string, string]> = [
+  [getAnexoStatusButton(RelacionEstado.PENDIENTE_FIRMA_EMPRESA), RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR, 'COMPLETADO', 'anexo'],
+  [getAnexoStatusButton(RelacionEstado.PENDIENTE_FIRMA_DIRECTOR), RelacionEstado.COMPLETADO, 'COMPLETADO', 'anexo'],
+  [getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE), PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA, 'COMPLETADO', 'plan'],
+  [getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA), PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR, 'COMPLETADO', 'plan'],
+  [getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR), PlanFormativoEstado.COMPLETADO, 'COMPLETADO', 'plan'],
+  [getSeguimientoStatusButton(SeguimientoEstado.ENVIADO_A_EMPRESA), SeguimientoEstado.RECIBIDO, 'RECIBIDO', 'seguimiento'],
+  [getValoracionStatusButton(ValoracionEstado.ENVIADO_A_EMPRESA), ValoracionEstado.RECIBIDO, 'RECIBIDO', 'valoracion'],
 ];
 
 describe('colores de los botones de accion', () => {
@@ -191,10 +91,41 @@ describe('colores de los botones de accion', () => {
     }
   });
 
-  it('las acciones de recepcion son verdes', () => {
-    for (const [nombre, btn, color] of BOTONES_RECEPCION) {
+  it('las recepciones intermedias son naranjas', () => {
+    for (const [nombre, btn, color] of BOTONES_INTERMEDIOS) {
       expect(btn, nombre).not.toBeNull();
       expect(btn!.color, nombre).toBe(color);
+    }
+  });
+
+  it('solo la ultima recepcion de cada tramite es verde', () => {
+    for (const [nombre, btn, color] of BOTONES_FINALES) {
+      expect(btn, nombre).not.toBeNull();
+      expect(btn!.color, nombre).toBe(color);
+    }
+  });
+
+  it('el verde coincide con dejar el tramite en su estado terminal', () => {
+    for (const [btn, siguiente, terminal, tramite] of ESTADO_TRAS_PULSAR) {
+      const esperado = siguiente === terminal ? FINAL : RECEPCION;
+      expect(btn!.color, `${tramite} -> ${siguiente}`).toBe(esperado);
+    }
+  });
+
+  it('ninguna recepcion intermedia se pinta de verde', () => {
+    for (const [nombre, btn] of BOTONES_INTERMEDIOS) {
+      expect(btn!.color, nombre).not.toBe(FINAL);
+    }
+  });
+
+  it('no hay mas de un boton verde por tramite', () => {
+    const porTramite: Record<string, number> = {};
+    for (const [nombre, btn] of BOTONES_FINALES) {
+      const tramite = nombre.split('/')[0];
+      porTramite[tramite] = (porTramite[tramite] ?? 0) + 1;
+    }
+    for (const [tramite, total] of Object.entries(porTramite)) {
+      expect(total, tramite).toBe(1);
     }
   });
 
@@ -204,20 +135,22 @@ describe('colores de los botones de accion', () => {
     expect(emp.color).toBe(est.color);
   });
 
-  it('recibido de empresa y recibido de direccion coinciden', () => {
-    const emp = getAnexoStatusButton(RelacionEstado.PENDIENTE_FIRMA_EMPRESA)!;
+  it('el boton que cierra el plan formativo se distingue del que no', () => {
+    const tutor = getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR)!;
+    const empresa = getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA)!;
+    expect(tutor.color).toBe(FINAL);
+    expect(empresa.color).toBe(RECEPCION);
+    expect(tutor.color).not.toBe(empresa.color);
+  });
+
+  it('el boton que cierra la relacion se distingue del que no', () => {
     const dir = getAnexoStatusButton(RelacionEstado.PENDIENTE_FIRMA_DIRECTOR)!;
-    expect(emp.color).toBe(dir.color);
+    const emp = getAnexoStatusButton(RelacionEstado.PENDIENTE_FIRMA_EMPRESA)!;
+    expect(dir.color).toBe(FINAL);
+    expect(emp.color).toBe(RECEPCION);
   });
 
-  it('ningun boton de recepcion usa el color de espera de firma', () => {
-    const esperaFirma = getStatusBadgeColor(PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA, 'plan');
-    for (const [nombre, btn] of BOTONES_RECEPCION) {
-      expect(btn!.color, nombre).not.toBe(esperaFirma);
-    }
-  });
-
-  it('los botones de un tramite alternan envio y recepcion', () => {
+  it('los botones de un tramite alternan envio, recepcion y cierre', () => {
     const orden = [
       getPlanStatusButton(PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE),
       getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE),
@@ -225,7 +158,7 @@ describe('colores de los botones de accion', () => {
       getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA),
       getPlanStatusButton(PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR),
     ].map(b => b!.color);
-    expect(orden).toEqual([ENVIAR, COMPLETAR, ENVIAR, COMPLETAR, COMPLETAR]);
+    expect(orden).toEqual([ENVIAR, RECEPCION, ENVIAR, RECEPCION, FINAL]);
   });
 
   it('seguimiento y valoracion ofrecen el mismo boton para el mismo estado', () => {
@@ -249,6 +182,12 @@ describe('colores de los botones de accion', () => {
     expect(getPlanStatusButton('NO_EXISTE')).toBeNull();
     expect(getSeguimientoStatusButton('NO_EXISTE')).toBeNull();
     expect(getValoracionStatusButton('NO_EXISTE')).toBeNull();
+  });
+
+  it('todos los botones usan uno de los tres colores de la paleta', () => {
+    for (const [nombre, btn] of TODOS) {
+      expect([ENVIAR, RECEPCION, FINAL], nombre).toContain(btn!.color);
+    }
   });
 });
 

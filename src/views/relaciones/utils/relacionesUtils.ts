@@ -225,31 +225,34 @@ export const getStatusLabel = (estado: string, type: string): string => {
   return estado;
 };
 
-// Los botones de accion se tinen por el TIPO de accion, no por el estado que
-// dejan. El flujo de cada tramite alterna enviar (saca el documento) y recibir
-// (lo recoge firmado), asi que la paleta es de dos colores y el ritmo se lee
-// de un vistazo:
+// Los botones de accion se tinen por el tipo de accion y por si la accion
+// cierra el tramite. El flujo de cada tramite alterna enviar (saca el
+// documento hacia fuera) y recibir (lo recoge firmado), y hay pasos de
+// recepcion que no son los ultimos, de modo que la paleta tiene tres niveles:
 //
-//   ENVIAR    saca el documento hacia fuera   -> azul
-//   COMPLETAR confirma la recepcion           -> verde
+//   ENVIAR    saca el documento hacia fuera        -> azul
+//   RECEPCION confirma una firma que no es la ultima -> naranja
+//   FINAL     deja el tramite en su estado terminal -> verde
+//
+// El verde esta reservado a la ultima recepcion de cada tramite: "Recibido de
+// Direccion" en la relacion, "Recibir Firma Tutor" en el plan formativo y
+// "Marcar como Recibido" en seguimiento y valoracion. Cualquier otra
+// recepcion va en naranja, para que se distinga de un vistazo de la que cierra
+// el proceso.
 //
 // El badge y el boton miden cosas distintas a proposito: el badge dice donde
 // estas y el boton que va a pasar al pulsarlo. Por eso un boton verde puede
 // aparecer bajo un badge amarillo, y no es una contradiccion.
-//
-// Antes cada boton repetia su propia cadena de clases y dos se quedaron
-// fuera del criterio: "Recibido de Empresa" y "Recibir Firma Estudiante"
-// estaban en amarillo mientras sus equivalentes ("Recibido de Direccion",
-// "Recibir Firma Empresa") estaban en verde.
 const COLOR_BOTON_ENVIAR    = 'bg-primary';
-const COLOR_BOTON_COMPLETAR = 'bg-success';
+const COLOR_BOTON_RECEPCION = 'bg-warning';
+const COLOR_BOTON_FINAL     = 'bg-success';
 
 export const getAnexoStatusButton = (estado: string) => {
   switch (estado) {
     case RelacionEstado.PENDIENTE_ENVIAR_EMPRESA:   return { label: 'Enviar Doc. a Empresa',  icon: Send,       color: COLOR_BOTON_ENVIAR };
-    case RelacionEstado.PENDIENTE_FIRMA_EMPRESA:    return { label: 'Recibido de Empresa',     icon: Clock,      color: COLOR_BOTON_COMPLETAR };
+    case RelacionEstado.PENDIENTE_FIRMA_EMPRESA:    return { label: 'Recibido de Empresa',     icon: Clock,      color: COLOR_BOTON_RECEPCION };
     case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR:  return { label: 'Enviar a Dirección',      icon: Send,       color: COLOR_BOTON_ENVIAR };
-    case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR:   return { label: 'Recibido de Dirección',   icon: ShieldCheck,color: COLOR_BOTON_COMPLETAR };
+    case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR:   return { label: 'Recibido de Dirección',   icon: ShieldCheck,color: COLOR_BOTON_FINAL };
     default: return null;
   }
 };
@@ -260,10 +263,10 @@ export const getPlanStatusButton = (estado: string) => {
     // antes cada caso tenia delante un duplicado con el mismo literal, que
     // nunca se evaluaba.
     case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE: return { label: 'Enviar Doc. a Estudiante', icon: Send,        color: COLOR_BOTON_ENVIAR };
-    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE: return { label: 'Recibir Firma Estudiante',  icon: Clock,       color: COLOR_BOTON_COMPLETAR };
+    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE: return { label: 'Recibir Firma Estudiante',  icon: Clock,       color: COLOR_BOTON_RECEPCION };
     case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:    return { label: 'Enviar a Empresa',           icon: Send,        color: COLOR_BOTON_ENVIAR };
-    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:     return { label: 'Recibir Firma Empresa',      icon: Clock,       color: COLOR_BOTON_COMPLETAR };
-    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:       return { label: 'Recibir Firma Tutor',        icon: ShieldCheck, color: COLOR_BOTON_COMPLETAR };
+    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:     return { label: 'Recibir Firma Empresa',      icon: Clock,       color: COLOR_BOTON_RECEPCION };
+    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:       return { label: 'Recibir Firma Tutor',        icon: ShieldCheck, color: COLOR_BOTON_FINAL };
     default: return null;
   }
 };
@@ -271,7 +274,7 @@ export const getPlanStatusButton = (estado: string) => {
 export const getSeguimientoStatusButton = (estado: string) => {
   switch (estado) {
     case SeguimientoEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: COLOR_BOTON_ENVIAR };
-    case SeguimientoEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: COLOR_BOTON_COMPLETAR };
+    case SeguimientoEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: COLOR_BOTON_FINAL };
     default: return null;
   }
 };
@@ -279,7 +282,7 @@ export const getSeguimientoStatusButton = (estado: string) => {
 export const getValoracionStatusButton = (estado: string) => {
   switch (estado) {
     case ValoracionEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: COLOR_BOTON_ENVIAR };
-    case ValoracionEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: COLOR_BOTON_COMPLETAR };
+    case ValoracionEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: COLOR_BOTON_FINAL };
     default: return null;
   }
 };
