@@ -430,6 +430,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             }
         } catch (error) {
             console.error('Error guardando relación:', error);
+            mostrarToast('No se pudo guardar la relación: error de conexión con el servidor.', 'error');
         }
     };
 
@@ -1119,7 +1120,6 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             const numDocsGeneral = docsRelacion.filter(k => k === 'relacion'
                 ? relacionSeleccionada
                 : selectedDocs[k as keyof typeof selectedDocs]).length;
-
             if (numDocsAlumno === 0 && numDocsGeneral === 0) {
                 alert('Debes seleccionar al menos un tipo de documento para descargar.');
                 return;
@@ -1188,16 +1188,34 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             const zip = new JSZip();
 
             // 1. CÁLCULO DINÁMICO EXACTO DEL TOTAL DE OPERACIONES
+            //
+            // Se cuenta por FICHERO, no por tipo de documento: el plan
+            // formativo genera un PDF y un DOCX, y la relación también. Antes
+            // el total contaba un tipo mientras la barra solo avanzaba con el
+            // DOCX, de modo que se quedaba muy por debajo del 100 %.
+            const ficherosPorAlumno =
+                (selectedDocs.plan ? 2 : 0)
+                + (selectedDocs.seguimiento ? 1 : 0)
+                + (selectedDocs.valoracion ? 1 : 0)
+                + (selectedDocs.calendario ? 1 : 0);
+            const ficherosPorRelacion =
+                (relacionSeleccionada ? 2 : 0)
+                + (selectedDocs.carta ? 1 : 0);
+
             let totalOperaciones = 0;
             relaciones.forEach(rel => {
                 const alumnosValidos = rel.alumnos?.filter(a => a.relacionId) || [];
-                totalOperaciones += (alumnosValidos.length * numDocsAlumno) + numDocsGeneral;
+                totalOperaciones += (alumnosValidos.length * ficherosPorAlumno) + ficherosPorRelacion;
             });
 
             let operacionesCompletadas = 0;
             const reportarProgreso = (mensaje: string) => {
                 operacionesCompletadas++;
-                const porcentaje = totalOperaciones > 0 ? (operacionesCompletadas / totalOperaciones) * 90 : 90;
+                // min(90) como red de seguridad: si el recuento se desajusta,
+                // la barra no puede sobrepasar el tramo de generación.
+                const porcentaje = totalOperaciones > 0
+                    ? Math.min(90, (operacionesCompletadas / totalOperaciones) * 90)
+                    : 90;
                 setDownloadProgress(porcentaje);
                 setDownloadStatus(mensaje);
             };
@@ -1226,6 +1244,9 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                             if (blob) { // Si no falló y tenemos el archivo
                                 targetFolder?.file(`Plan_Formativo_${alumno.apellidos}.pdf`, blob);
                             }
+                            // Avanza tanto si sale como si falla: si no, la
+                            // barra se queda parada en ese documento.
+                            reportarProgreso(`Plan Formativo (PDF): ${alumno.apellidos}`);
                         });
                         tareas.push(async () => tarea);
 
@@ -1234,8 +1255,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tareaDoc = crearPlanFormativo('docx', alumno, relacion).then((blob) => {
                             if (blob) { // Si no falló y tenemos el archivo
                                 targetFolder?.file(`Plan_Formativo_${alumno.apellidos}.docx`, blob);
-                                reportarProgreso(`Plan Formativo: ${alumno.apellidos}`);
                             }
+                            reportarProgreso(`Plan Formativo: ${alumno.apellidos}`);
                         });
                         tareas.push(async () => tareaDoc);
 
@@ -1247,8 +1268,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tarea = crearSeguimiento(alumno, relacion).then((blob) => {
                             if (blob) {
                                 targetFolder?.file(`Ficha_Seguimiento_${alumno.apellidos}.docx`, blob);
-                                reportarProgreso(`Ficha Seguimiento: ${alumno.apellidos}`);
                             }
+                            reportarProgreso(`Ficha Seguimiento: ${alumno.apellidos}`);
                         });
                         tareas.push(async () => tarea);
                     }
@@ -1258,8 +1279,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tarea = crearValoracion(alumno, relacion).then((blob) => {
                             if (blob) {
                                 targetFolder?.file(`Valoracion_Final_${alumno.apellidos}.docx`, blob);
-                                reportarProgreso(`Valoración Final: ${alumno.apellidos}`);
                             }
+                            reportarProgreso(`Valoración Final: ${alumno.apellidos}`);
                         });
                         tareas.push(async () => tarea);
                     }
@@ -1269,8 +1290,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tarea = crearCalendario(alumno, relacion).then((blob) => {
                             if (blob) {
                                 targetFolder?.file(`Calendario_${alumno.apellidos}.pdf`, blob);
-                                reportarProgreso(`Calendario: ${alumno.apellidos}`);
                             }
+                            reportarProgreso(`Calendario: ${alumno.apellidos}`);
                         });
                         tareas.push(async () => tarea);
                     }
@@ -1286,6 +1307,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                             if (blob) {
                                 mainFolder?.file(`Relacion_${numRelacionLimpio}.pdf`, blob);
                             }
+                            reportarProgreso(`Relacion_${numRelacionLimpio} (PDF)`);
                         });
                         tareas.push(async () => tarea);
 
@@ -1293,8 +1315,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tareaDocx = crearDocumentoRelacion('docx', relacion).then((blob) => {
                             if (blob) {
                                 mainFolder?.file(`Relacion_${numRelacionLimpio}.docx`, blob);
-                                reportarProgreso(`Relacion_${numRelacionLimpio}`);
                             }
+                            reportarProgreso(`Relacion_${numRelacionLimpio}`);
                         });
                         tareas.push(async () => tareaDocx);
                     }
@@ -1304,8 +1326,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tarea = crearCarta(relacion).then((blob) => {
                             if (blob) {
                                 mainFolder?.file(`Carta.pdf`, blob);
-                                reportarProgreso(`Carta: ${numRelacionLimpio}`);
                             }
+                            reportarProgreso(`Carta: ${numRelacionLimpio}`);
                         });
                         tareas.push(async () => tarea);
                     }

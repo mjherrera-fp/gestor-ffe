@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {ArrowLeft, Cloud, Download, Eye, FileText, Loader2, Trash2, Upload, X} from 'lucide-react';
 import {Modal} from './ui/Modal.tsx';
+import {mostrarToast} from '../utils/toast.ts';
 
 interface DocumentoItem {
     id: number;
@@ -94,8 +95,15 @@ export function GestorDocumentalModal({
                     ? `?comunicacionDatId=${entidadId}`
                     : `?${entidad}Id=${entidadId}`;
             const res = await fetch(`${apiBase}${params}`);
-            if (res.ok) setDocumentos(await res.json());
-        } catch { /* ignore */
+            if (res.ok) {
+                setDocumentos(await res.json());
+            } else {
+                console.error('Error al cargar los documentos:', res.status);
+                mostrarToast('No se pudieron cargar los documentos.', 'error');
+            }
+        } catch (error) {
+            console.error('Error de red al cargar los documentos:', error);
+            mostrarToast('No se pudieron cargar los documentos: error de conexión.', 'error');
         }
         setLoading(false);
     }, [apiBase, entidadId, alumnoId]);
@@ -183,8 +191,14 @@ export function GestorDocumentalModal({
                 setComentario('');
                 if (inputRef.current) inputRef.current.value = '';
                 fetchDocumentos();
+            } else {
+                const detalle = await res.text().catch(() => '');
+                console.error('Error al subir el documento:', res.status, detalle);
+                mostrarToast(`No se pudo subir el documento. ${detalle}`.trim(), 'error');
             }
-        } catch { /* ignore */
+        } catch (error) {
+            console.error('Error de red al subir el documento:', error);
+            mostrarToast('No se pudo subir el documento: error de conexión.', 'error');
         }
         setUploading(false);
     };
@@ -196,8 +210,14 @@ export function GestorDocumentalModal({
             if (res.ok) {
                 setDeleteConfirmId(null);
                 fetchDocumentos();
+            } else {
+                const detalle = await res.text().catch(() => '');
+                console.error('Error al eliminar el documento:', res.status, detalle);
+                mostrarToast(`No se pudo eliminar el documento. ${detalle}`.trim(), 'error');
             }
-        } catch { /* ignore */
+        } catch (error) {
+            console.error('Error de red al eliminar el documento:', error);
+            mostrarToast('No se pudo eliminar el documento: error de conexión.', 'error');
         }
     };
 

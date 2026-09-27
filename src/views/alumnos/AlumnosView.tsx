@@ -191,15 +191,34 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig,
       {/* ── MODAL: Resultado importación ── */}
       <Modal open={!!ctx.importResult} onClose={() => ctx.setImportResult(null)} maxWidth="md">
         <div className="p-6">
-          <div className="w-14 h-14 rounded-full bg-success-soft text-success flex items-center justify-center mx-auto mb-4">
-            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 ${
+            (ctx.importResult?.failed ?? 0) > 0 ? 'bg-warning-soft text-warning-strong' : 'bg-success-soft text-success'
+          }`}>
+            {(ctx.importResult?.failed ?? 0) > 0 ? (
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+            ) : (
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            )}
           </div>
           <h3 className="text-lg font-bold text-text-main mb-4 text-center">Importación finalizada</h3>
           <div className="space-y-2 text-sm text-text-muted text-center">
             <p><span className="font-bold text-success">{ctx.importResult?.success}</span> alumnos importados</p>
+            {!!ctx.importResult?.duplicated && (
+              <p><span className="font-bold text-warning-strong">{ctx.importResult.duplicated}</span> omitidos por ya existir</p>
+            )}
+            {!!ctx.importResult?.failed && (
+              <p><span className="font-bold text-danger-strong">{ctx.importResult.failed}</span> no se pudieron importar</p>
+            )}
           </div>
+          {!!ctx.importResult?.duplicated && (ctx.importResult?.failed ?? 0) === 0 && (
+            <p className="mt-3 text-xs text-text-muted text-center">
+              Las filas omitidas ya estaban en la base de datos; no se han vuelto a crear.
+            </p>
+          )}
           {ctx.importResult?.errors && ctx.importResult.errors.length > 0 && (
             <div className="mt-4 p-4 bg-danger-soft rounded-xl border border-danger/20">
               <p className="text-sm font-bold text-danger-strong mb-2">Errores ({ctx.importResult.errors.length}):</p>

@@ -61,7 +61,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
 
   // ── Importación Excel ──
   const [isImporting,  setIsImporting]  = useState(false);
-  const [importResult, setImportResult] = useState<{ success: number; updated: number; errors?: string[] } | null>(null);
+  const [importResult, setImportResult] = useState<{ success: number; updated: number; duplicated?: number; failed?: number; errors?: string[] } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [modoCreacion, setModoCreacion] = useState('descargar');
 
@@ -176,10 +176,13 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
         fetchAlumnos();
         return true;
       } else {
-        console.error('Error al guardar:', await res.text());
+        const detalle = (await res.text()).slice(0, 200);
+        console.error('Error al guardar:', detalle);
+        mostrarToast(`No se pudo guardar el alumno. ${detalle}`.trim(), 'error');
       }
     } catch (error) {
       console.error('Error en la petición de red:', error);
+      mostrarToast('No se pudo guardar el alumno: error de conexión con el servidor.', 'error');
     }
     return false;
   };
@@ -208,9 +211,15 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     fd.append('cv', file);
     try {
       const res = await fetch(`/api/alumnos/${alumnoId}/cv`, { method: 'POST', body: fd });
-      if (res.ok) fetchAlumnos();
+      if (res.ok) {
+        fetchAlumnos();
+      } else {
+        console.error('Error al subir el CV:', await res.text());
+        mostrarToast(`No se pudo subir el CV de ${file.name}.`, 'error');
+      }
     } catch (error) {
       console.error(error);
+      mostrarToast(`No se pudo subir el CV de ${file.name}: error de conexión.`, 'error');
     }
   };
 
@@ -273,8 +282,10 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
         const ws   = wb.Sheets[wb.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false }) as any[];
 
-        let successCount = 0;
-        const errors: string[] = [];
+  let successCount = 0;
+  let duplicatedCount = 0;
+  let failedCount = 0;
+  const errors: string[] = [];
 
         for (const row of data) {
           const dni            = (row['DNI/Pasaporte'] || '').toString().trim();
@@ -318,19 +329,34 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(studentData),
             });
-            if (res.ok) successCount++;
-            else if (res.status === 409) {
-              const errData = await res.json();
+            if (res.ok) {
+              successCount++;
+            } else if (res.status === 409) {
+              // El alumno ya existe: se omite, pero se dice cuantas veces.
+              const errData = await res.json().catch(() => ({ error: 'Ya existe' }));
+              duplicatedCount++;
               errors.push(`${studentData.apellidos}, ${studentData.nombre}: ${errData.error}`);
+            } else {
+              // Cualquier otro status (500, 400...) se perdia en silencio: la
+              // fila no se importaba y el usuario creia que si.
+              failedCount++;
+              const detalle = await res.text().catch(() => '');
+              errors.push(
+                `${studentData.apellidos}, ${studentData.nombre}: error ${res.status}${detalle ? ` — ${detalle.slice(0, 120)}` : ''}`
+              );
             }
           } catch (err) {
+            // Fallo de red: tampoco se contabilizaba.
+            failedCount++;
             console.error('Error al procesar alumno:', studentData.nombre, err);
+            errors.push(`${studentData.apellidos}, ${studentData.nombre}: error de conexión con el servidor.`);
           }
         }
 
         fetchAlumnos();
-        setImportResult({ success: successCount, updated: 0, errors });
-      } catch {
+        setImportResult({ success: successCount, updated: 0, duplicated: duplicatedCount, failed: failedCount, errors });
+      } catch (error) {
+        console.error('Error al procesar el archivo Excel:', error);
         alert('Hubo un error al procesar el archivo Excel.');
       } finally {
         setIsImporting(false);

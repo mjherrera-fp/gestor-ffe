@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Profesor, CentroEducativo, DetalleAcademico, ResultadoAprendizaje } from '../../../types/index.ts';
+import { mostrarToast } from '../../../utils/toast.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS INTERNOS
@@ -107,9 +108,13 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
         onUpdate({ ...formData, id: data.id });
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
+      } else {
+        console.error('Error al guardar el perfil:', res.status, data);
+        mostrarToast(data?.error || 'No se pudo guardar el perfil.', 'error');
       }
     } catch (error) {
       console.error(error);
+      mostrarToast('No se pudo guardar el perfil: error de conexión con el servidor.', 'error');
     } finally {
       setSaving(false);
     }
