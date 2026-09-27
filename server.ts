@@ -8,7 +8,9 @@ import Handlebars from 'handlebars';
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import multer from 'multer';
+import {resolverRutaDentro} from './src/lib/seguridadRutas.ts';
 import {db} from './src/lib/db.ts';
 import {
   AceptacionUsoDAO,
@@ -97,6 +99,81 @@ async function startServer() {
   } catch (e) {
     if (process.send) process.send('ERROR_PERMISOS');
   }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // SEGURIDAD: token de sesión
+  // ─────────────────────────────────────────────────────────────────────
+  // El servidor escucha solo en 127.0.0.1, pero eso NO impide que cualquier
+  // página web que el usuario tenga abierta en el navegador haga fetch a
+  // http://127.0.0.1:PORT/api/... y lea o modifique todos sus datos. Ese es
+  // el ataque real (CSRF/DNS rebinding contra un servidor local).
+  //
+  // El token lo genera el proceso principal (main.js) y llega al renderer
+  // únicamente por el preload, así que una web ajena no puede leerlo. Además
+  // la cabecera X-FFE-Token no es "simple": al ser personalizada, el navegador
+  // exigiría un preflight CORS que el servidor no responde, así que ni
+  // siquiera se llega a enviar la petición.
+  //
+  // ⚠️ La resolución del token debe MANTENERSE IGUAL que en main.js.
+  // ─────────────────────────────────────────────────────────────────────
+  function resolveSessionToken(): string {
+    // 1. Producción: main.js lo inyecta por entorno al hacer fork.
+    const fromEnv = (process.env.FFE_SESSION_TOKEN || '').trim();
+    if (fromEnv) return fromEnv;
+
+    // 2. Desarrollo: Electron y este proceso NO comparten process.env (los
+    //    lanza 'concurrently' por separado), así que se consensúa por un
+    //    fichero git-ignored que crea el que llegue primero.
+    //    OJO: server.ts se compila a ESM, donde __dirname no existe; el resto
+    //    del archivo usa process.cwd() por el mismo motivo.
+    try {
+      const tokenFile = path.join(process.cwd(), '.ffe-session-token');
+      // La lectura falla a propósito en el primer arranque (el fichero aún
+      // no existe): por eso va en su propio try, para que ese fallo NORMAL
+      // no se lleve por delante la escritura que viene justo después.
+      let guardado = '';
+      try {
+        guardado = fs.readFileSync(tokenFile, 'utf8').trim();
+      } catch {
+        // aún no creado
+      }
+      if (guardado) return guardado;
+      const nuevo = crypto.randomBytes(32).toString('hex');
+      fs.writeFileSync(tokenFile, nuevo, {encoding: 'utf8', mode: 0o600});
+      return nuevo;
+    } catch {
+      return '';
+    }
+  }
+
+  const sessionToken = resolveSessionToken();
+  const sessionTokenHash = sessionToken ? crypto.createHash('sha256').update(sessionToken).digest() : null;
+
+  if (!sessionToken) {
+    console.warn('[seguridad] Sin token de sesión: la API responderá sin autenticar. NO distribuyas así.');
+  }
+
+  // Comparación en tiempo constante sobre el hash, para no filtrar el token
+  // por tiempos de respuesta ni romper cuando las longitudes no coinciden.
+  function tokenValido(recibido: unknown): boolean {
+    if (!sessionTokenHash) return true;
+    if (typeof recibido !== 'string' || !recibido) return false;
+    const hash = crypto.createHash('sha256').update(recibido).digest();
+    return crypto.timingSafeEqual(hash, sessionTokenHash);
+  }
+
+  // Se registra ANTES de express.json() a propósito: así una petición no
+  // autorizada ni siquiera llega a parsearse, y no puede gastar memoria
+  // hasta los 50 MB de body que permite el límite de JSON.
+  app.use((req, res, next) => {
+    // Los assets del frontend (index.html, bundles) los carga el BrowserWindow
+    // con una navegación normal, que no puede añadir cabeceras: por eso el
+    // token solo protege la API y /uploads, no express.static.
+    const url = req.path || '';
+    if (!url.startsWith('/api') && !url.startsWith('/uploads')) return next();
+    if (tokenValido(req.headers['x-ffe-token'])) return next();
+    res.status(401).json({error: 'unauthorized'});
+  });
 
   app.use(express.json({limit: '50mb'}));
 
@@ -853,7 +930,16 @@ async function startServer() {
   });
 
   app.get('/uploads/:filename', (req, res) => {
-    res.sendFile(path.resolve('uploads', req.params.filename));
+    // path.basename elimina cualquier componente de directorio, así que un
+    // nombre como "..%2F..%2Fconfig" se queda en su último segmento y nunca
+    // puede salir de UPLOADS. La comparación con uploadDir es una segunda
+    // barrera por si basename devolviera '..' o un separador.
+    const seguro = path.basename(req.params.filename);
+    const destino = resolverRutaDentro(uploadDir, seguro);
+    if (!destino) {
+      return res.status(400).json({error: 'invalid_filename'});
+    }
+    res.sendFile(destino);
   });
 
   // Contactos para autocompletado de email

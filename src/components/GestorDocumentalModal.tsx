@@ -58,6 +58,8 @@ export function GestorDocumentalModal({
     const [dragOver, setDragOver] = useState(false);
     const [loading, setLoading] = useState(false);
     const [viewingDoc, setViewingDoc] = useState<DocumentoItem | null>(null);
+  const [vistaUrl, setVistaUrl] = useState<string | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
     const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
     const [nextcloudUploading, setNextcloudUploading] = useState(false);
     const [nextcloudConfirmOpen, setNextcloudConfirmOpen] = useState(false);
@@ -223,10 +225,71 @@ export function GestorDocumentalModal({
 
     const handleView = (doc: DocumentoItem) => {
         setViewingDoc(doc);
+        void cargarDocumentoEnVista(doc);
     };
 
+    // Libera el blob de la vista previa al cerrar el modal, para no dejar
+    // el documento entero retenido en memoria.
+    useEffect(() => () => {
+        setVistaUrl(prev => {
+            if (prev) window.URL.revokeObjectURL(prev);
+            return null;
+        });
+    }, []);
+
+    const revocarVistaPrevia = useCallback(() => {
+        setVistaUrl(prev => {
+            if (prev) window.URL.revokeObjectURL(prev);
+            return null;
+        });
+    }, []);
+
     const handleCloseView = () => {
+        revocarVistaPrevia();
         setViewingDoc(null);
+    };
+
+    // ─────────────────────────────────────────────────────────────────
+    // El token de sesión se añade en el wrapper de window.fetch, así que
+    // un <iframe src> o un <a href> NO pueden descargar nada: no hay forma
+    // de ponerles cabeceras. Por eso el documento se pide con fetch (que sí
+    // lleva el token) y se muestra/guarda como blob local, igual que ya
+    // hace el visor de CV de AlumnosView.
+    // ─────────────────────────────────────────────────────────────────
+    const cargarDocumentoEnVista = async (doc: DocumentoItem) => {
+        setViewLoading(true);
+        try {
+            const res = await fetch(`${apiBase}/${doc.id}/download`);
+            if (!res.ok) throw new Error('No se pudo cargar el documento');
+            const blob = await res.blob();
+            revocarVistaPrevia();
+            setVistaUrl(window.URL.createObjectURL(blob));
+        } catch (error) {
+            console.error(error);
+            mostrarToast('No se pudo abrir el documento', 'error');
+            setViewingDoc(null);
+        } finally {
+            setViewLoading(false);
+        }
+    };
+
+    const handleDescargarDocumento = async (doc: DocumentoItem) => {
+        try {
+            const res = await fetch(`${apiBase}/${doc.id}/download`);
+            if (!res.ok) throw new Error('No se pudo descargar el documento');
+            const blob = await res.blob();
+            const urlLocal = window.URL.createObjectURL(blob);
+            const enlace = document.createElement('a');
+            enlace.href = urlLocal;
+            enlace.download = doc.nombreFichero;
+            document.body.appendChild(enlace);
+            enlace.click();
+            enlace.remove();
+            window.URL.revokeObjectURL(urlLocal);
+        } catch (error) {
+            console.error(error);
+            mostrarToast('No se pudo descargar el documento', 'error');
+        }
     };
 
     const handleUploadToNextCloud = async () => {
@@ -455,24 +518,34 @@ export function GestorDocumentalModal({
 
             {viewingDoc ? (
                 <div className="p-6 flex flex-col gap-4 overflow-y-auto flex-1">
-                    <iframe
-                        src={`${apiBase}/${viewingDoc.id}/download`}
-                        className="w-full h-140 rounded-xl border border-border-base"
-                        title={viewingDoc.nombreFichero}
-                    />
+                    {viewLoading ? (
+                        <div className="flex items-center justify-center gap-3 h-140 rounded-xl border border-border-base text-sm text-text-muted">
+                            <Loader2 className="h-5 w-5 animate-spin"/> Cargando documento...
+                        </div>
+                    ) : vistaUrl ? (
+                        <iframe
+                            src={vistaUrl}
+                            className="w-full h-140 rounded-xl border border-border-base"
+                            title={viewingDoc.nombreFichero}
+                        />
+                    ) : (
+                        <div className="flex items-center justify-center h-140 rounded-xl border border-border-base text-sm text-text-muted">
+                            No se pudo cargar el documento
+                        </div>
+                    )}
                     <div className="flex items-center justify-between">
                         <div className="text-xs text-text-muted font-medium">
                             {viewingDoc.comentario && (
                                 <span className="italic">{viewingDoc.comentario}</span>
                             )}
                         </div>
-                        <a
-                            href={`${apiBase}/${viewingDoc.id}/download`}
-                            download={viewingDoc.nombreFichero}
+                        <button
+                            type="button"
+                            onClick={() => void handleDescargarDocumento(viewingDoc)}
                             className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all"
                         >
                             <Download className="h-4 w-4"/> Descargar
-                        </a>
+                        </button>
                     </div>
                 </div>
             ) : (

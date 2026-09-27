@@ -21,3 +21,4 @@ uploads/
 prompt.ia
 .vscode/
 src/lib/update-secret.js
+.ffe-session-token
