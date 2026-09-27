@@ -168,30 +168,48 @@ export const calculateStartDateFromEnd = (
 //  LÓGICA DE ESTADOS (colores y textos)
 // ─────────────────────────────────────────
 
+// Los cuatro niveles de un tramite. El color dice en que punto esta, de modo
+// que se pueda leer de un vistazo sin mirar el texto:
+//
+//   PENDIENTE    nada enviado todavia
+//   EN_CURSO     enviado, esperando respuesta
+//   ESPERA_FIRMA bloqueado a la espera de una firma
+//   TERMINADO    completado o recibido
+//
+// Antes cada estado repetia su propia cadena de clases y el mapa se habia
+// desincronizado: en el plan formativo, "pendiente firma empresa" y
+// "pendiente firma tutor" salian en verde igual que "completado", y en la
+// relacion "pendiente firma director" salia en azul mientras "pendiente firma
+// empresa" salia en amarillo.
+const COLOR_PENDIENTE     = 'bg-surface-subtle text-text-muted border-border-base';
+const COLOR_EN_CURSO      = 'bg-primary-light text-primary border-primary-light';
+const COLOR_ESPERA_FIRMA  = 'bg-warning-soft text-warning-strong border-warning/20';
+const COLOR_TERMINADO     = 'bg-success-soft text-success-strong border-success/20';
+
 export const getStatusBadgeColor = (estado: string, type: string): string => {
   if (type === 'relacion') {
-    if (estado === RelacionEstado.PENDIENTE_ENVIAR_EMPRESA)  return 'bg-primary-light text-primary border-primary-light';
-    if (estado === RelacionEstado.PENDIENTE_FIRMA_EMPRESA)   return 'bg-warning-soft text-warning-strong border-warning/20';
-    if (estado === RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR) return 'bg-primary-light text-primary border-primary-light';
-    if (estado === RelacionEstado.PENDIENTE_FIRMA_DIRECTOR)  return 'bg-primary-light text-primary border-primary-light';
-    if (estado === RelacionEstado.COMPLETADO)                return 'bg-success-soft text-success-strong border-success/20';
+    if (estado === RelacionEstado.PENDIENTE_ENVIAR_EMPRESA)  return COLOR_EN_CURSO;
+    if (estado === RelacionEstado.PENDIENTE_FIRMA_EMPRESA)   return COLOR_ESPERA_FIRMA;
+    if (estado === RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR) return COLOR_EN_CURSO;
+    if (estado === RelacionEstado.PENDIENTE_FIRMA_DIRECTOR)  return COLOR_ESPERA_FIRMA;
+    if (estado === RelacionEstado.COMPLETADO)                return COLOR_TERMINADO;
   } else if (type === 'plan') {
-    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE)  return 'bg-primary-light text-primary border-primary-light';
-    if (estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE)  return 'bg-warning-soft text-warning-strong border-warning/20';
-    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA)     return 'bg-primary-light text-primary border-primary-light';
-    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA)      return 'bg-success-soft text-success-strong border-success/20';
-    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR)        return 'bg-success-soft text-success-strong border-success/20';
-    if (estado === PlanFormativoEstado.COMPLETADO)                   return 'bg-success-soft text-success-strong border-success/20';
+    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE)  return COLOR_EN_CURSO;
+    if (estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE)  return COLOR_ESPERA_FIRMA;
+    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA)     return COLOR_EN_CURSO;
+    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA)      return COLOR_ESPERA_FIRMA;
+    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR)        return COLOR_ESPERA_FIRMA;
+    if (estado === PlanFormativoEstado.COMPLETADO)                   return COLOR_TERMINADO;
   } else if (type === 'seguimiento') {
-    if (estado === SeguimientoEstado.PENDIENTE) return 'bg-surface-subtle text-text-muted border-border-base';
-    if (estado === SeguimientoEstado.ENVIADO_A_EMPRESA)   return 'bg-warning-soft text-warning-strong border-warning/20';
-    if (estado === SeguimientoEstado.RECIBIDO)  return 'bg-success-soft text-success-strong border-success/20';
+    if (estado === SeguimientoEstado.PENDIENTE)          return COLOR_PENDIENTE;
+    if (estado === SeguimientoEstado.ENVIADO_A_EMPRESA) return COLOR_EN_CURSO;
+    if (estado === SeguimientoEstado.RECIBIDO)           return COLOR_TERMINADO;
   } else if (type === 'valoracion') {
-    if (estado === ValoracionEstado.PENDIENTE) return 'bg-surface-subtle text-text-muted border-border-base';
-    if (estado === ValoracionEstado.ENVIADO_A_EMPRESA)   return 'bg-warning-soft text-warning-strong border-warning/20';
-    if (estado === ValoracionEstado.RECIBIDO)  return 'bg-success-soft text-success-strong border-success/20';
+    if (estado === ValoracionEstado.PENDIENTE)          return COLOR_PENDIENTE;
+    if (estado === ValoracionEstado.ENVIADO_A_EMPRESA) return COLOR_EN_CURSO;
+    if (estado === ValoracionEstado.RECIBIDO)           return COLOR_TERMINADO;
   }
-  return 'bg-surface-subtle text-text-muted border-border-base';
+  return COLOR_PENDIENTE;
 };
 
 export const getStatusLabel = (estado: string, type: string): string => {
