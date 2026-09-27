@@ -219,16 +219,14 @@ export const getAnexoStatusButton = (estado: string) => {
 
 export const getPlanStatusButton = (estado: string) => {
   switch (estado) {
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE:
-    case 'PENDIENTE_ENVIAR_ESTUDIANTE':  return { label: 'Enviar Doc. a Estudiante', icon: Send,        color: 'bg-primary' };
-    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
-    case 'PENDIENTE_FIRMAR_ESTUDIANTE': return { label: 'Recibir Firma Estudiante',  icon: Clock,       color: 'bg-warning' };
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
-    case 'PENDIENTE_ENVIAR_EMPRESA':    return { label: 'Enviar a Empresa',           icon: Send,        color: 'bg-primary' };
-    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
-    case 'PENDIENTE_FIRMA_EMPRESA':     return { label: 'Recibir Firma Empresa',      icon: Clock,       color: 'bg-success' };
-    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
-    case 'PENDIENTE_FIRMA_TUTOR':       return { label: 'Recibir Firma Tutor',        icon: ShieldCheck, color: 'bg-success' };
+    // Los enums de estado son strings cuyo valor es su propia clave, asi que
+    // antes cada caso tenia delante un duplicado con el mismo literal, que
+    // nunca se evaluaba.
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE: return { label: 'Enviar Doc. a Estudiante', icon: Send,        color: 'bg-primary' };
+    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE: return { label: 'Recibir Firma Estudiante',  icon: Clock,       color: 'bg-warning' };
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:    return { label: 'Enviar a Empresa',           icon: Send,        color: 'bg-primary' };
+    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:     return { label: 'Recibir Firma Empresa',      icon: Clock,       color: 'bg-success' };
+    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:       return { label: 'Recibir Firma Tutor',        icon: ShieldCheck, color: 'bg-success' };
     default: return null;
   }
 };

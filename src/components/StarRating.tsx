@@ -26,7 +26,7 @@ export function StarRating({ value, onChange, readonly = false, size = 'md' }: S
             key={star}
             type="button"
             disabled={readonly}
-            onClick={() => onChange?.(star === value && star === 1 ? 0 : star === value ? star : star)}
+            onClick={() => onChange?.(star === value && star === 1 ? 0 : star)}
             className={`${readonly ? 'cursor-default' : 'cursor-pointer'} transition-colors ${
               readonly ? '' : 'hover:scale-110'
             }`}
@@ -41,9 +41,9 @@ export function StarRating({ value, onChange, readonly = false, size = 'md' }: S
           </button>
         );
       })}
-      {!readonly && value !== undefined && (
+      {!readonly && (
         <span className="ml-1.5 text-xs font-bold text-text-muted">
-          {value > 0 ? value.toFixed(1) : ''}
+          {value > 0 ? value : ''}
         </span>
       )}
     </div>
