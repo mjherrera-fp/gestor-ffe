@@ -18,6 +18,7 @@
     "postinstall": "patch-package",
     "lint": "tsc --noEmit",
     "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:watch": "vitest",
     "pack:win": "npm run clean && npm run build && npm run build:server && npm run rebuild:electron && electron-builder --win --x64",
     "pack:win:portable": "npm run clean && npm run build && npm run build:server && npx rimraf node_modules/better-sqlite3-multiple-ciphers/build && npm run rebuild:electron && electron-builder --win --x64 -c.win.target=portable"
