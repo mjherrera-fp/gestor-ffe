@@ -3,8 +3,15 @@ INFORMACIÓN IMPORTANTE SOBRE LA INSTALACIÓN
 Bienvenido al sistema de Gestión de Convenios y Relaciones de Alumnos.
 
 Nota sobre el tamaño de la aplicación:
-Para garantizar que la generación de documentos PDF oficiales sea idéntica a los anexos de Word al 100%, esta aplicación incluye su propio motor interno de conversión (LibreOffice Portable). 
+Para generar los documentos PDF oficiales, esta aplicación incluye su propio motor de
+impresión incrustado (Puppeteer/Chromium). Los documentos DOCX se generan con docxtemplater.
 
-Gracias a esto, NO necesitas tener Microsoft Word ni LibreOffice instalados en tu ordenador para que el programa funcione correctamente. Todo está incluido y funciona de manera independiente.
+Gracias a esto, NO necesitas tener Microsoft Word, LibreOffice ni ningún otro programa
+ofimático instalado en tu ordenador para que el programa funcione correctamente.
+Todo está incluido y funciona de manera independiente.
+
+Ten en cuenta que la primera vez que generes un PDF puede tardar un poco más de lo
+habitual, porque el motor de impresión se prepara la primera vez. A partir de ahí,
+los documentos se generan con normalidad.
 
 En el siguiente paso podrás elegir la carpeta donde deseas instalar la aplicación.
