@@ -26,8 +26,8 @@ export function HorasWarningModal({ open, onConfirm, onCancel }: HorasWarningMod
         <p className="text-sm text-text-muted font-medium mb-8">
           Has modificado el total de horas de un alumno que ya está asignado a una relación de
           prácticas. <br /><br />
-          De continuar, <b>se eliminarán su Fecha de Inicio y Fecha de Fin</b> actuales, ya que sus
-          prácticas deben ser recalculadas en el panel de Relaciones.
+          Al continuar, <b>se recalculará su Fecha de Fin</b> a partir de las horas nuevas, su
+          horario y los festivos configurados. La Fecha de Inicio no se modifica.
         </p>
 
         <div className="flex gap-3">
@@ -41,7 +41,7 @@ export function HorasWarningModal({ open, onConfirm, onCancel }: HorasWarningMod
             onClick={onConfirm}
             className="flex-1 py-3 bg-warning text-white text-sm font-bold rounded-xl shadow-lg shadow-warning/20 hover:bg-warning/90 transition-all font-sans"
           >
-            Sí, borrar fechas
+            Sí, recalcular
           </button>
         </div>
     </Modal>

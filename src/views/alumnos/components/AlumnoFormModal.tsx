@@ -32,7 +32,7 @@ interface AlumnoFormModalProps {
   detalles: DetalleAcademico[];
   pendingSubmitData: any | null;
   onSubmit: (e: React.FormEvent) => void;
-  onConfirmClearDates: () => void;
+  onConfirmRecalcular: () => void;
   onCancelWarning: () => void;
   onClose: () => void;
 }
@@ -40,7 +40,7 @@ interface AlumnoFormModalProps {
 export function AlumnoFormModal({
   open, editing, formData, setFormData,
   detalles, pendingSubmitData,
-  onSubmit, onConfirmClearDates, onCancelWarning, onClose,
+  onSubmit, onConfirmRecalcular, onCancelWarning, onClose,
 }: AlumnoFormModalProps) {
   const { errors, onBlur, validateAll } = useFormValidation(RULES);
 
@@ -70,7 +70,7 @@ export function AlumnoFormModal({
         {pendingSubmitData && (
           <HorasWarningModal
             open={!!pendingSubmitData}
-            onConfirm={onConfirmClearDates}
+            onConfirm={onConfirmRecalcular}
             onCancel={onCancelWarning}
           />
         )}

@@ -141,7 +141,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig,
         detalles={ctx.detalles}
         pendingSubmitData={ctx.pendingSubmitData}
         onSubmit={ctx.handleSubmit}
-        onConfirmClearDates={() => ctx.handleSubmit(undefined, ctx.pendingSubmitData, true)}
+        onConfirmRecalcular={() => ctx.handleSubmit(undefined, ctx.pendingSubmitData, true)}
         onCancelWarning={() => ctx.setPendingSubmitData(null)}
         onClose={() => ctx.setShowForm(false)}
       />

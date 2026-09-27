@@ -18,8 +18,6 @@ import {
     ValoracionEstado
 } from '../../../types/index.ts';
 import {
-    calculateEndDateForHours,
-    calculateStartDateFromEnd,
     DEFAULT_HORARIO,
     getNextPlanEstado,
     getNextRelacionEstado,
@@ -31,6 +29,7 @@ import {
     getPrevValoracionEstado
 } from '../utils/relacionesUtils.ts';
 import {EmailAttachment} from '../../../types/email.ts';
+import {crearResolutorFechas} from '../../../lib/calculoFechas.ts';
 import {uploadGeneratedAttachment} from '../../../utils/emailUtils.ts';
 import {mostrarToast} from '../../../utils/toast.ts';
 import {applyCustomMarkers, interpolateBody} from '../../../../templates/emails/emailTemplates.ts';
@@ -65,6 +64,18 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     const [usarFestivosEmpresa, setUsarFestivosEmpresa] = useState(false);
     const [empresaFestivosMap, setEmpresaFestivosMap] = useState<Record<string, string[]>>({});
     const [empresaFestivosActuales, setEmpresaFestivosActuales] = useState<string[]>([]);
+
+    // Resolvedor de fechas con la configuracion de festivos ya atada. Antes
+    // cada calculo repetia a mano los siete argumentos.
+    const resolutorFechas = useMemo(
+        () => crearResolutorFechas({
+            centroFestivos,
+            usarFestivos,
+            empresaFestivos: empresaFestivosActuales,
+            usarFestivosEmpresa,
+        }),
+        [centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa],
+    );
     const [modoCreacion, setModoCreacion] = useState('descargar');
     const [carpetaEstudiante, setCarpetaEstudiante] = useState(false);
 
@@ -359,12 +370,12 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             setFormData(prev => ({
                 ...prev,
                 alumnos: (prev.alumnos || []).map(ar => {
-                    const endDate = calculateEndDateForHours(ar.fechaInicio || '', ar.totalHorasFFE, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
+                    const endDate = resolutorFechas.calcularFechaFin(ar.fechaInicio || '', ar.totalHorasFFE, prev.horario);
                     return endDate ? { ...ar, fechaFin: endDate } : ar;
                 }),
             }));
         }
-    }, [formData.horario, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa]);
+    }, [formData.horario, resolutorFechas]);
 
     // ─────────────────────────────────────────
     //  LÓGICA DEL FORMULARIO
@@ -512,7 +523,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = calculateEndDateForHours(a.fechaInicio || '', hours, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
+                const newEndDate = resolutorFechas.calcularFechaFin(a.fechaInicio || '', hours, prev.horario);
                 return { ...a, totalHorasFFE: hours, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -523,7 +534,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = calculateEndDateForHours(date, a.totalHorasFFE || 0, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
+                const newEndDate = resolutorFechas.calcularFechaFin(date, a.totalHorasFFE || 0, prev.horario);
                 return { ...a, fechaInicio: date, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -535,7 +546,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             ...prev,
             alumnos: (prev.alumnos || []).map(a => ({
                 ...a,
-                fechaInicio: calculateStartDateFromEnd(targetEndDate, a.totalHorasFFE, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa) || a.fechaInicio,
+                fechaInicio: resolutorFechas.calcularFechaInicio(targetEndDate, a.totalHorasFFE, prev.horario) || a.fechaInicio,
                 fechaFin: targetEndDate,
             })),
         }));
@@ -546,7 +557,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
-                const endDate = calculateEndDateForHours(targetStartDate, a.totalHorasFFE || 0, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
+                const endDate = resolutorFechas.calcularFechaFin(targetStartDate, a.totalHorasFFE || 0, prev.horario);
                 return { ...a, fechaInicio: targetStartDate, fechaFin: endDate || a.fechaFin };
             }),
         }));
