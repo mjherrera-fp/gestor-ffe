@@ -6,6 +6,11 @@ import { useUpdaterStatus } from './useUpdaterStatus.tsx';
 // que ni el updater del proceso principal emite nunca, así que las dos
 // definiciones podian divergir sin que nada lo detectara.
 
+// El banner va arriba a la derecha, pero por debajo del header: este mide
+// h-18 lg:h-20 y en su derecha van el avatar y los botones de historico, tema,
+// descarga, avisos y configuracion. Un top-5 lo dejaria encima justo de esos
+// iconos, incluido el que lo dispara, y el banner puede quedarse dias en
+// pantalla. top-24 (96px) salva los 80px del header mas aire.
 const SUBTLE_TEXT = 'font-bold text-text-main uppercase tracking-wider';
 
 export function UpdateBanner() {
@@ -16,7 +21,7 @@ export function UpdateBanner() {
   if (status.state === 'available' || status.state === 'ready') {
     const isReady = status.state === 'ready';
     return (
-      <div className="fixed bottom-5 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-border-base overflow-hidden">
+      <div className="fixed top-24 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-border-base overflow-hidden">
         <div className="px-5 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -87,7 +92,7 @@ export function UpdateBanner() {
       ? Math.min(100, Math.round(((status.received || 0) / status.total) * 100))
       : 0;
     return (
-      <div className="fixed bottom-5 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-border-base p-5">
+      <div className="fixed top-24 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-border-base p-5">
         <p className={`text-xs ${SUBTLE_TEXT} mb-2`}>
           Descargando actualización {status.version}
         </p>
@@ -104,7 +109,7 @@ export function UpdateBanner() {
 
   if (status.state === 'error') {
     return (
-      <div className="fixed bottom-5 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-danger/20 p-5">
+      <div className="fixed top-24 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-danger/20 p-5">
         <p className={`text-xs ${SUBTLE_TEXT} text-[10px] text-danger mb-1`}>
           No se pudo descargar la actualización
         </p>
