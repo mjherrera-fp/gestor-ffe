@@ -1,6 +1,7 @@
 import { app, BrowserWindow, shell, ipcMain, safeStorage } from 'electron';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { fork } from 'child_process';
 import {
@@ -21,6 +22,45 @@ let serverProcess;
 // Puerto del servidor: sobrescribible con PORT. Producción usa 3000 y
 // desarrollo 3100 (debe coincidir con la lógica de server.ts).
 const serverPort = Number(process.env.PORT) || (app.isPackaged ? 3000 : 3100);
+
+// ─────────────────────────────────────────────────────────────────────
+// SEGURIDAD: token de sesión
+// ─────────────────────────────────────────────────────────────────────
+// Lo genera el proceso principal y lo usan tres consumidores:
+//   1. El servidor Express, que lo recibe por entorno al hacer fork.
+//   2. El preload, que lo expone al renderer como window.ffeSession.token.
+//   3. En desarrollo, un fichero git-ignored, porque Electron y el servidor
+//      los lanza 'concurrently' como procesos separados y NO comparten
+//      process.env (misma idea que resolveSessionToken() en server.ts, que
+//      debe mantenerse sincronizada con esta).
+//
+// Sin esto, cualquier página web abierta en el navegador del profesor
+// podría pedir http://127.0.0.1:3000/api/... y leer o modificar todos sus
+// datos de FFP, porque el servidor solo escucha en local pero eso no
+// impide el acceso desde el navegador.
+// ─────────────────────────────────────────────────────────────────────
+// En desarrollo el servidor puede arrancar antes que Electron (de hecho
+// 'dev:electron:wait' espera a que el puerto 3100 responda), así que el
+// servidor crea el fichero con SU token. Si generáramos el nuestro sin más,
+// el renderer enviaría un token que el servidor no conoce y toda la API
+// devolvería 401: por eso aquí se ADOPTA el que ya haya en el fichero.
+let sessionToken = crypto.randomBytes(32).toString('hex');
+const TOKEN_FILE = path.join(__dirname, '.ffe-session-token');
+
+if (!app.isPackaged) {
+  try {
+    const guardado = fs.readFileSync(TOKEN_FILE, 'utf8').trim();
+    if (guardado) {
+      sessionToken = guardado;
+    } else {
+      fs.writeFileSync(TOKEN_FILE, sessionToken, {encoding: 'utf8', mode: 0o600});
+    }
+  } catch {
+    try {
+      fs.writeFileSync(TOKEN_FILE, sessionToken, {encoding: 'utf8', mode: 0o600});
+    } catch { /* sin fichero, el servidor genera el suyo */ }
+  }
+}
 
 // FUNCIÓN DE REINTENTO INTELIGENTE
 const cargarURLConReintentos = (ventanaPrincipal, splashWindow, url, reintentos = 20) => {
@@ -67,6 +107,9 @@ function createWindow() {
       contextIsolation: true,
       nativeWindowOpen: true,
       preload: path.join(__dirname, 'preload.cjs'),
+      // El preload solo lo alcanza leyendo process.argv, que es el canal
+      // oficial de Electron para pasar secretos sin un IPC bloqueante.
+      additionalArguments: [`--ffe-session-token=${sessionToken}`],
     }
   });
 
@@ -122,7 +165,9 @@ function startServer() {
     env: {
       ...process.env,
       NODE_ENV: 'production',
-      PORTABLE_EXECUTABLE_DIR: baseDir
+      PORTABLE_EXECUTABLE_DIR: baseDir,
+      // El servidor lo exige en todas las rutas /api y /uploads.
+      FFE_SESSION_TOKEN: sessionToken,
     },
     stdio: 'pipe'
   });
@@ -161,31 +206,48 @@ function sendUpdateStatus(status) {
   }
 }
 
-// NUEVO CICLO DE VIDA (Más estable que app.on('ready'))
-app.whenReady().then(async () => {
-  startServer();
+// Instancia única: abrir el .exe dos veces dejaba DOS procesos forkeando
+// servidor y queriendo escribir en la misma BBDD SQLCipher, con el
+// "database is locked" como síntoma. El segundo proceso se cierra y le
+// cede el sitio al primero.
+const tieneLock = app.requestSingleInstanceLock();
 
-  if (app.isPackaged) {
-    // Producción: Esperamos a nuestro propio servidor forkeado
-    const serverReady = await waitForServer(`http://127.0.0.1:${serverPort}`);
-    if (serverReady) {
-      createWindow();
-      // La comprobación de actualizaciones la dispara el renderer al montar
-      // (UpdaterProvider -> updater-check), no un timer del proceso principal.
-    } else {
-      console.error("El servidor tardó demasiado en iniciar.");
-      app.quit();
+if (!tieneLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
     }
-  } else {
-    // Desarrollo: Creamos la ventana y dejamos que use sus propios reintentos
-    // mientras Vite termina de compilar
-    createWindow();
-  }
-
-  app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
-});
+
+  // NUEVO CICLO DE VIDA (Más estable que app.on('ready'))
+  app.whenReady().then(async () => {
+    startServer();
+
+    if (app.isPackaged) {
+      // Producción: Esperamos a nuestro propio servidor forkeado
+      const serverReady = await waitForServer(`http://127.0.0.1:${serverPort}`);
+      if (serverReady) {
+        createWindow();
+        // La comprobación de actualizaciones la dispara el renderer al montar
+        // (UpdaterProvider -> updater-check), no un timer del proceso principal.
+      } else {
+        console.error("El servidor tardó demasiado en iniciar.");
+        app.quit();
+      }
+    } else {
+      // Desarrollo: Creamos la ventana y dejamos que use sus propios reintentos
+      // mientras Vite termina de compilar
+      createWindow();
+    }
+
+    app.on('activate', function () {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+  });
+}
 
 app.on('window-all-closed', function () {
   if (serverProcess) {

@@ -10,6 +10,9 @@ interface UpdateStatus {
 }
 
 interface Window {
+  ffeSession?: {
+    token: string;
+  };
   updater?: {
     onStatus: (callback: (status: UpdateStatus) => void) => () => void;
     applyAndRestart: () => void;

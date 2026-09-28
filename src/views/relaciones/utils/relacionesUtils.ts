@@ -3,13 +3,16 @@ import {
   HorarioDia,
   RelacionEstado,
   PlanFormativoEstado,
+  ConvenioEstado,
   RelacionEstadoLabels,
   PlanFormativoEstadoLabels,
+  ConvenioEstadoLabels,
   SeguimientoEstado,
   SeguimientoEstadoLabels,
   ValoracionEstado,
   ValoracionEstadoLabels,
 } from '../../../types/index.ts';
+import * as escalaEstados from '../../../utils/escalaEstados.ts';
 import { Send, Clock, ShieldCheck, Check } from 'lucide-react';
 
 //agrupa las funciones puras: calculateEndDateForHours, getNextRelacionEstado, los colores de badges, etc. Son fácilmente testeables de forma aislada.
@@ -60,6 +63,17 @@ const festivosSet = (festivos: string[], empresaFestivos: string[], usarFestivos
   return set;
 };
 
+const DIAS_SEMANA = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'] as const;
+
+/**
+ * Indica si el horario tiene al menos un dia con horas. Si no tiene ninguno,
+ * no existe fecha fin calculable por horas: las horas nunca se consumen.
+ */
+export const horarioTieneHoras = (horario: HorarioSemanal | undefined): boolean => {
+  if (!horario) return false;
+  return DIAS_SEMANA.some(dia => (horario[dia]?.horas ?? 0) > 0);
+};
+
 export const calculateEndDateForHours = (
   startDate: string,
   totalHours: number,
@@ -98,6 +112,12 @@ export const calculateEndDateForHours = (
     if (remainingHoras > 0) current.setDate(current.getDate() + 1);
     iterations++;
   }
+
+  // Si el bucle se agota, el horario no aporta horas suficientes para
+  // consumir las pedidas y no existe un ultimo dia al que llegar. Antes se
+  // devolvia la fecha en la que se agotaron las 365 vueltas (inicio + 365
+  // dias), que no significa nada y ademas sobrescribia la fecha fin real.
+  if (remainingHoras > 0) return null;
 
   return formatDateLocal(current);
 };
@@ -141,6 +161,9 @@ export const calculateStartDateFromEnd = (
     iterations++;
   }
 
+  // Mismo criterio que en calculateEndDateForHours: si no converge, null.
+  if (remainingHoras > 0) return null;
+
   return formatDateLocal(current);
 };
 
@@ -148,35 +171,59 @@ export const calculateStartDateFromEnd = (
 //  LÓGICA DE ESTADOS (colores y textos)
 // ─────────────────────────────────────────
 
+// Los cuatro niveles de un tramite viven ya en la escala compartida, que usan
+// tambien los convenios y las comunicaciones DAT. Antes cada estado repetia su
+// propia cadena de clases y los mapas se desincronizaban entre vistas: en el
+// plan formativo "pendiente firma empresa" y "pendiente firma tutor" salian en
+// verde igual que "completado", y en el convenio "pendiente firma director"
+// salia en azul mientras en la relacion salia en amarillo.
+const {
+  COLOR_PENDIENTE,
+  COLOR_EN_CURSO,
+  COLOR_ESPERA_FIRMA,
+  COLOR_TERMINADO,
+} = escalaEstados;
+
 export const getStatusBadgeColor = (estado: string, type: string): string => {
-  if (type === 'relacion') {
-    if (estado === RelacionEstado.PENDIENTE_ENVIAR_EMPRESA)  return 'bg-primary-light text-primary border-primary-light';
-    if (estado === RelacionEstado.PENDIENTE_FIRMA_EMPRESA)   return 'bg-warning-soft text-warning-strong border-warning/20';
-    if (estado === RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR) return 'bg-primary-light text-primary border-primary-light';
-    if (estado === RelacionEstado.PENDIENTE_FIRMA_DIRECTOR)  return 'bg-primary-light text-primary border-primary-light';
-    if (estado === RelacionEstado.COMPLETADO)                return 'bg-success-soft text-success-strong border-success/20';
+  // El convenio recorre los mismos cuatro pasos que la relacion, asi que
+  // comparte sus niveles. No estaba aqui y por eso su StatusBadge se pintaba
+  // con un mapa propio que se habia desincronizado del resto.
+  if (type === 'convenio') {
+    if (estado === ConvenioEstado.PENDIENTE_ENVIAR)          return COLOR_PENDIENTE;
+    if (estado === ConvenioEstado.PENDIENTE_FIRMA_EMPRESA)   return COLOR_ESPERA_FIRMA;
+    if (estado === ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR) return COLOR_EN_CURSO;
+    if (estado === ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR)  return COLOR_ESPERA_FIRMA;
+    if (estado === ConvenioEstado.COMPLETADO)                return COLOR_TERMINADO;
+  } else if (type === 'relacion') {
+    if (estado === RelacionEstado.PENDIENTE_ENVIAR_EMPRESA)  return COLOR_EN_CURSO;
+    if (estado === RelacionEstado.PENDIENTE_FIRMA_EMPRESA)   return COLOR_ESPERA_FIRMA;
+    if (estado === RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR) return COLOR_EN_CURSO;
+    if (estado === RelacionEstado.PENDIENTE_FIRMA_DIRECTOR)  return COLOR_ESPERA_FIRMA;
+    if (estado === RelacionEstado.COMPLETADO)                return COLOR_TERMINADO;
   } else if (type === 'plan') {
-    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE)  return 'bg-primary-light text-primary border-primary-light';
-    if (estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE)  return 'bg-warning-soft text-warning-strong border-warning/20';
-    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA)     return 'bg-primary-light text-primary border-primary-light';
-    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA)      return 'bg-success-soft text-success-strong border-success/20';
-    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR)        return 'bg-success-soft text-success-strong border-success/20';
-    if (estado === PlanFormativoEstado.COMPLETADO)                   return 'bg-success-soft text-success-strong border-success/20';
+    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE)  return COLOR_EN_CURSO;
+    if (estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE)  return COLOR_ESPERA_FIRMA;
+    if (estado === PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA)     return COLOR_EN_CURSO;
+    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA)      return COLOR_ESPERA_FIRMA;
+    if (estado === PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR)        return COLOR_ESPERA_FIRMA;
+    if (estado === PlanFormativoEstado.COMPLETADO)                   return COLOR_TERMINADO;
   } else if (type === 'seguimiento') {
-    if (estado === SeguimientoEstado.PENDIENTE) return 'bg-surface-subtle text-text-muted border-border-base';
-    if (estado === SeguimientoEstado.ENVIADO_A_EMPRESA)   return 'bg-warning-soft text-warning-strong border-warning/20';
-    if (estado === SeguimientoEstado.RECIBIDO)  return 'bg-success-soft text-success-strong border-success/20';
+    if (estado === SeguimientoEstado.PENDIENTE)          return COLOR_PENDIENTE;
+    if (estado === SeguimientoEstado.ENVIADO_A_EMPRESA) return COLOR_EN_CURSO;
+    if (estado === SeguimientoEstado.RECIBIDO)           return COLOR_TERMINADO;
   } else if (type === 'valoracion') {
-    if (estado === ValoracionEstado.PENDIENTE) return 'bg-surface-subtle text-text-muted border-border-base';
-    if (estado === ValoracionEstado.ENVIADO_A_EMPRESA)   return 'bg-warning-soft text-warning-strong border-warning/20';
-    if (estado === ValoracionEstado.RECIBIDO)  return 'bg-success-soft text-success-strong border-success/20';
+    if (estado === ValoracionEstado.PENDIENTE)          return COLOR_PENDIENTE;
+    if (estado === ValoracionEstado.ENVIADO_A_EMPRESA) return COLOR_EN_CURSO;
+    if (estado === ValoracionEstado.RECIBIDO)           return COLOR_TERMINADO;
   }
-  return 'bg-surface-subtle text-text-muted border-border-base';
+  return COLOR_PENDIENTE;
 };
 
 export const getStatusLabel = (estado: string, type: string): string => {
   if (type === 'relacion') {
     return RelacionEstadoLabels[estado as RelacionEstado] || estado;
+  } else if (type === 'convenio') {
+    return ConvenioEstadoLabels[estado as ConvenioEstado] || estado;
   } else if (type === 'plan') {
     return PlanFormativoEstadoLabels[estado as PlanFormativoEstado] || estado;
   } else if (type === 'seguimiento') {
@@ -187,44 +234,64 @@ export const getStatusLabel = (estado: string, type: string): string => {
   return estado;
 };
 
+// Los botones de accion se tinen por el tipo de accion y por si la accion
+// cierra el tramite. El flujo de cada tramite alterna enviar (saca el
+// documento hacia fuera) y recibir (lo recoge firmado), y hay pasos de
+// recepcion que no son los ultimos, de modo que la paleta tiene tres niveles:
+//
+//   ENVIAR    saca el documento hacia fuera        -> azul
+//   RECEPCION confirma una firma que no es la ultima -> naranja
+//   FINAL     deja el tramite en su estado terminal -> verde
+//
+// El verde esta reservado a la ultima recepcion de cada tramite: "Recibido de
+// Direccion" en la relacion, "Recibir Firma Tutor" en el plan formativo y
+// "Marcar como Recibido" en seguimiento y valoracion. Cualquier otra
+// recepcion va en naranja, para que se distinga de un vistazo de la que cierra
+// el proceso.
+//
+// El badge y el boton miden cosas distintas a proposito: el badge dice donde
+// estas y el boton que va a pasar al pulsarlo. Por eso un boton verde puede
+// aparecer bajo un badge amarillo, y no es una contradiccion.
+const COLOR_BOTON_ENVIAR    = 'bg-primary';
+const COLOR_BOTON_RECEPCION = 'bg-warning';
+const COLOR_BOTON_FINAL     = 'bg-success';
+
 export const getAnexoStatusButton = (estado: string) => {
   switch (estado) {
-    case RelacionEstado.PENDIENTE_ENVIAR_EMPRESA:   return { label: 'Enviar Doc. a Empresa',  icon: Send,       color: 'bg-primary' };
-    case RelacionEstado.PENDIENTE_FIRMA_EMPRESA:    return { label: 'Recibido de Empresa',     icon: Clock,      color: 'bg-warning' };
-    case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR:  return { label: 'Enviar a Dirección',      icon: Send,       color: 'bg-primary' };
-    case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR:   return { label: 'Recibido de Dirección',   icon: ShieldCheck,color: 'bg-success' };
+    case RelacionEstado.PENDIENTE_ENVIAR_EMPRESA:   return { label: 'Enviar Doc. a Empresa',  icon: Send,       color: COLOR_BOTON_ENVIAR };
+    case RelacionEstado.PENDIENTE_FIRMA_EMPRESA:    return { label: 'Recibido de Empresa',     icon: Clock,      color: COLOR_BOTON_RECEPCION };
+    case RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR:  return { label: 'Enviar a Dirección',      icon: Send,       color: COLOR_BOTON_ENVIAR };
+    case RelacionEstado.PENDIENTE_FIRMA_DIRECTOR:   return { label: 'Recibido de Dirección',   icon: ShieldCheck,color: COLOR_BOTON_FINAL };
     default: return null;
   }
 };
 
 export const getPlanStatusButton = (estado: string) => {
   switch (estado) {
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE:
-    case 'PENDIENTE_ENVIAR_ESTUDIANTE':  return { label: 'Enviar Doc. a Estudiante', icon: Send,        color: 'bg-primary' };
-    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
-    case 'PENDIENTE_FIRMAR_ESTUDIANTE': return { label: 'Recibir Firma Estudiante',  icon: Clock,       color: 'bg-warning' };
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
-    case 'PENDIENTE_ENVIAR_EMPRESA':    return { label: 'Enviar a Empresa',           icon: Send,        color: 'bg-primary' };
-    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
-    case 'PENDIENTE_FIRMA_EMPRESA':     return { label: 'Recibir Firma Empresa',      icon: Clock,       color: 'bg-success' };
-    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
-    case 'PENDIENTE_FIRMA_TUTOR':       return { label: 'Recibir Firma Tutor',        icon: ShieldCheck, color: 'bg-success' };
+    // Los enums de estado son strings cuyo valor es su propia clave, asi que
+    // antes cada caso tenia delante un duplicado con el mismo literal, que
+    // nunca se evaluaba.
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE: return { label: 'Enviar Doc. a Estudiante', icon: Send,        color: COLOR_BOTON_ENVIAR };
+    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE: return { label: 'Recibir Firma Estudiante',  icon: Clock,       color: COLOR_BOTON_RECEPCION };
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:    return { label: 'Enviar a Empresa',           icon: Send,        color: COLOR_BOTON_ENVIAR };
+    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:     return { label: 'Recibir Firma Empresa',      icon: Clock,       color: COLOR_BOTON_RECEPCION };
+    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:       return { label: 'Recibir Firma Tutor',        icon: ShieldCheck, color: COLOR_BOTON_FINAL };
     default: return null;
   }
 };
 
 export const getSeguimientoStatusButton = (estado: string) => {
   switch (estado) {
-    case SeguimientoEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: 'bg-primary' };
-    case SeguimientoEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: 'bg-success' };
+    case SeguimientoEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: COLOR_BOTON_ENVIAR };
+    case SeguimientoEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: COLOR_BOTON_FINAL };
     default: return null;
   }
 };
 
 export const getValoracionStatusButton = (estado: string) => {
   switch (estado) {
-    case ValoracionEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: 'bg-primary' };
-    case ValoracionEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: 'bg-success' };
+    case ValoracionEstado.PENDIENTE: return { label: 'Marcar como Enviado', icon: Send,        color: COLOR_BOTON_ENVIAR };
+    case ValoracionEstado.ENVIADO_A_EMPRESA: return { label: 'Marcar como Recibido', icon: Check,       color: COLOR_BOTON_FINAL };
     default: return null;
   }
 };
@@ -259,32 +326,22 @@ export const getPrevRelacionEstado = (estado: RelacionEstado): RelacionEstado =>
 
 export const getNextPlanEstado = (estado: PlanFormativoEstado | string): PlanFormativoEstado | string => {
   switch (estado) {
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE:
-    case 'PENDIENTE_ENVIAR_ESTUDIANTE':  return PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
-    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
-    case 'PENDIENTE_FIRMAR_ESTUDIANTE': return PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA;
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
-    case 'PENDIENTE_ENVIAR_EMPRESA':    return PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA;
-    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
-    case 'PENDIENTE_FIRMA_EMPRESA':     return PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR;
-    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
-    case 'PENDIENTE_FIRMA_TUTOR':       return PlanFormativoEstado.COMPLETADO;
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE: return PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
+    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE: return PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA;
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:    return PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA;
+    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:     return PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR;
+    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:       return PlanFormativoEstado.COMPLETADO;
     default: return estado;
   }
 };
 
 export const getPrevPlanEstado = (estado: PlanFormativoEstado | string): PlanFormativoEstado | string => {
   switch (estado) {
-    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE:
-    case 'PENDIENTE_FIRMAR_ESTUDIANTE': return PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
-    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:
-    case 'PENDIENTE_ENVIAR_EMPRESA':    return PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
-    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:
-    case 'PENDIENTE_FIRMA_EMPRESA':     return PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA;
-    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:
-    case 'PENDIENTE_FIRMA_TUTOR':       return PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA;
-    case PlanFormativoEstado.COMPLETADO:
-    case 'COMPLETADO':                  return PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR;
+    case PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE: return PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE;
+    case PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA:    return PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
+    case PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA:     return PlanFormativoEstado.PENDIENTE_ENVIAR_EMPRESA;
+    case PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR:       return PlanFormativoEstado.PENDIENTE_FIRMA_EMPRESA;
+    case PlanFormativoEstado.COMPLETADO:                  return PlanFormativoEstado.PENDIENTE_FIRMA_TUTOR;
     default: return estado;
   }
 };

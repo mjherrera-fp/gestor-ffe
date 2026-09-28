@@ -18,8 +18,6 @@ import {
     ValoracionEstado
 } from '../../../types/index.ts';
 import {
-    calculateEndDateForHours,
-    calculateStartDateFromEnd,
     DEFAULT_HORARIO,
     getNextPlanEstado,
     getNextRelacionEstado,
@@ -31,6 +29,7 @@ import {
     getPrevValoracionEstado
 } from '../utils/relacionesUtils.ts';
 import {EmailAttachment} from '../../../types/email.ts';
+import {crearResolutorFechas} from '../../../lib/calculoFechas.ts';
 import {uploadGeneratedAttachment} from '../../../utils/emailUtils.ts';
 import {mostrarToast} from '../../../utils/toast.ts';
 import {applyCustomMarkers, interpolateBody} from '../../../../templates/emails/emailTemplates.ts';
@@ -65,6 +64,18 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     const [usarFestivosEmpresa, setUsarFestivosEmpresa] = useState(false);
     const [empresaFestivosMap, setEmpresaFestivosMap] = useState<Record<string, string[]>>({});
     const [empresaFestivosActuales, setEmpresaFestivosActuales] = useState<string[]>([]);
+
+    // Resolvedor de fechas con la configuracion de festivos ya atada. Antes
+    // cada calculo repetia a mano los siete argumentos.
+    const resolutorFechas = useMemo(
+        () => crearResolutorFechas({
+            centroFestivos,
+            usarFestivos,
+            empresaFestivos: empresaFestivosActuales,
+            usarFestivosEmpresa,
+        }),
+        [centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa],
+    );
     const [modoCreacion, setModoCreacion] = useState('descargar');
     const [carpetaEstudiante, setCarpetaEstudiante] = useState(false);
 
@@ -359,12 +370,12 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             setFormData(prev => ({
                 ...prev,
                 alumnos: (prev.alumnos || []).map(ar => {
-                    const endDate = calculateEndDateForHours(ar.fechaInicio || '', ar.totalHorasFFE, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
+                    const endDate = resolutorFechas.calcularFechaFin(ar.fechaInicio || '', ar.totalHorasFFE, prev.horario);
                     return endDate ? { ...ar, fechaFin: endDate } : ar;
                 }),
             }));
         }
-    }, [formData.horario, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa]);
+    }, [formData.horario, resolutorFechas]);
 
     // ─────────────────────────────────────────
     //  LÓGICA DEL FORMULARIO
@@ -430,6 +441,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             }
         } catch (error) {
             console.error('Error guardando relación:', error);
+            mostrarToast('No se pudo guardar la relación: error de conexión con el servidor.', 'error');
         }
     };
 
@@ -511,7 +523,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = calculateEndDateForHours(a.fechaInicio || '', hours, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
+                const newEndDate = resolutorFechas.calcularFechaFin(a.fechaInicio || '', hours, prev.horario);
                 return { ...a, totalHorasFFE: hours, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -522,7 +534,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = calculateEndDateForHours(date, a.totalHorasFFE || 0, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
+                const newEndDate = resolutorFechas.calcularFechaFin(date, a.totalHorasFFE || 0, prev.horario);
                 return { ...a, fechaInicio: date, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -534,7 +546,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             ...prev,
             alumnos: (prev.alumnos || []).map(a => ({
                 ...a,
-                fechaInicio: calculateStartDateFromEnd(targetEndDate, a.totalHorasFFE, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa) || a.fechaInicio,
+                fechaInicio: resolutorFechas.calcularFechaInicio(targetEndDate, a.totalHorasFFE, prev.horario) || a.fechaInicio,
                 fechaFin: targetEndDate,
             })),
         }));
@@ -545,7 +557,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
-                const endDate = calculateEndDateForHours(targetStartDate, a.totalHorasFFE || 0, prev.horario, centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa);
+                const endDate = resolutorFechas.calcularFechaFin(targetStartDate, a.totalHorasFFE || 0, prev.horario);
                 return { ...a, fechaInicio: targetStartDate, fechaFin: endDate || a.fechaFin };
             }),
         }));
@@ -1119,7 +1131,6 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             const numDocsGeneral = docsRelacion.filter(k => k === 'relacion'
                 ? relacionSeleccionada
                 : selectedDocs[k as keyof typeof selectedDocs]).length;
-
             if (numDocsAlumno === 0 && numDocsGeneral === 0) {
                 alert('Debes seleccionar al menos un tipo de documento para descargar.');
                 return;
@@ -1188,16 +1199,34 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             const zip = new JSZip();
 
             // 1. CÁLCULO DINÁMICO EXACTO DEL TOTAL DE OPERACIONES
+            //
+            // Se cuenta por FICHERO, no por tipo de documento: el plan
+            // formativo genera un PDF y un DOCX, y la relación también. Antes
+            // el total contaba un tipo mientras la barra solo avanzaba con el
+            // DOCX, de modo que se quedaba muy por debajo del 100 %.
+            const ficherosPorAlumno =
+                (selectedDocs.plan ? 2 : 0)
+                + (selectedDocs.seguimiento ? 1 : 0)
+                + (selectedDocs.valoracion ? 1 : 0)
+                + (selectedDocs.calendario ? 1 : 0);
+            const ficherosPorRelacion =
+                (relacionSeleccionada ? 2 : 0)
+                + (selectedDocs.carta ? 1 : 0);
+
             let totalOperaciones = 0;
             relaciones.forEach(rel => {
                 const alumnosValidos = rel.alumnos?.filter(a => a.relacionId) || [];
-                totalOperaciones += (alumnosValidos.length * numDocsAlumno) + numDocsGeneral;
+                totalOperaciones += (alumnosValidos.length * ficherosPorAlumno) + ficherosPorRelacion;
             });
 
             let operacionesCompletadas = 0;
             const reportarProgreso = (mensaje: string) => {
                 operacionesCompletadas++;
-                const porcentaje = totalOperaciones > 0 ? (operacionesCompletadas / totalOperaciones) * 90 : 90;
+                // min(90) como red de seguridad: si el recuento se desajusta,
+                // la barra no puede sobrepasar el tramo de generación.
+                const porcentaje = totalOperaciones > 0
+                    ? Math.min(90, (operacionesCompletadas / totalOperaciones) * 90)
+                    : 90;
                 setDownloadProgress(porcentaje);
                 setDownloadStatus(mensaje);
             };
@@ -1226,6 +1255,9 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                             if (blob) { // Si no falló y tenemos el archivo
                                 targetFolder?.file(`Plan_Formativo_${alumno.apellidos}.pdf`, blob);
                             }
+                            // Avanza tanto si sale como si falla: si no, la
+                            // barra se queda parada en ese documento.
+                            reportarProgreso(`Plan Formativo (PDF): ${alumno.apellidos}`);
                         });
                         tareas.push(async () => tarea);
 
@@ -1234,8 +1266,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tareaDoc = crearPlanFormativo('docx', alumno, relacion).then((blob) => {
                             if (blob) { // Si no falló y tenemos el archivo
                                 targetFolder?.file(`Plan_Formativo_${alumno.apellidos}.docx`, blob);
-                                reportarProgreso(`Plan Formativo: ${alumno.apellidos}`);
                             }
+                            reportarProgreso(`Plan Formativo: ${alumno.apellidos}`);
                         });
                         tareas.push(async () => tareaDoc);
 
@@ -1247,8 +1279,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tarea = crearSeguimiento(alumno, relacion).then((blob) => {
                             if (blob) {
                                 targetFolder?.file(`Ficha_Seguimiento_${alumno.apellidos}.docx`, blob);
-                                reportarProgreso(`Ficha Seguimiento: ${alumno.apellidos}`);
                             }
+                            reportarProgreso(`Ficha Seguimiento: ${alumno.apellidos}`);
                         });
                         tareas.push(async () => tarea);
                     }
@@ -1258,8 +1290,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tarea = crearValoracion(alumno, relacion).then((blob) => {
                             if (blob) {
                                 targetFolder?.file(`Valoracion_Final_${alumno.apellidos}.docx`, blob);
-                                reportarProgreso(`Valoración Final: ${alumno.apellidos}`);
                             }
+                            reportarProgreso(`Valoración Final: ${alumno.apellidos}`);
                         });
                         tareas.push(async () => tarea);
                     }
@@ -1269,8 +1301,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tarea = crearCalendario(alumno, relacion).then((blob) => {
                             if (blob) {
                                 targetFolder?.file(`Calendario_${alumno.apellidos}.pdf`, blob);
-                                reportarProgreso(`Calendario: ${alumno.apellidos}`);
                             }
+                            reportarProgreso(`Calendario: ${alumno.apellidos}`);
                         });
                         tareas.push(async () => tarea);
                     }
@@ -1286,6 +1318,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                             if (blob) {
                                 mainFolder?.file(`Relacion_${numRelacionLimpio}.pdf`, blob);
                             }
+                            reportarProgreso(`Relacion_${numRelacionLimpio} (PDF)`);
                         });
                         tareas.push(async () => tarea);
 
@@ -1293,8 +1326,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tareaDocx = crearDocumentoRelacion('docx', relacion).then((blob) => {
                             if (blob) {
                                 mainFolder?.file(`Relacion_${numRelacionLimpio}.docx`, blob);
-                                reportarProgreso(`Relacion_${numRelacionLimpio}`);
                             }
+                            reportarProgreso(`Relacion_${numRelacionLimpio}`);
                         });
                         tareas.push(async () => tareaDocx);
                     }
@@ -1304,8 +1337,8 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                         const tarea = crearCarta(relacion).then((blob) => {
                             if (blob) {
                                 mainFolder?.file(`Carta.pdf`, blob);
-                                reportarProgreso(`Carta: ${numRelacionLimpio}`);
                             }
+                            reportarProgreso(`Carta: ${numRelacionLimpio}`);
                         });
                         tareas.push(async () => tarea);
                     }

@@ -82,7 +82,6 @@ export function AlumnosToolbar({
   onBulkEmail,
 }: AlumnosToolbarProps) {
   const [showImportCVModal, setShowImportCVModal] = useState(false);
-  const [lteInput, setLteInput] = useState('');
   return (
     <div className="space-y-4">
 
@@ -332,9 +331,12 @@ export function AlumnosToolbar({
               type="number"
               min={0}
               placeholder="0"
-              value={lteInput}
+              // El valor se deriva del filtro, no de un estado local: antes el
+              // input guardaba su propio texto y se quedaba desincronizado
+              // al cambiar el filtro desde los botones 500h / 380h o al
+              // limpiar los filtros.
+              value={filterHorasFFE.mode === 'lte' ? String(filterHorasFFE.value) : ''}
               onChange={e => {
-                setLteInput(e.target.value);
                 const v = Number(e.target.value);
                 if (e.target.value === '' || Number.isNaN(v) || v < 0) onFilterHorasFFEChange({ mode: 'off' });
                 else onFilterHorasFFEChange({ mode: 'lte', value: Math.floor(v) });
@@ -354,7 +356,6 @@ export function AlumnosToolbar({
                 onFilterRelacionStatusChange('all');
                 onFilterNSSChange('all');
                 onFilterHorasFFEChange({ mode: 'off' });
-                setLteInput('');
               }}
               className="ml-auto px-2.5 py-1 rounded-md text-[11px] font-bold text-danger border border-danger/20 bg-danger-soft hover:bg-danger/15 transition-all"
             >

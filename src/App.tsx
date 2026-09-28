@@ -130,6 +130,13 @@ export default function App() {
       }
 
       const termsRes = await fetch('/api/profesor/aceptacion-uso');
+      if (!termsRes.ok) {
+        // Un fallo al leer la aceptacion NO significa "no aceptada". Si faltara
+        // el token (401) o fallara el servidor, se mostrarian las condiciones y
+        // el usuario no podria superarlas, porque el POST fallaria igual. Se
+        // lanza para que lo recoja el catch de abajo.
+        throw new Error(`No se pudo leer la aceptacion de uso: ${termsRes.status}`);
+      }
       const { aceptado } = await termsRes.json();
       if (!aceptado) {
         setShowTerms(true);
@@ -229,14 +236,28 @@ export default function App() {
         body: JSON.stringify({ password })
       });
 
-      if (res.ok) {
-        setIsLocked(false);
-        setAuthError('');
-        setLoading(true);
-        await fetchData(); // Recargamos todo ahora que hay acceso
-      } else {
-        setAuthError('La contraseña es incorrecta o el archivo está dañado.');
-      }
+    if (res.ok) {
+      setIsLocked(false);
+      setAuthError('');
+      setLoading(true);
+      await fetchData(); // Recargamos todo ahora que hay acceso
+      return;
+    }
+
+    if (res.status === 429) {
+      // El servidor aún no permite reintentar. Decir "contraseña incorrecta"
+      // sería mentir: aquí no se ha mirado la contraseña.
+      const datos = await res.json().catch(() => null);
+      const segundos = datos?.esperaSegundos;
+      setAuthError(
+        typeof segundos === 'number' && segundos > 0
+          ? `Demasiados intentos fallidos. Espera ${segundos} s antes de reintentar.`
+          : 'Demasiados intentos fallidos. Espera unos segundos antes de reintentar.'
+      );
+      return;
+    }
+
+    setAuthError('La contraseña es incorrecta o el archivo está dañado.');
     } catch (err) {
       setAuthError('Error de comunicación con el servidor.');
     }
@@ -318,10 +339,19 @@ export default function App() {
 
   if (showTerms) {
     return <TermsView onAccept={async () => {
-      await fetch('/api/profesor/aceptacion-uso', { method: 'POST' });
+      const res = await fetch('/api/profesor/aceptacion-uso', { method: 'POST' });
+      if (!res.ok) {
+        // Si la pantalla se limpiara pese al fallo, la app entraria como si el
+        // usuario hubiera aceptado sin que el servidor lo registrara, y volveria
+        // a preguntar en el siguiente arranque. Se devuelve false para que
+        // TermsView muestre el error y deje reintentar.
+        console.error('No se pudo registrar la aceptacion de uso:', res.status);
+        return false;
+      }
       setShowTerms(false);
       setLoading(true);
-      fetchData();
+      await fetchData();
+      return true;
     }} />;
   }
 

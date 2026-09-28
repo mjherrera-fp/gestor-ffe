@@ -99,7 +99,6 @@ export function RelacionesListado({
   setTargetEmailRelaciones
 }: RelacionesListadoProps) {
 
-  const [isDownloading, setIsDownloading] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
   const getEstadoOptions = (tipo: 'relacion' | 'plan' | 'seguimiento' | 'valoracion') => {
@@ -152,11 +151,7 @@ export function RelacionesListado({
                 onClick={() => { if (relaciones) setTargetDownloadRelaciones(relaciones); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-light text-primary hover:bg-primary/15 border border-primary-light rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
               >
-                {isDownloading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-                ) : (
-                  <Download className="h-3.5 w-3.5" />
-                )}
+                <Download className="h-3.5 w-3.5" />
               </button>
             </Title>
             <button

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import { Alumno, DetalleAcademico, RelacionAlumno } from '../../../types/index.ts';
 import { EmailAttachment, EmailTargetType } from '../../../types/email.ts';
+import { cargarContextoFechas, crearResolutorFechas } from '../../../lib/calculoFechas.ts';
 import { mostrarToast } from '../../../utils/toast.ts';
 
 // ─────────────────────────────────────────
@@ -61,7 +62,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
 
   // ── Importación Excel ──
   const [isImporting,  setIsImporting]  = useState(false);
-  const [importResult, setImportResult] = useState<{ success: number; updated: number; errors?: string[] } | null>(null);
+  const [importResult, setImportResult] = useState<{ success: number; updated: number; duplicated?: number; failed?: number; errors?: string[] } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [modoCreacion, setModoCreacion] = useState('descargar');
 
@@ -128,21 +129,70 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     setShowForm(true);
   };
 
+  // ─────────────────────────────────────────
+  //  RECÁLCULO DE LA FECHA FIN
+  //
+  //  Al cambiar las horas de un alumno que ya está asignado a una relación hay
+  //  que rehacer la fecha fin. Antes se limitaba a borrar las dos fechas y
+  //  obligaba al usuario a recalcular en el panel de Relaciones.
+  //
+  //  Los datos se piden en el momento de confirmar, no al montar, para que la
+  //  fecha se calcule con la configuración de festivos vigente. Se recorre
+  //  la misma cadena que el panel: convenio -> centro y empresa -> ciudad.
+  // ─────────────────────────────────────────
+
+  const buscarRelacionDeAlumno = (alumnoId: number): RelacionAlumno | null =>
+    relaciones.find(rel =>
+      rel.alumnos?.some((ar: any) => (ar.alumnoId ?? ar.id) === alumnoId)
+    ) ?? null;
+
+  const recalcularFechaFinAlumno = async (
+    alumnoId: number,
+    horas: number,
+    fechaInicio: string,
+  ): Promise<string | null> => {
+    const rel = buscarRelacionDeAlumno(alumnoId);
+    if (!rel) return null;
+
+    try {
+      const convRes = await fetch(`/api/convenios/${rel.convenioId}`);
+      const conv = convRes.ok ? await convRes.json() : null;
+
+      // El panel de Relaciones saca la ciudad de la empresa con su propia
+      // petición, no del objeto embebido en la relación. Se replica igual
+      // para que ambas vistas ignoren los mismos festivos.
+      let empresaCiudad: string | null = null;
+      if (conv?.empresaId) {
+        const empRes = await fetch(`/api/empresas/${conv.empresaId}`);
+        const emp = empRes.ok ? await empRes.json() : null;
+        empresaCiudad = emp?.ciudad ?? null;
+      }
+
+      const contexto = await cargarContextoFechas({
+        centroId: conv?.centroId,
+        empresaCiudad,
+      });
+
+      return crearResolutorFechas(contexto).calcularFechaFin(fechaInicio, horas, rel.horario);
+    } catch {
+      // Si algo falla se devuelve null y quien llama conserva la fecha previa.
+      return null;
+    }
+  };
+
   const handleSubmit = async (
     e?: React.FormEvent,
     manualData?: any,
-    confirmClearDates = false
+    confirmarRecalculo = false
   ): Promise<boolean> => {
     if (e) e.preventDefault();
 
     const dataToSend = manualData ? { ...manualData } : { ...formData, cursoId };
 
     // Intercepción: aviso de cambio de horas en alumno asignado
-    if (editing && !manualData && !confirmClearDates) {
+    if (editing && !manualData && !confirmarRecalculo) {
       if (formData.totalHorasFFE !== editing.totalHorasFFE) {
-        const isAssigned =
-          relaciones.some(rel => rel.alumnos?.some((ar: any) => ar.alumnoId === editing.id)) ||
-          !!(editing as any).relacionId;
+        const isAssigned = !!buscarRelacionDeAlumno(editing.id) || !!(editing as any).relacionId;
         if (isAssigned) {
           setPendingSubmitData(dataToSend);
           return false;
@@ -150,9 +200,24 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
       }
     }
 
-    if (confirmClearDates) {
-      dataToSend.fechaInicio = null;
-      dataToSend.fechaFin    = null;
+    // El usuario ha confirmado el aviso: se recalcula la fecha fin con las
+    // horas nuevas en lugar de dejar las fechas en blanco. Si el cálculo no
+    // sale (horario sin horas, sin red, sin convenio) se conservan las fechas
+    // que ya tenía, que es preferible a perderlas.
+    if (confirmarRecalculo && editing) {
+      const fechaInicio = dataToSend.fechaInicio || editing.fechaInicio;
+      if (fechaInicio) {
+        const horas = Number(dataToSend.totalHorasFFE) || 0;
+        const nuevaFechaFin = await recalcularFechaFinAlumno(editing.id, horas, fechaInicio);
+        if (nuevaFechaFin) {
+          dataToSend.fechaFin = nuevaFechaFin;
+        } else {
+          mostrarToast(
+            'No se pudo recalcular la Fecha de Fin. Se conserva la anterior.',
+            'info',
+          );
+        }
+      }
     }
 
     const method = editing ? 'PUT' : 'POST';
@@ -176,10 +241,13 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
         fetchAlumnos();
         return true;
       } else {
-        console.error('Error al guardar:', await res.text());
+        const detalle = (await res.text()).slice(0, 200);
+        console.error('Error al guardar:', detalle);
+        mostrarToast(`No se pudo guardar el alumno. ${detalle}`.trim(), 'error');
       }
     } catch (error) {
       console.error('Error en la petición de red:', error);
+      mostrarToast('No se pudo guardar el alumno: error de conexión con el servidor.', 'error');
     }
     return false;
   };
@@ -208,9 +276,15 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     fd.append('cv', file);
     try {
       const res = await fetch(`/api/alumnos/${alumnoId}/cv`, { method: 'POST', body: fd });
-      if (res.ok) fetchAlumnos();
+      if (res.ok) {
+        fetchAlumnos();
+      } else {
+        console.error('Error al subir el CV:', await res.text());
+        mostrarToast(`No se pudo subir el CV de ${file.name}.`, 'error');
+      }
     } catch (error) {
       console.error(error);
+      mostrarToast(`No se pudo subir el CV de ${file.name}: error de conexión.`, 'error');
     }
   };
 
@@ -273,8 +347,10 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
         const ws   = wb.Sheets[wb.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false }) as any[];
 
-        let successCount = 0;
-        const errors: string[] = [];
+  let successCount = 0;
+  let duplicatedCount = 0;
+  let failedCount = 0;
+  const errors: string[] = [];
 
         for (const row of data) {
           const dni            = (row['DNI/Pasaporte'] || '').toString().trim();
@@ -318,19 +394,34 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(studentData),
             });
-            if (res.ok) successCount++;
-            else if (res.status === 409) {
-              const errData = await res.json();
+            if (res.ok) {
+              successCount++;
+            } else if (res.status === 409) {
+              // El alumno ya existe: se omite, pero se dice cuantas veces.
+              const errData = await res.json().catch(() => ({ error: 'Ya existe' }));
+              duplicatedCount++;
               errors.push(`${studentData.apellidos}, ${studentData.nombre}: ${errData.error}`);
+            } else {
+              // Cualquier otro status (500, 400...) se perdia en silencio: la
+              // fila no se importaba y el usuario creia que si.
+              failedCount++;
+              const detalle = await res.text().catch(() => '');
+              errors.push(
+                `${studentData.apellidos}, ${studentData.nombre}: error ${res.status}${detalle ? ` — ${detalle.slice(0, 120)}` : ''}`
+              );
             }
           } catch (err) {
+            // Fallo de red: tampoco se contabilizaba.
+            failedCount++;
             console.error('Error al procesar alumno:', studentData.nombre, err);
+            errors.push(`${studentData.apellidos}, ${studentData.nombre}: error de conexión con el servidor.`);
           }
         }
 
         fetchAlumnos();
-        setImportResult({ success: successCount, updated: 0, errors });
-      } catch {
+        setImportResult({ success: successCount, updated: 0, duplicated: duplicatedCount, failed: failedCount, errors });
+      } catch (error) {
+        console.error('Error al procesar el archivo Excel:', error);
         alert('Hubo un error al procesar el archivo Excel.');
       } finally {
         setIsImporting(false);

@@ -4,6 +4,7 @@ import {ComunicacionDAT, ComunicacionDATEstado} from '../../../types/index.ts';
 import {CustomSelect} from '../../../components/CustomSelect.tsx';
 import {Title} from '../../../components/Title.tsx';
 import {COM_DAT_STATUS_LABELS} from '../utils/comunicacionesDatUtils.ts';
+import {colorEstado} from '../../../utils/escalaEstados.ts';
 
 interface Props {
     items: ComunicacionDAT[];
@@ -31,10 +32,14 @@ const STATUS_OPTIONS = [
     })),
 ];
 
-const STATUS_BADGE_COLORS: Record<string, string> = {
-    PENDIENTE_ENVIAR_DIRECTOR: 'bg-warning-soft text-warning-strong border-warning/20',
-    PENDIENTE_FIRMA_DIRECTOR: 'bg-primary-light text-primary border-primary/20',
-    COMPLETADO: 'bg-success-soft text-success-strong border-success/20',
+// Antes este mapa tenía los dos primeros estados cambiados respecto al resto de
+// la aplicación: "pendiente enviar" salía en naranja y "pendiente firma" en
+// azul, justo al revés que en la relación y en el convenio, donde pendiente de
+// firma es el estado de espera.
+const STATUS_BADGE_COLORS: Record<ComunicacionDATEstado, string> = {
+    [ComunicacionDATEstado.PENDIENTE_ENVIAR_DIRECTOR]: colorEstado('EN_CURSO'),
+    [ComunicacionDATEstado.PENDIENTE_FIRMA_DIRECTOR]: colorEstado('ESPERA_FIRMA'),
+    [ComunicacionDATEstado.COMPLETADO]: colorEstado('TERMINADO'),
 };
 
 export function ComunicacionesDatListado({

@@ -446,17 +446,27 @@ export function useEmpresas(cursoId: number) {
 
       setShowEmpresaForm(false);
       fetchEmpresas();
+      return;
     }
+
+    // Si no es 409 y tampoco res.ok, el fallo se cae por aqui sin avisar.
+    const detalle = await res.text().catch(() => '');
+    console.error('Error al guardar la empresa:', res.status, detalle);
+    mostrarToast(`No se pudo guardar la empresa. ${detalle}`.trim(), 'error');
   };
 
   const handleDeleteEmpresa = async (id: number) => {
     try {
-      await fetch(`/api/empresas/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/empresas/${id}`, { method: 'DELETE' });
+      // Sin esta comprobacion, un 500 cerraba el dialogo y recargaba igual:
+      // el usuario veía el empresa desaparecer de la lista sin saber por que.
+      if (!res.ok) throw new Error((await res.text().catch(() => '')) || `HTTP ${res.status}`);
       if (selectedEmpresa?.id === id) { setSelectedEmpresa(null); setTutores([]); }
       setShowDeleteConfirm(null);
       fetchEmpresas();
-    } catch {
-      alert('Error al eliminar la empresa.');
+    } catch (error) {
+      console.error('Error al eliminar la empresa:', error);
+      mostrarToast('Error al eliminar la empresa.', 'error');
     }
   };
 
@@ -490,17 +500,23 @@ export function useEmpresas(cursoId: number) {
       setShowTutorForm(false);
       fetchTutores(selectedEmpresa.id!);
       fetchEmpresas();
+      return;
     }
+    const detalle = await res.text().catch(() => '');
+    console.error('Error al guardar el tutor:', res.status, detalle);
+    mostrarToast(`No se pudo guardar el tutor. ${detalle}`.trim(), 'error');
   };
 
   const handleDeleteTutor = async (id: number) => {
     try {
-      await fetch(`/api/tutores-empresa/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/tutores-empresa/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error((await res.text().catch(() => '')) || `HTTP ${res.status}`);
       setShowDeleteConfirm(null);
       fetchTutores(selectedEmpresa!.id!);
       fetchEmpresas();
-    } catch {
-      alert('Error al eliminar el tutor.');
+    } catch (error) {
+      console.error('Error al eliminar el tutor:', error);
+      mostrarToast('Error al eliminar el tutor.', 'error');
     }
   };
 
@@ -603,7 +619,11 @@ export function useEmpresas(cursoId: number) {
 
   const handleEmailConPlantilla = async (plantillaId: string) => {
     const res = await fetch(`/api/plantillas/by-plantilla-id/${plantillaId}`);
-    if (!res.ok) return;
+    if (!res.ok) {
+      console.error('No se pudo cargar la plantilla:', res.status);
+      mostrarToast('No se pudo cargar la plantilla de correo.', 'error');
+      return;
+    }
     const cfg = await res.json();
 
     const marcadoresRes = await fetch('/api/marcadores-personalizados');

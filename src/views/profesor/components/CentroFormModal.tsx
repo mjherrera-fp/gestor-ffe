@@ -99,9 +99,11 @@ export function CentroFormModal({
       e.preventDefault();
       const m = filtered[highlightedIndex];
       selectMunicipio(m.name, m.slug);
-    } else if (e.key === 'Escape') {
-      setCiudadFocused(false);
-    }
+      } else if (e.key === 'Escape') {
+        // Se consume la tecla: sin esto Modal cerraria el formulario entero.
+        e.stopPropagation();
+        setCiudadFocused(false);
+      }
   };
 
   const handleObtenerFestivos = async (year: number) => {

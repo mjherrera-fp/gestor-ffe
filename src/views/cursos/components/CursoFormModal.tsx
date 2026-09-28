@@ -23,11 +23,12 @@ interface CursoFormModalProps {
   setFormData: React.Dispatch<React.SetStateAction<Partial<Curso>>>;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
+  saving?: boolean;
 }
 
 export function CursoFormModal({
   open, editing, formData, setFormData,
-  onSubmit, onClose,
+  onSubmit, onClose, saving = false,
 }: CursoFormModalProps) {
   const { errors, onBlur, validateAll } = useFormValidation(RULES);
 
@@ -45,7 +46,7 @@ export function CursoFormModal({
           <h3 className="text-xl font-bold text-text-main">
             {editing ? 'Editar Curso' : 'Crear Nuevo Curso'}
           </h3>
-          <button onClick={onClose} className="text-text-muted hover:text-text-main transition-colors">
+          <button onClick={onClose} disabled={saving} className="text-text-muted hover:text-text-main transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -97,15 +98,17 @@ export function CursoFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 border border-border-base rounded-xl font-medium text-text-main hover:bg-surface-hover transition-all"
+              disabled={saving}
+              className="flex-1 py-3 border border-border-base rounded-xl font-medium text-text-main hover:bg-surface-hover transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
+              disabled={saving}
+              className="flex-1 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {editing ? 'Actualizar' : 'Crear Curso'}
+              {saving ? 'Guardando...' : editing ? 'Actualizar' : 'Crear Curso'}
             </button>
           </div>
         </form>

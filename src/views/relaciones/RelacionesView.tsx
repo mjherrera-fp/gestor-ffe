@@ -441,9 +441,6 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
             onEmailCarta={ctx.handleEmailConCarta}
             onEmailCalendario={ctx.handleEmailConCalendario}
             onHandleDescargarTodo={ctx.handleDescargarTodo}
-            isDownloadingMasivo={ctx.isDownloadingMasivo}
-            downloadProgress={ctx.downloadProgress}
-            downloadStatus={ctx.downloadStatus}
             setTargetDownloadRelaciones={ctx.setTargetDownloadRelaciones}
             targetDownloadRelaciones={ctx.targetDownloadRelaciones}
             setSelectedDocs={ctx.setSelectedDocs}

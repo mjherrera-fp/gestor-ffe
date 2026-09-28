@@ -11,7 +11,7 @@ import {
 } from '../../../types/index.ts';
 import {CustomSelect} from '../../../components/CustomSelect.tsx';
 import {Modal} from '../../../components/ui/Modal.tsx';
-import {DEFAULT_HORARIO, getDayName} from '../utils/relacionesUtils.ts';
+import {DEFAULT_HORARIO, getDayName, horarioTieneHoras} from '../utils/relacionesUtils.ts';
 import {BulkHorario} from '../hooks/useRelaciones.ts';
 import {formatDate} from '../../../lib/dateUtils.ts';
 import {useFormValidation} from '../../../hooks/useFormValidation.ts';
@@ -91,6 +91,15 @@ export function RelacionFormModal({
     label: RelacionEstadoLabels[e as RelacionEstado],
   }));
 
+  // Sin ningun dia con horas no se puede calcular la fecha fin por horas. No se
+  // bloquea el guardado porque el horario puede estarse rellenando a medias;
+  // solo se explica, porque antes la funcion devolvia una fecha sin sentido
+  // (inicio + 365 dias) que ademas sobrescribia la fecha fin real.
+  // El aviso se muestra una sola vez: el horario es comun a todos los alumnos.
+  const avisarHorarioSinHoras =
+    !horarioTieneHoras(formData.horario) &&
+    !!formData.alumnos?.some(a => (a.totalHorasFFE ?? 0) > 0);
+
   const tutoresOptions = tutores.map(t => ({
     id: t.id,
     label: `${t.nombre} ${t.apellidos}`,
@@ -162,8 +171,15 @@ export function RelacionFormModal({
                       )}
                     </div>
 
-                    {/* Lista de alumnos seleccionados */}
-                    <div className="space-y-3 max-h-[35vh] overflow-y-auto pr-2">
+                      {/* Lista de alumnos seleccionados */}
+                      {avisarHorarioSinHoras && (
+                        <p className="text-[10px] font-medium text-warning-strong bg-warning-soft border border-warning/20 rounded-xl px-3 py-2">
+                          El horario no tiene ningún día con horas, así que no se puede calcular la
+                          fecha fin de los alumnos a partir de sus horas FFE. Asigna horas al menos
+                          a un día del horario, o indica la fecha fin a mano.
+                        </p>
+                      )}
+                      <div className="space-y-3 max-h-[35vh] overflow-y-auto pr-2">
                       {formData.alumnos?.map(ar => {
                         const alum            = alumnos.find(a => a.id === ar.id);
                         const studentStartDate = ar.fechaInicio || '';

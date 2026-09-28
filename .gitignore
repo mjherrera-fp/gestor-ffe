@@ -5,7 +5,8 @@ dist-server/
 binarios/
 release/
 coverage/
-docs/
+docs/**
+!docs/*.md
 !templates/docs/
 .DS_Store
 *.log
@@ -20,3 +21,4 @@ uploads/
 prompt.ia
 .vscode/
 src/lib/update-secret.js
+.ffe-session-token

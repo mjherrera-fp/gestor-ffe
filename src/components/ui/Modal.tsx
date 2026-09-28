@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 
 interface ModalProps {
   open: boolean
@@ -11,12 +11,60 @@ interface ModalProps {
   cardClass?: string
 }
 
+// Modales abiertos, del mas antiguo al mas reciente. Escape solo debe cerrar el
+// de encima: con dos modales anidados (un confirm dentro de otro, por ejemplo)
+// cada uno tiene su propio listener en document, asi que una sola pulsacion
+// cerraria los dos a la vez.
+const pilaModales: symbol[] = []
+
+function useEscape(open: boolean, onClose?: () => void) {
+  // El cierre se guarda en un ref para no depender de su identidad: los
+  // componentes suelen pasar una flecha inline, que cambia en cada render y
+  // provocaria resuscripciones continuas del listener.
+  const refCierre = useRef(onClose)
+  refCierre.current = onClose
+
+  useEffect(() => {
+    if (!open) return
+
+    const id = Symbol('modal')
+    pilaModales.push(id)
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (pilaModales[pilaModales.length - 1] !== id) return
+      refCierre.current?.()
+    }
+    document.addEventListener('keydown', onKey)
+
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      const i = pilaModales.indexOf(id)
+      if (i !== -1) pilaModales.splice(i, 1)
+    }
+  }, [open])
+}
+
+// Bloqueo de scroll con recuento de referencias. Guardar el valor anterior y
+// restaurarlo al cerrar no vale con modales anidados: A abre (hidden), B abre
+// (hidden), A cierra y restaura '', dejando el body con scroll mientras B sigue
+// abierto, y al cerrar B restaura 'hidden' y congela la pagina para siempre.
+let bloqueosActivos = 0
+
 function usePreventBodyScroll(open: boolean) {
   useEffect(() => {
-    if (open) {
-      const prev = document.body.style.overflow
+    if (!open) return
+
+    bloqueosActivos++
+    if (bloqueosActivos === 1) {
       document.body.style.overflow = 'hidden'
-      return () => { document.body.style.overflow = prev }
+    }
+
+    return () => {
+      bloqueosActivos--
+      if (bloqueosActivos === 0) {
+        document.body.style.overflow = ''
+      }
     }
   }, [open])
 }
@@ -44,6 +92,7 @@ export function Modal({
   cardClass = '',
 }: ModalProps) {
   usePreventBodyScroll(open)
+  useEscape(open, onClose)
   return (
     <AnimatePresence mode="wait">
       {open && (

@@ -1,4 +1,6 @@
 import {db, lockDB, unlockDB} from './db.ts';
+import { safeParse } from './json.ts';
+import { contarDiasCotizacion } from './seguridadSocial.ts';
 import {
   Alumno,
   AnulacionFFE,
@@ -39,15 +41,6 @@ import {
   MarcadorPersonalizado,
   PlantillaCorreoDB
 } from '../types/email.ts';
-
-const safeParse = (str: any, fallback: any) => {
-  if (!str || str === 'undefined' || str === 'null') return fallback;
-  try {
-    return JSON.parse(str);
-  } catch (e) {
-    return fallback;
-  }
-};
 
 // --- HORAS REALIZADAS DE FFE ---
 
@@ -609,6 +602,22 @@ export const DetalleAcademicoDAO = {
   delete: (id: number) => db.prepare('DELETE FROM detalles_academicos WHERE id = ?').run(id)
 };
 
+/**
+ * Los festivos son datos del curso, no ajustes permanentes: al empezar un
+ * curso nuevo hay que reaplicarlos, porque los del curso anterior ya no valen.
+ * Se limpian los dos origenes:
+ *
+ *   - `configuracion.tipo = 'festivos_empresa'`, indexados por ciudad.
+ *   - `centros_educativos.festivos`, los del centro de trabajo.
+ *
+ * Se vacia solo la lista de festivos del centro: la fila se conserva, con su
+ * nombre, codigo y datos de contacto, porque eso no es del curso anterior.
+ */
+const limpiarFestivos = () => {
+  db.prepare('DELETE FROM configuracion WHERE tipo = ?').run('festivos_empresa');
+  db.prepare("UPDATE centros_educativos SET festivos = '[]'").run();
+};
+
 export const CursoDAO = {
   getAll: () => db.prepare('SELECT * FROM cursos').all() as Curso[],
   getById: (id: number) => db.prepare('SELECT * FROM cursos WHERE id = ?').get(id) as Curso | undefined,
@@ -624,13 +633,38 @@ export const CursoDAO = {
   delete: (id: number) => {
     const delRelaciones = db.prepare('DELETE FROM relaciones WHERE convenioId IN (SELECT id FROM convenios WHERE cursoId = ?)');
     const delAlumnos = db.prepare('DELETE FROM alumnos WHERE cursoId = ?');
-    const delFestivosEmpresa = db.prepare('DELETE FROM configuracion WHERE tipo = ?');
     const delCurso = db.prepare('DELETE FROM cursos WHERE id = ?');
     db.transaction(() => {
       delRelaciones.run(id);
       delAlumnos.run(id);
-      delFestivosEmpresa.run('festivos_empresa');
+      limpiarFestivos();
       delCurso.run(id);
+    })();
+  },
+  /**
+   * Sustituye todos los cursos por uno nuevo en una sola transaccion.
+   *
+   * Es lo que permite que el formulario de nuevo curso se pueda cancelar sin
+   * perdida: el borrado ocurre aqui, al guardar, y si algo falla se deshace
+   * entero. Antes se borraba al abrir el formulario, de modo que cancelar
+   * dejaba la aplicacion sin curso y con los alumnos ya perdidos.
+   *
+   * Comparte `limpiarFestivos` con `delete`: las dos rutas dejan la aplicacion
+   * lista para el curso nuevo, con los festivos por reaplicar.
+   */
+  replaceAll: (curso: Curso) => {
+    const delRelaciones = db.prepare(
+      'DELETE FROM relaciones WHERE convenioId IN (SELECT id FROM convenios WHERE cursoId IN (SELECT id FROM cursos))'
+    );
+    const delAlumnos = db.prepare('DELETE FROM alumnos WHERE cursoId IN (SELECT id FROM cursos)');
+    const delCurso = db.prepare('DELETE FROM cursos');
+    const insCurso = db.prepare('INSERT INTO cursos (descripcion, fechaInicio, fechaFin) VALUES (?, ?, ?)');
+    return db.transaction(() => {
+      delRelaciones.run();
+      delAlumnos.run();
+      limpiarFestivos();
+      delCurso.run();
+      return insCurso.run(curso.descripcion, curso.fechaInicio, curso.fechaFin).lastInsertRowid;
     })();
   },
 };
@@ -1349,19 +1383,6 @@ export const PanelDAO = {
       `SELECT id, nombre, apellidos, fechaInicio, fechaFin FROM alumnos a WHERE a.cursoId = ? ${filtroAlumno}`
     ).all(...paramsAlumno) as { id: number; nombre: string; apellidos: string; fechaInicio: string | null; fechaFin: string | null }[];
 
-    const toLocalDate = (iso: string | null): Date | null => {
-      if (!iso) return null;
-      const [y, m, d] = iso.split('-').map(Number);
-      return new Date(y, m - 1, d);
-    };
-
-    const toLocalDateStr = (d: Date): string => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-    };
-
     const relaciones = db.prepare(`
       SELECT r.id, r.horario, r.convenioId, a.id as alumnoId, a.fechaInicio as aluInicio, a.fechaFin as aluFin
       FROM relaciones r
@@ -1405,72 +1426,17 @@ export const PanelDAO = {
       }
     }
 
-    let minDate: Date | null = null;
-    let maxDate: Date | null = null;
-    for (const rel of relaciones) {
-      const di = toLocalDate(rel.aluInicio);
-      const df = toLocalDate(rel.aluFin);
-      if (di && (!minDate || di < minDate)) minDate = di;
-      if (df && (!maxDate || df > maxDate)) maxDate = df;
-    }
-
-    if (!minDate || !maxDate) return { meses: [], alumnos: [], datos: {} };
-
-    const meses: string[] = [];
-    const iter = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
-    while (iter <= maxDate) {
-      meses.push(toLocalDateStr(iter));
-      iter.setMonth(iter.getMonth() + 1);
-    }
-
-    const datos: Record<string, number> = {};
-
-    for (const rel of relaciones) {
-      const horario = safeParse(rel.horario, {});
-      const diasSemana: string[] = [];
-      for (const dia of ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']) {
-        if (horario[dia]?.horas > 0) diasSemana.push(dia);
-      }
-      if (diasSemana.length === 0) continue;
-
-      const diaMap: Record<string, number> = {
-        lunes: 1, martes: 2, miercoles: 3, jueves: 4, viernes: 5, sabado: 6, domingo: 0
-      };
-      const diasSet = new Set(diasSemana.map(d => diaMap[d]));
-
-      const centroId = relCentroMap[rel.id];
-      const festivosSkip = new Set(centroFestivosMap[centroId] || []);
-      const empCiudad = relEmpresaCiudadMap[rel.id];
-      const empFestivosSet = empCiudad ? empresaFestivosByCiudad[empCiudad] : undefined;
-      if (empFestivosSet) {
-        for (const f of empFestivosSet) festivosSkip.add(f);
-      }
-
-      const aluInicio = toLocalDate(rel.aluInicio) || minDate;
-      const aluFin = toLocalDate(rel.aluFin) || maxDate;
-
-      for (const mesKey of meses) {
-        const [year, month] = mesKey.split('-').map(Number);
-        const startM = new Date(year, month - 1, 1);
-        const endM = new Date(year, month, 0);
-
-        const start = startM < aluInicio ? aluInicio : startM;
-        const end = endM > aluFin ? aluFin : endM;
-
-        let dias = 0;
-        const d = new Date(start);
-        while (d <= end) {
-          const esFestivo = festivosSkip.has(toLocalDateStr(d));
-          const skipCentro = usarFestivos && centroFestivosMap[centroId]?.has(toLocalDateStr(d));
-          const skipEmpresa = usarFestivosEmpresa && empFestivosSet?.has(toLocalDateStr(d));
-          if (diasSet.has(d.getDay()) && !skipCentro && !skipEmpresa) dias++;
-          d.setDate(d.getDate() + 1);
-        }
-
-        const key = `${rel.alumnoId}_${mesKey}`;
-        datos[key] = (datos[key] || 0) + dias;
-      }
-    }
+    // El calculo de dias cotizados vive en src/lib/seguridadSocial.ts para
+    // poder testearlo sin levantar la base de datos.
+    const { meses, datos } = contarDiasCotizacion({
+      relaciones,
+      relCentroMap,
+      relEmpresaCiudadMap,
+      centroFestivosMap,
+      empresaFestivosByCiudad,
+      usarFestivos,
+      usarFestivosEmpresa,
+    });
 
     return { meses, alumnos, datos };
   }
