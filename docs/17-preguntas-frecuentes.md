@@ -26,6 +26,15 @@ Los documentos DOCX y PDF se generan en el servidor Express utilizando docxtempl
 **¿Dónde se almacenan los archivos adjuntos temporales?**
 En el directorio `uploads/` junto a la aplicación. Los adjuntos se limpian automáticamente tras el envío o al cerrar la aplicación.
 
+**¿Quién es la DAT y es obligatorio enviarle las comunicaciones?**
+La aplicación no comprueba si el envío es obligatorio: solo registra los envíos que decides hacer. Consulta la normativa aplicable a tu centro antes de darlos por obligatorios.
+
+**¿Por qué no me aparece el módulo «Enviar a la DAT»?**
+Porque falta un profesor o un curso seleccionado, o porque en **Configuración → Documentos** el envío a la DAT está en modo **No es necesario**. Hay que reiniciar la aplicación después de cambiar esa opción. Ver [18. Comunicaciones DAT](18-comunicaciones-dat.md#182-cuándo-está-disponible).
+
+**¿Por qué no aparece un alumno al crear una comunicación?**
+Solo se listan los alumnos con una relación en estado Completado, y por defecto se ocultan los que ya tienen una comunicación asignada. Activa **Mostrar estudiantes con comunicación previa** en el formulario.
+
 ---
 
-[← Servicios conectados](16-servicios-conectados.md)  |  [Índice](README.md)
+[← Servicios conectados](16-servicios-conectados.md)  |  [Índice](README.md)  |  [Comunicaciones DAT →](18-comunicaciones-dat.md)

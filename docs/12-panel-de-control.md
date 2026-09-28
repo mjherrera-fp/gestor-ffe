@@ -8,6 +8,8 @@
 
 Tabla completa de todos los alumnos con su estado actual en cada proceso: convenio, relación, plan formativo, seguimiento y valoración. Puedes filtrar por cualquier columna y ordenar los resultados.
 
+> ℹ️ Si en **Configuración → Documentos** el envío a la DAT está en modo **Es necesario**, la tabla añade dos columnas más: **Fecha Envío DAT** y **Estado DAT**, con la fecha y el estado de la comunicación a la que está asignado cada alumno. Ver [18. Comunicaciones DAT](18-comunicaciones-dat.md).
+
 > `[IMAGEN: Tabla de resumen con filtros activos]`
 
 ## 12.2 Estadísticas

@@ -2,7 +2,7 @@
 
 Documentación de uso de la aplicación, dividida en un documento por módulo.
 
-**Versión:** 0.1.20-alpha · **Plataforma:** Windows (portable)
+**Versión:** 0.1.20-alpha · **Plataforma:** Windows (portable) · **18 documentos**
 
 ## Contenido
 
@@ -25,6 +25,7 @@ Documentación de uso de la aplicación, dividida en un documento por módulo.
 | 15 | [Seguridad y Cifrado](15-seguridad-y-cifrado.md) | Cifrado SQLCipher y bloqueo de la aplicación |
 | 16 | [Servicios conectados](16-servicios-conectados.md) | Servicios externos que usa la aplicación |
 | 17 | [Preguntas Frecuentes](17-preguntas-frecuentes.md) | Dudas habituales y sus respuestas |
+| 18 | [Comunicaciones DAT](18-comunicaciones-dat.md) | Envíos a la DAT, estados del trámite, documentación y NextCloud |
 
 ## Documentación técnica
 

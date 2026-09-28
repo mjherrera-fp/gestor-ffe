@@ -147,10 +147,12 @@ revisar antes de darlos por buenos:
 - **La clave de cifrado de la BBDD.** Hay que confirmar de dónde procede y que
   no acaba en un sitio legible (`.env`, `claves-dev.txt` está en `.gitignore`,
   pero conviene revisarlo).
-- **`info_instalador.txt`** contiene una afirmación falsa sobre la conversión a
-  PDF mediante LibreOffice: el proyecto usa **Puppeteer**, no LibreOffice.
-  Corregirlo en la fase de documentación.
-- **Tests de integración.** No existe todavía `npm run test:integration`
-  (está pendiente crearlo). Ninguna prueba debe tocar la BBDD real: hay que
-  apuntar `PORTABLE_EXECUTABLE_DIR` a un directorio temporal, que es
-  precisamente el mecanismo que se usó para verificar el token de sesión.
+- **`info_instalador.txt`** afirmaba que la conversión a PDF se hacía con
+  LibreOffice. **Corregido**: el texto dice ahora que el motor va incrustado
+  (Puppeteer/Chromium) y que no hace falta instalar nada.
+- **Tests de integración.** **Hecho**: existe `npm run test:integration`
+  (`vitest.integration.config.ts`), que arranca el servidor real y trabaja
+  contra una BBDD temporal. Ninguna prueba debe tocar la BBDD real: el punto de
+  entrada es `PORTABLE_EXECUTABLE_DIR`, que se apunta a un directorio temporal,
+  el mismo mecanismo que se usó para verificar el token de sesión. El recorrido
+  de cifrado y desbloqueo está cubierto en `tests/integration/seguridad-ciclo.test.ts`.

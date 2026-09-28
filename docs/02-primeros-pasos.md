@@ -22,13 +22,17 @@ Antes de comenzar, dirígete a **Configuración** revisa los parámetros configu
 
 En la seccion **Seguridad** podrás introducir una contraseña para cifrar la base de datos. Consulta la sección [15. Seguridad y Cifrado](15-seguridad-y-cifrado.md#15-seguridad-y-cifrado)
 
-> **MUY importante**, una vez cifrada la base de datos, esta operación **NO se puede revertir** y SIEMPRE quedará cifrada, por lo que si decides cifrar **NO** olvides la contraseña dado que no se puede recuperar y **los datos se perderían para siempre**.
+> **MUY importante**, una vez cifrada la base de datos, los datos quedarán cifrados, por lo que si decides cifrar **NO** olvides la contraseña dado que no se puede recuperar y **los datos se perderían para siempre**.
 
 ## 2.4 Estructura de la navegación
 
-> `[IMAGEN: Barra lateral izquierda con todos los módulos visibles: Profesor, Cursos, Alumnos, Empresas, Intereses, Convenios, Relaciones, Panel, Configuración, Histórico]`
+> `[IMAGEN: Barra lateral izquierda con todos los módulos visibles: Profesor, Cursos, Alumnos, Empresas, Intereses, Convenios, Relaciones, Enviar a la DAT, Panel, Configuración, Histórico]`
 
 La navegación principal se encuentra en la barra lateral izquierda. Cada icono corresponde a un módulo:
+
+> ℹ️ **Enviar a la DAT** solo aparece si tienes un profesor y un curso seleccionados, y si en
+> Configuración el envío a la DAT está en modo **Es necesario**. Consulta la sección
+> [18. Comunicaciones DAT](18-comunicaciones-dat.md).
 
 | Icono | Módulo | Descripción |
 |-------|--------|-------------|
@@ -40,6 +44,7 @@ La navegación principal se encuentra en la barra lateral izquierda. Cada icono 
 | 🔗 | Intereses | Preferencias alumno-empresa |
 | 📄 | Convenios | Convenios de colaboración |
 | 🤝 | Relaciones | Periodos de prácticas |
+| 📤 | Enviar a la DAT | Comunicaciones a la DAT y su estado de trámite |
 
 En la parte superior podemos encontrar otra sección de iconos que nos llevan a elementos más generales:
 

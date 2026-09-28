@@ -42,6 +42,19 @@ Configura cómo se generan los documentos (DOCX, PDF, XLSX):
 
 > `[IMAGEN: Sección de configuración de creación de ficheros con selector de modo y checkbox]`
 
+### Envío a la DAT
+
+Indica si, en tu centro, es necesario enviar documentación a la DAT:
+
+- **Es necesario:** muestra el módulo «Enviar a la DAT» en el menú y añade al Panel las columnas **Fecha Envío DAT** y **Estado DAT**.
+- **No es necesario:** oculta el módulo y esas dos columnas.
+
+> ⚠️ Después de guardar el cambio **hay que reiniciar la aplicación** para que tome efecto.
+
+> `[IMAGEN: Sección de configuración de envío a la DAT con las dos opciones y el botón de guardar]`
+
+El uso del módulo está explicado en [18. Comunicaciones DAT](18-comunicaciones-dat.md).
+
 ## 13.2 Correo
 
 Configuración del servidor SMTP (ver sección [11.1](11-correo-electronico.md#111-configuración-smtp)).
