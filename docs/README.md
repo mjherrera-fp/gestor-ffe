@@ -31,10 +31,3 @@ Documentación de uso de la aplicación, dividida en un documento por módulo.
 
 - [Seguridad interna](seguridad-interna.md) — modelo de seguridad, token de sesión y
   deuda de seguridad conocida. Dirigida a quien mantiene la aplicación, no al usuario final.
-
-## Convenciones
-
-- Los bloques `> \`[IMAGEN: ...]\`` marcan el sitio donde debe insertarse una captura de
-  pantalla. Son marcadores de posición: al añadir la imagen, se sustituye la línea
-  completa por la imagen en markdown.
-- Las advertencias que afectan a la integridad de los datos van marcadas con `⚠️`.
