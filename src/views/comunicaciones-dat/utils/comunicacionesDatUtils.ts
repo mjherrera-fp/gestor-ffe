@@ -1,11 +1,11 @@
 import {Send, ShieldCheck} from 'lucide-react';
 import {ComunicacionDATEstado} from '@/src/types';
 
-export const COM_DAT_STATUS_LABELS: Record<string, string> = {
-    PENDIENTE_ENVIAR_DIRECTOR: 'Pendiente enviar a director',
-    PENDIENTE_FIRMA_DIRECTOR: 'Pendiente firma director',
-    COMPLETADO: 'Completado',
-};
+// Las etiquetas viven en types/index.ts, que es donde el panel de control ya
+// las leia. Este archivo las duplicaba con tipado laxo (Record<string, string>),
+// de modo que un estado nuevo se aparecia en el panel y no en las vistas de
+// comunicaciones DAT.
+export {ComunicacionDATEstadoLabels as COM_DAT_STATUS_LABELS} from '@/src/types';
 
 export const getStatusButton = (estado: ComunicacionDATEstado) => {
     switch (estado) {

@@ -3,13 +3,16 @@ import {
   HorarioDia,
   RelacionEstado,
   PlanFormativoEstado,
+  ConvenioEstado,
   RelacionEstadoLabels,
   PlanFormativoEstadoLabels,
+  ConvenioEstadoLabels,
   SeguimientoEstado,
   SeguimientoEstadoLabels,
   ValoracionEstado,
   ValoracionEstadoLabels,
 } from '../../../types/index.ts';
+import * as escalaEstados from '../../../utils/escalaEstados.ts';
 import { Send, Clock, ShieldCheck, Check } from 'lucide-react';
 
 //agrupa las funciones puras: calculateEndDateForHours, getNextRelacionEstado, los colores de badges, etc. Son fácilmente testeables de forma aislada.
@@ -168,26 +171,30 @@ export const calculateStartDateFromEnd = (
 //  LÓGICA DE ESTADOS (colores y textos)
 // ─────────────────────────────────────────
 
-// Los cuatro niveles de un tramite. El color dice en que punto esta, de modo
-// que se pueda leer de un vistazo sin mirar el texto:
-//
-//   PENDIENTE    nada enviado todavia
-//   EN_CURSO     enviado, esperando respuesta
-//   ESPERA_FIRMA bloqueado a la espera de una firma
-//   TERMINADO    completado o recibido
-//
-// Antes cada estado repetia su propia cadena de clases y el mapa se habia
-// desincronizado: en el plan formativo, "pendiente firma empresa" y
-// "pendiente firma tutor" salian en verde igual que "completado", y en la
-// relacion "pendiente firma director" salia en azul mientras "pendiente firma
-// empresa" salia en amarillo.
-const COLOR_PENDIENTE     = 'bg-surface-subtle text-text-muted border-border-base';
-const COLOR_EN_CURSO      = 'bg-primary-light text-primary border-primary-light';
-const COLOR_ESPERA_FIRMA  = 'bg-warning-soft text-warning-strong border-warning/20';
-const COLOR_TERMINADO     = 'bg-success-soft text-success-strong border-success/20';
+// Los cuatro niveles de un tramite viven ya en la escala compartida, que usan
+// tambien los convenios y las comunicaciones DAT. Antes cada estado repetia su
+// propia cadena de clases y los mapas se desincronizaban entre vistas: en el
+// plan formativo "pendiente firma empresa" y "pendiente firma tutor" salian en
+// verde igual que "completado", y en el convenio "pendiente firma director"
+// salia en azul mientras en la relacion salia en amarillo.
+const {
+  COLOR_PENDIENTE,
+  COLOR_EN_CURSO,
+  COLOR_ESPERA_FIRMA,
+  COLOR_TERMINADO,
+} = escalaEstados;
 
 export const getStatusBadgeColor = (estado: string, type: string): string => {
-  if (type === 'relacion') {
+  // El convenio recorre los mismos cuatro pasos que la relacion, asi que
+  // comparte sus niveles. No estaba aqui y por eso su StatusBadge se pintaba
+  // con un mapa propio que se habia desincronizado del resto.
+  if (type === 'convenio') {
+    if (estado === ConvenioEstado.PENDIENTE_ENVIAR)          return COLOR_PENDIENTE;
+    if (estado === ConvenioEstado.PENDIENTE_FIRMA_EMPRESA)   return COLOR_ESPERA_FIRMA;
+    if (estado === ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR) return COLOR_EN_CURSO;
+    if (estado === ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR)  return COLOR_ESPERA_FIRMA;
+    if (estado === ConvenioEstado.COMPLETADO)                return COLOR_TERMINADO;
+  } else if (type === 'relacion') {
     if (estado === RelacionEstado.PENDIENTE_ENVIAR_EMPRESA)  return COLOR_EN_CURSO;
     if (estado === RelacionEstado.PENDIENTE_FIRMA_EMPRESA)   return COLOR_ESPERA_FIRMA;
     if (estado === RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR) return COLOR_EN_CURSO;
@@ -215,6 +222,8 @@ export const getStatusBadgeColor = (estado: string, type: string): string => {
 export const getStatusLabel = (estado: string, type: string): string => {
   if (type === 'relacion') {
     return RelacionEstadoLabels[estado as RelacionEstado] || estado;
+  } else if (type === 'convenio') {
+    return ConvenioEstadoLabels[estado as ConvenioEstado] || estado;
   } else if (type === 'plan') {
     return PlanFormativoEstadoLabels[estado as PlanFormativoEstado] || estado;
   } else if (type === 'seguimiento') {

@@ -310,11 +310,16 @@ export const PlanFormativoEstadoLabels: Record<PlanFormativoEstado, string> = {
   [PlanFormativoEstado.COMPLETADO]: 'Completado'
 };
 
+// Las etiquetas de todos los tramites comparten forma: "pendiente <accion> a
+// <destinatario>". Antes el convenio decia "Pendiente de enviar a empresa" y
+// "Pendiente de firmar por direccion" mientras la relacion decia "Pendiente
+// enviar a empresa" y "Pendiente firma director", de modo que el mismo paso se
+// leia de dos maneras distintas en pantallas contiguas.
 export const ConvenioEstadoLabels: Record<ConvenioEstado, string> = {
-  [ConvenioEstado.PENDIENTE_ENVIAR]: 'Pendiente de enviar a empresa',
-  [ConvenioEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente de firmar por empresa',
-  [ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'Pendiente de enviar al director',
-  [ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR]: 'Pendiente de firmar por dirección',
+  [ConvenioEstado.PENDIENTE_ENVIAR]: 'Pendiente enviar a empresa',
+  [ConvenioEstado.PENDIENTE_FIRMA_EMPRESA]: 'Pendiente firma empresa',
+  [ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR]: 'Pendiente enviar a director',
+  [ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR]: 'Pendiente firma director',
   [ConvenioEstado.COMPLETADO]: 'Completado'
 };
 

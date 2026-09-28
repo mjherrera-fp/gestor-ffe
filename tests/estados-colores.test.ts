@@ -14,11 +14,23 @@ import {
   RelacionEstado,
   SeguimientoEstado,
   ValoracionEstado,
+  ConvenioEstado,
+  ComunicacionDATEstado,
   PlanFormativoEstadoLabels,
   RelacionEstadoLabels,
   SeguimientoEstadoLabels,
   ValoracionEstadoLabels,
+  ConvenioEstadoLabels,
+  ComunicacionDATEstadoLabels,
 } from '../src/types/index.ts';
+import {
+  colorEstado,
+  COLOR_PENDIENTE,
+  COLOR_EN_CURSO,
+  COLOR_ESPERA_FIRMA,
+  COLOR_TERMINADO,
+  type NivelEstado,
+} from '../src/utils/escalaEstados.ts';
 
 
 // ─────────────────────────────────────────
@@ -224,5 +236,132 @@ describe('transiciones del plan formativo', () => {
   it('devuelve el estado sin cambios si no lo conoce', () => {
     expect(getNextPlanEstado('NO_EXISTE')).toBe('NO_EXISTE');
     expect(getPrevPlanEstado('NO_EXISTE')).toBe('NO_EXISTE');
+  });
+});
+
+
+describe('la escala de estados es la misma en todos los modulos', () => {
+  // Antes cada modulo traia su propio mapa de clases y el mismo estado salia
+  // de un color en una pantalla y de otro en la contigua. Estos tests fijan que
+  // un paso con el mismo significado se pinte igual venga de donde venga.
+
+  /** Nivel que le corresponde a cada estado de cada tramite. */
+  const NIVELES: Array<[string, string, NivelEstado]> = [
+    // Relacion y convenio comparten los mismos cuatro pasos.
+    ['relacion/enviar empresa', RelacionEstado.PENDIENTE_ENVIAR_EMPRESA, 'EN_CURSO'],
+    ['relacion/firma empresa', RelacionEstado.PENDIENTE_FIRMA_EMPRESA, 'ESPERA_FIRMA'],
+    ['relacion/enviar director', RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR, 'EN_CURSO'],
+    ['relacion/firma director', RelacionEstado.PENDIENTE_FIRMA_DIRECTOR, 'ESPERA_FIRMA'],
+    ['relacion/completado', RelacionEstado.COMPLETADO, 'TERMINADO'],
+    ['convenio/enviar empresa', ConvenioEstado.PENDIENTE_ENVIAR, 'PENDIENTE'],
+    ['convenio/firma empresa', ConvenioEstado.PENDIENTE_FIRMA_EMPRESA, 'ESPERA_FIRMA'],
+    ['convenio/enviar director', ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR, 'EN_CURSO'],
+    ['convenio/firma director', ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR, 'ESPERA_FIRMA'],
+    ['convenio/completado', ConvenioEstado.COMPLETADO, 'TERMINADO'],
+    ['dat/enviar director', ComunicacionDATEstado.PENDIENTE_ENVIAR_DIRECTOR, 'EN_CURSO'],
+    ['dat/firma director', ComunicacionDATEstado.PENDIENTE_FIRMA_DIRECTOR, 'ESPERA_FIRMA'],
+    ['dat/completado', ComunicacionDATEstado.COMPLETADO, 'TERMINADO'],
+  ];
+
+  it('cada estado del convenio cae en el nivel que le corresponde', () => {
+    for (const [nombre, estado, nivel] of NIVELES.filter(([n]) => n.startsWith('convenio'))) {
+      // Se compara contra el badge real del modulo, no contra la constante.
+      expect(getStatusBadgeColor(estado, 'convenio'), nombre).toBe(colorEstado(nivel));
+    }
+  });
+
+  it('los estados que comparten nombre y paso comparten color', () => {
+    // Estos pares son el caso que se estaba viendo mal: el mismo paso de firma
+    // del director aparecia en azul en el convenio y en naranja en la relacion.
+    const pares: Array<[string, string, string]> = [
+      ['enviar a director', RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR, ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR],
+      ['firma director', RelacionEstado.PENDIENTE_FIRMA_DIRECTOR, ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR],
+      ['firma empresa', RelacionEstado.PENDIENTE_FIRMA_EMPRESA, ConvenioEstado.PENDIENTE_FIRMA_EMPRESA],
+    ];
+    for (const [nombre, enRelacion, enConvenio] of pares) {
+      expect(
+        getStatusBadgeColor(enRelacion, 'relacion'),
+        nombre,
+      ).toBe(getStatusBadgeColor(enConvenio, 'convenio'));
+    }
+  });
+
+  it('esperar firma nunca sale en el color de pendiente', () => {
+    for (const [nombre, , nivel] of NIVELES) {
+      if (nivel !== 'ESPERA_FIRMA') continue;
+      const color = colorEstado(nivel);
+      expect(color, nombre).toBe(COLOR_ESPERA_FIRMA);
+      expect(color, nombre).not.toBe(COLOR_PENDIENTE);
+    }
+  });
+
+  it('solo lo terminal va en verde', () => {
+    for (const [nombre, , nivel] of NIVELES) {
+      const color = colorEstado(nivel);
+      if (nivel === 'TERMINADO') {
+        expect(color, nombre).toBe(COLOR_TERMINADO);
+      } else {
+        expect(color, nombre).not.toBe(COLOR_TERMINADO);
+      }
+    }
+  });
+
+  it('los cuatro niveles son colores distintos', () => {
+    const colores = [COLOR_PENDIENTE, COLOR_EN_CURSO, COLOR_ESPERA_FIRMA, COLOR_TERMINADO];
+    expect(new Set(colores).size).toBe(4);
+  });
+});
+
+
+describe('las etiquetas de estado dicen lo mismo en todos los modulos', () => {
+  it('el paso de enviar al director se escribe igual en relacion, convenio y DAT', () => {
+    // Convenio y relacion comparten el paso, asi que la frase tiene que ser la
+    // misma: antes uno deia "Pendiente de enviar al director" y el otro
+    // "Pendiente enviar a director" en pantallas contiguas.
+    expect(RelacionEstadoLabels[RelacionEstado.PENDIENTE_ENVIAR_DIRECTOR]).toBe('Pendiente enviar a director');
+    expect(ConvenioEstadoLabels[ConvenioEstado.PENDIENTE_ENVIAR_DIRECTOR]).toBe('Pendiente enviar a director');
+    expect(ComunicacionDATEstadoLabels[ComunicacionDATEstado.PENDIENTE_ENVIAR_DIRECTOR]).toBe('Pendiente enviar a director');
+  });
+
+  it('ninguna etiqueta mete una "de" que las demas no llevan', () => {
+    const todas = [
+      ...Object.values(RelacionEstadoLabels),
+      ...Object.values(PlanFormativoEstadoLabels),
+      ...Object.values(ConvenioEstadoLabels),
+      ...Object.values(ComunicacionDATEstadoLabels),
+      ...Object.values(SeguimientoEstadoLabels),
+      ...Object.values(ValoracionEstadoLabels),
+    ];
+    // "Recibido de empresa" y "Pendiente enviar a empresa" son legitimos; lo
+    // que no debe aparecer es el "pendiente de <verbo>".
+    const sospechosos = todas.filter(t => /^pendiente de /.test(t));
+    expect(sospechosos).toEqual([]);
+  });
+
+  it('los tramites de la misma direccion comparten la etiqueta de firma', () => {
+    expect(RelacionEstadoLabels[RelacionEstado.PENDIENTE_FIRMA_DIRECTOR])
+      .toBe(ConvenioEstadoLabels[ConvenioEstado.PENDIENTE_FIRMA_DIRECTOR]);
+    expect(RelacionEstadoLabels[RelacionEstado.PENDIENTE_FIRMA_EMPRESA])
+      .toBe(ConvenioEstadoLabels[ConvenioEstado.PENDIENTE_FIRMA_EMPRESA]);
+  });
+
+  it('cada estado tiene etiqueta y ninguna esta vacia', () => {
+    for (const [nombre, etiquetas] of Object.entries({
+      relacion: RelacionEstadoLabels,
+      plan: PlanFormativoEstadoLabels,
+      convenio: ConvenioEstadoLabels,
+      dat: ComunicacionDATEstadoLabels,
+    })) {
+      for (const [estado, etiqueta] of Object.entries(etiquetas)) {
+        expect(etiqueta, `${nombre}/${estado}`).toBeTruthy();
+      }
+    }
+  });
+
+  it('ningun estado terminal dice pendiente', () => {
+    expect(RelacionEstadoLabels[RelacionEstado.COMPLETADO]).toBe('Completado');
+    expect(PlanFormativoEstadoLabels[PlanFormativoEstado.COMPLETADO]).toBe('Completado');
+    expect(ConvenioEstadoLabels[ConvenioEstado.COMPLETADO]).toBe('Completado');
+    expect(ComunicacionDATEstadoLabels[ComunicacionDATEstado.COMPLETADO]).toBe('Completado');
   });
 });
