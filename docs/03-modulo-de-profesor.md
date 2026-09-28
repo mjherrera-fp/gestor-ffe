@@ -13,7 +13,7 @@ Completa tus datos personales: nombre, apellidos, NIF, correo electrónico y tel
 Gestiona los centros educativos a los que perteneces. Cada centro puede tener:
 
 - Nombre, ciudad, teléfono y correo electrónico.
-- **Festivos del centro:** días no laborables que se descontarán del cálculo de fechas de prácticas.
+- **Festivos del centro:** días no laborables que se podrán descontar del cálculo de fechas de prácticas.
 
 > `[IMAGEN: Modal de creación/edición de centro educativo con campo de festivos]`
 

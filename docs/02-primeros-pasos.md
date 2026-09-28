@@ -4,7 +4,7 @@
 
 ## 2.1 Uso
 
-Descarga la última versión portable `.zip` desde la página de distribución. Descomprime el archivo y ejecuta el programa `GestorFFE.exe`.
+Descarga la última versión portable `.exe` desde la página de distribución. Ejecuta el archivo `GestorFFE.exe`.
 
 ## 2.2 Inicio de sesión / Desbloqueo
 
@@ -42,11 +42,14 @@ La navegación principal se encuentra en la barra lateral izquierda. Cada icono 
 | 🤝 | Relaciones | Periodos de prácticas |
 
 En la parte superior podemos encontrar otra sección de iconos que nos llevan a elementos más generales:
-| Icono | Módulo | Descripción |
-|-------|--------|-------------|
-| 🕓 | Histórico | Auditoría de operaciones |
-| 🔔 | Avisos | Ver y crear nuevos avisos |
-| ⚙️ | Configuración | Avisos, festivos, correo y seguridad |
+
+| Icono | Módulo        | Descripción                                                         |
+|-------|---------------|---------------------------------------------------------------------|
+| 🕓 | Histórico     | Auditoría de operaciones                                            |
+| 💻 | Tema          | Cambio rápido entre tema claro, oscura y del sistema                |
+| ⬇️ | Descarga      | Este icono solo es visible cuando una nueva versión está disponible |
+| 🔔 | Avisos        | Ver y crear nuevos avisos                                           |
+| ⚙️ | Configuración | Avisos, festivos, correo y seguridad                                |
 
 > ℹ️ En esta fila superior encontraremos un selector de ciclo, pudiendo elegir entre diferentes ciclos de los que seamos tutores de FFE.
 

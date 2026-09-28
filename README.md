@@ -2,51 +2,51 @@
 <img width="1200" height="475" alt="Banner" src="./assets/banner.png" />
 </div>
 
-# Gestor FFE â€” Sistema de GestiÃ³n de PrÃ¡cticas Formativas
+# Gestor FFE - Sistema de Gestión de Prácticas Formativas
 
-**VersiÃ³n:** 0.1.20-alpha  
+**Versión:** 0.1.20-alpha  
 **Plataforma:** Windows (portable)
 
-AplicaciÃ³n de escritorio para la gestiÃ³n integral de la Fase de FormaciÃ³n en Empresa (FFE). Permite administrar alumnos, empresas, convenios, relaciones de prÃ¡cticas, generaciÃ³n de documentos oficiales, envÃ­o de correos electrÃ³nicos y cÃ¡lculo de dÃ­as de Seguridad Social, todo en un mismo entorno.
+Aplicación de escritorio para la gestión integral de la Fase de Formación en Empresa (FFE). Permite administrar alumnos, empresas, convenios, relaciones de prácticas, generación de documentos oficiales, envío de correos electrónicos y cálculo de días de Seguridad Social, todo en un mismo entorno.
 
 ---
 
-## DocumentaciÃ³n
+## Documentación
 
-El manual de uso estÃ¡ en **[`docs/`](docs/README.md)**, dividido en 17 documentos:
+El manual de uso está en **[`docs/`](docs/README.md)**, dividido en 17 documentos:
 
-1. [IntroducciÃ³n](docs/01-introduccion.md) â€” quÃ© es la aplicaciÃ³n, condiciones de uso y copyright
-2. [Primeros pasos](docs/02-primeros-pasos.md) â€” instalaciÃ³n, desbloqueo y navegaciÃ³n
-3. [MÃ³dulo de Profesor](docs/03-modulo-de-profesor.md) â€” datos personales, centros y ciclos
-4. [Cursos](docs/04-cursos.md) â€” cursos acadÃ©micos
-5. [Alumnos](docs/05-alumnos.md) â€” alta, importaciÃ³n desde Excel y CV
-6. [Empresas](docs/06-empresas.md) â€” empresas colaboradoras y tutores
-7. [Intereses Alumno-Empresa](docs/07-intereses-alumno-empresa.md) â€” preferencias bidireccionales
-8. [Convenios](docs/08-convenios.md) â€” convenios de colaboraciÃ³n y sus estados
-9. [Relaciones Alumno-Empresa](docs/09-relaciones-alumno-empresa.md) â€” horarios, fechas y estados
-10. [GeneraciÃ³n de Documentos](docs/10-generacion-de-documentos.md) â€” documentos oficiales y calendario
-11. [Correo ElectrÃ³nico](docs/11-correo-electronico.md) â€” SMTP, plantillas y marcadores
-12. [Panel de Control](docs/12-panel-de-control.md) â€” resumen, estadÃ­sticas y Seguridad Social
-13. [ConfiguraciÃ³n](docs/13-configuracion.md) â€” avisos, festivos, ficheros y cifrado
-14. [HistÃ³rico / AuditorÃ­a](docs/14-historico-auditoria.md) â€” registro de operaciones
-15. [Seguridad y Cifrado](docs/15-seguridad-y-cifrado.md) â€” SQLCipher y bloqueo
-16. [Servicios conectados](docs/16-servicios-conectados.md) â€” servicios externos
-17. [Preguntas Frecuentes](docs/17-preguntas-frecuentes.md) â€” dudas habituales
+1. [Introducción](docs/01-introduccion.md) - qué es la aplicación, condiciones de uso y copyright
+2. [Primeros pasos](docs/02-primeros-pasos.md) - instalación, desbloqueo y navegación
+3. [Módulo de Profesor](docs/03-modulo-de-profesor.md) - datos personales, centros y ciclos
+4. [Cursos](docs/04-cursos.md) - cursos académicos
+5. [Alumnos](docs/05-alumnos.md) - alta, importación desde Excel y CV
+6. [Empresas](docs/06-empresas.md) - empresas colaboradoras y tutores
+7. [Intereses Alumno-Empresa](docs/07-intereses-alumno-empresa.md) - preferencias bidireccionales
+8. [Convenios](docs/08-convenios.md) - convenios de colaboración y sus estados
+9. [Relaciones Alumno-Empresa](docs/09-relaciones-alumno-empresa.md) - horarios, fechas y estados
+10. [Generación de Documentos](docs/10-generacion-de-documentos.md) - documentos oficiales y calendario
+11. [Correo Electrónico](docs/11-correo-electronico.md) - SMTP, plantillas y marcadores
+12. [Panel de Control](docs/12-panel-de-control.md) - resumen, estadísticas y Seguridad Social
+13. [Configuración](docs/13-configuracion.md) - avisos, festivos, ficheros y cifrado
+14. [Histórico / Auditoría](docs/14-historico-auditoria.md) - registro de operaciones
+15. [Seguridad y Cifrado](docs/15-seguridad-y-cifrado.md) - SQLCipher y bloqueo
+16. [Servicios conectados](docs/16-servicios-conectados.md) - servicios externos
+17. [Preguntas Frecuentes](docs/17-preguntas-frecuentes.md) - dudas habituales
 
-DocumentaciÃ³n tÃ©cnica para quien mantiene la aplicaciÃ³n: [Seguridad interna](docs/seguridad-interna.md).
+Documentación técnica para quien mantiene la aplicación: [Seguridad interna](docs/seguridad-interna.md).
 
 ---
 
 ## Para empezar
 
-1. Descomprime el `.zip` descargado y ejecuta `GestorFFE.exe`.
-2. Si la base de datos tiene contraseÃ±a, introducirla en la pantalla de desbloqueo.
-3. Ve a **ConfiguraciÃ³n** y revisa los avisos, los festivos y el correo antes de empezar.
+1. Descarga el `.exe` `GestorFFE.exe`.
+2. Si la base de datos tiene contraseña, introducirla en la pantalla de desbloqueo.
+3. Ve a **Configuración** y revisa los avisos, los festivos y el correo antes de empezar.
 
-> âš ï¸ **Cifrar la base de datos no se puede revertir.** Si decides hacerlo, la contraseÃ±a
+> ⚠️  **Se recomienda cifrar la base de datos para proteger los datos de los estudiantes.** Si decides hacerlo, la contraseña
 > **no es recuperable**: si la olvidas, los datos se pierden para siempre.
 
-La aplicaciÃ³n se ejecuta en el propio ordenador: no necesita servidor ni conexiÃ³n a
+La aplicación se ejecuta en el propio ordenador: no necesita servidor ni conexión a
 internet, salvo para obtener los festivos por localidad y para enviar correos.
 
 ---
@@ -55,25 +55,25 @@ internet, salvo para obtener los festivos por localidad y para enviar correos.
 
 El usuario es responsable de cumplir con todas las leyes y regulaciones aplicables al utilizar este software.
 
-El desarrollador de esta aplicaciÃ³n **no se hace responsable** de ningÃºn daÃ±o, pÃ©rdida o perjuicio que pueda derivarse del uso indebido, inapropiado o incorrecto de la aplicaciÃ³n. El uso de esta aplicaciÃ³n es a su propio riesgo.
+El desarrollador de esta aplicación **no se hace responsable** de ningún daño, pérdida o perjuicio que pueda derivarse del uso indebido, inapropiado o incorrecto de la aplicación. El uso de esta aplicación es a su propio riesgo.
 
-**No garantizamos** que la aplicaciÃ³n funcione sin errores, interrupciones o fallos, ni que los resultados obtenidos sean precisos o completos. La aplicaciÃ³n se proporciona "tal cual" y "segÃºn disponibilidad", sin ninguna garantÃ­a expresa o implÃ­cita de ningÃºn tipo.
+**No garantizamos** que la aplicación funcione sin errores, interrupciones o fallos, ni que los resultados obtenidos sean precisos o completos. La aplicación se proporciona "tal cual" y "según disponibilidad", sin ninguna garantía expresa o implícita de ningún tipo.
 
-Al utilizar esta aplicaciÃ³n, usted **acepta que el desarrollador no serÃ¡ responsable** de ningÃºn daÃ±o directo, indirecto, incidental, especial o consecuente que pueda surgir del uso o mal funcionamiento de la aplicaciÃ³n.
+Al utilizar esta aplicación, usted **acepta que el desarrollador no será responsable** de ningún daño directo, indirecto, incidental, especial o consecuente que pueda surgir del uso o mal funcionamiento de la aplicación.
 
-El desarrollador no se hace responsable de la gestiÃ³n, almacenamiento o protecciÃ³n de los datos introducidos en la aplicaciÃ³n. Es responsabilidad del usuario asegurarse de que los datos gestionados cumplen con la normativa vigente en materia de protecciÃ³n de datos.
+El desarrollador no se hace responsable de la gestión, almacenamiento o protección de los datos introducidos en la aplicación. Es responsabilidad del usuario asegurarse de que los datos gestionados cumplen con la normativa vigente en materia de protección de datos.
 
 ### Derechos de autor
 
-Copyright (c) Manuel JesÃºs Herrera Morgaz. Todos los derechos reservados.
+Copyright (c) Manuel Jesús Herrera Morgaz. Todos los derechos reservados.
 
-Este software se distribuye bajo una licencia de cÃ³digo fuente disponible. Se permite usar, ver y estudiar el cÃ³digo. <a href="https://github.com/mjherrera-fp/gestor-ffe" target="_blank" rel="noopener noreferrer">El cÃ³digo fuente estÃ¡ disponible en GitHub</a>.
+Este software se distribuye bajo una licencia de código fuente disponible. Se permite usar, ver y estudiar el código. <a href="https://github.com/mjherrera-fp/gestor-ffe" target="_blank" rel="noopener noreferrer">El código fuente está disponible en GitHub</a>.
 
-No se permite copiar, redistribuir, sublicenciar o usar con fines comerciales o de ningÃºn otro tipo sin autorizaciÃ³n expresa del autor.
+No se permite copiar, redistribuir, sublicenciar o usar con fines comerciales o de ningún otro tipo sin autorización expresa del autor.
 
-Toda copia autorizada deberÃ¡ mantener esta nota de copyright y atribuir al autor original.
+Toda copia autorizada deberá mantener esta nota de copyright y atribuir al autor original.
 
-Al aceptar estas condiciones, el usuario se compromete a hacer un uso responsable de la aplicaciÃ³n y de los datos gestionados a travÃ©s de la misma.
+Al aceptar estas condiciones, el usuario se compromete a hacer un uso responsable de la aplicación y de los datos gestionados a través de la misma.
 
 ---
 
@@ -82,7 +82,7 @@ Al aceptar estas condiciones, el usuario se compromete a hacer un uso responsabl
 ```bash
 npm install
 npm run dev            # servidor de desarrollo + Electron
-npm run lint           # comprobaciÃ³n de tipos
+npm run lint           # comprobación de tipos
 npm test               # tests unitarios
 npm run pack:win:portable   # genera el portable en release/
 ```
