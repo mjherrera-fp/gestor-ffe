@@ -236,14 +236,28 @@ export default function App() {
         body: JSON.stringify({ password })
       });
 
-      if (res.ok) {
-        setIsLocked(false);
-        setAuthError('');
-        setLoading(true);
-        await fetchData(); // Recargamos todo ahora que hay acceso
-      } else {
-        setAuthError('La contraseña es incorrecta o el archivo está dañado.');
-      }
+    if (res.ok) {
+      setIsLocked(false);
+      setAuthError('');
+      setLoading(true);
+      await fetchData(); // Recargamos todo ahora que hay acceso
+      return;
+    }
+
+    if (res.status === 429) {
+      // El servidor aún no permite reintentar. Decir "contraseña incorrecta"
+      // sería mentir: aquí no se ha mirado la contraseña.
+      const datos = await res.json().catch(() => null);
+      const segundos = datos?.esperaSegundos;
+      setAuthError(
+        typeof segundos === 'number' && segundos > 0
+          ? `Demasiados intentos fallidos. Espera ${segundos} s antes de reintentar.`
+          : 'Demasiados intentos fallidos. Espera unos segundos antes de reintentar.'
+      );
+      return;
+    }
+
+    setAuthError('La contraseña es incorrecta o el archivo está dañado.');
     } catch (err) {
       setAuthError('Error de comunicación con el servidor.');
     }

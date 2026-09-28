@@ -11,6 +11,13 @@ import path from 'path';
 import crypto from 'crypto';
 import multer from 'multer';
 import {resolverRutaDentro} from './src/lib/seguridadRutas.ts';
+import {
+  EstadoBackoff,
+  ESTADO_INICIAL,
+  esperaRestanteMs,
+  registrarExito,
+  registrarFallo,
+} from './src/lib/backoff.ts';
 import {db} from './src/lib/db.ts';
 import {
   AceptacionUsoDAO,
@@ -62,6 +69,11 @@ import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Fallos consecutivos de desbloqueo. Solo la lectura correcta lo pone a cero:
+// deliberadamente NO se reinicia en /api/auth/lock, porque si se hiciera un
+// atacante podría alternar lock y unlock para anular la espera en cada intento.
+let backoffDesbloqueo: EstadoBackoff = { ...ESTADO_INICIAL };
 
 function resolveImapSendConfig(emailCfg: Record<string, string>, smtpUser: string, smtpPass: string, smtpHost: string) {
   const enabled = emailCfg.guardar_enviados === undefined ? true : emailCfg.guardar_enviados === '1';
@@ -369,9 +381,24 @@ async function startServer() {
   app.post('/api/auth/unlock', (req, res) => {
     const { password } = req.body;
 
+    // La espera se comprueba ANTES de comparar la contraseña. Si se comprobara
+    // después, el retardo solo molestaría: se seguiría probando tan rápido como
+    // la CPU permita. Así, mientras haya que esperar, no se gasta nada.
+    const restante = esperaRestanteMs(backoffDesbloqueo, Date.now());
+    if (restante > 0) {
+      const esperaSegundos = Math.ceil(restante / 1000);
+      res.setHeader('Retry-After', String(esperaSegundos));
+      return res.status(429).json({
+        error: 'Demasiados intentos fallidos.',
+        esperaSegundos,
+      });
+    }
+
     if (unlockDatabase(password)) {
+      backoffDesbloqueo = registrarExito();
       res.status(200).json({ success: true });
     } else {
+      backoffDesbloqueo = registrarFallo(backoffDesbloqueo, Date.now());
       res.status(401).json({ error: 'Contraseña incorrecta' });
     }
   });
