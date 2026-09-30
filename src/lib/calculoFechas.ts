@@ -1,4 +1,4 @@
-import type { HorarioSemanal } from '../types/index.ts';
+import type { HorarioSemanal, FestivoPersonalizado } from '../types/index.ts';
 import {
   calculateEndDateForHours,
   calculateStartDateFromEnd,
@@ -55,10 +55,16 @@ export const CONTEXTO_VACIO: ContextoFechas = {
 };
 
 export type ResolutorFechas = {
-  /** Fecha fin a partir de las horas, o null si el horario no aporta horas. */
-  calcularFechaFin: (fechaInicio: string, totalHoras: number, horario: HorarioSemanal | undefined) => string | null;
+  /**
+   * Fecha fin a partir de las horas, o null si el horario no aporta horas.
+   *
+   * `personalizados` son los dias en los que este alumno se desvía de los
+   * festivos heredados. Es opcional para no obligar a los consumidores que
+   * calculan para toda una relacion a conocer los dias de cada alumno.
+   */
+  calcularFechaFin: (fechaInicio: string, totalHoras: number, horario: HorarioSemanal | undefined, personalizados?: FestivoPersonalizado[]) => string | null;
   /** Fecha inicio a partir del fin, o null si el horario no aporta horas. */
-  calcularFechaInicio: (fechaFin: string, totalHoras: number, horario: HorarioSemanal | undefined) => string | null;
+  calcularFechaInicio: (fechaFin: string, totalHoras: number, horario: HorarioSemanal | undefined, personalizados?: FestivoPersonalizado[]) => string | null;
   /** Si el horario tiene al menos un dia con horas. */
   tieneHoras: (horario: HorarioSemanal | undefined) => boolean;
   /** Atajo: las dos fechas de golpe. */
@@ -66,26 +72,27 @@ export type ResolutorFechas = {
     referencia: { fechaInicio?: string | null; fechaFin?: string | null },
     totalHoras: number,
     horario: HorarioSemanal | undefined,
+    personalizados?: FestivoPersonalizado[],
   ) => { fechaInicio: string | null; fechaFin: string | null };
 };
 
 export const crearResolutorFechas = (contexto: ContextoFechas): ResolutorFechas => {
   const { centroFestivos, usarFestivos, empresaFestivos, usarFestivosEmpresa } = contexto;
 
-  const calcularFechaFin: ResolutorFechas['calcularFechaFin'] = (fechaInicio, totalHoras, horario) =>
-    calculateEndDateForHours(fechaInicio, totalHoras, horario, centroFestivos, usarFestivos, empresaFestivos, usarFestivosEmpresa);
+  const calcularFechaFin: ResolutorFechas['calcularFechaFin'] = (fechaInicio, totalHoras, horario, personalizados) =>
+    calculateEndDateForHours(fechaInicio, totalHoras, horario, centroFestivos, usarFestivos, empresaFestivos, usarFestivosEmpresa, personalizados);
 
-  const calcularFechaInicio: ResolutorFechas['calcularFechaInicio'] = (fechaFin, totalHoras, horario) =>
-    calculateStartDateFromEnd(fechaFin, totalHoras, horario, centroFestivos, usarFestivos, empresaFestivos, usarFestivosEmpresa);
+  const calcularFechaInicio: ResolutorFechas['calcularFechaInicio'] = (fechaFin, totalHoras, horario, personalizados) =>
+    calculateStartDateFromEnd(fechaFin, totalHoras, horario, centroFestivos, usarFestivos, empresaFestivos, usarFestivosEmpresa, personalizados);
 
-  const calcularFechas: ResolutorFechas['calcularFechas'] = (referencia, totalHoras, horario) => {
+  const calcularFechas: ResolutorFechas['calcularFechas'] = (referencia, totalHoras, horario, personalizados) => {
     const inicio = referencia.fechaInicio || null;
     const fin = referencia.fechaFin || null;
     return {
       // Con las dos fechas se respeta lo que haya: si falta la inicio se
       // deduce del fin, y si falta el fin se deduce de las horas.
-      fechaInicio: inicio ?? (fin ? calcularFechaInicio(fin, totalHoras, horario) : null),
-      fechaFin: fin ?? (inicio ? calcularFechaFin(inicio, totalHoras, horario) : null),
+      fechaInicio: inicio ?? (fin ? calcularFechaInicio(fin, totalHoras, horario, personalizados) : null),
+      fechaFin: fin ?? (inicio ? calcularFechaFin(inicio, totalHoras, horario, personalizados) : null),
     };
   };
 

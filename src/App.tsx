@@ -13,6 +13,7 @@ import {
   Lock,
   Menu,
   Moon,
+  School,
   Settings,
   Sun,
   UserCircle,
@@ -22,6 +23,7 @@ import {
 import {AnimatePresence, motion} from 'motion/react';
 import {Aviso, Curso, DetalleAcademico, Profesor} from './types/index.ts';
 import {useTheme, type ThemeMode} from './hooks/useTheme.tsx';
+import type {RangoCurso} from './lib/calendarioFestivos.ts';
 import {verificarCredencialBiometrica} from './utils/webauthn.ts';
 import packageJson from '../package.json';
 
@@ -35,6 +37,7 @@ import {Title} from './components/Title.tsx';
 import ProfesorView from './views/profesor/ProfesorView.tsx';
 import CursosView from './views/cursos/CursosView.tsx';
 import AlumnosView from './views/alumnos/AlumnosView.tsx';
+import CentrosView from './views/centros/CentrosView.tsx';
 import EmpresasView from './views/empresas/EmpresasView.tsx';
 import ConveniosView from './views/convenios/ConveniosView.tsx';
 import InteresesView from './views/intereses/InteresesView.tsx';
@@ -214,9 +217,18 @@ export default function App() {
 
   const tieneProfesor = profesor !== null;
   const tieneCurso = activeCurso !== null;
+
+  // Los festivos se cuentan sobre las fechas del curso, asi que el calendario
+  // que los edita necesita este rango. Sin curso no hay rango que dibujar.
+  const rangoCurso: RangoCurso | null = activeCurso
+    ? { inicio: activeCurso.fechaInicio, fin: activeCurso.fechaFin }
+    : null;
+  const irACursos = () => setActiveTab('cursos');
+
   const navItems = useMemo(() => [
     { id: 'dashboard', label: 'Profesor', icon: UserCircle },
     { id: 'cursos', label: 'Cursos', icon: BookOpen, disabled: !tieneProfesor },
+    { id: 'centros', label: 'Centros', icon: School, disabled: !tieneProfesor || !tieneCurso },
     { id: 'panel', label: 'Panel', icon: LayoutDashboard, disabled: !tieneProfesor || !tieneCurso },
     { id: 'alumnos', label: 'Alumnos', icon: Users, disabled: !tieneProfesor || !tieneCurso },
     { id: 'empresas', label: 'Empresas', icon: Building2, disabled: !tieneProfesor || !tieneCurso },
@@ -597,7 +609,14 @@ export default function App() {
                 onUpdate={(newProfesor) => {
                   setProfesor(newProfesor);
                 }}
+              />
+            )}
+            {activeTab === 'centros' && activeCurso && (
+              <CentrosView
+                profesor={profesor}
                 onRefresh={fetchData}
+                rangoCurso={rangoCurso}
+                onIrACursos={irACursos}
               />
             )}
             {activeTab === 'cursos' && (
@@ -648,7 +667,7 @@ export default function App() {
                 <ComunicacionesDatView cursoId={activeCurso.id!} detalleAcademicoId={activeDetalle?.id}/>
             )}
           {activeTab === 'historico' && <HistoricoView initialAnulacionesAlumnoId={historicoAnulacionAlumnoId} />}
-          {activeTab === 'configuracion' && <ConfiguracionView initialTab={configTab} />}
+          {activeTab === 'configuracion' && <ConfiguracionView initialTab={configTab} rangoCurso={rangoCurso} onIrACursos={irACursos} />}
           </div>
         </section>
       </main>

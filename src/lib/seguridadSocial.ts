@@ -1,4 +1,6 @@
 import { safeParse } from './json.ts';
+import { conjuntoSaltar } from './festivosAlumno.ts';
+import type { FestivoPersonalizado } from '../types/index.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  DIAS COTIZADOS POR ALUMNO Y MES
@@ -36,6 +38,14 @@ export interface ParamsContarDiasCotizacion {
   empresaFestivosByCiudad: Record<string, Set<string>>;
   usarFestivos: boolean;
   usarFestivosEmpresa: boolean;
+  /**
+   * alumnoId -> dias en los que ese alumno se desvía de los festivos heredados.
+   *
+   * Un `QUITAR` saca el dia de la cuenta aunque siga siendo festivo del centro,
+   * y un `ANADIR` mete uno que no lo era. Asi los dias cotizados cuadran con las
+   * horas que consumio el alumno y con las que muestra su relacion.
+   */
+  personalizadosPorAlumno?: Map<number, FestivoPersonalizado[]>;
 }
 
 export interface ResultadoContarDiasCotizacion {
@@ -70,6 +80,7 @@ export const contarDiasCotizacion = (
   const {
     relaciones, relCentroMap, relEmpresaCiudadMap, centroFestivosMap,
     empresaFestivosByCiudad, usarFestivos, usarFestivosEmpresa,
+    personalizadosPorAlumno,
   } = params;
 
   // Rango global: del inicio mas temprano al fin mas tardio.
@@ -104,9 +115,18 @@ export const contarDiasCotizacion = (
 
     const diasSet = new Set(diasSemana.map(d => DIA_A_NUMERO[d]));
 
-    const centroId = relCentroMap[rel.id];
     const empCiudad = relEmpresaCiudadMap[rel.id];
-    const empFestivosSet = empCiudad ? empresaFestivosByCiudad[empCiudad] : undefined;
+
+    // El conjunto heredado se compone con los dos interruptores, igual que en
+    // el resto de la aplicacion, y encima se aplica el desvio del alumno. Se
+    // resuelve una vez por relacion y no por dia del bucle.
+    const heredar = new Set<string>([
+      ...(usarFestivos ? (centroFestivosMap[relCentroMap[rel.id]] ?? []) : []),
+      ...(usarFestivosEmpresa
+        ? (empCiudad ? (empresaFestivosByCiudad[empCiudad] ?? []) : [])
+        : []),
+    ]);
+    const saltados = conjuntoSaltar(heredar, personalizadosPorAlumno?.get(rel.alumnoId));
 
     const aluInicio = toLocalDate(rel.aluInicio) || minDate;
     const aluFin = toLocalDate(rel.aluFin) || maxDate;
@@ -123,10 +143,7 @@ export const contarDiasCotizacion = (
       let dias = 0;
       const d = new Date(inicio);
       while (d <= fin) {
-        const fecha = toLocalDateStr(d);
-        const skipCentro = usarFestivos && centroFestivosMap[centroId]?.has(fecha);
-        const skipEmpresa = usarFestivosEmpresa && empFestivosSet?.has(fecha);
-        if (diasSet.has(d.getDay()) && !skipCentro && !skipEmpresa) dias++;
+        if (diasSet.has(d.getDay()) && !saltados.has(toLocalDateStr(d))) dias++;
         d.setDate(d.getDate() + 1);
       }
 

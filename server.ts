@@ -11,6 +11,7 @@ import path from 'path';
 import crypto from 'crypto';
 import multer from 'multer';
 import {resolverRutaDentro} from './src/lib/seguridadRutas.ts';
+import {formatDate} from './src/lib/dateUtils.ts';
 import {
   EstadoBackoff,
   ESTADO_INICIAL,
@@ -61,8 +62,10 @@ import {
   recalcularFechasAlumnos,
   RelacionAlumnoDAO,
   TutorEmpresaDAO,
-  unlockDatabase
+  unlockDatabase,
+  AlumnoFestivosDAO
 } from './src/lib/dao.ts';
+import {aplicarPersonalizados, festivosHeredados} from './src/lib/festivosAlumno.ts';
 import {Alumno, DetalleAcademico, DocConvenio, DocRelacion} from './src/types/index.ts';
 import {appendToSentFolder} from './src/lib/imap.ts';
 import {fileURLToPath} from 'url';
@@ -74,6 +77,18 @@ const __dirname = path.dirname(__filename);
 // deliberadamente NO se reinicia en /api/auth/lock, porque si se hiciera un
 // atacante podría alternar lock y unlock para anular la espera en cada intento.
 let backoffDesbloqueo: EstadoBackoff = { ...ESTADO_INICIAL };
+
+/**
+ * La fecha de hoy en 'YYYY-MM-DD' leida en hora local.
+ *
+ * `toISOString()` no sirve para esto: convierte a UTC, asi que a partir de las
+ * dos de la tarde en España devolveria el dia siguiente. Se construye a mano con
+ * los getters locales para pasarla despues a `formatDate`, que parte la cadena.
+ */
+function fechaLocalISO(d: Date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 function resolveImapSendConfig(emailCfg: Record<string, string>, smtpUser: string, smtpPass: string, smtpHost: string) {
   const enabled = emailCfg.guardar_enviados === undefined ? true : emailCfg.guardar_enviados === '1';
@@ -1913,13 +1928,7 @@ async function startServer() {
       // NUEVO: Buscamos TODOS los alumnos que tienen esta relacionId
       const alumnosAsignados: Alumno[] = relacionAlumno.alumnos || [];
 
-      const fechaFormateada = convenio.fechaConvenio
-        ? new Date(convenio.fechaConvenio).toLocaleDateString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        })
-        : '';
+      const fechaFormateada = formatDate(convenio.fechaConvenio);
 
       // Buscamos el detalle académico (asumiendo que todos los alumnos de la relación comparten ciclo)
       // 1. Tipamos la variable permitiendo que sea 'undefined'
@@ -1944,21 +1953,9 @@ async function startServer() {
           INDEX: index + 1,
           APELLIDOS_NOMBRE: `${alumno.apellidos}, ${alumno.nombre}`,
           NIF: alumno.dni,
-          FECHA_NAC: new Date(alumno.fechaNacimiento).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          }),
-          F_INICIO: new Date(alumno.fechaInicio).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          }),
-          F_FIN: new Date(alumno.fechaFin).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          }),
+          FECHA_NAC: formatDate(alumno.fechaNacimiento),
+          F_INICIO: formatDate(alumno.fechaInicio),
+          F_FIN: formatDate(alumno.fechaFin),
           DIAS: "L-V",
           H_INICIO: relacionAlumno.horario.lunes?.inicio || '',
           H_FIN: relacionAlumno.horario.lunes?.fin || '',
@@ -2039,13 +2036,7 @@ async function startServer() {
 
       const alumnosAsignados: Alumno[] = relacionAlumno.alumnos || [];
 
-      const fechaFormateada = convenio.fechaConvenio
-        ? new Date(convenio.fechaConvenio).toLocaleDateString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        })
-        : '';
+      const fechaFormateada = formatDate(convenio.fechaConvenio);
 
       // Buscamos el detalle académico (asumiendo que todos los alumnos de la relación comparten ciclo)
       // 1. Tipamos la variable permitiendo que sea 'undefined'
@@ -2079,21 +2070,9 @@ async function startServer() {
           INDEX: index + 1,
           APELLIDOS_NOMBRE: `${alumno.apellidos}, ${alumno.nombre}`,
           NIF: alumno.dni,
-          FECHA_NAC: new Date(alumno.fechaNacimiento).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          }),
-          F_INICIO: new Date(fInicio).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          }),
-          F_FIN: new Date(fFin).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          }),
+          FECHA_NAC: formatDate(alumno.fechaNacimiento),
+          F_INICIO: formatDate(fInicio),
+          F_FIN: formatDate(fFin),
           DIAS: "L-V",
           H_INICIO: relacionAlumno.horario.lunes?.inicio || '',
           H_FIN: relacionAlumno.horario.lunes?.fin || '',
@@ -2409,8 +2388,8 @@ async function startServer() {
         EMPRESA_TUTOR_NOMBRE_COMPLETO: `${tutorEmpresa?.nombre} ${tutorEmpresa?.apellidos}`,
         EMPRESA_TUTOR_EMAIL: tutorEmpresa?.email,
         EMPRESA_TUTOR_TELEFONO: tutorEmpresa?.tlfn,
-        FECHA_INI: alumno.fechaInicio || '',
-        FECHA_FIN: alumno.fechaFin || '',
+        FECHA_INI: formatDate(alumno.fechaInicio),
+        FECHA_FIN: formatDate(alumno.fechaFin),
         HORARIO: formatearHorarioCompacto(relacionAlumno.horario),
         TOTAL_HORAS: alumno.totalHorasFFE || 0,
         modulos: (detalleAcademicoGlobal?.resultadosAprendizaje || []).map((ra: any) => ({
@@ -2514,17 +2493,28 @@ async function startServer() {
         usarFestivos = cfg.usar_festivos !== '0';
         usarFestivosEmpresa = cfg.usar_festivos_empresa === '1';
       }
-      const festivosCentro = usarFestivos ? (centro?.festivos || []) : [];
+      const festivosCentro = centro?.festivos || [];
 
       // Obtener festivos de empresa
       let festivosEmpresa: string[] = [];
       const empresa = EmpresaDAO.getById(convenio.empresaId);
-      if (usarFestivosEmpresa && profesor?.id) {
-        if (empresa?.ciudad) {
-          festivosEmpresa = EmpresaFestivosDAO.getByCiudad(profesor.id, empresa.ciudad);
-        }
+      if (profesor?.id && empresa?.ciudad) {
+        festivosEmpresa = EmpresaFestivosDAO.getByCiudad(profesor.id, empresa.ciudad);
       }
-      const festivos = [...new Set([...festivosCentro, ...festivosEmpresa])];
+
+      // Los interruptores se aplican en `festivosHeredados` y no aqui, para que
+      // el servidor y la interfaz compongan el conjunto heredado igual. Luego se
+      // aplica el desvío del alumno: un dia que el alumno marcara como ANADIR
+      // aparece como no lectivo aunque no sea festivo oficial, y uno que
+      // marcara como QUITAR deja de aparecer aunque lo fuera.
+      const heredados = festivosHeredados({
+        centro: festivosCentro,
+        usarCentro: usarFestivos,
+        empresa: festivosEmpresa,
+        usarEmpresa: usarFestivosEmpresa,
+      });
+      const personalizados = AlumnoFestivosDAO.getByAlumno(alumnoId);
+      const festivos = aplicarPersonalizados(heredados, personalizados);
 
       // --- LÓGICA DE GENERACIÓN DE MESES PARA EL CALENDARIO ---
       const mesesData = [];
@@ -2684,11 +2674,7 @@ async function startServer() {
 
       const htmlFinal = template({
         CENTRO_CIUDAD: centro?.ciudad || '',
-        FECHA_ACTUAL: new Date().toLocaleDateString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        }) || '',
+        FECHA_ACTUAL: formatDate(fechaLocalISO()),
         TUTOR_NOMBRE_COMPLETO: `${profesor?.nombre} ${profesor?.apellidos}`,
         TUTOR_EMAIL: profesor?.email,
         CURSO_ACADEMICO: curso?.descripcion || ''
@@ -2772,15 +2758,10 @@ async function startServer() {
       const curso = CursoDAO.getById(convenio.cursoId); //
       const profesor = ProfesorDAO.get(); //
       const detalle = alumno.detalleAcademicoId ? DetalleAcademicoDAO.getById(alumno.detalleAcademicoId) : undefined; //
-      const fechaSeguimiento = alumno.fechaInicio !== null && alumno.fechaInicio !== null ? new Date(alumno.fechaInicio).toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      }) + ' - ' + (alumno.fechaFin ? new Date(alumno.fechaFin).toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      }) : '') : '';
+      const fechaSeguimiento =
+        alumno.fechaInicio && alumno.fechaFin
+          ? `${formatDate(alumno.fechaInicio)} - ${formatDate(alumno.fechaFin)}`
+          : '';
 
       // Mapeo de Resultados de Aprendizaje
       const RAs = (detalle?.resultadosAprendizaje || []).map((ra: any) => ({
@@ -3042,17 +3023,49 @@ async function startServer() {
     const curso = cursos[0];
     let year = Number(req.query.year);
     if (!year || Number.isNaN(year)) {
-      year = curso ? new Date(curso.fechaFin).getFullYear() : new Date().getFullYear();
+      // El año se saca de la cadena, no de `new Date(...).getFullYear()`: una
+      // fecha solo-fecha es medianoche UTC y en un huso por detras de UTC el
+      // 31 de diciembre devolvería el año anterior.
+      year = curso ? Number(curso.fechaFin.slice(0, 4)) : new Date().getFullYear();
+    }
+
+    // Un curso abarca casi siempre dos años naturales (2025-2026), asi que se
+    // admite un rango. `yearFin` ausente equivale a `year`: un solo año, como
+    // antes. El tope evita que un rango disparado convierta esto en un bucle de
+    // peticiones a la API externa.
+    const LIMITE_ANIOS = 3;
+    let yearFin = Number(req.query.yearFin);
+    if (!yearFin || Number.isNaN(yearFin)) {
+      yearFin = year;
+    }
+    if (yearFin < year) {
+      const swapped = year;
+      year = yearFin;
+      yearFin = swapped;
+    }
+    if (yearFin - year + 1 > LIMITE_ANIOS) {
+      yearFin = year + LIMITE_ANIOS - 1;
     }
 
     try {
-      const response = await fetch(`https://calendariosnacionales.com/es/v1/${year}/localidades/mad/madrid/${slug}.json`);
-      if (!response.ok) return res.status(502).json({ error: 'Error al consultar la API externa' });
+      const fechas = new Set<string>();
+      let fallo = false;
+      for (let y = year; y <= yearFin; y++) {
+        const response = await fetch(`https://calendariosnacionales.com/es/v1/${y}/localidades/mad/madrid/${slug}.json`);
+        if (!response.ok) {
+          fallo = true;
+          break;
+        }
+        const data = await response.json();
+        for (const h of data.holidays?.calendar || []) {
+          if (h?.date) fechas.add(h.date);
+        }
+      }
+      if (fallo) return res.status(502).json({ error: 'Error al consultar la API externa' });
 
-      const data = await response.json();
-      const fechas: string[] = (data.holidays?.calendar || []).map((h: any) => h.date);
-
-      res.json({ fechas });
+      // El orden lo fija el cliente al mezclarlos con lo que ya tuviera, pero se
+      // deja ordenado aqui para que la respuesta sea estable.
+      res.json({ fechas: [...fechas].sort() });
     } catch {
       res.status(502).json({ error: 'No se pudo conectar con la API de festivos' });
     }

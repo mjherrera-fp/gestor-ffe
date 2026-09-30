@@ -30,6 +30,11 @@ import {
 } from '../utils/relacionesUtils.ts';
 import {EmailAttachment} from '../../../types/email.ts';
 import {crearResolutorFechas} from '../../../lib/calculoFechas.ts';
+import {
+    aplicarPersonalizados,
+    deltaPersonalizados,
+    festivosHeredados,
+} from '../../../lib/festivosAlumno.ts';
 import {uploadGeneratedAttachment} from '../../../utils/emailUtils.ts';
 import {mostrarToast} from '../../../utils/toast.ts';
 import {applyCustomMarkers, interpolateBody} from '../../../../templates/emails/emailTemplates.ts';
@@ -381,7 +386,37 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     //  LÓGICA DEL FORMULARIO
     // ─────────────────────────────────────────
 
+    /**
+     * Vaciar lo que el usuario ha ido escogiendo en el formulario.
+     *
+     * `selectedAlumnosIds` no es solo memoria de lo añadido: el selector de
+     * alumnos esconde a quien ya esté en la lista, y lo hace para que no se
+     * pueda añadir dos veces al mismo. Ese filtro solo tiene sentido mientras
+     * el borrador está abierto. Si sobrevive a un cancelar, el alumno elegido en
+     * el borrador que se abandonó sigue apareciendo como "ya está en la
+     * relación" y desaparece del selector el resto de la vida de la página:
+     * para volver a elegirlo hay que recargar, porque `alumnos` viene del
+     * servidor y su `relacionId` sigue vacío.
+     *
+     * Se vacía al cerrar y también al abrir, porque las dos rutas tienen que
+     * dejar el mismo borrador limpio: si el formulario se cerrara por otra vía
+     * que no pase por aquí, quedaría a medias otra vez.
+     */
+    const limpiarBorradorAlumnos = () => {
+        setSelectedAlumnosIds([]);
+        setSearchTermAlumno('');
+    };
+
+    /** Cerrar el formulario es descartar el borrador, no solo esconderlo. */
+    const closeForm = () => {
+        setShowForm(false);
+        setFestivosAlumnoId(null);
+        limpiarBorradorAlumnos();
+    };
+
     const handleOpenForm = (rel: RelacionAlumno | null) => {
+        // Empezar siempre de cero. Ver `limpiarBorradorAlumnos`.
+        limpiarBorradorAlumnos();
         if (rel) {
             setEditing(rel);
             setFormData({ ...rel, alumnos: rel.alumnos || [] });
@@ -432,7 +467,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
                 body: JSON.stringify({ ...formData, alumnosIds: selectedAlumnosIds }),
             });
             if (res.ok) {
-                setShowForm(false);
+                closeForm();
                 setEditing(null);
                 await fetchData();
             } else {
@@ -518,12 +553,109 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         }));
     };
 
+    // ── Dias no lectivos propios de cada alumno ──
+    //
+    // El modal de festivos trabaja con la lista efectiva (los dias que el alumno
+    // no asiste) porque es lo que se ve y lo que se desmarca. Lo que se guarda
+    // es solo el desvío respecto a los festivos heredados, que es lo que hace
+    // que un festivo nuevo del centro llegue a todos sin tocar sus filas.
+    const [festivosAlumnoId, setFestivosAlumnoId] = useState<number | null>(null);
+
+    // La lista con la que se siembra el modal: los festivos heredados de este
+    // convenio (los del centro y los de la ciudad de la empresa, segun los
+    // interruptores) mas lo que ese alumno ya tiene desfasado.
+    const festivosConvenio = useMemo(
+        () => festivosHeredados({
+            centro: centroFestivos,
+            usarCentro: usarFestivos,
+            empresa: empresaFestivosActuales,
+            usarEmpresa: usarFestivosEmpresa,
+        }),
+        [centroFestivos, usarFestivos, empresaFestivosActuales, usarFestivosEmpresa]
+    );
+
+    const festivosEfectivosAlumno = (id: number): string[] => {
+        const alu = (formData.alumnos || []).find(a => a.id === id);
+        return aplicarPersonalizados(festivosConvenio, alu?.festivosPersonalizados);
+    };
+
+    // El nombre va en el subtitulo del modal de dias, para que se sepa a quien
+    // se le estan editando sin tener que cerrar el formulario de la relacion.
+    // El numero de dias propios no va aqui: el modal lo recalcula en vivo
+    // mientras se edita, y un numero aqui se quedaria en el valor guardado,
+    // contradiciendo a los dias que se verian marcados delante.
+    const festivosAlumnoNombre = useMemo(() => {
+        const alu = (formData.alumnos || []).find(a => a.id === festivosAlumnoId);
+        if (!alu) return '';
+        return `${alu.nombre ?? ''} ${alu.apellidos ?? ''}`.trim();
+    }, [formData.alumnos, festivosAlumnoId]);
+
+    /**
+     * Que pasaria con este alumno si se guardaran estos dias, sin guardarlos.
+     *
+     * Lo que el editor necesita para ir diciendo cuanto se mueve la fecha fin
+     * mientras se tocan los dias. Devuelve el desvio ademas de la fecha porque
+     * es el mismo calculo que hace el guardado, y se calcula una sola vez aqui
+     * para que la cifra que enseña el editor sea exactamente la que se va a
+     * guardar. Si se calculara en los dos sitios, cualquier diferencia entre
+     * ambos haria que el editor prometiese una fecha y se guardara otra.
+     */
+    const desvioYFinAlumno = (id: number, efectivos: string[]) => {
+        const alu = (formData.alumnos || []).find(a => a.id === id);
+        if (!alu) return null;
+        const desvio = deltaPersonalizados(festivosConvenio, efectivos);
+        return {
+            desvio,
+            fechaFin: resolutorFechas.calcularFechaFin(
+                alu.fechaInicio || '', alu.totalHorasFFE || 0, formData.horario, desvio
+            ),
+        };
+    };
+
+    /**
+     * Guarda la lista que devuelve el modal como desvío del alumno.
+     *
+     * Se guarda el desvío y no la lista entera a proposito: si el profesor
+     * desmarca un festivo heredado, eso es un `QUITAR`, y si añade un dia
+     * suelto, es un `ANADIR`. Aplicar despues el desvío sobre la lista
+     * heredada devuelve exactamente lo que se marcó.
+     */
+    const saveFestivosAlumno = (id: number, efectivos: string[]) => {
+        const calculo = desvioYFinAlumno(id, efectivos);
+        setFormData(prev => ({
+            ...prev,
+            alumnos: (prev.alumnos || []).map(a => {
+                if (a.id !== id || !calculo) return a;
+                return {
+                    ...a,
+                    festivosPersonalizados: calculo.desvio,
+                    // Los dias propios cambian cuantas horas se consumen, asi que
+                    // la fecha fin se recalcula aqui y no espera a guardar.
+                    fechaFin: calculo.fechaFin || a.fechaFin,
+                };
+            }),
+        }));
+        setFestivosAlumnoId(null);
+    };
+
+    /**
+     * La previsualizacion del editor de dias, en forma de funcion pura sobre la
+     * lista efectiva. No guarda nada; el guardado es `saveFestivosAlumno`.
+     */
+    const previewFestivosAlumno = (id: number, efectivos: string[]): { fechaFin: string | null; diasPropios: number } => {
+        const calculo = desvioYFinAlumno(id, efectivos);
+        return {
+            fechaFin: calculo?.fechaFin ?? null,
+            diasPropios: calculo?.desvio.length ?? 0,
+        };
+    };
+
     const updateStudentHours = (id: number, hours: number) => {
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = resolutorFechas.calcularFechaFin(a.fechaInicio || '', hours, prev.horario);
+                const newEndDate = resolutorFechas.calcularFechaFin(a.fechaInicio || '', hours, prev.horario, a.festivosPersonalizados);
                 return { ...a, totalHorasFFE: hours, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -534,7 +666,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
                 if (a.id !== id) return a;
-                const newEndDate = resolutorFechas.calcularFechaFin(date, a.totalHorasFFE || 0, prev.horario);
+                const newEndDate = resolutorFechas.calcularFechaFin(date, a.totalHorasFFE || 0, prev.horario, a.festivosPersonalizados);
                 return { ...a, fechaInicio: date, fechaFin: newEndDate || a.fechaFin };
             }),
         }));
@@ -546,7 +678,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
             ...prev,
             alumnos: (prev.alumnos || []).map(a => ({
                 ...a,
-                fechaInicio: resolutorFechas.calcularFechaInicio(targetEndDate, a.totalHorasFFE, prev.horario) || a.fechaInicio,
+                fechaInicio: resolutorFechas.calcularFechaInicio(targetEndDate, a.totalHorasFFE, prev.horario, a.festivosPersonalizados) || a.fechaInicio,
                 fechaFin: targetEndDate,
             })),
         }));
@@ -557,7 +689,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
-                const endDate = resolutorFechas.calcularFechaFin(targetStartDate, a.totalHorasFFE || 0, prev.horario);
+                const endDate = resolutorFechas.calcularFechaFin(targetStartDate, a.totalHorasFFE || 0, prev.horario, a.festivosPersonalizados);
                 return { ...a, fechaInicio: targetStartDate, fechaFin: endDate || a.fechaFin };
             }),
         }));
@@ -2014,7 +2146,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         sortBy, setBy, sortOrder, setSortOrder,
         filteredAndSortedRelaciones,
         // Formulario UI
-        showForm, setShowForm,
+        showForm,
         editing, setEditing,
         formData, setFormData,
         searchTermAlumno, setSearchTermAlumno,
@@ -2026,9 +2158,12 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         isConvenioDropdownOpen, setIsConvenioDropdownOpen,
         filteredAlumnos, filteredConvenios,
         // Handlers formulario
-        handleOpenForm, handleSubmit, handleDelete,
+        handleOpenForm, handleSubmit, handleDelete, closeForm,
         addAlumnoToRelacion, removeAlumnoFromRelacion,
-        updateStudentHours, updateStudentStartDate,
+    updateStudentHours, updateStudentStartDate,
+    festivosAlumnoId, setFestivosAlumnoId, festivosEfectivosAlumno, saveFestivosAlumno,
+    previewFestivosAlumno,
+        festivosAlumnoNombre,
         applyTargetEndDate, applyStartDateToAll, applyBulkHorario, updateFirma,
         // Handlers estados
         advanceStatus, moveBackStatus,

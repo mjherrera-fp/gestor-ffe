@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Loader2, MapPin, ExternalLink, X } from 'lucide-react';
+import { Plus, MapPin } from 'lucide-react';
 import { CentroEducativo } from '../../../types/index.ts';
-import { DateList } from '../../../components/ui/DateList.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
-import { FestivosYearModal } from '../../../components/ui/FestivosYearModal.tsx';
+import { Title } from '../../../components/Title.tsx';
 import localidades from '../../../data/geo/localidades-madrid.json';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
 import { required, email, compose } from '../../../utils/validation.ts';
@@ -25,40 +24,27 @@ interface CentroFormModalProps {
   editing: CentroEducativo | null;
   formData: Partial<CentroEducativo>;
   onChange: (data: Partial<CentroEducativo>) => void;
-  newFestivo: string;
-  setNewFestivo: (v: string) => void;
-  onAddFestivo: () => void;
-  onRemoveFestivo: (d: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }
 
+/**
+ * Alta y edicion de un centro educativo.
+ *
+ * Los dias festivos no se editan aqui: se abren desde el boton de calendario
+ * de la tarjeta del centro, en `CentrosEducativos`. Aqui solo viajan en el
+ * `PUT`, sin tocarlos, para que guardar el formulario no los pierda.
+ */
 export function CentroFormModal({
-  open, editing, formData, onChange,
-  newFestivo, setNewFestivo, onAddFestivo, onRemoveFestivo,
-  onSubmit, onClose,
+  open, editing, formData, onChange, onSubmit, onClose,
 }: CentroFormModalProps) {
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
-  const [loadingFestivos, setLoadingFestivos] = useState(false);
   const [ciudadFocused, setCiudadFocused] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [showAgradecimiento, setShowAgradecimiento] = useState(false);
-  const [showYearModal, setShowYearModal] = useState(false);
-  const [festivosImportados, setFestivosImportados] = useState(0);
   const ciudadRef = useRef<HTMLDivElement>(null);
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const update = (field: keyof CentroEducativo) => (e: React.ChangeEvent<HTMLInputElement>) =>
     onChange({ ...formData, [field]: e.target.value });
-
-  useEffect(() => {
-    if (formData.ciudad) {
-      const match = localidades.municipalities.find(m => m.name === formData.ciudad);
-      setSelectedSlug(match ? match.slug : null);
-    } else {
-      setSelectedSlug(null);
-    }
-  }, [formData.ciudad]);
 
   useEffect(() => {
     return () => { if (blurTimerRef.current) clearTimeout(blurTimerRef.current); };
@@ -73,17 +59,13 @@ export function CentroFormModal({
 
   useEffect(() => { setHighlightedIndex(-1); }, [filtered.length]);
 
-  const selectMunicipio = (name: string, slug: string) => {
+  const selectMunicipio = (name: string) => {
     onChange({ ...formData, ciudad: name });
-    setSelectedSlug(slug);
     setCiudadFocused(false);
   };
 
   const handleCiudadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    onChange({ ...formData, ciudad: value });
-    const match = localidades.municipalities.find(m => m.name === value);
-    setSelectedSlug(match ? match.slug : null);
+    onChange({ ...formData, ciudad: e.target.value });
     setHighlightedIndex(-1);
   };
 
@@ -98,32 +80,12 @@ export function CentroFormModal({
     } else if (e.key === 'Enter' && highlightedIndex >= 0) {
       e.preventDefault();
       const m = filtered[highlightedIndex];
-      selectMunicipio(m.name, m.slug);
+      selectMunicipio(m.name);
       } else if (e.key === 'Escape') {
         // Se consume la tecla: sin esto Modal cerraria el formulario entero.
         e.stopPropagation();
         setCiudadFocused(false);
       }
-  };
-
-  const handleObtenerFestivos = async (year: number) => {
-    if (!selectedSlug) return;
-    setLoadingFestivos(true);
-    try {
-      const res = await fetch(`/api/festivos/obtener?slug=${selectedSlug}&year=${year}`);
-      const data = await res.json();
-      const existing = formData.festivos || [];
-      const nuevasFechas = (data.fechas || []).filter((f: string) => !existing.includes(f));
-      const newSet = [...new Set([...existing, ...(data.fechas || [])])];
-      newSet.sort();
-      onChange({ ...formData, festivos: newSet });
-      setFestivosImportados(nuevasFechas.length);
-      setShowAgradecimiento(true);
-    } catch {
-      alert('No se pudieron obtener los días festivos.');
-    } finally {
-      setLoadingFestivos(false);
-    }
   };
 
   const { errors, onBlur, validateAll } = useFormValidation(RULES);
@@ -142,9 +104,11 @@ export function CentroFormModal({
           <h3 className="font-black text-text-main uppercase tracking-widest text-xs">
             {editing ? 'Editar Centro' : 'Añadir Nuevo Centro'}
           </h3>
-          <button onClick={onClose} className="text-text-muted hover:text-text-main">
-            <Plus className="rotate-45 h-6 w-6" />
-          </button>
+          <Title text="Cerrar">
+            <button onClick={onClose} className="text-text-muted hover:text-text-main">
+              <Plus className="rotate-45 h-6 w-6" />
+            </button>
+          </Title>
         </div>
 
         {/* Form */}
@@ -187,7 +151,7 @@ export function CentroFormModal({
                     <button
                       key={m.slug}
                       type="button"
-                      onMouseDown={e => { e.preventDefault(); selectMunicipio(m.name, m.slug); }}
+                      onMouseDown={e => { e.preventDefault(); selectMunicipio(m.name); }}
                       onMouseEnter={() => setHighlightedIndex(i)}
                       className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs border-b border-border-base last:border-0 ${
                         i === highlightedIndex ? 'bg-primary-light text-primary' : 'text-text-main hover:bg-surface-hover'
@@ -224,29 +188,6 @@ export function CentroFormModal({
             </div>
           </div>
 
-          {/* Festivos */}
-          <DateList
-            label="Días Festivos"
-            count={formData.festivos?.length || 0}
-            dates={formData.festivos || []}
-            newDate={newFestivo}
-            onNewDateChange={setNewFestivo}
-            onAdd={onAddFestivo}
-            onRemove={onRemoveFestivo}
-            emptyText="No se han añadido días festivos todavía."
-            headerExtra={selectedSlug ? (
-              <button
-                type="button"
-                disabled={loadingFestivos}
-                onClick={() => { if (!loadingFestivos) setShowYearModal(true); }}
-                className="text-[9px] font-bold text-primary hover:text-primary/80 underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-              >
-                {loadingFestivos && <Loader2 className="h-3 w-3 animate-spin" />}
-                {loadingFestivos ? 'Obteniendo...' : 'Obtener festivos con calendariosnacionales.com'}
-              </button>
-            ) : undefined}
-          />
-
           <button
             type="submit"
             className="w-full bg-primary text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all mt-6 shadow-xl shadow-primary/20"
@@ -254,48 +195,6 @@ export function CentroFormModal({
             Guardar Centro Educativo
           </button>
         </form>
-
-        {/* Agradecimiento API */}
-        <Modal open={showAgradecimiento} onClose={() => setShowAgradecimiento(false)} maxWidth="sm" zIndex={60} backdropClass="bg-overlay backdrop-blur-md" cardClass="rounded-4xl p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-black text-text-main uppercase tracking-widest text-xs">
-                  Festivos añadidos
-                </h3>
-                <button onClick={() => setShowAgradecimiento(false)} className="text-text-muted hover:text-text-main">
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <p className="text-sm text-text-muted mb-4">
-                Se han añadido <strong>{festivosImportados}</strong> días festivos.
-                Revise que todos los días sean correctos antes de guardar.
-              </p>
-              <p className="text-xs text-text-muted mb-6">
-                Servicio ofrecido por{' '}
-                <a
-                  href="https://calendariosnacionales.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:text-primary/80 underline underline-offset-2 inline-flex items-center gap-1"
-                >
-                  calendariosnacionales.com <ExternalLink className="h-3 w-3" />
-                </a>
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowAgradecimiento(false)}
-                className="w-full bg-primary text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all"
-              >
-                Entendido
-              </button>
-            </Modal>
-
-        {/* Modal previo: elegir año de los festivos */}
-        <FestivosYearModal
-          open={showYearModal}
-          localidad={formData.ciudad}
-          onClose={() => setShowYearModal(false)}
-          onConfirm={(year) => { setShowYearModal(false); handleObtenerFestivos(year); }}
-        />
       </Modal>
-  );
+    );
 }

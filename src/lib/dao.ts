@@ -16,6 +16,7 @@ import {
   DocRelacion,
   DocSeguimiento,
   DocValoracion,
+  FestivoPersonalizado,
   Empresa,
   EmpresaEstadistica,
   FFEEvaluacion,
@@ -30,9 +31,11 @@ import {
   RelacionAlumno,
   SeguimientoEstado,
   SeguridadSocialData,
+  TipoFestivoPersonalizado,
   TutorEmpresa,
   ValoracionEstado
 } from '../types/index.ts';
+import { conjuntoSaltar } from './festivosAlumno.ts';
 import {
   Contacto,
   GrupoContacto,
@@ -529,7 +532,9 @@ export const CentroDAO = {
   getAllByProfesor: (profesorId: number) => (db.prepare('SELECT * FROM centros_educativos WHERE profesorId = ?').all(profesorId) as any[]).map(c => ({
     ...c,
     codigoCentro: c.codigo_centro,
-    festivos: c.festivos ? JSON.parse(c.festivos) : []
+    // safeParse y no JSON.parse: si la columna `festivos` esta corrupta, esto
+    // no debe dejar al profesor sin lista de centros ni sin su calendario.
+    festivos: safeParse(c.festivos, [])
   })) as CentroEducativo[],
   getById: (id: number) => {
     const c = db.prepare('SELECT * FROM centros_educativos WHERE id = ?').get(id) as any;
@@ -537,7 +542,7 @@ export const CentroDAO = {
     return {
       ...c,
       codigoCentro: c.codigo_centro,
-      festivos: c.festivos ? JSON.parse(c.festivos) : []
+      festivos: safeParse(c.festivos, [])
     } as CentroEducativo;
   },
   create: (centro: CentroEducativo) => {
@@ -920,6 +925,109 @@ export const EmpresaFestivosDAO = {
   },
 };
 
+/**
+ * Desvio de cada alumno respecto a los dias no lectivos que hereda.
+ *
+ * Se guarda solo la diferencia, no la lista completa: `QUITAR` para un festivo
+ * heredado al que el alumno asiste y `ANADIR` para un dia en el que no asiste
+ * aunque no sea festivo. Asi los cambios del profesor en el centro llegan a
+ * todos los alumnos sin reescribir sus filas.
+ *
+ * Ver `src/lib/festivosAlumno.ts` para el algebra de aplicar el desvio.
+ */
+export const AlumnoFestivosDAO = {
+  getByAlumno: (alumnoId: number): FestivoPersonalizado[] => {
+    const rows = db.prepare(
+      'SELECT fecha, tipo FROM alumnos_festivos_personalizados WHERE alumnoId = ? ORDER BY fecha'
+    ).all(alumnoId) as { fecha: string; tipo: string }[];
+    return rows.map(r => ({ fecha: r.fecha, tipo: r.tipo as TipoFestivoPersonalizado }));
+  },
+
+  /**
+   * El desvio de varios alumnos en una sola consulta.
+   *
+   * Los llamantes recorren listas de alumnos enteros (un panel, un recálculo, un
+   * documento); preguntar uno a uno sería una consulta por alumno. Los que no
+   * tienen ninguna fila no aparecen en el `Map`, que es lo mismo que no tener
+   * ninguna preferencia.
+   */
+  getMapByAlumnos: (alumnoIds: number[]): Map<number, FestivoPersonalizado[]> => {
+    const mapa = new Map<number, FestivoPersonalizado[]>();
+    if (alumnoIds.length === 0) return mapa;
+    // Los ids vienen del codigo, no de entrada del usuario, y aun asi se
+    // validan porque un id invalido haria que la consulta se trunque en
+    // silencio. better-sqlite3 no admite secuencias de este tamano.
+    const marcadores = alumnoIds.map(() => '?').join(',');
+    const rows = db.prepare(
+      `SELECT alumnoId, fecha, tipo FROM alumnos_festivos_personalizados
+        WHERE alumnoId IN (${marcadores}) ORDER BY alumnoId, fecha`
+    ).all(...alumnoIds) as { alumnoId: number; fecha: string; tipo: string }[];
+    for (const r of rows) {
+      const lista = mapa.get(r.alumnoId) ?? [];
+      lista.push({ fecha: r.fecha, tipo: r.tipo as TipoFestivoPersonalizado });
+      mapa.set(r.alumnoId, lista);
+    }
+    return mapa;
+  },
+
+  /**
+   * Sustituye por completo el desvio de un alumno.
+   *
+   * Borra e inserta en una transaccion en lugar de hacer un diff: la lista es de
+   * unos pocos dias y asi no puede quedar medio desvio aplicado si algo falla a
+   * mitad.
+   */
+  setForAlumno: (alumnoId: number, personalizados: FestivoPersonalizado[]) => {
+    db.transaction(() => {
+      db.prepare('DELETE FROM alumnos_festivos_personalizados WHERE alumnoId = ?').run(alumnoId);
+      if (personalizados.length === 0) return;
+      const stmt = db.prepare(
+        'INSERT INTO alumnos_festivos_personalizados (alumnoId, fecha, tipo) VALUES (?, ?, ?)'
+      );
+      for (const p of personalizados) {
+        stmt.run(alumnoId, p.fecha, p.tipo);
+      }
+    })();
+  },
+
+  /** Desvios de varios alumnos a la vez, para el guardado de una relacion. */
+  setForAlumnos: (personalizadosPorAlumno: Map<number, FestivoPersonalizado[]>) => {
+    if (personalizadosPorAlumno.size === 0) return;
+    db.transaction(() => {
+      const borrar = db.prepare('DELETE FROM alumnos_festivos_personalizados WHERE alumnoId = ?');
+      const insertar = db.prepare(
+        'INSERT INTO alumnos_festivos_personalizados (alumnoId, fecha, tipo) VALUES (?, ?, ?)'
+      );
+      for (const [alumnoId, personalizados] of personalizadosPorAlumno) {
+        borrar.run(alumnoId);
+        for (const p of personalizados) insertar.run(alumnoId, p.fecha, p.tipo);
+      }
+    })();
+  },
+
+  deleteByAlumno: (alumnoId: number) => {
+    db.prepare('DELETE FROM alumnos_festivos_personalizados WHERE alumnoId = ?').run(alumnoId);
+  },
+};
+
+/**
+ * Attache el desvio de dias a los alumnos de una relacion.
+ *
+ * `RelacionAlumnoDAO` lee con `SELECT * FROM alumnos`, que no puede traer las
+ * filas de la tabla de desvios. Sin esto el formulario de edicion las perderia:
+ * `handleOpenForm` reemplaza `alumnos` por lo que llega del servidor, asi que
+ * unos dias guardados que no volvicen se borrarian en silencio al abrir y
+ * guardar la relacion otra vez.
+ */
+const conFestivosPersonalizados = (alumnos: Alumno[]): Alumno[] => {
+  const ids = alumnos.map(a => a.id).filter((id): id is number => typeof id === 'number');
+  const mapa = AlumnoFestivosDAO.getMapByAlumnos(ids);
+  return alumnos.map(a => ({
+    ...a,
+    festivosPersonalizados: mapa.get(a.id!) ?? [],
+  }));
+};
+
 export const TutorEmpresaDAO = {
   getAllByEmpresa: (empresaId: number) => db.prepare('SELECT * FROM empresa_tutores WHERE empresaId = ?').all(empresaId) as TutorEmpresa[],
   getById: (id: number) => db.prepare('SELECT * FROM empresa_tutores WHERE id = ?').get(id) as TutorEmpresa,
@@ -1168,7 +1276,7 @@ export const RelacionAlumnoDAO = {
         ...r,
         horario: safeParse(r.horario, {}),
         empresa: empresa,
-        alumnos: alumnosRelacionados
+        alumnos: conFestivosPersonalizados(alumnosRelacionados)
       } as RelacionAlumno;
     });
   },
@@ -1184,7 +1292,7 @@ export const RelacionAlumnoDAO = {
       ...r,
       horario: safeParse(r.horario, {}),
       empresa: empresa,
-      alumnos: alumnosRelacionados
+      alumnos: conFestivosPersonalizados(alumnosRelacionados)
     } as RelacionAlumno;
   },
 
@@ -1200,7 +1308,7 @@ export const RelacionAlumnoDAO = {
         ...r,
         horario: safeParse(r.horario, {}),
         empresa: empresa,
-        alumnos: alumnosRelacionados
+        alumnos: conFestivosPersonalizados(alumnosRelacionados)
       } as RelacionAlumno;
     });
   },
@@ -1246,7 +1354,14 @@ export const RelacionAlumnoDAO = {
         stmtAlumno.run(relacionId, alu.fechaInicio, alu.fechaFin, 'PENDIENTE_ENVIAR_ESTUDIANTE', 'PENDIENTE', 'PENDIENTE', alu.id);
       }
 
-      // 3. Sincronizar empresa_estadisticas
+      // 3. Desvio de dias no lectivos de cada alumno.
+      // Lo calcula la interfaz con `deltaPersonalizados`, que es quien tiene el
+      // conjunto efectivo que se mostró en el editor. Aqui solo se persiste.
+      AlumnoFestivosDAO.setForAlumnos(
+        new Map(rel.alumnos.map(alu => [alu.id!, alu.festivosPersonalizados ?? []]))
+      );
+
+      // 4. Sincronizar empresa_estadisticas
       syncEmpresaEstadistica(rel.convenioId);
 
       return relacionId;
@@ -1276,12 +1391,17 @@ export const RelacionAlumnoDAO = {
       );
 
       // 2. Gestionar alumnos: Primero desvinculamos a los que ya no están
+      // Los que salen de la relación pierden sus días personalizados, igual que
+      // su fechaInicio y fechaFin: days quite about to the days of a
+      // relationship that no longer exists, and keeping them would resurrect
+      // them silently if the student were linked back later.
+      const losQueSeVan = db.prepare('SELECT id FROM alumnos WHERE relacionId = ?').all(id) as { id: number }[];
       db.prepare('UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL WHERE relacionId = ?').run(id);
 
       // 3. Vinculamos a los nuevos/actuales (conservando su estado individual)
       const stmtAlumno = db.prepare(`
-        UPDATE alumnos SET 
-          relacionId = ?, 
+        UPDATE alumnos SET
+          relacionId = ?,
           fechaInicio = ?,
           fechaFin = ?
         WHERE id = ?
@@ -1291,7 +1411,17 @@ export const RelacionAlumnoDAO = {
         stmtAlumno.run(id, alu.fechaInicio, alu.fechaFin, alu.id);
       }
 
-      // 4. Sincronizar empresa_estadisticas
+      // 4. Desvio de dias no lectivos: se sustituye el de cada alumno
+      // vinculado, y se borra el de los que se han quedado fuera.
+      const nuevosIds = new Set(rel.alumnos.map(alu => alu.id!));
+      for (const { id: alumnoId } of losQueSeVan) {
+        if (!nuevosIds.has(alumnoId)) AlumnoFestivosDAO.deleteByAlumno(alumnoId);
+      }
+      AlumnoFestivosDAO.setForAlumnos(
+        new Map(rel.alumnos.map(alu => [alu.id!, alu.festivosPersonalizados ?? []]))
+      );
+
+      // 5. Sincronizar empresa_estadisticas
       syncEmpresaEstadistica(rel.convenioId);
     })();
   },
@@ -1302,7 +1432,12 @@ export const RelacionAlumnoDAO = {
 
     db.transaction(() => {
       // 1. Limpiamos la referencia en los alumnos antes de borrar la relación
+      const alumnos = db.prepare('SELECT id FROM alumnos WHERE relacionId = ?').all(id) as { id: number }[];
       db.prepare(`UPDATE alumnos SET relacionId = NULL, fechaInicio = NULL, fechaFin = NULL, estadoPlanFormativo = 'PENDIENTE_ENVIAR_ESTUDIANTE', estadoSeguimiento = 'PENDIENTE', estadoValoracion = 'PENDIENTE' WHERE relacionId = ?`).run(id);
+
+      // Los días personalizados se pierden con la relación, por el mismo motivo
+      // que las fechas: describen las horas de un convenio que ya no existe.
+      for (const { id: alumnoId } of alumnos) AlumnoFestivosDAO.deleteByAlumno(alumnoId);
 
       // 2. Borramos la relación
       db.prepare('DELETE FROM relaciones WHERE id = ?').run(id);
@@ -1345,6 +1480,10 @@ export const PanelDAO = {
     const empresaFestivosByCiudad = usarFestivosEmpresa ? EmpresaFestivosDAO.getAll(pid) : {};
     const festivosCache = createFestivosCache();
 
+    // El desvio de dias se lee de una vez para toda la tabla. Son unos pocos
+    // dias por alumno y la consulta es una, no una por fila.
+    const personalizadosPorAlumno = AlumnoFestivosDAO.getMapByAlumnos(rows.map(r => r.alumnoId));
+
     const hoy = new Date();
     return rows.map(r => {
       const total = Number(r.totalHorasFFE) || 0;
@@ -1354,7 +1493,13 @@ export const PanelDAO = {
           fechaInicio: r.fechaInicio,
           totalHorasFFE: total,
           horario: safeParse(r.horario, {}),
-          festivosSkip: getFestivosSkipConvenio(festivosCache, r.convenioId, usarFestivos, usarFestivosEmpresa, empresaFestivosByCiudad),
+          // Los dias propios del alumno se aplican encima de los heredados del
+          // convenio, asi que las horas que ve el panel son las mismas que
+          // consumieron las de Seguridad Social y las del documento.
+          festivosSkip: conjuntoSaltar(
+            getFestivosSkipConvenio(festivosCache, r.convenioId, usarFestivos, usarFestivosEmpresa, empresaFestivosByCiudad),
+            personalizadosPorAlumno.get(r.alumnoId)
+          ),
         }, hoy);
       }
       return {
@@ -1397,8 +1542,7 @@ export const PanelDAO = {
       const conv = db.prepare('SELECT centroId FROM convenios WHERE id = ?').get(convId) as any;
       if (conv?.centroId && !centroFestivosMap[conv.centroId]) {
         const centro = db.prepare('SELECT festivos FROM centros_educativos WHERE id = ?').get(conv.centroId) as any;
-        const festivos: string[] = centro?.festivos ? JSON.parse(centro.festivos) : [];
-        centroFestivosMap[conv.centroId] = new Set(festivos);
+        centroFestivosMap[conv.centroId] = new Set<string>(safeParse(centro?.festivos, []));
       }
     }
     // Map relacionId → centroId
@@ -1436,6 +1580,11 @@ export const PanelDAO = {
       empresaFestivosByCiudad,
       usarFestivos,
       usarFestivosEmpresa,
+      // El desvio se lee desde `relaciones`, que ya trae el alumnoId de cada
+      // relacion, en vez de cruzar con la lista de alumnos: aqui una relacion
+      // puede traer varios alumnos y la lista de arriba puede traer alumnos sin
+      // relacion, asi que no son el mismo conjunto.
+      personalizadosPorAlumno: AlumnoFestivosDAO.getMapByAlumnos(relaciones.map(r => r.alumnoId)),
     });
 
     return { meses, alumnos, datos };
@@ -1742,12 +1891,16 @@ const horasRealizadasHasta = (row: any, hasta: Date): number => {
   const usarFestivos = config.usar_festivos !== '0';
   const usarFestivosEmpresa = config.usar_festivos_empresa === '1';
   const empresaFestivosByCiudad = usarFestivosEmpresa ? EmpresaFestivosDAO.getAll(pid) : {};
-  const festivosSkip = getFestivosSkipConvenio(
-    createFestivosCache(),
-    row.convenioId,
-    usarFestivos,
-    usarFestivosEmpresa,
-    empresaFestivosByCiudad
+  const personalizados = row.alumnoId != null ? AlumnoFestivosDAO.getByAlumno(row.alumnoId) : undefined;
+  const festivosSkip = conjuntoSaltar(
+    getFestivosSkipConvenio(
+      createFestivosCache(),
+      row.convenioId,
+      usarFestivos,
+      usarFestivosEmpresa,
+      empresaFestivosByCiudad
+    ),
+    personalizados
   );
   return calcularHorasRealizadasFFE({
     fechaInicio: row.fechaInicio,
@@ -1984,11 +2137,15 @@ export function recalcularFechasAlumnos(profesorId: number): number {
     const conv = db.prepare('SELECT centroId FROM convenios WHERE id = ?').get(alumno.convenioId) as any;
     if (conv?.centroId && !centroFestivosMap[conv.centroId]) {
       const centro = db.prepare('SELECT festivos FROM centros_educativos WHERE id = ?').get(conv.centroId) as any;
-      centroFestivosMap[conv.centroId] = centro?.festivos ? JSON.parse(centro.festivos) : [];
+      // safeParse y no JSON.parse: un `festivos` corrupto en la base hacia
+      // lanzar el recalculo entero y dejar las fechas a medias.
+      centroFestivosMap[conv.centroId] = centro?.festivos ? safeParse(centro.festivos, []) : [];
     }
   }
 
-  // Build empresa festivos map by ciudad
+  // El desvio de cada alumno se lee de una vez para todo el recalculo.
+  const personalizadosPorAlumno = AlumnoFestivosDAO.getMapByAlumnos(alumnos.map(a => a.alumnoId));
+
   const empresaFestivosByCiudad: Record<string, string[]> = {};
   if (usarFestivosEmpresa) {
     const raw = EmpresaFestivosDAO.getAll(profesorId);
@@ -2028,9 +2185,17 @@ export function recalcularFechasAlumnos(profesorId: number): number {
       const empCiudad = empresaCiudadByConvenio[alumno.convenioId];
       const empFestivos: string[] = empCiudad ? (empresaFestivosByCiudad[empCiudad] || []) : [];
 
-      const saltar = new Set<string>();
-      if (usarFestivos) centroFestivos.forEach(f => saltar.add(f));
-      if (usarFestivosEmpresa) empFestivos.forEach(f => saltar.add(f));
+      // El conjunto heredado del convenio mas el desvio del alumno. Es el mismo
+      // calculo que hacen el panel, Seguridad Social y la interfaz, asi que un
+      // recalculo global no puede mover la fecha fin de un alumno mas que lo
+      // que ya le showed su relacion.
+      const saltar = conjuntoSaltar(
+        new Set<string>([
+          ...(usarFestivos ? centroFestivos : []),
+          ...(usarFestivosEmpresa ? empFestivos : []),
+        ]),
+        personalizadosPorAlumno.get(alumno.alumnoId)
+      );
 
       const startParts = alumno.fechaInicio.split('-').map(Number);
       let current = new Date(startParts[0], startParts[1] - 1, startParts[2]);
@@ -2058,6 +2223,12 @@ export function recalcularFechasAlumnos(profesorId: number): number {
         if (remainingHoras > 0) current.setDate(current.getDate() + 1);
         iterations++;
       }
+
+      // Sin dia con horas el bucle no consume nada y se agota: no hay fecha fin
+      // que deducir. Se deja la que hubiera, en vez de escribir la fecha en la que
+      // se acabaron las 365 vueltas, que no significa nada. Es el mismo criterio
+      // que devuelve null en calculateEndDateForHours del cliente.
+      if (remainingHoras > 0) continue;
 
       const nuevaFechaFin = formatDateLocal(current);
       updateStmt.run(nuevaFechaFin, alumno.alumnoId);

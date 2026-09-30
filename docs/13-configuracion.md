@@ -18,18 +18,24 @@ Configura con cuántas semanas de antelación se generan los avisos:
 
 Activa o desactiva la opción **Usar días festivos del centro** para que los festivos del centro educativo se descuenten del cálculo de fechas de fin de prácticas y días de Seguridad Social.
 
+Los festivos del centro se editan desde **Centros → Añadir/Editar centro → Calendario**, no desde aquí. Consulta el [módulo de Profesor y sección Centros](03-modulo-de-profesor.md).
+
 ### Festivos de empresa
 
 Activa o desactiva la opción **Usar días festivos de empresa** para descontar los festivos locales de la empresa en el cálculo.
 
 **Gestión de festivos por localidad:**
 
-1. Pulsa **Gestionar festivos por localidad**.
-2. Selecciona la localidad cuyos festivos deseas configurar.
-3. Añade o elimina fechas manualmente.
-4. Usa **Obtener festivos** para importar automáticamente los festivos desde la API de Calendarios Nacionales (localidades de Madrid).
+1. Activa **Descontar días festivos de la empresa** para que aparezca la lista.
+2. Pulsa **Festivos** en la localidad que quieras configurar.
+3. En el modal, pulsa un día del calendario para marcarlo o desmarcarlo. El calendario muestra el curso entero, del primer día al último.
+4. Usa **Obtener festivos** para importar los festivos de la localidad desde la API de Calendarios Nacionales (localidades de Madrid), o **Borrar todos** para vaciarlos.
 
-> `[IMAGEN: Modal de gestión de festivos de empresa por localidad con lista de fechas]`
+Solo se marcan los días que caen dentro del curso: los que se quedaran fuera se descartan al guardar.
+
+> `[IMAGEN: Modal de días festivos de la empresa con el calendario del curso y la lista de días marcados]`
+
+Los cambios se quedan pendientes hasta que pulses **Guardar Configuración de Festivos**, que además recalcula las fechas de fin de todos los alumnos.
 
 ### Creación de ficheros
 

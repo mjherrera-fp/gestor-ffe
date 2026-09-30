@@ -160,6 +160,28 @@ const SCHEMA_MIGRATIONS: Array<(db: any) => void> = [
   (db) => {
     ensureColumn(db, 'alumnos', 'comunicacionDAT', 'comunicacionDAT INTEGER REFERENCES comunicaciones_dat(id) ON DELETE SET NULL');
   },
+  // v2 -> v3: días no lectivos personalizados por alumno.
+  //
+  // El DDL es el mismo que crea `setupTables`, y ambos son idempotentes, como
+  // exigen las migraciones: en una base nueva esta entrada no hace nada porque
+  // la tabla ya existe, y en una antigua la crea. `IF NOT EXISTS` sobre la
+  // tabla y sobre el indice es lo que hace la entrada segura en los dos casos.
+  (db) => {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS alumnos_festivos_personalizados (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        alumnoId INTEGER NOT NULL,
+        fecha TEXT NOT NULL,
+        tipo TEXT NOT NULL CHECK (tipo IN ('QUITAR','ANADIR')),
+        FOREIGN KEY(alumnoId) REFERENCES alumnos(id) ON DELETE CASCADE,
+        UNIQUE (alumnoId, fecha)
+      );
+    `);
+    db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_alumnos_festivos_personalizados_alumno
+        ON alumnos_festivos_personalizados (alumnoId);
+    `);
+  },
 ];
 
 const CURRENT_SCHEMA_VERSION = SCHEMA_MIGRATIONS.length;
@@ -388,6 +410,27 @@ function setupTables() {
     FOREIGN KEY(relacionId) REFERENCES relaciones(id) ON DELETE SET NULL,
     FOREIGN KEY(detalleAcademicoId) REFERENCES detalles_academicos(id) ON DELETE SET NULL
   );
+
+  -- Desvio de cada alumno respecto a los dias no lectivos que hereda del centro
+  -- y de la empresa. No se guarda su lista completa de dias, solo en que se
+  -- diferencia de la heredada: 'QUITAR' es un festivo que el alumno si asiste y
+  -- 'ANADIR' un dia en el que no asiste aunque no sea festivo.
+  --
+  -- El CASCADE limpia estas filas solo al borrar el curso, porque es
+  -- CursoDAO.delete y replaceAll los que borran los alumnos. Un alumno que sale
+  -- de una relacion conserva las suyas; las borra el propio guardado de la
+  -- relacion, igual que hace con fechaInicio y fechaFin.
+  CREATE TABLE IF NOT EXISTS alumnos_festivos_personalizados (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    alumnoId INTEGER NOT NULL,
+    fecha TEXT NOT NULL,
+    tipo TEXT NOT NULL CHECK (tipo IN ('QUITAR','ANADIR')),
+    FOREIGN KEY(alumnoId) REFERENCES alumnos(id) ON DELETE CASCADE,
+    UNIQUE (alumnoId, fecha)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_alumnos_festivos_personalizados_alumno
+    ON alumnos_festivos_personalizados (alumnoId);
 
   CREATE TABLE IF NOT EXISTS intereses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -20,6 +20,7 @@ Desde Gestor FFE se usan los siguientes servicios:
 | Servicio | Dónde |
 |----------|-------|
 | Festivos por localidad | **Configuración → General → Festivos de empresa** |
+| Festivos de centro educativo | **Centros → botón de calendario de la tarjeta del centro** |
 | NextCloud | **Configuración → Cloud** (URL, usuario, contraseña y rutas de carpetas) |
 | SMTP | **Configuración → Correo** |
 
