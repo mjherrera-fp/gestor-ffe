@@ -74,7 +74,8 @@ export function ProfesorForm({ formData, setFormData, saving, success, onSubmit 
             Perfil del Profesor
           </h1>
           <p className="text-xs lg:text-sm text-text-muted mt-1 leading-relaxed">
-            Configura tu información personal y los centros donde impartes clase.
+            Configura tu información personal. Los centros donde impartes clase
+            se gestionan en la sección <strong className="text-text-main">Centros</strong>.
           </p>
         </div>
       </div>

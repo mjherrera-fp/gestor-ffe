@@ -1,8 +1,9 @@
 import React from 'react';
-import {ArrowLeftRight, Building2, Calendar, Clock, Plus, User, X} from 'lucide-react';
+import {ArrowLeftRight, Building2, Calendar, CalendarOff, Clock, Plus, User, X} from 'lucide-react';
 import {
   Alumno,
   Convenio,
+  FestivoPersonalizado,
   HorarioSemanal,
   RelacionAlumno,
   RelacionEstado,
@@ -11,7 +12,9 @@ import {
 } from '../../../types/index.ts';
 import {CustomSelect} from '../../../components/CustomSelect.tsx';
 import {Modal} from '../../../components/ui/Modal.tsx';
-import {DEFAULT_HORARIO, getDayName, horarioTieneHoras} from '../utils/relacionesUtils.ts';
+import {FestivosModal} from '../../../components/ui/FestivosModal.tsx';
+import {rangoEsValido} from '../../../lib/calendarioFestivos.ts';
+import {DEFAULT_HORARIO, diasConHorasDelHorario, getDayName, horarioTieneHoras} from '../utils/relacionesUtils.ts';
 import {BulkHorario} from '../hooks/useRelaciones.ts';
 import {formatDate} from '../../../lib/dateUtils.ts';
 import {useFormValidation} from '../../../hooks/useFormValidation.ts';
@@ -41,7 +44,22 @@ interface RelacionFormModalProps {
   onRemoveAlumno: (id: number) => void;
   onUpdateStudentHours: (id: number, h: number) => void;
   onUpdateStudentStartDate: (id: number, d: string) => void;
-  calculateEndDateForHours: (start: string, hours: number) => string | null;
+  calculateEndDateForHours: (start: string, hours: number, personalizados?: FestivoPersonalizado[]) => string | null;
+  // Dias no lectivos propios de cada alumno
+  /** Alumno al que se le esta editando el calendario de dias no lectivos. */
+  festivosAlumnoId: number | null;
+  onOpenFestivosAlumno: (id: number) => void;
+  onCloseFestivosAlumno: () => void;
+  /** Dias que ya le tocan a ese alumno, para sembrar el modal. */
+  festivosEfectivosDe: (id: number) => string[];
+  onSaveFestivosAlumno: (id: number, efectivos: string[]) => void;
+  /**
+   * Que pasaria con el alumno si se guardaran estos dias, sin guardarlos. Lo
+   * usa el editor para mover la fecha fin mientras se edita.
+   */
+  onPreviewFestivosAlumno: (id: number, efectivos: string[]) => { fechaFin: string | null; diasPropios: number };
+  /** Nombre del alumno en edicion, para el subtitulo del modal. */
+  festivosAlumnoNombre?: string;
   // Fechas generales
   targetStartDate: string;
   setTargetStartDate: (v: string) => void;
@@ -71,6 +89,8 @@ export function RelacionFormModal({
   open, editing, formData, setFormData,
   alumnos, searchTermAlumno, setSearchTermAlumno, filteredAlumnos,
   onAddAlumno, onRemoveAlumno, onUpdateStudentHours, onUpdateStudentStartDate, calculateEndDateForHours,
+  festivosAlumnoId,   onOpenFestivosAlumno, onCloseFestivosAlumno, festivosEfectivosDe, onSaveFestivosAlumno,
+  onPreviewFestivosAlumno, festivosAlumnoNombre,
   targetStartDate, setTargetStartDate, targetEndDate, setTargetEndDate,
   onApplyStartDateToAll, onApplyTargetEndDate,
   convenios, filteredConvenios, searchTermConvenio, setSearchTermConvenio,
@@ -110,7 +130,32 @@ export function RelacionFormModal({
     viernes: 'V', sabado: 'S', domingo: 'D',
   };
 
+  // El calendario de dias se abre sobre el periodo del alumno, no sobre el
+  // curso entero. Antes de empezar y despues de acabar no hay nada que
+  // decidir: lo que importa es que se vea el periodo del que dependen las horas
+  // que le quedan, porque es donde se ve el efecto de marcar un dia.
+  //
+  // Se usa la fecha fin guardada, que ya es la estimada: `updateStudentHours` y
+  // `saveFestivosAlumno` la recalculan en cuanto cambia algo, asi que al abrir
+  // el editor esta al dia. Sin las dos fechas no hay periodo que pintar, y el
+  // boton ni se muestra.
+  const alumnoEnDias = (formData.alumnos || []).find(a => a.id === festivosAlumnoId);
+  const periodoAlumno = React.useMemo(() => {
+    if (!alumnoEnDias?.fechaInicio || !alumnoEnDias?.fechaFin) return null;
+    const rango = { inicio: alumnoEnDias.fechaInicio, fin: alumnoEnDias.fechaFin };
+    return rangoEsValido(rango) ? rango : null;
+  }, [alumnoEnDias?.fechaInicio, alumnoEnDias?.fechaFin]);
+
+  // Solo los dias de la semana con horas. El numero de dias laborables no se
+  // calcula aqui porque cambia con el periodo, y el periodo lo mueve el editor
+  // segun los dias que se van marcando: se lo deja expandirlos a el.
+  const diasConHoras = React.useMemo(
+    () => diasConHorasDelHorario(formData.horario),
+    [formData.horario]
+  );
+
   return (
+    <>
     <Modal open={open} onClose={onClose} maxWidth="6xl" backdropClass="bg-overlay backdrop-blur-md" cardClass="rounded-4xl">
 
         {/* Header */}
@@ -152,7 +197,7 @@ export function RelacionFormModal({
                         onChange={e => setSearchTermAlumno(e.target.value)}
                       />
                       <p className="text-[10px] text-text-muted mt-1 ml-1 italic">
-                        * Solo se muestran alumnos sin relación asignada.
+                        * No aparecen los que ya están en otra relación ni los que ya has añadido a esta.
                       </p>
                       {filteredAlumnos.length > 0 && (
                         <div className="absolute z-20 w-full mt-2 bg-surface-card border border-border-base rounded-2xl shadow-2xl max-h-48 overflow-y-auto py-2">
@@ -183,7 +228,11 @@ export function RelacionFormModal({
                       {formData.alumnos?.map(ar => {
                         const alum            = alumnos.find(a => a.id === ar.id);
                         const studentStartDate = ar.fechaInicio || '';
-                        const studentEndDate   = calculateEndDateForHours(studentStartDate, ar.totalHorasFFE);
+                        // El fin estimado tiene en cuenta los dias propios del
+                        // alumno: si ha quitado un festivo, acaba antes, y si ha
+                        // añadido dias, despues.
+                        const studentEndDate   = calculateEndDateForHours(studentStartDate, ar.totalHorasFFE, ar.festivosPersonalizados);
+                        const diasPropios = (ar.festivosPersonalizados?.length ?? 0) > 0;
                         return (
                           <div key={ar.id} className="bg-surface-card p-4 rounded-2xl border border-border-base shadow-sm space-y-3">
                             <div className="flex items-center justify-between">
@@ -219,10 +268,37 @@ export function RelacionFormModal({
                               </div>
                             </div>
                             <div className="flex items-center justify-between pt-1 border-t border-border-base">
-                              <span className="text-[9px] font-bold text-text-muted uppercase">Fin Estimado</span>
-                              <span className="text-[10px] font-black text-success bg-success-soft px-2 py-0.5 rounded-md">
-                                {studentEndDate ? formatDate(studentEndDate) : '—'}
-                              </span>
+                              {ar.fechaInicio && ar.fechaFin ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenFestivosAlumno(ar.id!)}
+                                  className="flex items-center gap-1.5 text-[9px] font-bold text-text-muted uppercase hover:text-primary transition-colors"
+                                >
+                                  <CalendarOff className="h-3 w-3" />
+                                  Días no lectivos
+                                  {diasPropios && (
+                                    <span className="px-1.5 rounded-md bg-primary-soft text-primary">
+                                      {ar.festivosPersonalizados!.length}
+                                    </span>
+                                  )}
+                                </button>
+                              ) : (
+                                // Sin inicio y fin no hay periodo sobre el que
+                                // decidir que dias se pierde, asi que no se
+                                // ofrece el editor. Se dice cual de los dos
+                                // falta, porque si no el hueco se lee como que
+                                // el boton ha desaparecido sin motivo.
+                                <span className="flex items-center gap-1.5 text-[9px] font-bold text-text-muted/50 uppercase">
+                                  <CalendarOff className="h-3 w-3" />
+                                  {!ar.fechaInicio ? 'Sin fecha inicio' : 'Sin fecha fin estimada'}
+                                </span>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <span className="text-[9px] font-bold text-text-muted uppercase">Fin Estimado</span>
+                                <span className="text-[10px] font-black text-success bg-success-soft px-2 py-0.5 rounded-md">
+                                  {studentEndDate ? formatDate(studentEndDate) : '—'}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         );
@@ -508,5 +584,38 @@ export function RelacionFormModal({
           </div>
         </form>
     </Modal>
+
+    {/* Editor de dias no lectivos del alumno. Va fuera del formulario de la
+        relacion a proposito: el modal de dias trae su propio formulario, y
+        anidarlos no es HTML valido ni dejaria llegar el submit al que toca. */}
+    <FestivosModal
+      open={festivosAlumnoId !== null}
+      onClose={onCloseFestivosAlumno}
+      onSave={efectivos => { if (festivosAlumnoId !== null) onSaveFestivosAlumno(festivosAlumnoId, efectivos); }}
+      titulo="Días no lectivos"
+      subtitulo={festivosAlumnoNombre || undefined}
+      rango={periodoAlumno}
+      festivos={festivosAlumnoId !== null ? festivosEfectivosDe(festivosAlumnoId) : []}
+      textoGuardar="Guardar días"
+      zIndex={70}
+      // Los dias de la semana con horas, no los laborables ya expandidos: el
+      // periodo se mueve con cada dia que marca, y quien lo tiene que recalcular
+      // es el modal, no esta pantalla.
+      diasConHoras={diasConHoras}
+      // Lo que se veria si se guardara ahora mismo. El editor lo llama en cada
+      // pulsacion para mover la fecha fin en vivo, y el guardado de verdad sigue
+      // siendo el de abajo, con el mismo calculo.
+      previewAlumno={efectivos => (festivosAlumnoId !== null
+        ? onPreviewFestivosAlumno(festivosAlumnoId, efectivos)
+        : { fechaFin: null, diasPropios: 0 })}
+      // Su lista efectiva es la de todo el curso, no la de su periodo, y se
+      // guarda tal cual. Recortarla al guardar convertiria en `QUITAR` cada
+      // festivo que tuviera despues de terminar, y le acortaria la fecha fin
+      // sola. Lo que cae fuera de su periodo no se toca porque no se ve y no se
+      // puede pulsar: el editor solo pinta el periodo que tiene delante.
+      descartarFueraDeRango={false}
+      nombreRango="periodo"
+    />
+    </>
   );
 }

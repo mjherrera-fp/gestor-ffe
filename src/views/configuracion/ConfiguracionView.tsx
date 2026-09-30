@@ -6,6 +6,7 @@ import {TabDocumentos} from './components/TabDocumentos.tsx';
 import {TabCorreo} from './components/TabCorreo.tsx';
 import {TabSeguridad} from './components/TabSeguridad.tsx';
 import {TabCloud} from './components/TabCloud.tsx';
+import type {RangoCurso} from '../../lib/calendarioFestivos.ts';
 
 type TabId = 'general' | 'documentos' | 'correo' | 'seguridad' | 'cloud';
 
@@ -19,9 +20,12 @@ const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
 
 interface Props {
   initialTab?: TabId;
+  /** Rango del curso actual, o `null` si no hay ninguno. */
+  rangoCurso?: RangoCurso | null;
+  onIrACursos?: () => void;
 }
 
-export default function ConfiguracionView({ initialTab }: Props = {}) {
+export default function ConfiguracionView({ initialTab, rangoCurso, onIrACursos }: Props = {}) {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab || 'general');
 
   useEffect(() => {
@@ -53,7 +57,7 @@ export default function ConfiguracionView({ initialTab }: Props = {}) {
       </div>
 
       {/* Contenido */}
-      {activeTab === 'general' && <TabGeneral />}
+      {activeTab === 'general' && <TabGeneral rangoCurso={rangoCurso} onIrACursos={onIrACursos} />}
       {activeTab === 'documentos' && <TabDocumentos />}
       {activeTab === 'correo' && (
         <TabCorreo

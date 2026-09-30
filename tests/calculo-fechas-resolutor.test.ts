@@ -6,6 +6,12 @@ import {
   CONTEXTO_VACIO,
 } from '../src/lib/calculoFechas.ts';
 import { DEFAULT_HORARIO } from '../src/views/relaciones/utils/relacionesUtils.ts';
+import { deltaPersonalizados } from '../src/lib/festivosAlumno.ts';
+import type { FestivoPersonalizado } from '../src/types/index.ts';
+
+const quitar = (fecha: string): FestivoPersonalizado => ({ fecha, tipo: 'QUITAR' });
+const anadir = (fecha: string): FestivoPersonalizado => ({ fecha, tipo: 'ANADIR' });
+import type { HorarioSemanal } from '../src/types/index.ts';
 
 // ─────────────────────────────────────────
 //  Resolvedor compartido de fechas.
@@ -47,6 +53,108 @@ const SIN_HORAS = {
   sabado: DIA_0H,
   domingo: DIA_0H,
 };
+
+// Los dias propios del alumno se encadenan al final del contexto, con el
+// mismo criterio de `src/lib/festivosAlumno.ts`. Sobre el ejemplo del cabecera:
+//   16 h con lunes y martes de 8 h, empezando el lunes 5 de enero de 2026
+//     sin nada            -> 2026-01-06
+//     QUITAR el martes 6   -> el alumno asiste ese dia, asi que 2026-01-06
+//     ANADIR el lunes 12   -> ese dia no se consume, el fin se va a 2026-01-13
+describe('dias propios del alumno', () => {
+  const resolver = crearResolutorFechas({
+    centroFestivos: ['2026-01-06'],
+    usarFestivos: true,
+    empresaFestivos: [],
+    usarFestivosEmpresa: false,
+  });
+
+  it('QUITAR un festivo heredado le hace trabajar ese dia y acaba antes', () => {
+    // Sin el QUITAR el martes 6 se salta y el fin cae en el lunes 12.
+    expect(resolver.calcularFechaFin('2026-01-05', 16, LUNES_Y_MARTES)).toBe('2026-01-12');
+    expect(
+      resolver.calcularFechaFin('2026-01-05', 16, LUNES_Y_MARTES, [{ fecha: '2026-01-06', tipo: 'QUITAR' }])
+    ).toBe('2026-01-06');
+  });
+
+  it('ANADIR un dia con horas lo deja fuera y retrasa el fin', () => {
+    // Las 16 h caen el lunes 5 y, saltado el martes 6 por festivo, el lunes 12.
+    // Marcar el 12 como propio deja las 8 h para el martes 13.
+    expect(
+      resolver.calcularFechaFin('2026-01-05', 16, LUNES_Y_MARTES, [{ fecha: '2026-01-12', tipo: 'ANADIR' }])
+    ).toBe('2026-01-13');
+  });
+
+  it('calcularFechaInicio respeta el mismo desvio, en sentido inverso', () => {
+    // Caminando hacia atras desde el lunes 12: ese dia aporta 8 h, y el martes
+    // 6, que el alumno si trabaja, aporta las otras 8. Sin el QUITAR el 6 se
+    // saltaria y el inicio seria el lunes 5.
+    expect(
+      resolver.calcularFechaInicio('2026-01-12', 16, LUNES_Y_MARTES, [{ fecha: '2026-01-06', tipo: 'QUITAR' }])
+    ).toBe('2026-01-06');
+  });
+
+  it('un alumno sin desvio da el mismo resultado que no pasar el parametro', () => {
+    const sinParametro = resolver.calcularFechaFin('2026-01-05', 16, LUNES_Y_MARTES);
+    expect(resolver.calcularFechaFin('2026-01-05', 16, LUNES_Y_MARTES, [])).toBe(sinParametro);
+  });
+
+  it('un ANADIR sobre un dia heredado gana al QUITAR del mismo dia', () => {
+    // Marcar las dos cosas a la vez no puede ser: si el alumno dice que no
+    // asiste, no asiste, este o no sea festivo oficial.
+    expect(
+      resolver.calcularFechaFin('2026-01-05', 16, LUNES_Y_MARTES, [
+        { fecha: '2026-01-06', tipo: 'QUITAR' },
+        { fecha: '2026-01-06', tipo: 'ANADIR' },
+      ])
+    ).toBe('2026-01-12');
+  });
+
+  /**
+   * Estas pruebas fijan la equivalencia de la que depende el editor de dias.
+   *
+   * El editor enseña una lista de dias y guarda el desvío de esa lista respecto
+   * a los festivos del convenio. Si las dos cosas no llevaran a la misma fecha
+   * fin, la que se enseña mientras se edita seria distinta de la que se acaba
+   * guardando, y el profesor marcaria un dia viendo una fecha y obtendria
+   * otra. Por eso se comprueba con las dos entradas, no solo con el desvio.
+   */
+  describe('el desvio que guarda equivale a la lista que se ve', () => {
+    const comoListaVisible = (visibles: string[]) => crearResolutorFechas({
+      centroFestivos: visibles, usarFestivos: true,
+      empresaFestivos: [], usarFestivosEmpresa: false,
+    });
+    const heredados = ['2026-01-06'];
+    // El martes 6 es festivo. Siempre se empieza el lunes 5 con 16 h y un
+    // horario de 8 h de lunes y martes, asi que sin nada raro el fin es el 6.
+    const fin = (visibles: string[]) =>
+      resolver.calcularFechaFin('2026-01-05', 16, LUNES_Y_MARTES, deltaPersonalizados(heredados, visibles));
+
+    it('despintar el festivo deja al alumno trabajar ese dia', () => {
+      const visibles: string[] = [];
+      expect(deltaPersonalizados(heredados, visibles)).toEqual([quitar('2026-01-06')]);
+      expect(fin(visibles)).toBe(comoListaVisible(visibles).calcularFechaFin('2026-01-05', 16, LUNES_Y_MARTES));
+      expect(fin(visibles)).toBe('2026-01-06');
+    });
+
+    it('marcar un dia suelto sin tocar los festivos lo retrasa', () => {
+      const visibles = ['2026-01-06', '2026-01-12'];
+      expect(deltaPersonalizados(heredados, visibles)).toEqual([anadir('2026-01-12')]);
+      expect(fin(visibles)).toBe(comoListaVisible(visibles).calcularFechaFin('2026-01-05', 16, LUNES_Y_MARTES));
+      expect(fin(visibles)).toBe('2026-01-13');
+    });
+
+    it('las dos cosas a la vez: manda el QUITAR, que ya consume las horas', () => {
+      // El 6 se despinta y el 12 se marca. El 12 no llega a contarse: al poder
+      // trabajar el martes 6, las 16 h ya estan gastadas el dia 6 y el lunes 12
+      // queda sin usar. Se comprueba porque es donde mas facil seria que las dos
+      // cuentas se desfasaran una de otra.
+      const visibles = ['2026-01-12'];
+      expect(deltaPersonalizados(heredados, visibles)).toEqual([quitar('2026-01-06'), anadir('2026-01-12')]);
+      expect(fin(visibles)).toBe(comoListaVisible(visibles).calcularFechaFin('2026-01-05', 16, LUNES_Y_MARTES));
+      expect(fin(visibles)).toBe('2026-01-06');
+    });
+  });
+});
 
 describe('crearResolutorFechas', () => {
 

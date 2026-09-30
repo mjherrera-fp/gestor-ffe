@@ -1,6 +1,7 @@
 import {
   HorarioSemanal,
   HorarioDia,
+  FestivoPersonalizado,
   RelacionEstado,
   PlanFormativoEstado,
   ConvenioEstado,
@@ -13,6 +14,8 @@ import {
   ValoracionEstadoLabels,
 } from '../../../types/index.ts';
 import * as escalaEstados from '../../../utils/escalaEstados.ts';
+import { conjuntoSaltar } from '../../../lib/festivosAlumno.ts';
+
 import { Send, Clock, ShieldCheck, Check } from 'lucide-react';
 
 //agrupa las funciones puras: calculateEndDateForHours, getNextRelacionEstado, los colores de badges, etc. Son fácilmente testeables de forma aislada.
@@ -63,6 +66,24 @@ const festivosSet = (festivos: string[], empresaFestivos: string[], usarFestivos
   return set;
 };
 
+/**
+ * El conjunto de dias a saltar de un alumno concreto.
+ *
+ * Los dos ultimos parametros de los calculos de fecha son opcionales a proposito:
+ * se anaden al final para no tener que tocar las llamadas que no llevan dias
+ * propios, que son la mayoria.
+ */
+const festivosAlumnoSet = (
+  festivos: string[],
+  empresaFestivos: string[],
+  usarFestivos: boolean,
+  usarFestivosEmpresa: boolean,
+  personalizados?: FestivoPersonalizado[]
+): Set<string> => conjuntoSaltar(
+  festivosSet(festivos, empresaFestivos, usarFestivos, usarFestivosEmpresa),
+  personalizados
+);
+
 const DIAS_SEMANA = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'] as const;
 
 /**
@@ -74,6 +95,28 @@ export const horarioTieneHoras = (horario: HorarioSemanal | undefined): boolean 
   return DIAS_SEMANA.some(dia => (horario[dia]?.horas ?? 0) > 0);
 };
 
+/**
+ * Los dias de la semana en los que el horario tiene horas, por nombre.
+ *
+ * Se devuelve el nombre y no la lista de fechas porque cuantos dias labora
+ * depende del periodo, y ese lo decide quien edita: el calendario de los dias de
+ * un alumno se recalcula sobre un periodo que se mueve segun los dias que va
+ * marcando. Fijar aqui las fechas las anclaria a un periodo que en cuanto se
+ * tocase un dia se quedaria corto, y los dias de la cola se quedarian en verde
+ * cuando el alumno ya habria terminado.
+ *
+ * Que el sabado sea laborable depende del convenio y no de un calendario
+ * generico: un convenio que trabaja los sabados los tiene en verde.
+ */
+export const diasConHorasDelHorario = (horario: HorarioSemanal | undefined): Set<string> => {
+  const conHoras = new Set<string>();
+  if (!horario) return conHoras;
+  for (const dia of DIAS_SEMANA) {
+    if ((horario[dia]?.horas ?? 0) > 0) conHoras.add(dia);
+  }
+  return conHoras;
+};
+
 export const calculateEndDateForHours = (
   startDate: string,
   totalHours: number,
@@ -81,14 +124,15 @@ export const calculateEndDateForHours = (
   festivos: string[],
   usarFestivos: boolean = true,
   empresaFestivos: string[] = [],
-  usarFestivosEmpresa: boolean = false
+  usarFestivosEmpresa: boolean = false,
+  personalizados?: FestivoPersonalizado[]
 ): string | null => {
   if (!startDate || !totalHours || !horario) return null;
 
   const startParts = startDate.split('-').map(Number);
   let remainingHoras = totalHours;
   let current = new Date(startParts[0], startParts[1] - 1, startParts[2]);
-  const saltar = festivosSet(festivos, empresaFestivos, usarFestivos, usarFestivosEmpresa);
+  const saltar = festivosAlumnoSet(festivos, empresaFestivos, usarFestivos, usarFestivosEmpresa, personalizados);
   let iterations = 0;
 
   while (remainingHoras > 0 && iterations < 365) {
@@ -129,14 +173,15 @@ export const calculateStartDateFromEnd = (
   festivos: string[],
   usarFestivos: boolean = true,
   empresaFestivos: string[] = [],
-  usarFestivosEmpresa: boolean = false
+  usarFestivosEmpresa: boolean = false,
+  personalizados?: FestivoPersonalizado[]
 ): string | null => {
   if (!targetEndDate || !totalHours || !horario) return null;
 
   const [year, month, day] = targetEndDate.split('-').map(Number);
   let remainingHoras = totalHours;
   let current = new Date(year, month - 1, day);
-  const saltar = festivosSet(festivos, empresaFestivos, usarFestivos, usarFestivosEmpresa);
+  const saltar = festivosAlumnoSet(festivos, empresaFestivos, usarFestivos, usarFestivosEmpresa, personalizados);
   let iterations = 0;
 
   while (remainingHoras > 0 && iterations < 365) {

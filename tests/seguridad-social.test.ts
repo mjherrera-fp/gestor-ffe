@@ -169,6 +169,90 @@ describe('festivos de empresa', () => {
   });
 });
 
+// Los dias que un alumno marca como propios se siguen el mismo criterio: un
+// `QUITAR` le devuelve un festivo heredado (y por tanto lo cotiza) y un `ANADIR`
+// le quita un dia laborable (y por tanto no lo cotiza). Sin esto, las horas
+// consumidas en la relacion y las cotizadas no saldrian.
+describe('dias personalizados por alumno', () => {
+  it('ANADIR descuenta un dia que no era festivo', () => {
+    const r = contarDiasCotizacion(
+      paramsBase({
+        personalizadosPorAlumno: new Map([[100, [{ fecha: '2026-01-14', tipo: 'ANADIR' as const }]]]),
+      })
+    );
+    // 14 de enero de 2026 es un miercoles: sin el dia propio serian 22.
+    expect(r.datos['100_2026-01-01']).toBe(21);
+  });
+
+  it('QUITAR vuelve a cotizar un festivo heredado', () => {
+    const r = contarDiasCotizacion(
+      paramsBase({
+        centroFestivosMap: { 10: new Set(['2026-01-07']) },
+        personalizadosPorAlumno: new Map([[100, [{ fecha: '2026-01-07', tipo: 'QUITAR' as const }]]]),
+      })
+    );
+    // Sin el QUITAR serian 21 por el festivo; con el, vuelve a 22.
+    expect(r.datos['100_2026-01-01']).toBe(22);
+  });
+
+  it('aplica solo al alumno que le corresponde', () => {
+    const r = contarDiasCotizacion(
+      paramsBase({
+        relaciones: [
+          relacion(1, 100, JSON.stringify(LUN_VIE_8H), '2026-01-01', '2026-01-31'),
+          relacion(2, 200, JSON.stringify(LUN_VIE_8H), '2026-01-01', '2026-01-31'),
+        ],
+        relCentroMap: { 1: 10, 2: 10 },
+        relEmpresaCiudadMap: { 1: 'Madrid', 2: 'Madrid' },
+        personalizadosPorAlumno: new Map([[100, [{ fecha: '2026-01-14', tipo: 'ANADIR' as const }]]]),
+      })
+    );
+    expect(r.datos['100_2026-01-01']).toBe(21);
+    expect(r.datos['200_2026-01-01']).toBe(22);
+  });
+
+  it('aplica los dos sentidos a la vez', () => {
+    const r = contarDiasCotizacion(
+      paramsBase({
+        centroFestivosMap: { 10: new Set(['2026-01-07']) },
+        personalizadosPorAlumno: new Map([[100, [
+          { fecha: '2026-01-07', tipo: 'QUITAR' as const },
+          { fecha: '2026-01-14', tipo: 'ANADIR' as const },
+        ]]]),
+      })
+    );
+    // 22 laborables - 1 festivo = 21; el QUITAR recupera ese dia (+1 = 22) y el
+    // ANADIR quita otro (-1 = 21). Los dos sentidos se cancelan en la cuenta
+    // pero no en el significado: este alumno asiste el festivo y no el miercoles.
+    expect(r.datos['100_2026-01-01']).toBe(21);
+  });
+
+  it('no toca un dia fuera del horario con horas', () => {
+    // El 17 de enero de 2026 es sabado, que no esta en el horario: marcarlo
+    // propio no puede cambiar la cuenta.
+    const r = contarDiasCotizacion(
+      paramsBase({
+        personalizadosPorAlumno: new Map([[100, [{ fecha: '2026-01-17', tipo: 'ANADIR' as const }]]]),
+      })
+    );
+    expect(r.datos['100_2026-01-01']).toBe(22);
+  });
+
+  it('un alumno sin desviacion cuenta igual que antes', () => {
+    const r = contarDiasCotizacion(paramsBase({ personalizadosPorAlumno: new Map() }));
+    expect(r.datos['100_2026-01-01']).toBe(22);
+  });
+
+  it('QUITAR de un dia que no era festivo no resta nada', () => {
+    const r = contarDiasCotizacion(
+      paramsBase({
+        personalizadosPorAlumno: new Map([[100, [{ fecha: '2026-01-14', tipo: 'QUITAR' as const }]]]),
+      })
+    );
+    expect(r.datos['100_2026-01-01']).toBe(22);
+  });
+});
+
 describe('rango de meses', () => {
   it('genera una clave por mes, del mes de inicio al de fin', () => {
     const r = contarDiasCotizacion(

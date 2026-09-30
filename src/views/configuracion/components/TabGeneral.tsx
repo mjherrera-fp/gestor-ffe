@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Bell, Settings, Loader2, CalendarDays, Building2, Plus, Trash2, Pencil, FileBadge, X, Sun, Moon, Laptop, Tag } from 'lucide-react';
-import { EmpresaFestivosModal } from './EmpresaFestivosModal.tsx';
+import { FestivosModal } from '../../../components/ui/FestivosModal.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { useTheme } from '../../../hooks/useTheme.tsx';
+import { allLocalidades } from '../../../data/geo/geoData.ts';
+import type { RangoCurso } from '../../../lib/calendarioFestivos.ts';
 
 const labelClass = 'block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5';
 const inputClass = 'w-full bg-surface-card border border-border-base rounded-lg px-4 py-2.5 text-text-main text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-sans';
@@ -13,7 +15,13 @@ interface AvisosConfig {
   semanas_fin: string;
 }
 
-export function TabGeneral() {
+interface TabGeneralProps {
+  /** Rango del curso actual, o `null` si no hay ninguno. */
+  rangoCurso?: RangoCurso | null;
+  onIrACursos?: () => void;
+}
+
+export function TabGeneral({ rangoCurso, onIrACursos }: TabGeneralProps = {}) {
   // ── Tema (apariencia) ──
   const { theme, setTheme } = useTheme();
 
@@ -182,6 +190,17 @@ export function TabGeneral() {
   const handleDeleteAllEmpresaFestivos = (localidad: string) => {
     setEmpresaFestivos(prev => ({ ...prev, [localidad]: [] }));
   };
+
+  // La localidad de la empresa se teclea a mano en el alta, así que el slug de
+  // la API hay que resolverlo por nombre y sin distinguir mayúsculas. Si no
+  // aparece en el catálogo no se ofrece la importación automática.
+  const festivosModalSlug = useMemo(() => {
+    if (!festivosModalLocalidad) return null;
+    const entrada = allLocalidades.find(
+      l => l.name.toLowerCase() === festivosModalLocalidad.toLowerCase()
+    );
+    return entrada?.slug || null;
+  }, [festivosModalLocalidad]);
 
   // ── Estado FFE valoraciones ──
   const [valoracionesFinales, setValoracionesFinales] = useState<{ id: number; codigo: string; valor: string; orden: number }[]>([]);
@@ -540,12 +559,24 @@ export function TabGeneral() {
       </div>
 
       {/* ─── MODAL FESTIVOS EMPRESA ─── */}
-      <EmpresaFestivosModal
+      <FestivosModal
         open={!!festivosModalLocalidad}
-        localidad={festivosModalLocalidad}
-        festivos={empresaFestivos[festivosModalLocalidad || ''] || []}
-        onSave={(festivos) => handleSaveEmpresaFestivos(festivosModalLocalidad || '', festivos)}
         onClose={() => setFestivosModalLocalidad(null)}
+        titulo="Días festivos de la empresa"
+        subtitulo={
+          festivosModalLocalidad
+            ? `Festivos de ${festivosModalLocalidad}`
+            : 'Por localidad'
+        }
+        rango={rangoCurso ?? null}
+        festivos={empresaFestivos[festivosModalLocalidad || ''] || []}
+        slug={festivosModalSlug}
+        onIrACursos={
+          onIrACursos
+            ? () => { setFestivosModalLocalidad(null); onIrACursos(); }
+            : undefined
+        }
+        onSave={(festivos) => handleSaveEmpresaFestivos(festivosModalLocalidad || '', festivos)}
       />
 
       {/* ─── SECCIÓN VALORACIONES FFE ─── */}

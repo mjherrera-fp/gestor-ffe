@@ -10,7 +10,7 @@ Documentación de uso de la aplicación, dividida en un documento por módulo.
 |---|-----------|-----------------|
 | 1 | [Introducción](01-introduccion.md) | Qué es la aplicación, condiciones de uso, copyright y funcionalidades |
 | 2 | [Primeros pasos](02-primeros-pasos.md) | Instalación, desbloqueo de la base de datos y estructura de la navegación |
-| 3 | [Módulo de Profesor](03-modulo-de-profesor.md) | Tus datos, centros educativos y ciclos formativos |
+| 3 | [Módulo de Profesor y Centros](03-modulo-de-profesor.md) | Tus datos, centros educativos y ciclos formativos |
 | 4 | [Cursos](04-cursos.md) | Gestión de los cursos académicos y qué ocurre al crear uno nuevo |
 | 5 | [Alumnos](05-alumnos.md) | Alta manual, importación desde Excel, CV y vistas grid/tabla |
 | 6 | [Empresas](06-empresas.md) | Empresas colaboradoras, tutores, estadísticas e importación |

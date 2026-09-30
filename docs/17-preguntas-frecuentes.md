@@ -12,7 +12,13 @@ Los alumnos, relaciones e intereses del curso anterior se eliminan. Las empresas
 Sí, desde el módulo de Alumnos puedes importar mediante Excel. Descarga la plantilla desde el propio botón de importación.
 
 **¿Los festivos de empresa se importan automáticamente?**
-Sí, desde el modal de gestión de festivos de empresa puedes obtener los festivos de una localidad automáticamente a través de la API de Calendarios Nacionales (soporta localidades de la Comunidad de Madrid).
+Sí. En **Configuración → ' General ' → Festivos de empresa**, activa el descuento y pulsa **Festivos** en la localidad. Desde ahí, **Obtener festivos** los descarga de la API de Calendarios Nacionales (soporta localidades de la Comunidad de Madrid). Trae los años naturales que cubre el curso y deja solo los días que caen dentro de sus fechas.
+
+**¿Qué pasa si los días festivos no coinciden con los del curso?**
+El calendario solo deja marcar días entre el primer día y el último del curso. Los que tuvieras guardados de un curso anterior se descartan al guardar, con un aviso antes de hacerlo.
+
+**¿Por qué no puedo marcar días festivos si no he creado el curso?**
+Los festivos se cuentan sobre las fechas del curso, así que hacen falta esas fechas para situarlos en el calendario. Crea el curso en la sección **Cursos** y vuelve a intentarlo.
 
 **¿Cómo recupero la contraseña de la base de datos?**
 No es posible recuperarla. Si olvidas la contraseña, los datos serán irrecuperables. Guarda la contraseña en un lugar seguro.

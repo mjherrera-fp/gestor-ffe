@@ -46,10 +46,15 @@ El calendario generado en PDF muestra cada mes del período de prácticas con un
 | Color | Significado |
 |-------|-------------|
 | Verde | Día laborable (prácticas) |
-| Rojo | Festivo (centro o empresa) |
+| Rojo | Día no lectivo: festivo del centro o de la empresa, o día marcado como propio del alumno |
 | Naranja | Tutoría |
 | Azul | Fecha de inicio o fin |
 | Gris | Fin de semana o día fuera del período |
+
+El calendario tiene en cuenta los **días no lectivos propios de cada alumno** (ver
+[Relaciones Alumno-Empresa](09-relaciones-alumno-empresa.md)): un día que el alumno marcó
+como no lectivo aparece en rojo aunque no sea festivo oficial, y un festivo al que el
+alumno asiste aparece en verde.
 
 > `[IMAGEN: Ejemplo de calendario de prácticas PDF con código de colores]`
 

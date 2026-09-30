@@ -26,9 +26,13 @@ En la seccion **Seguridad** podrás introducir una contraseña para cifrar la ba
 
 ## 2.4 Estructura de la navegación
 
-> `[IMAGEN: Barra lateral izquierda con todos los módulos visibles: Profesor, Cursos, Alumnos, Empresas, Intereses, Convenios, Relaciones, Enviar a la DAT, Panel, Configuración, Histórico]`
+> `[IMAGEN: Barra lateral izquierda con todos los módulos visibles: Profesor, Cursos, Centros, Panel, Alumnos, Empresas, Intereses, Convenios, Relaciones, Enviar a la DAT, Configuración, Histórico]`
 
 La navegación principal se encuentra en la barra lateral izquierda. Cada icono corresponde a un módulo:
+
+> ℹ️ Solo **Profesor** está disponible siempre. Todos los demás módulos aparecen en gris y
+> no se pueden abrir hasta que tengas un profesor configurado **y** un curso académico creado.
+> Para desbloquearlos, ve a **Cursos** y crea el curso.
 
 > ℹ️ **Enviar a la DAT** solo aparece si tienes un profesor y un curso seleccionados, y si en
 > Configuración el envío a la DAT está en modo **Es necesario**. Consulta la sección
@@ -36,8 +40,9 @@ La navegación principal se encuentra en la barra lateral izquierda. Cada icono 
 
 | Icono | Módulo | Descripción |
 |-------|--------|-------------|
-| 🧑‍🏫 | Profesor | Datos personales, centros educativos y ciclos |
+| 🧑‍🏫 | Profesor | Tus datos personales |
 | 📖 | Cursos | Gestión de cursos académicos |
+| 🏫 | Centros | Centros educativos y sus ciclos formativos |
 | 📊 | Panel | Dashboard, estadísticas y Seguridad Social |
 | 👥 | Alumnos | Gestión del alumnado |
 | 🏢 | Empresas | Empresas colaboradoras y tutores |

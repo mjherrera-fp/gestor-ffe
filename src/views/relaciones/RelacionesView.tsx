@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 import {useRelaciones} from './hooks/useRelaciones.ts';
-import {Alumno, RelacionAlumno} from '../../types/index.ts';
+import {Alumno, FestivoPersonalizado, RelacionAlumno} from '../../types/index.ts';
 import {RelacionesListado} from './components/RelacionesListado.tsx';
 import {RelacionDetalle} from './components/RelacionesDetalle.tsx';
 import {RelacionFormModal} from './components/RelacionesFormModal.tsx';
@@ -64,8 +64,10 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
   }, [ctx.targetEmailRelaciones]);
 
   // Adaptador para calculateEndDateForHours que inyecta los festivos del centro
-  const calcEndDate = (start: string, hours: number) =>
-    calculateEndDateForHours(start, hours, ctx.formData.horario, ctx.centroFestivos, ctx.usarFestivos, ctx.empresaFestivosActuales, ctx.usarFestivosEmpresa);
+  // y los dias propios del alumno, para que el "Fin Estimado" de cada tarjeta
+  // tenga en cuenta lo que ese alumno dejo defestivo o anadio.
+  const calcEndDate = (start: string, hours: number, personalizados?: FestivoPersonalizado[]) =>
+    calculateEndDateForHours(start, hours, ctx.formData.horario, ctx.centroFestivos, ctx.usarFestivos, ctx.empresaFestivosActuales, ctx.usarFestivosEmpresa, personalizados);
 
   return (
     <div className="space-y-6 flex flex-col animate-in fade-in duration-500">
@@ -504,6 +506,13 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         onUpdateStudentHours={ctx.updateStudentHours}
         onUpdateStudentStartDate={ctx.updateStudentStartDate}
         calculateEndDateForHours={calcEndDate}
+        festivosAlumnoId={ctx.festivosAlumnoId}
+        onOpenFestivosAlumno={ctx.setFestivosAlumnoId}
+        onCloseFestivosAlumno={() => ctx.setFestivosAlumnoId(null)}
+        festivosEfectivosDe={ctx.festivosEfectivosAlumno}
+        onSaveFestivosAlumno={ctx.saveFestivosAlumno}
+        onPreviewFestivosAlumno={ctx.previewFestivosAlumno}
+        festivosAlumnoNombre={ctx.festivosAlumnoNombre}
         targetStartDate={ctx.targetStartDate}
         setTargetStartDate={ctx.setTargetStartDate}
         targetEndDate={ctx.targetEndDate}
@@ -521,7 +530,10 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         setBulkHorario={ctx.setBulkHorario}
         onApplyBulkHorario={ctx.applyBulkHorario}
         onSubmit={ctx.handleSubmit}
-        onClose={() => ctx.setShowForm(false)}
+        // Cancelar descarta el borrador, no solo lo esconde: si no, el alumno
+        // que se había elegido seguiría fuera del selector, ya que para el
+        // servidor nunca llegó a estar en ninguna relación.
+        onClose={ctx.closeForm}
       />
 
       <RelacionEstadisticaFormModal

@@ -72,6 +72,28 @@ export interface HorarioSemanal {
   domingo: HorarioDia;
 }
 
+/**
+ * Desvío personal de un alumno respecto a los días no lectivos que le tocan.
+ *
+ * No se guarda la lista completa de días del alumno, sino solo en qué se
+ * diferencia de la que hereda del centro y de la empresa. Así, si el profesor
+ * añade un festivo al centro más adelante, todos los alumnos lo reciben sin
+ * tocar sus filas, y una preferencia personal ya expresa sigue siendo válida.
+ */
+export type TipoFestivoPersonalizado = 'QUITAR' | 'ANADIR';
+
+export interface FestivoPersonalizado {
+  /** 'YYYY-MM-DD'. */
+  fecha: string;
+  /**
+   * `QUITAR`: era un festivo heredado pero el alumno asiste ese día, así que deja
+   * de descontarse y la fecha fin se acorta.
+   * `ANADIR`: el alumno no asiste aunque no sea festivo, así que se descuenta y
+   * la fecha fin se retrasa.
+   */
+  tipo: TipoFestivoPersonalizado;
+}
+
 export interface Alumno {
   id?: number;
   nombre: string;
@@ -92,6 +114,8 @@ export interface Alumno {
   estadoPlanFormativo: PlanFormativoEstado;
   estadoSeguimiento: SeguimientoEstado;
   estadoValoracion: ValoracionEstado;
+  /** Días en los que este alumno se desvía de los festivos del centro y la empresa. */
+  festivosPersonalizados?: FestivoPersonalizado[];
   cvEnvioCount?: number;
   empresasInteresadasCount?: number;
   tieneMatch?: number;

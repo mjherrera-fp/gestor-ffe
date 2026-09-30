@@ -20,7 +20,7 @@ El manual de uso está en **[`docs/`](docs/README.md)**, dividido en 18 document
 
 1. [Introducción](docs/01-introduccion.md) - qué es la aplicación, condiciones de uso y copyright
 2. [Primeros pasos](docs/02-primeros-pasos.md) - instalación, desbloqueo y navegación
-3. [Módulo de Profesor](docs/03-modulo-de-profesor.md) - datos personales, centros y ciclos
+3. [Módulo de Profesor y Centros](docs/03-modulo-de-profesor.md) - datos personales, centros y ciclos
 4. [Cursos](docs/04-cursos.md) - cursos académicos
 5. [Alumnos](docs/05-alumnos.md) - alta, importación desde Excel y CV
 6. [Empresas](docs/06-empresas.md) - empresas colaboradoras y tutores
@@ -49,8 +49,9 @@ de módulos se desbloquean según haya un profesor configurado y un curso selecc
 
 | Módulo | Para qué sirve | Documento |
 |--------|----------------|-----------|
-| **Profesor** | Tus datos, los centros educativos y los ciclos en los que eres tutor | [3](docs/03-modulo-de-profesor.md) |
+| **Profesor** | Tus datos personales | [3](docs/03-modulo-de-profesor.md) |
 | **Cursos** | Curso académico en curso: fechas, detalle y cycles | [4](docs/04-cursos.md) |
+| **Centros** | Centros educativos, ciclos formativos y festivos del centro | [3](docs/03-modulo-de-profesor.md) |
 | **Panel** | Resumen del curso, Seguridad Social, firmas y columnas DAT | [12](docs/12-panel-de-control.md) |
 | **Alumnos** | Alta, importación desde Excel, CV y datos de contacto | [5](docs/05-alumnos.md) |
 | **Empresas** | Empresas colaboradoras, tutores y estadísticas | [6](docs/06-empresas.md) |

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Profesor, CentroEducativo, DetalleAcademico, ResultadoAprendizaje } from '../../../types/index.ts';
-import { mostrarToast } from '../../../utils/toast.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS INTERNOS
@@ -8,26 +7,26 @@ import { mostrarToast } from '../../../utils/toast.ts';
 
 export type DeleteTarget = { id: number; type: 'centro' | 'detalle' };
 
-export type Message = { type: 'success' | 'error' | ''; text: string };
-
 export type CentroWithDetalles = CentroEducativo & { detalles: DetalleAcademico[] };
 
 // ─────────────────────────────────────────
 //  HOOK PRINCIPAL
 // ─────────────────────────────────────────
 
-export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) => void, onRefresh?: () => void) {
-
-  // ── Datos del perfil ──
-  const [formData, setFormData] = useState<Profesor>({
-    nombre: '', apellidos: '', nif: '', email: '', telefono: '',
-  });
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
+/**
+ * Centros educativos del profesor y los ciclos formativos de cada uno.
+ *
+ * Vive aparte de `usePerfilProfesor` porque los centros son su propia seccion
+ * del menu: asi la vista del perfil no dispara el `GET /api/centros` y su
+ * lista de N+1 peticiones, y al abrir Centros no se arrastra el estado del
+ * formulario del perfil.
+ */
+export function useCentros(profesor: Profesor | null, onRefresh?: () => void) {
 
   // ── Centros ──
   const [centros, setCentros] = useState<CentroWithDetalles[]>([]);
   const [loadingCentros, setLoadingCentros] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // ── Modal eliminar ──
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<DeleteTarget | null>(null);
@@ -36,6 +35,12 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   const [showCentroForm, setShowCentroForm] = useState(false);
   const [editingCentro, setEditingCentro] = useState<CentroEducativo | null>(null);
   const [centroFormData, setCentroFormData] = useState<Partial<CentroEducativo>>({});
+
+  // ── Modal días festivos del centro ──
+  // Se abre desde la tarjeta del centro, no desde su formulario de edicion: los
+  // festivos son una cuenta aparte del nombre o la ciudad, asi que no tienen
+  // que obligar a abrir el formulario para poder tocarlos.
+  const [centroConFestivos, setCentroConFestivos] = useState<CentroWithDetalles | null>(null);
 
   // ── Modal detalle ──
   const [showDetalleForm, setShowDetalleForm] = useState(false);
@@ -49,8 +54,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   });
   const [editingRAId, setEditingRAId] = useState<string | null>(null);
 
-  // ── Festivos / Tutorías ──
-  const [newFestivo, setNewFestivo] = useState('');
+  // ── Tutorías ──
   const [newTutoria, setNewTutoria] = useState('');
 
   // ─────────────────────────────────────────
@@ -58,10 +62,7 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   // ─────────────────────────────────────────
 
   useEffect(() => {
-    if (profesor) {
-      setFormData({ ...profesor });
-      fetchCentros();
-    }
+    if (profesor) fetchCentros();
   }, [profesor]);
 
   // ─────────────────────────────────────────
@@ -86,37 +87,6 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
       console.error(error);
     } finally {
       setLoadingCentros(false);
-    }
-  };
-
-  // ─────────────────────────────────────────
-  //  HANDLERS: PERFIL
-  // ─────────────────────────────────────────
-
-  const handleSubmitProfesor = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setSuccess(false);
-    try {
-      const res = await fetch('/api/profesor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        onUpdate({ ...formData, id: data.id });
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      } else {
-        console.error('Error al guardar el perfil:', res.status, data);
-        mostrarToast(data?.error || 'No se pudo guardar el perfil.', 'error');
-      }
-    } catch (error) {
-      console.error(error);
-      mostrarToast('No se pudo guardar el perfil: error de conexión con el servidor.', 'error');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -167,6 +137,35 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     setShowDeleteConfirm(null);
     fetchCentros();
     onRefresh?.();
+  };
+
+  const handleOpenFestivos = (centro: CentroWithDetalles) => setCentroConFestivos(centro);
+
+  const handleSaveFestivos = async (nuevos: string[]) => {
+    const centro = centroConFestivos;
+    if (!centro?.id) return;
+    setSaving(true);
+    try {
+      // El `PUT` del centro reescribe todas sus columnas, no solo `festivos`
+      // (ver `CentroDAO.update`), asi que hay que reenviar el centro entero.
+      // Mandando solo `{ festivos }` el nombre, la ciudad, el telefono y el
+      // correo se quedarian a NULL. Los `detalles` se descartan porque el
+      // endpoint no los toca y no hay por que mandarlos.
+      const { detalles, ...datos } = centro;
+      const res = await fetch(`/api/centros/${centro.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...datos, festivos: nuevos }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      setCentroConFestivos(null);
+      fetchCentros();
+      onRefresh?.();
+    } catch {
+      alert('Error al guardar los días festivos del centro.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   // ─────────────────────────────────────────
@@ -239,14 +238,14 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
         resultadosAprendizaje: (prev.resultadosAprendizaje || []).map(r =>
           r.id === editingRAId
             ? {
-                ...r,
-                modulo: newRA.modulo!,
-                codigo: newRA.codigo!,
-                ra: newRA.ra!,
-                nombre: newRA.nombre!,
-                impartidoEmpresa: newRA.impartidoEmpresa || false,
-                actividadFormativa: newRA.actividadFormativa,
-              }
+              ...r,
+              modulo: newRA.modulo!,
+              codigo: newRA.codigo!,
+              ra: newRA.ra!,
+              nombre: newRA.nombre!,
+              impartidoEmpresa: newRA.impartidoEmpresa || false,
+              actividadFormativa: newRA.actividadFormativa,
+            }
             : r
         ),
       }));
@@ -296,24 +295,8 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   };
 
   // ─────────────────────────────────────────
-  //  HANDLERS: FESTIVOS / TUTORÍAS
+  //  HANDLERS: TUTORÍAS
   // ─────────────────────────────────────────
-
-  const addFestivo = () => {
-    if (!newFestivo) return;
-    setCentroFormData(prev => ({
-      ...prev,
-      festivos: [...new Set([...(prev.festivos || []), newFestivo])].sort(),
-    }));
-    setNewFestivo('');
-  };
-
-  const removeFestivo = (date: string) => {
-    setCentroFormData(prev => ({
-      ...prev,
-      festivos: (prev.festivos || []).filter(f => f !== date),
-    }));
-  };
 
   const addTutoria = () => {
     if (!newTutoria) return;
@@ -336,16 +319,15 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
   // ─────────────────────────────────────────
 
   return {
-    // Perfil
-    formData, setFormData,
-    saving, success,
-    handleSubmitProfesor,
     // Centros
-    centros, loadingCentros,
+    centros, loadingCentros, saving,
     showCentroForm, setShowCentroForm,
     editingCentro,
     centroFormData, setCentroFormData,
     handleOpenCentroForm, handleSaveCentro,
+    // Festivos
+    centroConFestivos, setCentroConFestivos,
+    handleOpenFestivos, handleSaveFestivos,
     // Detalles
     showDetalleForm, setShowDetalleForm,
     editingDetalle,
@@ -354,8 +336,8 @@ export function useProfesor(profesor: Profesor | null, onUpdate: (p: Profesor) =
     // RAs
     newRA, setNewRA,
     addRA, removeRA, startEditRA, cancelEditRA, editingRAId,
-    // Festivos / Tutorías
-    newFestivo, setNewFestivo, addFestivo, removeFestivo,
+    // Festivos: se editan en el calendario, no aqui
+    // Tutorías
     newTutoria, setNewTutoria, addTutoria, removeTutoria,
     // Eliminar
     showDeleteConfirm, setShowDeleteConfirm,

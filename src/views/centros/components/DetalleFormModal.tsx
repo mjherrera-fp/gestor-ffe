@@ -3,6 +3,7 @@ import { Plus, Trash2, Pencil, X, CheckCircle, CheckCircle2 } from 'lucide-react
 import { DetalleAcademico, ResultadoAprendizaje } from '../../../types/index.ts';
 import { DateList } from '../../../components/ui/DateList.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
+import { Title } from '../../../components/Title.tsx';
 import { useFormValidation } from '../../../hooks/useFormValidation.ts';
 import { required } from '../../../utils/validation.ts';
 
@@ -72,9 +73,11 @@ export function DetalleFormModal({
           <h3 className="font-black text-text-main uppercase tracking-widest text-xs">
             Configuración de Ciclo (Detalle Académico)
           </h3>
-          <button onClick={onClose} className="text-text-muted hover:text-text-main">
-            <Plus className="rotate-45 h-6 w-6" />
-          </button>
+          <Title text="Cerrar">
+            <button onClick={onClose} className="text-text-muted hover:text-text-main">
+              <Plus className="rotate-45 h-6 w-6" />
+            </button>
+          </Title>
         </div>
 
         {/* Form */}
@@ -203,14 +206,15 @@ export function DetalleFormModal({
                   <span className="text-[9px] font-black text-primary uppercase tracking-wider flex items-center gap-1.5">
                     <Pencil className="h-3 w-3" /> Editando RA
                   </span>
-                  <button
-                    type="button"
-                    onClick={onCancelEditRA}
-                    className="text-primary hover:text-primary p-1 rounded-md hover:bg-primary-light transition-colors"
-                    title="Cancelar edición"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
+                  <Title text="Cancelar edición">
+                    <button
+                      type="button"
+                      onClick={onCancelEditRA}
+                      className="text-primary hover:text-primary p-1 rounded-md hover:bg-primary-light transition-colors"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </Title>
                 </div>
               )}
               <div className="grid grid-cols-4 gap-2">
@@ -293,22 +297,24 @@ export function DetalleFormModal({
                     )}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => onEditRA(ra)}
-                      className="text-text-muted hover:text-primary p-1 rounded-md hover:bg-primary-light transition-colors"
-                      title="Editar RA"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onRemoveRA(ra.id)}
-                      className="text-text-muted hover:text-danger p-1 rounded-md hover:bg-danger-soft transition-colors"
-                      title="Eliminar RA"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <Title text="Editar RA">
+                      <button
+                        type="button"
+                        onClick={() => onEditRA(ra)}
+                        className="text-text-muted hover:text-primary p-1 rounded-md hover:bg-primary-light transition-colors"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                    </Title>
+                    <Title text="Eliminar RA">
+                      <button
+                        type="button"
+                        onClick={() => onRemoveRA(ra.id)}
+                        className="text-text-muted hover:text-danger p-1 rounded-md hover:bg-danger-soft transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </Title>
                   </div>
                 </div>
               ))}
