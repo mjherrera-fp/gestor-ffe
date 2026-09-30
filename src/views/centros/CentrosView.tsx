@@ -10,6 +10,7 @@ import { useCentros }          from './hooks/useCentros.ts';
 import { CentrosEducativos }   from './components/CentrosEducativos.tsx';
 import { CentroFormModal }     from './components/CentroFormModal.tsx';
 import { DetalleFormModal }    from './components/DetalleFormModal.tsx';
+import { ResultadosAprendizajeModal } from './components/ResultadosAprendizajeModal.tsx';
 
 interface Props {
   profesor: Profesor | null;
@@ -85,6 +86,7 @@ export default function CentrosView({ profesor, onRefresh, rangoCurso, onIrACurs
         onDeleteCentro={id => ctx.setShowDeleteConfirm({ id, type: 'centro' })}
         onAddDetalle={centroId => ctx.handleOpenDetalleForm(centroId, null)}
         onEditDetalle={(centroId, detalle) => ctx.handleOpenDetalleForm(centroId, detalle)}
+        onEditRA={ctx.handleOpenRA}
         onDeleteDetalle={id => ctx.setShowDeleteConfirm({ id, type: 'detalle' })}
       />
 
@@ -104,19 +106,21 @@ export default function CentrosView({ profesor, onRefresh, rangoCurso, onIrACurs
         editing={ctx.editingDetalle}
         formData={ctx.detalleFormData}
         onChange={ctx.setDetalleFormData}
-        newRA={ctx.newRA}
-        onNewRAChange={ctx.setNewRA}
-        onAddRA={ctx.addRA}
-        onRemoveRA={ctx.removeRA}
-        onEditRA={ctx.startEditRA}
-        onCancelEditRA={ctx.cancelEditRA}
-        editingRAId={ctx.editingRAId}
         newTutoria={ctx.newTutoria}
         setNewTutoria={ctx.setNewTutoria}
         onAddTutoria={ctx.addTutoria}
         onRemoveTutoria={ctx.removeTutoria}
         onSubmit={ctx.handleSaveDetalle}
         onClose={() => ctx.setShowDetalleForm(false)}
+      />
+
+      {/* ── MODAL: Resultados de Aprendizaje del ciclo ── */}
+      <ResultadosAprendizajeModal
+        open={!!ctx.raDetalle}
+        detalle={ctx.raDetalle}
+        saving={ctx.savingRA}
+        onSave={ctx.handleSaveRA}
+        onClose={ctx.closeRA}
       />
 
       {/* ── MODAL: Días festivos del centro ── */}

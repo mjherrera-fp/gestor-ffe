@@ -1,8 +1,15 @@
 import React from 'react';
-import { CalendarDays, GraduationCap, Plus, Edit2, Trash2, MapPin, Phone, Mail, School } from 'lucide-react';
+import {
+  CalendarDays, GraduationCap, Plus, Edit2, Trash2, MapPin, Phone, Mail, School,
+  Target, Layers,
+} from 'lucide-react';
 import { Title } from '../../../components/Title.tsx';
-import { CentroEducativo, DetalleAcademico } from '../../../types/index.ts';
+import { CentroEducativo, DetalleAcademico, ResultadoAprendizaje } from '../../../types/index.ts';
 import { CentroWithDetalles } from '../hooks/useCentros.ts';
+
+/** Modulos distintos entre los RA de un ciclo, para el resumen de la ficha. */
+const numModulos = (ra: ResultadoAprendizaje[] | undefined) =>
+  new Set((ra || []).map(r => r.modulo).filter(Boolean)).size;
 
 interface CentrosEducativosProps {
   centros: CentroWithDetalles[];
@@ -14,13 +21,14 @@ interface CentrosEducativosProps {
   onDeleteCentro: (id: number) => void;
   onAddDetalle: (centroId: number) => void;
   onEditDetalle: (centroId: number, detalle: DetalleAcademico) => void;
+  onEditRA: (detalle: DetalleAcademico) => void;
   onDeleteDetalle: (id: number) => void;
 }
 
 export function CentrosEducativos({
   centros, loading, profesorId,
   onAddCentro, onEditCentro, onEditFestivos, onDeleteCentro,
-  onAddDetalle, onEditDetalle, onDeleteDetalle,
+  onAddDetalle, onEditDetalle, onEditRA, onDeleteDetalle,
 }: CentrosEducativosProps) {
   return (
     <div>
@@ -145,50 +153,92 @@ export function CentrosEducativos({
                     No hay ciclos registrados en este centro.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                     {centro.detalles.map(detalle => (
                       <div
                         key={detalle.id}
-                        className="p-4 bg-surface-subtle rounded-xl border border-border-base"
+                        className="bg-surface-card rounded-xl border border-border-base shadow-sm hover:shadow-md transition-all group overflow-hidden flex flex-col h-full"
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="bg-primary/10 px-2 py-0.5 rounded text-[9px] font-black text-primary uppercase">
-                              Grupo: {detalle.codigoGrupo}
+                        <div className="p-5 flex flex-col grow">
+
+                          {/* Cabecera */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="bg-surface-subtle p-3 rounded-lg border border-border-base group-hover:bg-primary/5 transition-colors">
+                              <GraduationCap className="h-6 w-6 text-text-muted group-hover:text-primary transition-colors" />
                             </div>
-                            <div className="bg-primary-light px-2 py-0.5 rounded text-[9px] font-black text-primary uppercase border border-primary-light">
-                              {detalle.resultadosAprendizaje?.length || 0} RA
+                            <div className="flex gap-1.5">
+                              <Title text="Editar ciclo formativo">
+                                <button
+                                  onClick={() => onEditDetalle(centro.id!, detalle)}
+                                  className="p-1.5 text-text-muted hover:text-primary transition-colors hover:bg-primary-light rounded-md"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </button>
+                              </Title>
+                              <Title text="Eliminar ciclo formativo">
+                                <button
+                                  onClick={() => onDeleteDetalle(detalle.id!)}
+                                  className="p-1.5 text-text-muted hover:text-danger transition-colors hover:bg-danger-soft rounded-md"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </Title>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Title text="Editar ciclo formativo">
-                              <button
-                                onClick={() => onEditDetalle(centro.id!, detalle)}
-                                className="p-1 text-text-muted hover:text-primary"
-                              >
-                                <Edit2 className="h-3 w-3" />
-                              </button>
-                            </Title>
-                            <Title text="Eliminar ciclo formativo">
-                              <button
-                                onClick={() => onDeleteDetalle(detalle.id!)}
-                                className="p-1 text-text-muted hover:text-danger"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </button>
-                            </Title>
+
+                          {/* Nombre */}
+                          <div className="mb-4">
+                            <h3 className="font-bold text-base text-text-main leading-tight mb-0.5 line-clamp-2">
+                              {detalle.ciclo}
+                            </h3>
+                            <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+                              {detalle.codigo} · Grupo {detalle.codigoGrupo}
+                            </p>
+                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-info-soft text-info-strong border border-info-strong/20 rounded-full text-[9px] font-black uppercase tracking-wide">
+                                {detalle.nivel}
+                              </span>
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-subtle text-text-muted border border-border-base rounded-full text-[9px] font-bold uppercase tracking-wide">
+                                {detalle.grado}
+                              </span>
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-subtle text-text-muted border border-border-base rounded-full text-[9px] font-bold uppercase tracking-wide">
+                                {detalle.regimen}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Datos del ciclo */}
+                          <div className="space-y-2 border-t border-border-base pt-4 mt-auto">
+                            <div className="flex items-center gap-2.5 text-xs text-text-main font-medium">
+                              <Layers className="h-3.5 w-3.5 text-text-muted shrink-0" />
+                              <span className="truncate">
+                                {numModulos(detalle.resultadosAprendizaje)} módulos · {detalle.regimen}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2.5 text-xs text-text-main font-medium">
+                              <CalendarDays className="h-3.5 w-3.5 text-text-muted shrink-0" />
+                              <span className="truncate">
+                                {detalle.tutorias?.length || 0} sesiones de tutoría
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2.5 text-xs font-bold text-info-strong bg-info-soft px-2 py-1 rounded-md border border-info-strong/20">
+                              <Target className="h-3.5 w-3.5" /> {detalle.resultadosAprendizaje?.length || 0} RA
+                            </div>
                           </div>
                         </div>
-                        <div className="font-bold text-text-main text-xs mb-1 line-clamp-1">{detalle.ciclo}</div>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-[9px] text-text-muted font-medium">
-                            <span className="font-bold">Nivel:</span> {detalle.nivel}
-                          </div>
-                          <div className="flex items-center gap-2 text-[9px] text-text-muted font-medium">
-                            <span className="font-bold">Grado:</span> {detalle.grado}
-                          </div>
-                          <div className="flex items-center gap-2 text-[9px] text-text-muted font-medium">
-                            <span className="font-bold">Régimen:</span> {detalle.regimen}
+
+                        {/* Footer: RA */}
+                        <div className="px-5 py-4 bg-surface-subtle/50 border-t border-border-base flex items-center justify-between gap-3 mt-auto">
+                          <Title text="Gestionar resultados de aprendizaje">
+                            <button
+                              onClick={() => onEditRA(detalle)}
+                              className="flex items-center gap-1.5 text-info-strong font-bold text-[10px] uppercase tracking-wider hover:bg-info-strong/15 transition-colors bg-info-soft px-2 py-1 rounded-md"
+                            >
+                              <Target className="h-4 w-4" /> Gestionar RA
+                            </button>
+                          </Title>
+                          <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-50">
+                            #{detalle.id}
                           </div>
                         </div>
                       </div>

@@ -42,8 +42,26 @@ Los días que ya estaban guardados y no caen dentro del curso se avisan antes de
 Dentro de cada centro, dentro de la sección **Centros**, puedes gestionar los ciclos formativos:
 
 - Código, nombre del ciclo, nivel, grado (medio/superior), régimen (presencial/distancia) y código de grupo.
-- **Resultados de aprendizaje:** define los módulos profesionales, sus códigos y los resultados de aprendizaje asociados.
 - **Tutorías:** selecciona las fechas de tutoría que se marcarán en el calendario de prácticas.
+
+Cada ciclo se muestra como una ficha con su nombre, su código y su grupo, y un resumen con los módulos, las sesiones de tutoría y el número de resultados de aprendizaje.
+
+### 3.3.1 Resultados de aprendizaje
+
+Desde la ficha de un ciclo, pulsa **Gestionar RA** para abrir sus resultados de aprendizaje. Ahí defines los módulos profesionales, sus códigos y los RA asociados a cada uno. De cada RA se guarda:
+
+- **ID del RA:** su identificador dentro del módulo.
+- **Nombre:** la descripción del resultado.
+- **Impartido en empresa:** si el RA se trabaja en el centro o en la empresa.
+- **Actividad formativa:** la actividad concreta que lo desarrolla, si la tiene.
+
+La pantalla abre sobre el ciclo ya creado, porque los RA se guardan en el propio ciclo y antes de crearlo no hay dónde escribirlos. Pulsa **Añadir RA** para añadir uno nuevo, o edita y borra los que ya hay con los iconos de cada fila. Los campos obligatorios son el módulo, el código, el ID y el nombre: si falta alguno, la fila se marca en rojo y no se guarda.
+
+Los cambios se agrupan: puedes añadir, editar y borrar todos los RA que quieras y no se escribe nada en el ciclo hasta que pulsas **Guardar cambios**. Si cancelas, se descartan y la ficha sigue mostrando los RA que había. Mientras tengas un RA escrito en el formulario o una edición sin aplicar, **Guardar cambios** no está disponible: primero hay que añadirlo, actualizarlo o cancelar la edición, para que no se pierda lo escrito por el camino.
+
+> `[IMAGEN: Ficha de un ciclo con el botón Gestionar RA y el contador de resultados de aprendizaje]`
+
+> `[IMAGEN: Modal de resultados de aprendizaje con el formulario de un RA y la lista de RA del ciclo]`
 
 ---
 

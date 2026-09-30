@@ -591,6 +591,21 @@ async function startServer() {
     DetalleAcademicoDAO.update(Number(req.params.id), req.body);
     res.json({ success: true });
   });
+  // Los RA se editan en su propia pantalla, que no conoce el resto del ciclo.
+  // Por eso van por su propio endpoint: el de arriba reescribe todas las
+  // columnas y desde ahi no habria nada que mandar.
+  app.put('/api/detalles-academicos/:id/resultados', (req, res) => {
+    const id = Number(req.params.id);
+    if (!DetalleAcademicoDAO.getById(id)) {
+      return res.status(404).json({ error: 'El ciclo formativo no existe.' });
+    }
+    const resultados = req.body.resultadosAprendizaje;
+    if (!Array.isArray(resultados)) {
+      return res.status(400).json({ error: 'La lista de resultados de aprendizaje no es válida.' });
+    }
+    DetalleAcademicoDAO.updateResultados(id, resultados);
+    res.json({ success: true });
+  });
   app.delete('/api/detalles-academicos/:id', (req, res) => {
     DetalleAcademicoDAO.delete(Number(req.params.id));
     res.json({ success: true });

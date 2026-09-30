@@ -29,6 +29,7 @@ import {
   PlanFormativoEstado,
   Profesor,
   RelacionAlumno,
+  ResultadoAprendizaje,
   SeguimientoEstado,
   SeguridadSocialData,
   TipoFestivoPersonalizado,
@@ -603,6 +604,19 @@ export const DetalleAcademicoDAO = {
       WHERE id = ?
     `);
     stmt.run(detalle.ciclo, detalle.codigo, detalle.nivel, detalle.grado, detalle.regimen, detalle.codigoGrupo, detalle.nombreCorto || null, JSON.stringify(detalle.resultadosAprendizaje || []), JSON.stringify(detalle.tutorias || []), id);
+  },
+  /**
+   * Sustituir solo los RA, dejando el resto del ciclo como estaba.
+   *
+   * `update` reescribe todas las columnas del ciclo, asi que un guardado que
+   * mande solo la lista de RA vaciaria el nombre, el codigo y las tutorias: las
+   * columnas obligatorias recibirian `undefined` y las que no, un null. Los RA
+   * se editan en su propia pantalla, y desde ahi no se conoce el resto del
+   * ciclo, asi que se escribe una columna y no la fila entera.
+   */
+  updateResultados: (id: number, resultadosAprendizaje: ResultadoAprendizaje[]) => {
+    return db.prepare('UPDATE detalles_academicos SET resultadosAprendizaje = ? WHERE id = ?')
+      .run(JSON.stringify(resultadosAprendizaje || []), id).changes;
   },
   delete: (id: number) => db.prepare('DELETE FROM detalles_academicos WHERE id = ?').run(id)
 };
