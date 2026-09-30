@@ -48,11 +48,13 @@ export function useCentros(profesor: Profesor | null, onRefresh?: () => void) {
   const [detalleFormData, setDetalleFormData] = useState<Partial<DetalleAcademico>>({});
   const [currentCentroId, setCurrentCentroId] = useState<number | null>(null);
 
-  // ── RA en curso ──
-  const [newRA, setNewRA] = useState<Partial<ResultadoAprendizaje>>({
-    modulo: '', codigo: '', ra: '', nombre: '', impartidoEmpresa: false, actividadFormativa: '',
-  });
-  const [editingRAId, setEditingRAId] = useState<string | null>(null);
+  // ── RA del ciclo ──
+  //
+  // Los RA se editan en su propia pantalla, y su borrador vive ahi. Aqui solo
+  // se guarda cual es el ciclo abierto, para saber a quien hay que escribirle y
+  // de quien recargar los datos al terminar.
+  const [raDetalle, setRaDetalle] = useState<DetalleAcademico | null>(null);
+  const [savingRA, setSavingRA] = useState(false);
 
   // ── Tutorías ──
   const [newTutoria, setNewTutoria] = useState('');
@@ -176,6 +178,9 @@ export function useCentros(profesor: Profesor | null, onRefresh?: () => void) {
     setCurrentCentroId(centroId);
     setEditingDetalle(detalle);
     setDetalleFormData(detalle ?? {});
+    // La tutoria a medio escribir pertenece al ciclo que se estaba editando. Sin
+    // vaciarla aqui, se colaria en el siguiente ciclo que se abra.
+    setNewTutoria('');
     setShowDetalleForm(true);
   };
 
@@ -227,71 +232,45 @@ export function useCentros(profesor: Profesor | null, onRefresh?: () => void) {
   //  HANDLERS: RESULTADOS DE APRENDIZAJE
   // ─────────────────────────────────────────
 
-  const addRA = () => {
-    if (!newRA.modulo || !newRA.codigo || !newRA.ra || !newRA.nombre) {
-      alert('Por favor, rellena los campos obligatorios del Resultado de Aprendizaje.');
-      return;
+  /**
+   * Abrir los RA de un ciclo.
+   *
+   * Solo se puede sobre un ciclo ya creado: los RA se guardan en su propia fila,
+   * asi que un ciclo que aun no existe no tiene donde guardarlos. Por eso el
+   * boton vive en la ficha del ciclo y no en su formulario de creacion.
+   */
+  const handleOpenRA = (detalle: DetalleAcademico) => {
+    if (!detalle.id) return;
+    setRaDetalle(detalle);
+  };
+
+  const closeRA = () => setRaDetalle(null);
+
+  const handleSaveRA = async (resultadosAprendizaje: ResultadoAprendizaje[]) => {
+    if (!raDetalle?.id) return;
+    setSavingRA(true);
+    try {
+      // Endpoint propio, y no el guardado completo del ciclo, porque desde la
+      // pantalla de RA no se conocen el nombre ni las tutorias del ciclo: si se
+      // mandara la fila entera, se guardarian vacios.
+      const res = await fetch(`/api/detalles-academicos/${raDetalle.id}/resultados`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resultadosAprendizaje }),
+      });
+      if (res.ok) {
+        setRaDetalle(null);
+        // Para que el contador de la ficha recoja el cambio sin recargar.
+        await fetchCentros();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert('Error al guardar los resultados de aprendizaje: ' + (err.error || 'Error desconocido'));
+      }
+    } catch {
+      alert('Error de conexión al servidor.');
+    } finally {
+      setSavingRA(false);
     }
-    if (editingRAId) {
-      setDetalleFormData(prev => ({
-        ...prev,
-        resultadosAprendizaje: (prev.resultadosAprendizaje || []).map(r =>
-          r.id === editingRAId
-            ? {
-              ...r,
-              modulo: newRA.modulo!,
-              codigo: newRA.codigo!,
-              ra: newRA.ra!,
-              nombre: newRA.nombre!,
-              impartidoEmpresa: newRA.impartidoEmpresa || false,
-              actividadFormativa: newRA.actividadFormativa,
-            }
-            : r
-        ),
-      }));
-      setEditingRAId(null);
-      setNewRA({ modulo: '', codigo: '', ra: '', nombre: '', impartidoEmpresa: false, actividadFormativa: '' });
-      return;
-    }
-    const ra: ResultadoAprendizaje = {
-      id: crypto.randomUUID(),
-      modulo: newRA.modulo!,
-      codigo: newRA.codigo!,
-      ra: newRA.ra!,
-      nombre: newRA.nombre!,
-      impartidoEmpresa: newRA.impartidoEmpresa || false,
-      actividadFormativa: newRA.actividadFormativa,
-    };
-    setDetalleFormData(prev => ({
-      ...prev,
-      resultadosAprendizaje: [...(prev.resultadosAprendizaje || []), ra],
-    }));
-    setNewRA({ modulo: '', codigo: '', ra: '', nombre: '', impartidoEmpresa: false, actividadFormativa: '' });
-  };
-
-  const startEditRA = (ra: ResultadoAprendizaje) => {
-    setEditingRAId(ra.id);
-    setNewRA({
-      modulo: ra.modulo,
-      codigo: ra.codigo,
-      ra: ra.ra,
-      nombre: ra.nombre,
-      impartidoEmpresa: ra.impartidoEmpresa || false,
-      actividadFormativa: ra.actividadFormativa,
-    });
-  };
-
-  const cancelEditRA = () => {
-    setEditingRAId(null);
-    setNewRA({ modulo: '', codigo: '', ra: '', nombre: '', impartidoEmpresa: false, actividadFormativa: '' });
-  };
-
-  const removeRA = (id: string) => {
-    setDetalleFormData(prev => ({
-      ...prev,
-      resultadosAprendizaje: (prev.resultadosAprendizaje || []).filter(r => r.id !== id),
-    }));
-    if (editingRAId === id) cancelEditRA();
   };
 
   // ─────────────────────────────────────────
@@ -334,8 +313,7 @@ export function useCentros(profesor: Profesor | null, onRefresh?: () => void) {
     detalleFormData, setDetalleFormData,
     handleOpenDetalleForm, handleSaveDetalle,
     // RAs
-    newRA, setNewRA,
-    addRA, removeRA, startEditRA, cancelEditRA, editingRAId,
+    raDetalle, savingRA, handleOpenRA, closeRA, handleSaveRA,
     // Festivos: se editan en el calendario, no aqui
     // Tutorías
     newTutoria, setNewTutoria, addTutoria, removeTutoria,
