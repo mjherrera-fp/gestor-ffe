@@ -658,6 +658,7 @@ export default function App() {
                 cursoId={activeCurso.id!}
                 centroId={activeDetalle?.centroId}
                 detalleAcademicoId={activeDetalle?.id}
+                onGoToConfig={() => { setConfigTab('correo'); setActiveTab('configuracion'); }}
               />
             )}
           {activeTab === 'relaciones' && activeCurso && (

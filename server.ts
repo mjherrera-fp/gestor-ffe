@@ -1518,6 +1518,56 @@ async function startServer() {
   addDocAlumnoRoutes('seguimiento', DocSeguimientoDAO, 'SEGP', 'seguimiento');
   addDocAlumnoRoutes('valoracion', DocValoracionDAO, 'VALO', 'valoracion');
 
+  // ─── Última versión de un documento, para mandarlo por correo ────
+  //
+  // Responde solo con el identificador, el nombre y la versión; el archivo se
+  // descarga después por su ruta de siempre. Con el contenido dentro, esta
+  // respuesta arrastraría el archivo entero en base64 para acabar descartando
+  // todas las versiones menos la última.
+  //
+  // El 404 es parte del contrato: quien pregunta es el envío de correo, y para
+  // él "no hay nada subido" y "no existe" son la misma respuesta, porque en los
+  // dos casos no hay nada que mandar.
+  //
+  // Cada tipo se cuelga de lo suyo: las relaciones y los documentos de alumno
+  // van por `relacionId`, y los del convenio por `convenioId`. Por eso cada
+  // entrada dice de qué campo se cuelga, en vez de suponerlo a partir del tipo.
+
+  const DAOS_GESTOR_DOCUMENTAL: Record<string, { dao: any; campo: 'relacionId' | 'convenioId'; porAlumno: boolean }> = {
+    'relacion': { dao: DocRelacionDAO, campo: 'relacionId', porAlumno: false },
+    'plan-formativo': { dao: DocPlanFormativoDAO, campo: 'relacionId', porAlumno: true },
+    'seguimiento': { dao: DocSeguimientoDAO, campo: 'relacionId', porAlumno: true },
+    'valoracion': { dao: DocValoracionDAO, campo: 'relacionId', porAlumno: true },
+    'convenio': { dao: DocConvenioDAO, campo: 'convenioId', porAlumno: false },
+  };
+
+  app.get('/api/documentos/adjunto', (req, res) => {
+    const tipo = String(req.query.tipo || '');
+    const relacionId = req.query.relacionId ? Number(req.query.relacionId) : undefined;
+    const alumnoId = req.query.alumnoId ? Number(req.query.alumnoId) : undefined;
+    const convenioId = req.query.convenioId ? Number(req.query.convenioId) : undefined;
+
+    const entrada = DAOS_GESTOR_DOCUMENTAL[tipo];
+    if (!entrada) return res.status(404).json({ error: 'Ese tipo de documento no se archiva.' });
+
+    // "Falta X" (400) es una llamada mal formada y hay que notarla; "no hay
+    // ninguna versión subida" (404) es una respuesta normal y la que el cliente
+    // usa para decidir que no se adjunta nada.
+    const duenio = entrada.campo === 'convenioId' ? convenioId : relacionId;
+    if (!duenio) return res.status(400).json({ error: `Falta ${entrada.campo}` });
+    if (entrada.porAlumno && !alumnoId) return res.status(400).json({ error: 'Falta alumnoId' });
+
+    const doc = entrada.dao.getUltimo(duenio, alumnoId);
+    if (!doc) return res.status(404).json({ error: 'No hay ninguna versión subida.' });
+
+    res.json({
+      id: doc.id,
+      nombreFichero: doc.nombreFichero,
+      version: doc.version,
+      comentario: doc.comentario || null,
+    });
+  });
+
   // ─── Documentos Comunicación DAT ────────────────────
 
   app.post('/api/documentos/com-dat', upload.single('file'), (req, res) => {

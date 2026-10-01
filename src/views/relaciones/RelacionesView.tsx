@@ -558,6 +558,8 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         initialAttachments={ctx.emailAttachments}
         initialSubject={ctx.emailSubject}
         initialBody={ctx.emailBody}
+        perRecipientData={ctx.emailPerRecipient}
+        marcadoresVacios={ctx.emailMarcadoresVacios}
         onGoToConfig={onGoToConfig}
         contextualContactIds={ctx.contextualContactIds}
       />

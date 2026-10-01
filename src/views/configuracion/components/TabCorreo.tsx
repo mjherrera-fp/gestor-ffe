@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import {CustomSelect} from '../../../components/CustomSelect.tsx';
 import {Contacto, GrupoContacto} from '../../../types/email.ts';
+import { marcadoresAjenos, marcadoresDeAmbito, textoMarcador } from '../../../../templates/emails/emailTemplates.ts';
 import {EditorContent, EditorContext, useEditor} from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -106,6 +107,15 @@ interface MarcadorEdit {
   valor: string;
   descripcion: string;
 }
+
+/** Nombre de cada ámbito de plantilla. Los chips del filtro y la etiqueta de
+ *  cada tarjeta salen de aquí, para que añadir un ámbito sea tocar un sitio. */
+const PLACE_LABELS: Record<string, string> = {
+  empresa: 'Empresas',
+  relaciones: 'Relaciones',
+  alumno: 'Alumnos',
+  convenio: 'Convenios',
+};
 
 interface Props {
   emailConfig: EmailConfig;
@@ -1035,7 +1045,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
             >
               Todas
             </button>
-            {['empresa', 'relaciones', 'alumno'].map(place => (
+            {(['empresa', 'relaciones', 'alumno', 'convenio'] as const).map(place => (
               <button
                 key={place}
                 type="button"
@@ -1044,11 +1054,11 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                   filterPlace === place ? 'bg-primary text-white shadow-sm' : 'bg-surface-hover text-text-muted hover:bg-surface-subtle'
                 }`}
               >
-                {place === 'empresa' ? 'Empresas' : place === 'relaciones' ? 'Relaciones' : 'Alumnos'}
+                {PLACE_LABELS[place]}
               </button>
             ))}
-            {filterPlace === 'relaciones' && <span className="mx-1 text-text-muted">|</span>}
-            {filterPlace === 'relaciones' && ['varios-registros', 'registro-individual'].map(g => (
+            {(filterPlace === 'relaciones' || filterPlace === 'convenio') && <span className="mx-1 text-text-muted">|</span>}
+            {(filterPlace === 'relaciones' || filterPlace === 'convenio') && ['varios-registros', 'registro-individual'].map(g => (
               <button
                 key={g}
                 type="button"
@@ -1089,7 +1099,6 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 const IconComponent = p.tipo === 'sistema' ? (ICON_MAP[p.icon] || FileText) : PencilRuler;
                 const isHex = p.color?.startsWith('#');
                 const c = isHex ? null : (COLOR_MAP[p.color] || COLOR_MAP.slate);
-                const placeLabels: Record<string, string> = { empresa: 'Empresas', relaciones: 'Relaciones', alumno: 'Alumnos' };
                 const groupLabels: Record<string, string> = { 'varios-registros': 'Varios registros', 'registro-individual': 'Registro individual' };
                 const hexColor = isHex ? p.color : '#64748b';
                 const cardStyle = isHex ? {
@@ -1122,7 +1131,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                       <p className="text-[11px] text-text-muted mt-0.5 line-clamp-2">{p.description}</p>
                       <div className="flex items-center gap-1.5 mt-1.5">
                         <span className="text-[10px] font-medium text-text-muted bg-surface-hover/50 px-1.5 py-0.5 rounded">
-                          {p.plantillaId === 'otros' ? 'Todos' : (placeLabels[p.place] || p.place)}
+                          {p.plantillaId === 'otros' ? 'Todos' : (PLACE_LABELS[p.place] || p.place)}
                         </span>
                         {p.grupo && groupLabels[p.grupo] && (
                           <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
@@ -1473,6 +1482,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                       { id: 'empresa', label: 'Empresa' },
                       { id: 'relaciones', label: 'Relaciones' },
                       { id: 'alumno', label: 'Alumno' },
+                      { id: 'convenio', label: 'Convenio' },
                     ]}
                     value={editTemplate.place}
                     onChange={v => setEditTemplate({ ...editTemplate, place: v as string })}
@@ -1539,48 +1549,66 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
                 </div>
                 {(() => {
                   const place = editTemplate?.place || 'empresa';
-                  const allGroups: Record<string, string[]> = {
-                    empresa: [
-                      '{{profesor.nombre}}', '{{profesor.apellidos}}',
-                      '{{empresa.nombre}}', '{{empresa.personaContacto}}',
-                      '{{centro.nombre}}', '{{curso.descripcion}}',
-                      '{{@contacto}}', '{{@nombreEmpresa}}',
-                    ],
-                    relaciones: [
-                      '{{profesor.nombre}}', '{{profesor.apellidos}}',
-                      '{{empresa.nombre}}', '{{empresa.direccion}}', '{{empresa.personaContacto}}',
-                      '{{tutor.nombre}}', '{{tutor.apellidos}}',
-                      '{{nombreApellidosAlumnos}}', '{{alumnoTutor}}',
-                      '{{@contacto}}', '{{@nombreEmpresa}}',
-                    ],
-                    alumno: [
-                      '{{profesor.nombre}}', '{{profesor.apellidos}}',
-                      '{{empresa.nombre}}', '{{empresa.personaContacto}}',
-                      '{{nombreApellidosAlumnos}}', '{{alumnoTutor}}',
-                      '{{@contacto}}', '{{@nombreEmpresa}}',
-                    ],
-                  };
-                  const markers = allGroups[place] || allGroups.empresa;
+                  // La lista sale del catálogo del motor, no de una copia
+                  // escrita aquí. La copia era el problema: ofrecía marcadores
+                  // que ningún ámbito resolvía, y quien lo acababa de leer era
+                  // el profesor, a quien se lo mandaban en crudo a la empresa.
+                  const delSistema = marcadoresDeAmbito(place);
                   return (
                     <div className="mt-2">
-                      <p className="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1.5">Marcadores disponibles</p>
+                      <p className="text-[10px] text-text-muted font-semibold uppercase tracking-wider mb-1.5">
+                        Marcadores disponibles
+                      </p>
                       <div className="flex flex-wrap gap-1.5">
-                        {markers.map(m => (
+                        {delSistema.map(m => (
                           <code
-                            key={m}
-                            className="text-[10px] bg-surface-hover text-text-muted px-1.5 py-0.5 rounded cursor-pointer hover:bg-surface-subtle"
-                            onClick={() => templateEditor?.chain().focus().insertContent(m).run()}
+                            key={m.clave}
+                            title={m.etiqueta}
+                            className={`text-[10px] px-1.5 py-0.5 rounded cursor-pointer ${
+                              m.porDestinatario
+                                ? 'bg-primary-light text-primary hover:bg-primary-light/70'
+                                : 'bg-surface-hover text-text-muted hover:bg-surface-subtle'
+                            }`}
+                            onClick={() => templateEditor?.chain().focus().insertContent(textoMarcador(m)).run()}
                           >
-                            {m}
+                            {textoMarcador(m)}
                           </code>
                         ))}
-                        <code
-                          className="text-[10px] bg-primary-light text-primary px-1.5 py-0.5 rounded cursor-pointer hover:bg-primary-light/70"
-                          onClick={() => templateEditor?.chain().focus().insertContent('{{per_...}}').run()}
-                        >
-                          {'{{per_...}}'}
-                        </code>
+                        {/* Los personalizados van aparte porque no son del
+                            catálogo: los crea el profesor y valen en cualquier
+                            plantilla. Antes esta lista no estaba y había que
+                            acordarse del nombre de memoria. */}
+                        {marcadores.map(m => (
+                          <code
+                            key={`per_${m.id ?? m.nombre}`}
+                            title={m.descripcion || 'Marcador personalizado'}
+                            className="text-[10px] px-1.5 py-0.5 rounded cursor-pointer bg-success-soft text-success hover:bg-success-soft/70"
+                            onClick={() => templateEditor?.chain().focus().insertContent(`{{per_${m.nombre}}}`).run()}
+                          >
+                            {`{{per_${m.nombre}}}`}
+                          </code>
+                        ))}
                       </div>
+                      {/* Lo que se ha escrito y ese ámbito no puede resolver. Casi
+                          siempre es una errata, y sin este aviso se descubre al
+                          abrir el correo ya enviado. El asunto se revisa con el
+                          mismo criterio: un `{{...}}` sin resolver en la línea
+                          de arriba canta más que en el cuerpo. */}
+                      {(() => {
+                        const ajenos = [
+                          ...marcadoresAjenos(editTemplate?.body || '', place),
+                          ...marcadoresAjenos(editTemplate?.subject || '', place),
+                        ];
+                        if (ajenos.length === 0) return null;
+                        return (
+                          <p className="mt-1.5 text-[10px] text-warning-strong bg-warning-soft border border-warning/20 rounded px-2 py-1">
+                            No se van a sustituir:{' '}
+                            {ajenos.map(m => (
+                              <code key={m} className="font-mono">{m}</code>
+                            ))}
+                          </p>
+                        );
+                      })()}
                     </div>
                   );
                 })()}

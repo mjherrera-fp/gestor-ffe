@@ -1,5 +1,5 @@
 import React from 'react';
-import {Archive, CalendarPlus, Edit2, ExternalLink, FileText, Plus, Search, Trash2, Upload, X, TriangleAlert} from 'lucide-react';
+import {Archive, CalendarPlus, Edit2, ExternalLink, FileText, Mail, Plus, Search, Trash2, Upload, X, TriangleAlert} from 'lucide-react';
 import {ConvenioEstado, ConvenioEstadoLabels} from '../../../types/index.ts';
 import {CustomSelect} from '../../../components/CustomSelect.tsx';
 import {ConvenioExtendido, SortField, SortOrder} from '../hooks/useConvenios.ts';
@@ -15,6 +15,7 @@ interface ConveniosListadoProps {
   onNew: () => void;
   onUploadDocument?: (conv: ConvenioExtendido) => void;
   onCalendar: (conv: ConvenioExtendido) => void;
+  onEmail?: (conv: ConvenioExtendido) => void;
   conveniosUrl?: string;
   listSearchTerm: string;
   onListSearchChange: (v: string) => void;
@@ -28,7 +29,7 @@ interface ConveniosListadoProps {
 
 export function ConveniosListado({
   convenios, selectedConvenio,
-                                   onSelectConvenio, onEdit, onDeleteRequest, onNew, onUploadDocument, onCalendar, conveniosUrl,
+                                   onSelectConvenio, onEdit, onDeleteRequest, onNew, onUploadDocument, onCalendar, onEmail, conveniosUrl,
   listSearchTerm, onListSearchChange,
   statusFilter, onStatusFilterChange,
   sortBy, sortOrder, onSortByEmpresa, onSortByEstado,
@@ -42,7 +43,12 @@ export function ConveniosListado({
   ];
 
   return (
-    <div className="w-full lg:flex-1 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-surface-card rounded-xl border border-border-base shadow-sm flex flex-col">
+    // `lg:min-w-0` es lo que mantiene el listado en su ancho. Un hijo `flex-1`
+    // sin él tiene `min-width: auto` y no baja de su min-content: al añadir una
+    // acción más, la tabla dejó de caber, el listado se ensanchó y empujó al
+    // detalle, con lo que la fila entera se salía y el scroll horizontal
+    // aparecía en la página en vez de dentro de esta tarjeta.
+    <div className="w-full lg:flex-1 lg:min-w-0 lg:sticky lg:top-0 lg:max-h-[calc(100vh-9rem)] bg-surface-card rounded-xl border border-border-base shadow-sm flex flex-col overflow-hidden">
 
       {/* ── Cabecera + filtros ── */}
       <div className="px-6 py-4 border-b border-border-base space-y-4 relative z-20 shrink-0">
@@ -144,20 +150,34 @@ export function ConveniosListado({
                 <StatusBadge estado={conv.estado} />
               </div>
             </div>
-            {onUploadDocument && (
-                <div className="mt-2 flex justify-end">
-                  <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUploadDocument(conv);
-                      }}
-                      className="text-[10px] font-bold text-text-muted hover:text-primary transition-colors flex items-center gap-1"
-                  >
-                    <Upload className="h-3 w-3"/>
-                    Documentos
-                  </button>
+{(onEmail || onUploadDocument) && (
+                <div className="mt-2 flex justify-end gap-4">
+                  {onEmail && (
+                    <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEmail(conv);
+                        }}
+                        className="text-[10px] font-bold text-text-muted hover:text-primary transition-colors flex items-center gap-1"
+                    >
+                      <Mail className="h-3 w-3"/>
+                      Enviar correo
+                    </button>
+                  )}
+                  {onUploadDocument && (
+                    <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUploadDocument(conv);
+                        }}
+                        className="text-[10px] font-bold text-text-muted hover:text-primary transition-colors flex items-center gap-1"
+                    >
+                      <Upload className="h-3 w-3"/>
+                      Documentos
+                    </button>
+                  )}
                 </div>
-            )}
+              )}
           </div>
         ))}
         {convenios.length === 0 && (
@@ -168,7 +188,9 @@ export function ConveniosListado({
       </div>
 
       {/* ── Vista desktop: tabla ── */}
-      <div className="hidden lg:block lg:flex-1 lg:min-h-0 overflow-y-auto">
+      {/* `overflow-auto` en los dos ejes: si la tabla no cabe, se desplaza aquí
+          dentro y no empuja a la columna de detalle. */}
+      <div className="hidden lg:block lg:flex-1 lg:min-h-0 overflow-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-surface-subtle border-b border-border-base">
@@ -209,13 +231,25 @@ export function ConveniosListado({
                   )}
                 </td>
                 <td className="px-5 py-4">
-                  <p className="text-xs font-bold text-text-muted">{conv.numConvenio}</p>
+                  {/* Acotada con `truncate`: el número de convenio es el texto
+                      más largo de la fila y sin tope empuja el ancho de la tabla. */}
+                  <p className="text-xs font-bold text-text-muted truncate max-w-32">{conv.numConvenio}</p>
                 </td>
                 <td className="px-5 py-4">
                   <StatusBadge estado={conv.estado} />
                 </td>
                 <td className="px-5 py-4 text-right" onClick={e => e.stopPropagation()}>
                   <div className="flex items-center justify-end">
+                    {onEmail && (
+                      <Title text="Enviar correo a la empresa">
+                        <button
+                          onClick={() => onEmail(conv)}
+                          className="p-2 text-text-muted hover:text-primary transition-all hover:bg-surface-card rounded-lg border border-transparent hover:border-border-base"
+                        >
+                          <Mail className="h-4 w-4" />
+                        </button>
+                      </Title>
+                    )}
                     {onUploadDocument && (
                         <Title text="Subir documentos">
                           <button

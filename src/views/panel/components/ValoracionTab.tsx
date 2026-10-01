@@ -120,8 +120,16 @@ export function ValoracionTab({ cursoId, detalleAcademicoId }: { cursoId: number
                     <span className="text-xs font-bold text-text-muted">{r.nivel}</span>
                   </td>
                   <td className="px-6 py-3 text-center">
+                    {/* Las horas del nivel y, entre paréntesis, las que faltan a
+                        la fecha de evaluación. Antes salían solo las realizadas,
+                        que no es lo que promete el rótulo: un alumno con 500h
+                        asignadas y 380 cumplidas ponía "380h" y parecía que
+                        tenía 380 horas que hacer. */}
                     <span className="font-mono text-sm font-bold text-text-main">
-                      {r.relacionId === null ? r.totalHorasFFE : r.horasRealizadas}h
+                      {r.totalHorasFFE}h
+                    </span>
+                    <span className="font-mono text-xs font-semibold text-text-muted">
+                      {' '}({r.horasPendientes}h)
                     </span>
                   </td>
                   <td className="px-6 py-3">

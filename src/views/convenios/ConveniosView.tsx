@@ -7,14 +7,16 @@ import {ConvenioDetalle} from './components/ConvenioDetalle.tsx';
 import {ConvenioFormModal} from './components/ConvenioFormModal.tsx';
 import {GestorDocumentalModal} from '../../components/GestorDocumentalModal.tsx';
 import {CalendarioEventoModal} from '../../components/CalendarioEventoModal.tsx';
+import {EmailModal} from '../../components/EmailModal.tsx';
 
 interface Props {
   cursoId: number;
   centroId?: number;
     detalleAcademicoId?: number;
+  onGoToConfig?: () => void;
 }
 
-export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: Props) {
+export default function ConveniosView({cursoId, centroId, detalleAcademicoId, onGoToConfig}: Props) {
   const ctx = useConvenios(cursoId, centroId);
   const [calendarioConvenio, setCalendarioConvenio] = useState<ConvenioExtendido | null>(null);
 
@@ -45,6 +47,7 @@ export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: P
           else { ctx.setBy('estado'); ctx.setSortOrder('asc'); }
         }}
         onUploadDocument={ctx.handleOpenDocManager}
+        onEmail={ctx.handleEmailConvenio}
         conveniosUrl={ctx.conveniosUrl}
       />
 
@@ -122,7 +125,7 @@ export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: P
         }}
         centros={ctx.centros}
         selectedCentro={ctx.selectedCentro}
-        onCentroChange={ctx.setSelectedCentro}
+        onCentroChange={ctx.handleCentroChange}
         onSubmit={ctx.handleSubmit}
         onClose={() => ctx.setShowForm(false)}
       />
@@ -148,6 +151,19 @@ export default function ConveniosView({cursoId, centroId, detalleAcademicoId}: P
           open={!!calendarioConvenio}
           empresaId={calendarioConvenio?.empresaId ?? null}
           onClose={() => setCalendarioConvenio(null)}
+        />
+
+        {/* ── MODAL: Enviar correo a la empresa ── */}
+        <EmailModal
+          isOpen={!!ctx.emailTarget}
+          onClose={ctx.handleCloseEmail}
+          initialTo={ctx.emailTarget ? ctx.emailTo : []}
+          initialAttachments={ctx.emailAttachments}
+          initialSubject={ctx.emailSubject}
+          initialBody={ctx.emailBody}
+          perRecipientData={ctx.emailPerRecipient}
+          marcadoresVacios={ctx.emailMarcadoresVacios}
+          onGoToConfig={onGoToConfig}
         />
     </div>
   );

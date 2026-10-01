@@ -52,7 +52,7 @@ export interface PlantillaCorreoDB {
   recipientTarget: string;
   icon: string;
   color: string;
-  place: 'empresa' | 'relaciones' | 'alumno' | '';
+  place: 'empresa' | 'relaciones' | 'alumno' | 'convenio' | '';
   tipo: 'sistema' | 'personal';
   grupo?: string;
 }
