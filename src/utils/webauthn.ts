@@ -2,8 +2,19 @@ export type WebauthnResult =
   | { ok: true; credentialId?: string; error?: undefined }
   | { ok: false; credentialId?: string; error: string };
 
-const RP_ID = 'localhost';
 const RP_NAME = 'Gestor FFE';
+
+// El RP ID debe ser el dominio efectivo del origen: la ventana carga desde
+// http://localhost:<puerto> en desarrollo y http://127.0.0.1:<puerto> en
+// producción (ver main.js). Fijarlo a 'localhost' hace que en producción
+// Chromium lance SecurityError, porque 'localhost' no es sufijo de '127.0.0.1'.
+// El puerto no forma parte del RP ID, así que cambiarlo no invalida la
+// credencial ya registrada.
+function rpId(): string {
+  return typeof window !== 'undefined' && window.location?.hostname
+    ? window.location.hostname
+    : 'localhost';
+}
 
 function base64UrlEncode(buf: ArrayBuffer | Uint8Array): string {
   const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
@@ -37,6 +48,7 @@ function errorToMessage(err: unknown): string {
     if (err.name === 'NotAllowedError') return 'cancelado';
     if (err.name === 'NotSupportedError') return 'no-soportado';
     if (err.name === 'InvalidStateError') return 'ya-existe';
+    if (err.name === 'SecurityError') return 'rp-id-invalido';
   }
   return 'error-desconocido';
 }
@@ -58,7 +70,7 @@ export async function crearCredencialBiometrica(): Promise<WebauthnResult> {
     const credential = (await navigator.credentials.create({
       publicKey: {
         challenge,
-        rp: { id: RP_ID, name: RP_NAME },
+        rp: { id: rpId(), name: RP_NAME },
         user: {
           id: new TextEncoder().encode('gestor-ffe'),
           name: 'gestor-ffe',
