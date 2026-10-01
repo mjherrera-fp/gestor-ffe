@@ -4,12 +4,13 @@ export type WebauthnResult =
 
 const RP_NAME = 'Gestor FFE';
 
-// El RP ID debe ser el dominio efectivo del origen: la ventana carga desde
-// http://localhost:<puerto> en desarrollo y http://127.0.0.1:<puerto> en
-// producción (ver main.js). Fijarlo a 'localhost' hace que en producción
-// Chromium lance SecurityError, porque 'localhost' no es sufijo de '127.0.0.1'.
-// El puerto no forma parte del RP ID, así que cambiarlo no invalida la
-// credencial ya registrada.
+// El RP ID debe ser el dominio efectivo del origen. La ventana carga desde
+// http://localhost:<puerto> tanto en desarrollo como en producción (ver
+// main.js), precisamente porque Chromium no admite WebAuthn en orígenes con
+// IP: http://127.0.0.1 no admite ningún RP ID válido y credentials.create()
+// lanza SecurityError. Derivarlo de location.hostname lo mantiene correcto en
+// cualquier origen sin volver a fijarlo a mano. El puerto no forma parte del
+// RP ID, así que cambiarlo no invalida la credencial ya registrada.
 function rpId(): string {
   return typeof window !== 'undefined' && window.location?.hostname
     ? window.location.hostname

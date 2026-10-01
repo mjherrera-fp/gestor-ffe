@@ -3206,6 +3206,29 @@ async function startServer() {
   // Ahora se sube por la lista de puertos candidatos hasta encontrar uno
   // libre. Si todos están ocupados, se pide uno efímero al sistema (puerto 0)
   // para que la app arranque igualmente.
+  // La ventana tiene que abrirse en http://localhost, no en http://127.0.0.1:
+  // Chromium rechaza WebAuthn en orígenes con IP (lanza SecurityError con
+  // "This is an invalid domain"), que es lo que bloqueaba el desbloqueo
+  // biométrico en la app empaquetada. Pero en Windows localhost resuelve
+  // primero a ::1 y luego a 127.0.0.1, así que al servir solo en IPv4 el
+  // navegador tiene que reintentar por su cuenta en cada petición.
+  //
+  // Se escucha también en el bucle local IPv6 para que ese reintento no
+  // exista. Sigue siendo solo local: ::1 no es accesible desde la red, igual
+  // que 127.0.0.1. Si la máquina no tiene IPv6, se sigue sirviendo en IPv4
+  // sin más.
+  function bindIpv6Loopback(port: number): void {
+    const extra = app.listen(port, '::1');
+    extra.once('listening', () => {
+      console.log(`Server running on http://[::1]:${port}`);
+    });
+    extra.once('error', (err: any) => {
+      // Sin IPv6 no es motivo para tumbar la app: el listener IPv4 sigue
+      // vivo y el navegador cae a 127.0.0.1 por su cuenta.
+      console.warn('No se ha podido escuchar en [::1]: ' + err?.message);
+    });
+  }
+
   function listenOnFirstFreePort(candidates: number[], host: string, delayMs = 400): void {
     const [primero, ...resto] = candidates;
 
@@ -3215,6 +3238,7 @@ async function startServer() {
         const asintado = server.address() as { port: number } | null;
         puertoReal = asintado?.port ?? port;
         console.log(`Server running on http://${host}:${puertoReal}`);
+        bindIpv6Loopback(puertoReal);
         // main.js abre la ventana contra este puerto, no contra el que él
         // suponía: si hemos tenido que moverlo, solo el servidor sabe cuál
         // es el bueno.
