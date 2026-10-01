@@ -116,6 +116,10 @@ async function startServer() {
   // Puerto: se puede sobrescribir con PORT. Por defecto producción usa 3000
   // y desarrollo 3100 para no chocar con el de producción.
   const PORT = Number(process.env.PORT) || (isProd ? 3000 : 3100);
+  // Puerto realmente escucha. Puede acabar siendo otro si el de partida está
+  // ocupado: ver listenOnFirstFreePort() más abajo. Lo necesita la sonda de
+  // identidad para que main.js sepa a qué puerto debe dirigirse.
+  let puertoReal = PORT;
   const baseDir = process.env.PORTABLE_EXECUTABLE_DIR || process.cwd();
 
   // 1. Validar permisos de escritura inmediatamente
@@ -203,6 +207,22 @@ async function startServer() {
   });
 
   app.use(express.json({limit: '50mb'}));
+
+  // ─────────────────────────────────────────────────────────────────────
+  // SONDA DE IDENTIDAD
+  // El puerto 3000 (producción) es uno de los más usados de cualquier
+  // máquina: basta con que haya otro programa escuchándolo (otro Node, un
+  // Jupyter, un servidor de la escuela) para que nuestra app no pueda
+  // arrancar. Antes, main.js abría la ventana en cuanto "algo" contestara en el
+  // 3000, así que se acababa mostrando la web del intruso en lugar de la
+  // nuestra. Esta ruta devuelve una marca que solo esta app genera, de modo
+  // que main.js pueda distinguir "mi servidor" de "cualquier cosa en ese
+  // puerto". Va antes del bloqueo de token a propósito: es pública y sin
+  // datos, y el proceso principal no puede añadir la cabecera X-FFE-Token.
+  // ─────────────────────────────────────────────────────────────────────
+  app.get('/ffe-identity', (_req, res) => {
+    res.json({ app: 'gestor-ffe', port: puertoReal, pid: process.pid });
+  });
 
   // Si la BD está bloqueada (db === null), las rutas de datos deben responder
   // 401 en vez de crashear con TypeError al usar la conexión null.
@@ -3174,22 +3194,61 @@ async function startServer() {
     res.status(500).json({ error: err.message || 'Internal Server Error' });
   });
 
-  function listenWithRetry(port: number, host: string, retries = 20, delayMs = 500): void {
-    const server = app.listen(port, host, () => {
-      console.log(`Server running on http://${host}:${port}`);
-    });
-    server.on('error', (err: any) => {
-      if (err?.code === 'EADDRINUSE' && retries > 0) {
-        console.log(`Puerto ${port} ocupado (${retries} reintentos). Reintentando...`);
-        setTimeout(() => listenWithRetry(port, host, retries - 1, delayMs), delayMs);
-      } else {
-        console.error('Error al iniciar el servidor: ' + err?.message);
-        process.exit(1);
-      }
-    });
+  // Arranque del servidor.
+  //
+  // Antes, si el puerto estaba ocupado (EADDRINUSE) se reintentaba el MISMO
+  // puerto 20 veces y, agotados, process.exit(1). Eso solo funcionaba si lo
+  // ocupaba una copia anterior de esta misma app que se cerrara por sí sola;
+  // si lo ocupaba cualquier otro programa (el caso habitual: el 3000 es de
+  // los puertos más usados de la máquina), los 20 reintentos fallaban
+  // siempre y la app se quedaba con la ventana en blanco.
+  //
+  // Ahora se sube por la lista de puertos candidatos hasta encontrar uno
+  // libre. Si todos están ocupados, se pide uno efímero al sistema (puerto 0)
+  // para que la app arranque igualmente.
+  function listenOnFirstFreePort(candidates: number[], host: string, delayMs = 400): void {
+    const [primero, ...resto] = candidates;
+
+    const intentar = (port: number, pendientes: number[]): void => {
+      const server = app.listen(port, host);
+      server.once('listening', () => {
+        const asintado = server.address() as { port: number } | null;
+        puertoReal = asintado?.port ?? port;
+        console.log(`Server running on http://${host}:${puertoReal}`);
+        // main.js abre la ventana contra este puerto, no contra el que él
+        // suponía: si hemos tenido que moverlo, solo el servidor sabe cuál
+        // es el bueno.
+        if (process.send) {
+          process.send({ type: 'ffe-server-ready', port: puertoReal });
+        }
+      });
+      server.once('error', (err: any) => {
+        if (err?.code !== 'EADDRINUSE') {
+          console.error('Error al iniciar el servidor: ' + err?.message);
+          process.exit(1);
+          return;
+        }
+        if (pendientes.length > 0) {
+          console.log(`Puerto ${port} ocupado; probando el siguiente...`);
+          setTimeout(() => intentar(pendientes[0], pendientes.slice(1)), delayMs);
+        } else if (port !== 0) {
+          // Último recurso: el sistema nos asigna cualquier puerto libre.
+          console.log('Todos los puertos candidatos ocupados; pidiendo uno al sistema.');
+          setTimeout(() => intentar(0, []), delayMs);
+        } else {
+          console.error('No se ha podido encontrar un puerto libre: ' + err?.message);
+          process.exit(1);
+        }
+      });
+    };
+
+    intentar(primero, resto);
   }
 
-  listenWithRetry(PORT, '127.0.0.1');
+  // El puerto de por defecto y los siguientes. El 0 queda fuera de la lista
+  // porque hace de comodín en la rama de error.
+  const candidatos = Array.from({length: 20}, (_, i) => PORT + i);
+  listenOnFirstFreePort(candidatos, '127.0.0.1');
 }
 
 startServer().catch(err => {

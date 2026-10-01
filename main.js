@@ -23,6 +23,16 @@ let serverProcess;
 // desarrollo 3100 (debe coincidir con la lógica de server.ts).
 const serverPort = Number(process.env.PORT) || (app.isPackaged ? 3000 : 3100);
 
+// Puerto al que realmente se abre la ventana. Empieza siendo el de por
+// defecto, pero el servidor puede desplazarse si está ocupado (ver
+// listenOnFirstFreePort en server.ts) y lo avisa por IPC.
+let ventanaUrl = `http://localhost:${serverPort}`;
+
+// Puerto que el servidor ha comunicado por IPC al quedarse escuchando. Se
+// espera a conocerlo antes de dar el arranque por bueno: sondear el puerto de
+// por defecto solo fallaría cuando ese lo tenga otro programa.
+let puertoInformado = null;
+
 // ─────────────────────────────────────────────────────────────────────
 // SEGURIDAD: token de sesión
 // ─────────────────────────────────────────────────────────────────────
@@ -140,7 +150,9 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false);
 
   // 3. INTENTAMOS CARGAR LA RUTA (Y LE PASAMOS EL SPLASH PARA QUE LO CIERRE AL TERMINAR)
-  cargarURLConReintentos(mainWindow, splash, `http://localhost:${serverPort}`);
+  // Usa ventanaUrl, que puede haberse corregido al recibir el puerto real del
+  // servidor por IPC.
+  cargarURLConReintentos(mainWindow, splash, ventanaUrl);
 
   mainWindow.on('closed', function () {
     mainWindow = null;
@@ -183,18 +195,56 @@ function startServer() {
       console.error(`Server Error: ${data}`);
     });
   }
+
+  // El servidor comunica en qué puerto ha quedado escuchando. Hace falta
+  // porque puede no ser el de por defecto: si el 3000 está ocupado, se mueve
+  // al siguiente libre (ver listenOnFirstFreePort en server.ts) y este proceso
+  // no tiene forma de adivinarlo salvo que se lo digan.
+  serverProcess.on('message', (msg) => {
+    if (msg && msg.type === 'ffe-server-ready' && msg.port) {
+      puertoInformado = msg.port;
+      ventanaUrl = `http://127.0.0.1:${msg.port}`;
+    }
+  });
+
+  serverProcess.on('exit', (code) => {
+    console.error(`El servidor terminó inesperadamente (código ${code}).`);
+  });
 }
 
-// Usamos el fetch nativo mágico de Node (ya no hace falta importarlo)
-async function waitForServer(url, timeout = 10000) {
-  const start = Date.now();
-  while (Date.now() - start < timeout) {
-    try {
-      await fetch(url);
-      return true;
-    } catch (e) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+// Espera a que NUESTRO servidor esté listo. No basta con que algo conteste en
+// el puerto: si otro programa está escuchando en él (el 3000 está ocupado a
+// diario), un simple fetch() daría por bueno un servidor ajeno y la ventana
+// mostraría su web en lugar de la nuestra. Por eso se exige la marca que solo
+// esta app emite en /ffe-identity.
+//
+// Se sondea el puerto que el servidor ha dicho por IPC, no el de por defecto:
+// si el 3000 lo tiene otro, nuestro servidor escucha en otro sitio y sondear
+// solo el 3000 no encontraría nunca nada.
+async function waitForServer(timeout = 30000) {
+  const inicio = Date.now();
+
+  while (Date.now() - inicio < timeout) {
+    // Primero esperamos a que el servidor nos diga dónde escucha.
+    if (!puertoInformado) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      continue;
     }
+
+    const url = `http://127.0.0.1:${puertoInformado}`;
+    try {
+      const res = await fetch(`${url}/ffe-identity`);
+      if (res.ok) {
+        const info = await res.json();
+        if (info && info.app === 'gestor-ffe') {
+          ventanaUrl = `http://127.0.0.1:${info.port || puertoInformado}`;
+          return true;
+        }
+      }
+    } catch {
+      // Ha dicho el puerto pero aún no acepta conexiones: se reintenta.
+    }
+    await new Promise(resolve => setTimeout(resolve, 300));
   }
   return false;
 }
@@ -228,13 +278,20 @@ if (!tieneLock) {
 
     if (app.isPackaged) {
       // Producción: Esperamos a nuestro propio servidor forkeado
-      const serverReady = await waitForServer(`http://127.0.0.1:${serverPort}`);
+      const serverReady = await waitForServer();
       if (serverReady) {
         createWindow();
         // La comprobación de actualizaciones la dispara el renderer al montar
         // (UpdaterProvider -> updater-check), no un timer del proceso principal.
       } else {
-        console.error("El servidor tardó demasiado en iniciar.");
+        // waitForServer solo devuelve true si quien contesta es NUESTRO
+        // servidor. Si el puerto está tomado por otro programa, la identidad
+        // no cuadra y aquí se avisa en vez de abrir una ventana con la web
+        // ajena de fondo.
+        console.error(
+          'No se pudo confirmar el arranque del servidor en el puerto ' +
+            `${serverPort}. Puede que otro programa lo este usando.`
+        );
         app.quit();
       }
     } else {
