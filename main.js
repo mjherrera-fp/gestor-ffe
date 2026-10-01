@@ -203,7 +203,7 @@ function startServer() {
   serverProcess.on('message', (msg) => {
     if (msg && msg.type === 'ffe-server-ready' && msg.port) {
       puertoInformado = msg.port;
-      ventanaUrl = `http://127.0.0.1:${msg.port}`;
+      ventanaUrl = `http://localhost:${msg.port}`;
     }
   });
 
@@ -237,7 +237,7 @@ async function waitForServer(timeout = 30000) {
       if (res.ok) {
         const info = await res.json();
         if (info && info.app === 'gestor-ffe') {
-          ventanaUrl = `http://127.0.0.1:${info.port || puertoInformado}`;
+          ventanaUrl = `http://localhost:${info.port || puertoInformado}`;
           return true;
         }
       }
@@ -386,7 +386,7 @@ app.on('before-quit', () => {
     try {
       const payload = {
         version: 1,
-        rpId: 'localhost',
+        rpId: new URL(ventanaUrl).hostname,
         credentialId,
         password: safeStorage.encryptString(password).toString('base64'),
         createdAt: new Date().toISOString(),

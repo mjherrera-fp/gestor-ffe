@@ -172,11 +172,17 @@ export function useConfiguracion() {
 
       const cred = await crearCredencialBiometrica();
       if (!cred.ok) {
+        const mensajes: Record<string, string> = {
+          cancelado: 'Se canceló el registro biométrico.',
+          'ya-existe': 'Ya existe una credencial biométrica registrada en este equipo.',
+          'rp-id-invalido':
+            'El origen de la aplicación no coincide con el dominio de la credencial. Cierra y vuelve a abrir la aplicación e inténtalo de nuevo.',
+          'no-contexto-seguro':
+            'Windows Hello requiere un origen seguro. Abre la aplicación desde su icono, no desde una URL.',
+        };
         setBiometricMessage({
           type: 'error',
-          text: cred.error === 'cancelado'
-            ? 'Se canceló el registro biométrico.'
-            : 'No se pudo crear la credencial biométrica en este equipo.',
+          text: mensajes[cred.error] ?? 'No se pudo crear la credencial biométrica en este equipo.',
         });
         return;
       }

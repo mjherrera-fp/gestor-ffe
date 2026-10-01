@@ -11,7 +11,10 @@ La aplicación es una app de escritorio *portable* de un único usuario. No hay
 servidor remoto, ni multiusuario, ni nada que escuche fuera del equipo. El
 servidor Express:
 
-- Escucha **solo en `127.0.0.1`**, nunca en `0.0.0.0`.
+- Escucha **solo en el bucle local, IPv4 (`127.0.0.1`) e IPv6 (`::1`)**, nunca
+  en `0.0.0.0` ni en `::`. El puerto IPv6 se añade solo para que `localhost`
+  (que en Windows resuelve primero a `::1`) funcione sin depender del reintento
+  del navegador; `::1` no es accesible desde la red, igual que `127.0.0.1`.
 - Sirve a la vez la API y el frontend, y se abre con el `BrowserWindow`.
 - Guarda la BBDD en la carpeta del propio `.exe` (`ffe_management.db`), cifrada
   con SQLCipher (`better-sqlite3-multiple-ciphers`, `legacy=4`,
