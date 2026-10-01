@@ -386,7 +386,7 @@ app.on('before-quit', () => {
     try {
       const payload = {
         version: 1,
-        rpId: 'localhost',
+        rpId: new URL(ventanaUrl).hostname,
         credentialId,
         password: safeStorage.encryptString(password).toString('base64'),
         createdAt: new Date().toISOString(),
