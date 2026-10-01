@@ -36,8 +36,9 @@ import {
     festivosHeredados,
 } from '../../../lib/festivosAlumno.ts';
 import {uploadGeneratedAttachment} from '../../../utils/emailUtils.ts';
+import {adjuntoDesdeGestor, type TipoDocCorreo} from '../../../utils/emailAdjuntos.ts';
 import {mostrarToast} from '../../../utils/toast.ts';
-import {applyCustomMarkers, interpolateBody} from '../../../../templates/emails/emailTemplates.ts';
+import {applyCustomMarkers, interpolarCuerpo} from '../../../../templates/emails/emailTemplates.ts';
 
 //todo el estado y lógica de relaciones-alumnos, incluyendo gestión de alumnos en el formulario, cambios de estado y descargas de planes formativos
 
@@ -60,7 +61,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
 
     // ── Datos del servidor ──
     const [relaciones, setRelaciones] = useState<RelacionAlumno[]>([]);
-    const [convenios, setConvenios] = useState<(Convenio & { empresaNombre: string; empresaCiudad?: string })[]>([]);
+    const [convenios, setConvenios] = useState<(Convenio & { empresaNombre: string; empresaCiudad?: string; centroNombre?: string })[]>([]);
     const [alumnos, setAlumnos] = useState<Alumno[]>([]);
     const [tutores, setTutores] = useState<TutorEmpresa[]>([]);
     const [curso, setCurso] = useState<Curso | null>(null);
@@ -1636,6 +1637,27 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     const [contextualContactIds, setContextualContactIds] = useState<Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>>([]);
     const [emailSubject, setEmailSubject] = useState('');
     const [emailBody, setEmailBody] = useState('');
+    /** Sustitución de `{{@...}}` por destinatario. Vacío si la plantilla no los usa. */
+    const [emailPerRecipient, setEmailPerRecipient] = useState<Record<string, Record<string, string>>>({});
+    /**
+     * Marcadores que quedaron sin valor y salieron como hueco.
+     *
+     * Se avisa en el modal antes de enviar: el correo ya va a salir con el hueco,
+     * pero el profesor tiene que enterarse de que «Estimado/a, » va sin nombre,
+     * y no descubrirlo cuando la empresa conteste.
+     */
+    const [emailMarcadoresVacios, setEmailMarcadoresVacios] = useState<string[]>([]);
+
+    /**
+     * Los documentos que cuelgan de una relación.
+     *
+     * El catálogo `TipoDocCorreo` incluye el del convenio, que vive en su propio
+     * gestor documental y lo resuelve la pantalla de Convenios. Aquí no tiene
+     * sentido ni el nombre del archivo (que saldría con el número de relación) ni
+     * la autogeneración (que no existe para él), así que el ámbito se declara
+     * aparte en vez de ampliar el mapa de prefijos con un caso imposible.
+     */
+    type DocDeRelacion = Exclude<TipoDocCorreo, 'convenio'>;
 
     const getContextualContactIds = (): Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }> => {
         if (!selectedRelacion) return [];
@@ -1673,42 +1695,169 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         return { to: getTutorEmail(), bcc: [] };
     };
 
+    /**
+     * Nombres del alumnado, unidos con comas y con "y" o "e" al final.
+     *
+     * Se de-duplican porque las relaciones repiten a un mismo alumno cuando hay
+     * más de una relación en la lista, y sin quitarlo el correo lo nombraría dos
+     * veces.
+     */
+    const unirNombres = (lista: string[]) => {
+        const nombres = [...new Set(lista)];
+        if (nombres.length <= 1) return nombres.join(', ');
+        return nombres.slice(0, -1).join(', ') +
+            (nombres[nombres.length - 1].startsWith('I') || nombres[nombres.length - 1].startsWith('Í')
+                ? ' e '
+                : ' y ') +
+            nombres[nombres.length - 1];
+    };
+
     const buildPlaceholders = (relacion: RelacionAlumno, alumno?: Alumno, contactoOverride?: string) => {
         const empresa = relacion.empresa;
-        const nombreEmpresa = convenios?.find(c => c.id === relacion.convenioId)?.empresaNombre ?? empresa?.nombre ?? '';
+        const convenio = convenios?.find(c => c.id === relacion.convenioId);
+        const nombreEmpresa = convenio?.empresaNombre ?? empresa?.nombre ?? '';
         const tutor = tutores?.find(t => t.id === relacion.tutorEmpresaId);
         const nombreTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
         const contactoEmpresa = empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`;
-        const nombreProfesor = profesor ? `${profesor.nombre} ${profesor.apellidos}` : '';
         const listaAlumnos = (relacion.alumnos || [])
             .map(a => `${a.nombre} ${a.apellidos}`)
             .filter(Boolean);
-        const nombresUnicos = [...new Set(listaAlumnos)];
-        const nombreApellidosAlumnos = nombresUnicos.length <= 1
-          ? nombresUnicos.join(', ')
-          : nombresUnicos.slice(0, -1).join(', ') +
-            (nombresUnicos[nombresUnicos.length - 1].startsWith('I') || nombresUnicos[nombresUnicos.length - 1].startsWith('Í')
-              ? ' e '
-              : ' y ') +
-            nombresUnicos[nombresUnicos.length - 1];
+        const nombreApellidosAlumnos = unirNombres(listaAlumnos);
         const direccion = empresa?.direccion ?? '';
-        let alumnoTutor = '';
-        if (alumno) {
-            const estado = alumno.estadoPlanFormativo;
-            const esEstudiante = estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE || estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
-            alumnoTutor = esEstudiante ? `${alumno.nombre} ${alumno.apellidos}` : nombreTutor;
-        } else {
-            alumnoTutor = nombreTutor;
-        }
+
+        // A quién se dirige el correo. El plan formativo es el único que puede
+        // ir al alumno, y solo mientras lo tiene pendiente de firma: en cuanto
+        // lo firma, el destinatario es el tutor.
+        const esPendienteEstudiante = alumno
+            ? alumno.estadoPlanFormativo === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE
+            || alumno.estadoPlanFormativo === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE
+            : false;
+        const alumnoTutor = esPendienteEstudiante && alumno
+            ? `${alumno.nombre} ${alumno.apellidos}`
+            : nombreTutor;
+
         const contacto = contactoOverride ?? (alumno ? `${alumno.nombre} ${alumno.apellidos}` : nombreTutor);
+
         const context: Record<string, any> = {
             profesor: profesor ? { nombre: profesor.nombre, apellidos: profesor.apellidos } : null,
             empresa: empresa ? { nombre: nombreEmpresa, direccion, personaContacto: contactoEmpresa } : null,
             tutor: tutor ? { nombre: tutor.nombre, apellidos: tutor.apellidos } : null,
+            // El centro y el curso vienen del convenio, no de la relación: es lo
+            // único que los dos tienen en común. Antes se podían escribir en una
+            // plantilla y no salían nunca.
+            centro: convenio?.centroNombre ? { nombre: convenio.centroNombre } : null,
+            curso: curso ? { descripcion: curso.descripcion } : null,
+            relacion: { numRelacion: relacion.numRelacion || '' },
             nombreApellidosAlumnos,
             alumnoTutor,
         };
-        return context;
+        return { context, nombreEmpresa, nombreTutor, contacto, contactoEmpresa };
+    };
+
+    /**
+     * Datos que el modal de correo sustituye por destinatario (`{{@contacto}}`,
+     * `{{@nombreEmpresa}}`).
+     *
+     * Van indexados por correo porque cada destinatario recibe el suyo. Antes
+     * este flujo no rellenaba nada y el modal, al no encontrar su marca,
+     * borraba los marcadores en silencio: la plantilla se escribía, el correo
+     * salía con el hueco vacío y no había ni rastro ni aviso.
+     */
+    const perRecipientDeRelaciones = (
+        relaciones: RelacionAlumno[],
+        primera: { nombreEmpresa: string; nombreTutor: string; contacto: string }
+    ): Record<string, Record<string, string>> => {
+        const porCorreo: Record<string, Record<string, string>> = {};
+
+        const anotar = (correo: string | undefined, nombreEmpresa: string, contacto: string) => {
+            if (!correo) return;
+            porCorreo[correo] = { nombreEmpresa, contacto };
+        };
+
+        for (const relacion of relaciones) {
+            const empresa = relacion.empresa;
+            const convenio = convenios?.find(c => c.id === relacion.convenioId);
+            const nombreEmpresa = convenio?.empresaNombre ?? empresa?.nombre ?? '';
+            const tutor = tutores?.find(t => t.id === relacion.tutorEmpresaId);
+            const nombreTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
+
+            anotar(empresa?.email, nombreEmpresa, empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`);
+            anotar(tutor?.email, nombreEmpresa, nombreTutor);
+
+            for (const alumno of relacion.alumnos || []) {
+                const estado = alumno.estadoPlanFormativo;
+                const aAlumno = estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE
+                    || estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
+                if (aAlumno) {
+                    anotar(alumno.emailEduca || alumno.emailPersonal, nombreEmpresa, `${alumno.nombre} ${alumno.apellidos}`);
+                }
+            }
+        }
+
+        // Cuando varias relaciones comparten el mismo correo de empresa, gana la
+        // principal. Se vuelve a calcular su contacto en vez de usar el de la
+        // primera: aquí `contacto` es el del envío (tutor o alumno según el
+        // caso) y pisaba la persona de contacto de la empresa.
+        const principal = relaciones.find(r => r.alumnos?.length);
+        if (principal) {
+            const nombreEmpresa = convenios?.find(c => c.id === principal.convenioId)?.empresaNombre
+                ?? principal.empresa?.nombre
+                ?? primera.nombreEmpresa;
+            const contactoEmpresa = principal.empresa?.personaContacto
+                || `persona de contacto de ${nombreEmpresa}`;
+            anotar(principal.empresa?.email, nombreEmpresa, contactoEmpresa);
+        }
+
+        return porCorreo;
+    };
+
+    /**
+     * La extensión tiene que ser la del blob que se manda, no la que se le
+     * supone al tipo de documento. El profesor puede pedir la relación en DOCX,
+     * y llamarla `.pdf` hacía que Word le abriera un PDF con una cabecera que no
+     * correspondía (y al revés).
+     */
+    const nombreAdjunto = (
+        tipo: DocDeRelacion,
+        relacion: RelacionAlumno,
+        alumno?: Alumno,
+        formato?: 'docx' | 'pdf'
+    ) => {
+        const numRel = (relacion.numRelacion || '').replace(/\//g, '_');
+        const quien = alumno
+            ? `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_')
+            : (convenios.find(c => c.id === relacion.convenioId)?.empresaNombre ?? 'Empresa').replace(/\s+/g, '_');
+        const prefijo: Record<DocDeRelacion, string> = {
+            relacion: 'Relacion', plan: 'Plan', seguimiento: 'Seguimiento',
+            valoracion: 'Valoracion', calendario: 'Calendario', carta: 'Carta',
+        };
+        const extension = formato
+            ?? (tipo === 'seguimiento' || tipo === 'valoracion' ? 'docx' : 'pdf');
+        return `${prefijo[tipo]}_${numRel}_${quien}.${extension}`;
+    };
+
+    /**
+     * El adjunto de un documento, de la fuente que deba: el gestor documental
+     * si el profesor tiene algo subido, y si no, el que genera la aplicación.
+     *
+     * `autogenerar` sabe hacerlo y devuelve `null` cuando no puede; entonces no
+     * se adjunta nada. Ver `src/utils/emailAdjuntos.ts`, donde está el porqué de
+     * este orden.
+     */
+    const adjuntar = async (
+        tipo: DocDeRelacion,
+        relacion: RelacionAlumno,
+        alumno: Alumno | undefined,
+        autogenerar: () => Promise<Blob | null>,
+        formato?: 'docx' | 'pdf'
+    ): Promise<EmailAttachment | null> => {
+        if (relacion.id) {
+            const delGestor = await adjuntoDesdeGestor(tipo, { relacionId: relacion.id, alumnoId: alumno?.id });
+            if (delGestor) return delGestor;
+        }
+        const blob = await autogenerar();
+        if (!blob) return null;
+        return uploadGeneratedAttachment(blob, nombreAdjunto(tipo, relacion, alumno, formato));
     };
 
     const buildTemplateBody = async (plantillaId: string, placeholders: Record<string, any>) => {
@@ -1717,246 +1866,190 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         const cfg = await res.json();
         const marcadoresRes = await fetch('/api/marcadores-personalizados');
         const marcadores = marcadoresRes.ok ? await marcadoresRes.json() : [];
-        let body = applyCustomMarkers(cfg.body, marcadores);
-        body = interpolateBody(body, placeholders);
-        return { ...cfg, body };
+        const conPersonalizados = applyCustomMarkers(cfg.body, marcadores);
+        const { texto, sinResolver } = interpolarCuerpo(conPersonalizados, placeholders);
+        // El asunto se interpola también. Antes solo se hacía con el cuerpo, y un
+        // `{{...}}` escrito en la línea de asunto llegaba así a la empresa.
+        const { texto: asunto, sinResolver: sinResolverAsunto } = interpolarCuerpo(
+            applyCustomMarkers(cfg.subject || '', marcadores),
+            placeholders,
+        );
+        return { ...cfg, subject: asunto, body: texto, sinResolver: [...new Set([...sinResolver, ...sinResolverAsunto])] };
+    };
+
+    /**
+     * Deja el modal de correo listo con todo lo que se ha calculado.
+     *
+     * Los seis envíos por documento hacen exactamente los mismos pasos, y cada
+     * uno se olvidaba de alguno. Reunirlos aquí es lo que hace que el aviso de
+     * marcadores vacíos y los `{{@...}}` aparezcan igual en todos, y no solo en
+     * los que se tocan.
+     */
+    const abrirCorreo = (opts: {
+        to: string[];
+        bcc?: string[];
+        attachments: Array<EmailAttachment | null>;
+        cfg: { subject: string; body: string; sinResolver?: string[] };
+        perRecipient?: Record<string, Record<string, string>>;
+        /** Por defecto, los contactos de la relación abierta. El envío masivo
+         *  lleva los suyos, que son los de todas las relaciones del lote. */
+        contactIds?: Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>;
+    }) => {
+        const { to, bcc = [], attachments, cfg, perRecipient = {}, contactIds } = opts;
+        setEmailTo(to);
+        setEmailBcc(bcc);
+        // Un documento que no se pudo obtener deja hueco en vez de romper el envío.
+        setEmailAttachments(attachments.filter((a): a is EmailAttachment => !!a));
+        setContextualContactIds(contactIds ?? getContextualContactIds());
+        setEmailSubject(cfg.subject);
+        setEmailBody(cfg.body);
+        setEmailPerRecipient(perRecipient);
+        setEmailMarcadoresVacios(cfg.sinResolver || []);
+        setShowEmailModal(true);
+    };
+
+    const perRecipientDeUna = (relacion: RelacionAlumno, alumno?: Alumno) => {
+        // `contactoEmpresa` y no `contacto`: sin alumno, `contacto` cae al tutor,
+        // y el correo a la empresa se abría saludando a Marta Gómez en lugar de
+        // a la persona de contacto que consta en su ficha.
+        const { nombreEmpresa, nombreTutor, contactoEmpresa } = buildPlaceholders(relacion, alumno);
+        const correoAlumno = alumno && (
+            alumno.estadoPlanFormativo === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE
+            || alumno.estadoPlanFormativo === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE)
+            ? alumno.emailEduca || alumno.emailPersonal
+            : undefined;
+        const datos: Record<string, Record<string, string>> = {};
+        if (relacion.empresa?.email) datos[relacion.empresa.email] = { nombreEmpresa, contacto: contactoEmpresa };
+        const tutor = tutores.find(t => t.id === relacion.tutorEmpresaId);
+        if (tutor?.email) datos[tutor.email] = { nombreEmpresa, contacto: nombreTutor };
+        if (correoAlumno && alumno) {
+            datos[correoAlumno] = { nombreEmpresa, contacto: `${alumno.nombre} ${alumno.apellidos}` };
+        }
+        return datos;
     };
 
     const handleEmailConRelacion = async (tipo: 'docx' | 'pdf') => {
         if (!selectedRelacion) return;
-        const placeholders = buildPlaceholders(selectedRelacion);
-        const cfg = await buildTemplateBody('relacion', placeholders);
+        const { context } = buildPlaceholders(selectedRelacion);
+        const cfg = await buildTemplateBody('relacion', context);
         if (!cfg) return;
 
-        if (anexoRelacionExterno) {
-            setEmailTo(getEmpresaEmail());
-            setEmailBcc([]);
-            setEmailAttachments([]);
-            setContextualContactIds(getContextualContactIds());
-            setEmailSubject(cfg.subject);
-            setEmailBody(cfg.body);
-            setShowEmailModal(true);
-            return;
-        }
+        // El modo externo solo apaga la autogeneración, no la búsqueda. El
+        // profesor tiene su propio documento, pero lo puede haber subido él
+        // mismo al gestor documental, y si está ahí es el que hay que mandar:
+        // el autogenerado no, porque es justo lo que el modo externo descarta.
+        const att = await adjuntar(
+            'relacion',
+            selectedRelacion,
+            undefined,
+            () => (anexoRelacionExterno ? null : crearDocumentoRelacion(tipo, selectedRelacion)),
+            tipo
+        );
 
-        const blob = await crearDocumentoRelacion(tipo, selectedRelacion);
-        if (!blob) return;
-        const ext = tipo === 'pdf' ? 'pdf' : 'docx';
-        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
-        const att = await uploadGeneratedAttachment(blob, `Relacion_${numRel}.${ext}`);
-        setEmailTo(getEmpresaEmail());
-        setEmailBcc([]);
-        setEmailAttachments([att]);
-        setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg.subject);
-        setEmailBody(cfg.body);
-        setShowEmailModal(true);
+        // Si el documento no sale, el correo se abre igualmente y sin adjunto:
+        // el profesor ve que falta, y decide. Cerrar el modal en silencio le
+        // deja sin explicación de por qué no se puede mandar.
+        abrirCorreo({
+            to: getEmpresaEmail(),
+            attachments: [att],
+            cfg,
+            perRecipient: perRecipientDeUna(selectedRelacion),
+        });
     };
 
     const handleEmailConPlanFormativo = async (tipo: 'docx' | 'pdf', alumno: Alumno) => {
         if (!selectedRelacion) return;
-        const blob = await crearPlanFormativo(tipo, alumno, selectedRelacion);
-        if (!blob) return;
-        const ext = tipo === 'pdf' ? 'pdf' : 'docx';
-        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
-        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-        const att = await uploadGeneratedAttachment(blob, `Plan_${numRel}_${nombreAlumno}.${ext}`);
-        const { to, bcc } = getPlanDestinatarios(alumno);
-        const placeholders = buildPlaceholders(selectedRelacion, alumno);
-        const cfg = await buildTemplateBody('plan', placeholders);
+        const { context } = buildPlaceholders(selectedRelacion, alumno);
+        const cfg = await buildTemplateBody('plan', context);
         if (!cfg) return;
-        setEmailTo(to);
-        setEmailBcc(bcc);
-        setEmailAttachments([att]);
-        setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg.subject);
-        setEmailBody(cfg.body);
-        setShowEmailModal(true);
+
+        const att = await adjuntar('plan', selectedRelacion, alumno, () =>
+            crearPlanFormativo(tipo, alumno, selectedRelacion), tipo
+        );
+        const { to, bcc } = getPlanDestinatarios(alumno);
+        abrirCorreo({
+            to,
+            bcc,
+            attachments: [att],
+            cfg,
+            perRecipient: perRecipientDeUna(selectedRelacion, alumno),
+        });
     };
 
     const handleEmailConSeguimiento = async (alumno: Alumno) => {
         if (!selectedRelacion) return;
-        const blob = await crearSeguimiento(alumno, selectedRelacion);
-        if (!blob) return;
-        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
-        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-        const att = await uploadGeneratedAttachment(blob, `Seguimiento_${numRel}_${nombreAlumno}.docx`);
         const tutor = tutores.find(t => t.id === selectedRelacion.tutorEmpresaId);
         const nombreTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
-        const placeholders = buildPlaceholders(selectedRelacion, undefined, nombreTutor);
-        const cfg = await buildTemplateBody('seg', placeholders);
+        const { context } = buildPlaceholders(selectedRelacion, undefined, nombreTutor);
+        const cfg = await buildTemplateBody('seg', context);
         if (!cfg) return;
-        setEmailTo(getTutorEmail());
-        setEmailBcc([]);
-        setEmailAttachments([att]);
-        setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg.subject);
-        setEmailBody(cfg.body);
-        setShowEmailModal(true);
+
+        const att = await adjuntar('seguimiento', selectedRelacion, alumno, () =>
+            crearSeguimiento(alumno, selectedRelacion)
+        );
+        abrirCorreo({
+            to: getTutorEmail(),
+            attachments: [att],
+            cfg,
+            perRecipient: perRecipientDeUna(selectedRelacion),
+        });
     };
 
     const handleEmailConValoracion = async (alumno: Alumno) => {
         if (!selectedRelacion) return;
-        const blob = await crearValoracion(alumno, selectedRelacion);
-        if (!blob) return;
-        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
-        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-        const att = await uploadGeneratedAttachment(blob, `Valoracion_${numRel}_${nombreAlumno}.docx`);
         const tutor = tutores.find(t => t.id === selectedRelacion.tutorEmpresaId);
         const nombreTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
-        const placeholders = buildPlaceholders(selectedRelacion, undefined, nombreTutor);
-        const cfg = await buildTemplateBody('val', placeholders);
+        const { context } = buildPlaceholders(selectedRelacion, undefined, nombreTutor);
+        const cfg = await buildTemplateBody('val', context);
         if (!cfg) return;
-        setEmailTo(getTutorEmail());
-        setEmailBcc([]);
-        setEmailAttachments([att]);
-        setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg.subject);
-        setEmailBody(cfg.body);
-        setShowEmailModal(true);
+
+        const att = await adjuntar('valoracion', selectedRelacion, alumno, () =>
+            crearValoracion(alumno, selectedRelacion)
+        );
+        abrirCorreo({
+            to: getTutorEmail(),
+            attachments: [att],
+            cfg,
+            perRecipient: perRecipientDeUna(selectedRelacion),
+        });
     };
 
     const handleEmailConCarta = async () => {
         if (!selectedRelacion) return;
-        const blob = await crearCarta(selectedRelacion);
-        if (!blob) return;
-        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
-        let nombreEmpresa = 'Empresa';
         const convenio = convenios.find(c => c.id === selectedRelacion.convenioId);
-        if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
-        const att = await uploadGeneratedAttachment(blob, `Carta_${numRel}_${nombreEmpresa}.pdf`);
-        const lugarContacto = selectedRelacion.empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`;
-        const placeholders = buildPlaceholders(selectedRelacion, undefined, lugarContacto);
-        const cfg = await buildTemplateBody('carta-inicio', placeholders);
+        const nombreEmpresaLegible = convenio?.empresaNombre ?? selectedRelacion.empresa?.nombre ?? '';
+        const lugarContacto = selectedRelacion.empresa?.personaContacto
+            || `persona de contacto de ${nombreEmpresaLegible}`;
+        const { context } = buildPlaceholders(selectedRelacion, undefined, lugarContacto);
+        const cfg = await buildTemplateBody('carta-inicio', context);
         if (!cfg) return;
-        setEmailTo(getEmpresaEmail());
-        setEmailBcc([]);
-        setEmailAttachments([att]);
-        setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg.subject);
-        setEmailBody(cfg.body);
-        setShowEmailModal(true);
+
+        const att = await adjuntar('carta', selectedRelacion, undefined, () =>
+            crearCarta(selectedRelacion)
+        );
+        abrirCorreo({
+            to: getEmpresaEmail(),
+            attachments: [att],
+            cfg,
+            perRecipient: perRecipientDeUna(selectedRelacion),
+        });
     };
 
     const handleEmailConCalendario = async (alumno: Alumno) => {
         if (!selectedRelacion) return;
-        const blob = await crearCalendario(alumno, selectedRelacion);
-        if (!blob) return;
-        const numRel = selectedRelacion.numRelacion.replace(/\//g, '_');
-        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-        const att = await uploadGeneratedAttachment(blob, `Calendario_${numRel}_${nombreAlumno}.pdf`);
-        const placeholders = buildPlaceholders(selectedRelacion, alumno);
-        const cfg = await buildTemplateBody('cal', placeholders);
+        const { context } = buildPlaceholders(selectedRelacion, alumno);
+        const cfg = await buildTemplateBody('cal', context);
         if (!cfg) return;
-        setEmailTo(alumno.emailEduca ? [alumno.emailEduca] : []);
-        setEmailBcc([]);
-        setEmailAttachments([att]);
-        setContextualContactIds(getContextualContactIds());
-        setEmailSubject(cfg.subject);
-        setEmailBody(cfg.body);
-        setShowEmailModal(true);
-    };
 
-    const handleEmailConTodo = async (relaciones: RelacionAlumno[]) => {
-        if (!relaciones.length) return;
-
-        const docsAlumno: (keyof SelectedDocs)[] = ['plan', 'seguimiento', 'valoracion', 'calendario'];
-
-        const hasAlumnoDocs = docsAlumno.some(k => selectedDocs[k]);
-        const relacionSeleccionadaEmail = !anexoRelacionExterno && !!selectedDocs.relacion;
-        const hasRelacionDocs = (['relacion', 'carta'] as (keyof SelectedDocs)[]).some(k => k === 'relacion'
-            ? relacionSeleccionadaEmail
-            : selectedDocs[k]);
-
-        if (!hasAlumnoDocs && !hasRelacionDocs) {
-            alert('Debes seleccionar al menos un tipo de documento para enviar.');
-            return;
-        }
-
-        setTargetEmailRelaciones([]);
-
-        const atts: EmailAttachment[] = [];
-        const destinatarios = new Set<string>();
-        const soloRelacion = relacionSeleccionadaEmail && !hasAlumnoDocs && !selectedDocs.carta;
-
-        for (const relacion of relaciones) {
-            if (!relacion.alumnos?.length) continue;
-
-            const numRel = relacion.numRelacion.replace(/\//g, '_');
-
-            // Recipiente por relación
-            let recipient: string | undefined;
-            if (soloRelacion) {
-                recipient = relacion.empresa?.email;
-            } else {
-                const tutor = tutores.find(t => t.id === relacion.tutorEmpresaId);
-                recipient = tutor?.email || relacion.empresa?.email;
-            }
-            if (recipient) destinatarios.add(recipient);
-
-            for (const alumno of relacion.alumnos) {
-                const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-
-                if (selectedDocs.plan) {
-                    const blob = await crearPlanFormativo('pdf', alumno, relacion);
-                    if (blob) {
-                        const a = await uploadGeneratedAttachment(blob, `Plan_${numRel}_${nombreAlumno}.pdf`);
-                        atts.push(a);
-                    }
-                }
-
-                if (selectedDocs.seguimiento) {
-                    const blob = await crearSeguimiento(alumno, relacion);
-                    if (blob) {
-                        const a = await uploadGeneratedAttachment(blob, `Seguimiento_${numRel}_${nombreAlumno}.docx`);
-                        atts.push(a);
-                    }
-                }
-
-                if (selectedDocs.valoracion) {
-                    const blob = await crearValoracion(alumno, relacion);
-                    if (blob) {
-                        const a = await uploadGeneratedAttachment(blob, `Valoracion_${numRel}_${nombreAlumno}.docx`);
-                        atts.push(a);
-                    }
-                }
-
-                if (selectedDocs.calendario) {
-                    const blob = await crearCalendario(alumno, relacion);
-                    if (blob) {
-                        const a = await uploadGeneratedAttachment(blob, `Calendario_${numRel}_${nombreAlumno}.pdf`);
-                        atts.push(a);
-                    }
-                }
-            }
-
-            if (selectedDocs.carta) {
-                const blob = await crearCarta(relacion);
-                if (blob) {
-                    let nombreEmpresa = 'Empresa';
-                    const convenio = convenios.find(c => c.id === relacion.convenioId);
-                    if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
-                    const a = await uploadGeneratedAttachment(blob, `Carta_${numRel}_${nombreEmpresa}.pdf`);
-                    atts.push(a);
-                }
-            }
-
-            if (relacionSeleccionadaEmail) {
-                const blob = await crearDocumentoRelacion('pdf', relacion);
-                if (blob) {
-                    const a = await uploadGeneratedAttachment(blob, `Relacion_${numRel}.pdf`);
-                    atts.push(a);
-                }
-            }
-        }
-
-        setEmailTo(Array.from(destinatarios));
-        setEmailBcc([]);
-        setEmailAttachments(atts);
-        setContextualContactIds([]);
-        setEmailSubject('');
-        setEmailBody('');
-        setShowEmailModal(true);
+        const att = await adjuntar('calendario', selectedRelacion, alumno, () =>
+            crearCalendario(alumno, selectedRelacion)
+        );
+        abrirCorreo({
+            to: alumno.emailEduca ? [alumno.emailEduca] : [],
+            attachments: [att],
+            cfg,
+            perRecipient: perRecipientDeUna(selectedRelacion, alumno),
+        });
     };
 
     const handleEmailConPlantilla = async (relaciones: RelacionAlumno[], plantillaId: string) => {
@@ -1968,161 +2061,96 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         setIsPreparingEmail(true);
         setTargetEmailRelaciones([]);
 
-        const atts: EmailAttachment[] = [];
-        const destinatarios = new Set<string>();
-        const contactIds: Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }> = [];
+        try {
+            const atts: EmailAttachment[] = [];
+            const destinatarios = new Set<string>();
+            const contactIds: Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }> = [];
 
-        for (const relacion of relaciones) {
-            if (!relacion.alumnos?.length) continue;
-            const numRel = relacion.numRelacion.replace(/\//g, '_');
+            for (const relacion of relaciones) {
+                if (!relacion.alumnos?.length) continue;
 
-            if (relacion.empresa?.id) contactIds.push({ type: 'empresa', id: relacion.empresa.id });
-            if (relacion.tutorEmpresaId) contactIds.push({ type: 'tutor', id: relacion.tutorEmpresaId });
-            for (const a of relacion.alumnos) {
-                if (a.id) contactIds.push({ type: 'alumno', id: a.id });
-            }
-
-            // Destinatarios según la configuración de la plantilla
-            if (cfg.recipientTarget === 'empresa') {
-                if (relacion.empresa?.email) destinatarios.add(relacion.empresa.email);
-            } else if (cfg.recipientTarget === 'tutor') {
-                const tutor = tutores.find(t => t.id === relacion.tutorEmpresaId);
-                if (tutor?.email) destinatarios.add(tutor.email);
-                if (!tutor?.email && relacion.empresa?.email) destinatarios.add(relacion.empresa.email);
-            } else if (cfg.recipientTarget === 'estudiante_conditional') {
-                for (const alumno of relacion.alumnos) {
-                    const estado = alumno.estadoPlanFormativo;
-                    const esEstudiante = estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE || estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
-                    if (esEstudiante) {
-                        const email = alumno.emailEduca || alumno.emailPersonal;
-                        if (email) destinatarios.add(email);
-                    } else {
-                        const tutor = tutores.find(t => t.id === relacion.tutorEmpresaId);
-                        if (tutor?.email) destinatarios.add(tutor.email);
-                    }
-                }
-            }
-
-            // Documentos según la configuración de la plantilla
-            for (const doc of JSON.parse(cfg.documents || '[]') as string[]) {
-                if (doc === 'relacion') {
-                    if (anexoRelacionExterno) continue;
-                    const blob = await crearDocumentoRelacion('pdf', relacion);
-                    if (blob) {
-                        atts.push(await uploadGeneratedAttachment(blob, `Relacion_${numRel}.pdf`));
-                    }
+                if (relacion.empresa?.id) contactIds.push({ type: 'empresa', id: relacion.empresa.id });
+                if (relacion.tutorEmpresaId) contactIds.push({ type: 'tutor', id: relacion.tutorEmpresaId });
+                for (const a of relacion.alumnos) {
+                    if (a.id) contactIds.push({ type: 'alumno', id: a.id });
                 }
 
-                if (doc === 'plan') {
+                // Destinatarios según la configuración de la plantilla
+                if (cfg.recipientTarget === 'empresa') {
+                    if (relacion.empresa?.email) destinatarios.add(relacion.empresa.email);
+                } else if (cfg.recipientTarget === 'tutor') {
+                    const tutor = tutores.find(t => t.id === relacion.tutorEmpresaId);
+                    if (tutor?.email) destinatarios.add(tutor.email);
+                    if (!tutor?.email && relacion.empresa?.email) destinatarios.add(relacion.empresa.email);
+                } else if (cfg.recipientTarget === 'estudiante_conditional') {
                     for (const alumno of relacion.alumnos) {
-                        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-                        const blob = await crearPlanFormativo('pdf', alumno, relacion);
-                        if (blob) {
-                            atts.push(await uploadGeneratedAttachment(blob, `Plan_${numRel}_${nombreAlumno}.pdf`));
+                        const estado = alumno.estadoPlanFormativo;
+                        const esEstudiante = estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE || estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
+                        if (esEstudiante) {
+                            const email = alumno.emailEduca || alumno.emailPersonal;
+                            if (email) destinatarios.add(email);
+                        } else {
+                            const tutor = tutores.find(t => t.id === relacion.tutorEmpresaId);
+                            if (tutor?.email) destinatarios.add(tutor.email);
                         }
                     }
                 }
 
-                if (doc === 'seguimiento') {
-                    for (const alumno of relacion.alumnos) {
-                        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-                        const blob = await crearSeguimiento(alumno, relacion);
-                        if (blob) {
-                            atts.push(await uploadGeneratedAttachment(blob, `Seguimiento_${numRel}_${nombreAlumno}.docx`));
-                        }
-                    }
-                }
+                // Documentos según la configuración de la plantilla. Cada uno va
+                // primero al gestor documental, y solo si no hay nada se genera.
+                for (const doc of JSON.parse(cfg.documents || '[]') as TipoDocCorreo[]) {
+                    // Una plantilla de relaciones solo puede pedir documentos de
+                    // relación. El del convenio se resuelve en Convenios, contra su
+                    // propio gestor; aquí no se busca ni se genera, y se dice de
+                    // forma explícita en vez de dejarlo en que se caiga solo.
+                    if (doc === 'convenio') continue;
 
-                if (doc === 'valoracion') {
-                    for (const alumno of relacion.alumnos) {
-                        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-                        const blob = await crearValoracion(alumno, relacion);
-                        if (blob) {
-                            atts.push(await uploadGeneratedAttachment(blob, `Valoracion_${numRel}_${nombreAlumno}.docx`));
-                        }
-                    }
-                }
+                    // El anexo externo apaga la autogeneración de la relación,
+                    // pero no su búsqueda en el gestor: si el profesor subió
+                    // su versión ahí, esa es la que va, y es la buena.
+                    const autogenerarRelacion = () => (anexoRelacionExterno ? null : crearDocumentoRelacion('pdf', relacion));
 
-                if (doc === 'calendario') {
-                    for (const alumno of relacion.alumnos) {
-                        const nombreAlumno = `${alumno.nombre}_${alumno.apellidos}`.replace(/\s+/g, '_');
-                        const blob = await crearCalendario(alumno, relacion);
-                        if (blob) {
-                            atts.push(await uploadGeneratedAttachment(blob, `Calendario_${numRel}_${nombreAlumno}.pdf`));
-                        }
+                    if (doc === 'relacion' || doc === 'carta') {
+                        const att = await adjuntar(doc, relacion, undefined, () =>
+                            doc === 'relacion'
+                                ? autogenerarRelacion()
+                                : crearCarta(relacion)
+                        );
+                        if (att) atts.push(att);
+                        continue;
                     }
-                }
 
-                if (doc === 'carta') {
-                    const blob = await crearCarta(relacion);
-                    if (blob) {
-                        let nombreEmpresa = 'Empresa';
-                        const convenio = convenios.find(c => c.id === relacion.convenioId);
-                        if (convenio) nombreEmpresa = convenio.empresaNombre.replace(/\s+/g, '_');
-                        atts.push(await uploadGeneratedAttachment(blob, `Carta_${numRel}_${nombreEmpresa}.pdf`));
+                    // Los otros cuatro son de un alumno, y van uno a uno.
+                    for (const alumno of relacion.alumnos) {
+                        const att = await adjuntar(doc, relacion, alumno, () => {
+                            if (doc === 'plan') return crearPlanFormativo('pdf', alumno, relacion);
+                            if (doc === 'seguimiento') return crearSeguimiento(alumno, relacion);
+                            if (doc === 'valoracion') return crearValoracion(alumno, relacion);
+                            if (doc === 'calendario') return crearCalendario(alumno, relacion);
+                            return Promise.resolve(null);
+                        });
+                        if (att) atts.push(att);
                     }
                 }
             }
+
+            const primeraRelacion = relaciones.find(r => r.alumnos?.length);
+            const { context, nombreEmpresa, nombreTutor, contacto } = buildPlaceholders(primeraRelacion || relaciones[0]);
+            const cuerpo = await buildTemplateBody(plantillaId, context);
+            if (!cuerpo) return;
+
+            abrirCorreo({
+                to: Array.from(destinatarios),
+                attachments: atts,
+                cfg: cuerpo,
+                contactIds,
+                perRecipient: perRecipientDeRelaciones(relaciones, { nombreEmpresa, nombreTutor, contacto }),
+            });
+        } finally {
+            // Sin esto, un fallo a mitad de la generación deja el botón de
+            // envío girando para siempre y no explica qué pasó.
+            setIsPreparingEmail(false);
         }
-
-        setIsPreparingEmail(false);
-
-        const primeraRelacion = relaciones.find(r => r.alumnos?.length);
-        const nombreEmpresa = primeraRelacion
-            ? (convenios.find(c => c.id === primeraRelacion.convenioId)?.empresaNombre ?? primeraRelacion.empresa?.nombre ?? '')
-            : '';
-        const tutor = primeraRelacion ? tutores.find(t => t.id === primeraRelacion.tutorEmpresaId) : undefined;
-        const nombreTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
-        const nombreProfesor = profesor ? `${profesor.nombre} ${profesor.apellidos}` : '';
-        const listaAlumnos = relaciones
-            .flatMap(r => r.alumnos || [])
-            .map(a => `${a.nombre} ${a.apellidos}`)
-            .filter(Boolean);
-        const nombresUnicos = [...new Set(listaAlumnos)];
-        const nombreApellidosAlumnos = nombresUnicos.length <= 1
-          ? nombresUnicos.join(', ')
-          : nombresUnicos.slice(0, -1).join(', ') +
-            (nombresUnicos[nombresUnicos.length - 1].startsWith('I') || nombresUnicos[nombresUnicos.length - 1].startsWith('Í')
-              ? ' e '
-              : ' y ') +
-            nombresUnicos[nombresUnicos.length - 1];
-        const direccion = primeraRelacion?.empresa?.direccion ?? '';
-
-        const contactoEmpresa = primeraRelacion?.empresa?.personaContacto || `persona de contacto de ${nombreEmpresa}`;
-
-        let alumnoTutor = '';
-        if (plantillaId === 'plan' && primeraRelacion?.alumnos?.length) {
-            const firstAlumno = primeraRelacion.alumnos[0];
-            const estado = firstAlumno.estadoPlanFormativo;
-            const esEstudiante = estado === PlanFormativoEstado.PENDIENTE_ENVIAR_ESTUDIANTE || estado === PlanFormativoEstado.PENDIENTE_FIRMAR_ESTUDIANTE;
-            if (esEstudiante) {
-                alumnoTutor = nombreApellidosAlumnos;
-            } else {
-                const tutor = tutores.find(t => t.id === primeraRelacion.tutorEmpresaId);
-                alumnoTutor = tutor ? `${tutor.nombre} ${tutor.apellidos}` : '';
-            }
-        }
-
-        const context: Record<string, any> = {
-            profesor: profesor ? { nombre: profesor.nombre, apellidos: profesor.apellidos } : null,
-            tutor: tutor ? { nombre: tutor.nombre, apellidos: tutor.apellidos } : null,
-            empresa: primeraRelacion?.empresa ? { nombre: nombreEmpresa, direccion, personaContacto: contactoEmpresa } : null,
-            nombreApellidosAlumnos,
-            alumnoTutor,
-        };
-
-        const marcadoresRes = await fetch('/api/marcadores-personalizados');
-        const marcadores = marcadoresRes.ok ? await marcadoresRes.json() : [];
-        let body = applyCustomMarkers(cfg.body, marcadores);
-        body = interpolateBody(body, context);
-
-        setEmailTo(Array.from(destinatarios));
-        setEmailBcc([]);
-        setEmailAttachments(atts);
-        setEmailSubject(cfg.subject);
-        setEmailBody(body);
-        setContextualContactIds(contactIds);
-        setShowEmailModal(true);
     };
 
     // ─────────────────────────────────────────
@@ -2188,10 +2216,11 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         emailTo, emailBcc, emailAttachments, setEmailAttachments, contextualContactIds,
         emailSubject, setEmailSubject,
         emailBody, setEmailBody,
+        emailPerRecipient, emailMarcadoresVacios,
         handleEmailConRelacion, handleEmailConPlanFormativo,
         handleEmailConSeguimiento, handleEmailConValoracion,
         handleEmailConCarta, handleEmailConCalendario,
-        handleEmailConTodo, handleEmailConPlantilla,
+        handleEmailConPlantilla,
         isPreparingEmail,
         targetEmailRelaciones, setTargetEmailRelaciones,
         fetchData,

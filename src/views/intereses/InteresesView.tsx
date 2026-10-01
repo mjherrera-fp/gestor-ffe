@@ -5,7 +5,7 @@ import { AlumnosSidebar }            from './components/AlumnosSidebar.tsx';
 import { InteresesGrid }             from './components/InteresesGrid.tsx';
 import { EmailModal }                from '../../components/EmailModal.tsx';
 import { EmailAttachment }           from '../../types/email.ts';
-import { interpolateBody, applyCustomMarkers } from '../../../templates/emails/emailTemplates.ts';
+import { interpolarCuerpo, applyCustomMarkers } from '../../../templates/emails/emailTemplates.ts';
 
 interface Props {
   cursoId: number;
@@ -35,6 +35,7 @@ export default function InteresesView({ cursoId, detalleAcademicoId, onCreateRel
   const [emailSubject, setEmailSubject] = useState('Candidatura para prácticas en empresa');
   const [emailBody, setEmailBody] = useState('<p>Estimados señores:</p><p>Adjunto les remito mi currículum vitae para su consideración.</p><p>Quedo a su disposición para cualquier aclaración.</p><p>Atentamente,</p>');
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [marcadoresVacios, setMarcadoresVacios] = useState<string[]>([]);
 
   // ── Toggle interés con soporte multi-selección y envío de CV ──
 
@@ -99,32 +100,25 @@ export default function InteresesView({ cursoId, detalleAcademicoId, onCreateRel
                 empresa: eNombre ? { nombre: eNombre, personaContacto: contacto } : null,
               };
 
-              let body = cfg.body || '';
-              let subject = cfg.subject || '';
+              const conPersonalizados = applyCustomMarkers(cfg.body || '', marcadores);
+              const asuntoConPersonalizados = applyCustomMarkers(cfg.subject || '', marcadores);
 
-              body = applyCustomMarkers(body, marcadores);
-              subject = applyCustomMarkers(subject, marcadores);
-              body = interpolateBody(body, context);
-              subject = interpolateBody(subject, context);
+              // El asunto también lleva marcadores, así que se resuelve igual.
+              // Antes solo se interpolaba el cuerpo y el asunto se enviaba con
+              // las llaves puestas si alguien lo usaba.
+              const cuerpo = interpolarCuerpo(conPersonalizados, context);
+              const asunto = interpolarCuerpo(asuntoConPersonalizados, context);
 
-              // Sustitución directa de todos los marcadores (incluso si están vacíos)
-              body = body.replace(/\{\{empresa\.personaContacto\}\}/g, contacto);
-              subject = subject.replace(/\{\{empresa\.personaContacto\}\}/g, contacto);
-              body = body.replace(/\{\{empresa\.nombre\}\}/g, eNombre);
-              subject = subject.replace(/\{\{empresa\.nombre\}\}/g, eNombre);
-              body = body.replace(/\{\{profesor\.nombre\}\}/g, pNombre);
-              subject = subject.replace(/\{\{profesor\.nombre\}\}/g, pNombre);
-              body = body.replace(/\{\{profesor\.apellidos\}\}/g, pApellidos);
-              subject = subject.replace(/\{\{profesor\.apellidos\}\}/g, pApellidos);
+              // Los `{{@contacto}}` y `{{@nombreEmpresa}}` no se tocan aquí: los
+              // sustituye el modal uno a uno según a quién va el correo. Antes
+              // se limpiaba cualquier `{{...}}` al final, y eso los borraba antes
+              // de que llegaran al modal, con los datos ya calculados y sin
+              // usarse nunca.
+              if (asunto.texto) setEmailSubject(asunto.texto);
+              if (cuerpo.texto) setEmailBody(cuerpo.texto);
+              setMarcadoresVacios([...new Set([...cuerpo.sinResolver, ...asunto.sinResolver])]);
 
-              // Limpiar cualquier {{...}} que haya quedado sin reemplazar
-              body = body.replace(/\{\{[^}]+\}\}/g, '');
-              subject = subject.replace(/\{\{[^}]+\}\}/g, '');
-
-              if (subject) setEmailSubject(subject);
-              if (body) setEmailBody(body);
-
-              // per-recipient data for {{@contacto}} and {{@nombreEmpresa}}
+              // Datos por destinatario para los `{{@...}}`.
               if (empresa?.email || empresa?.nombre) {
                 const perData: Record<string, Record<string, string>> = {};
                 for (const email of empresa.email ? [empresa.email] : ['']) {
@@ -195,12 +189,13 @@ export default function InteresesView({ cursoId, detalleAcademicoId, onCreateRel
       {/* ── Modal de email para Envío de CV ── */}
       <EmailModal
         isOpen={showEmailModal}
-        onClose={() => { setShowEmailModal(false); setEmailAttachments([]); setEmailPerRecipientData(undefined); }}
+        onClose={() => { setShowEmailModal(false); setEmailAttachments([]); setEmailPerRecipientData(undefined); setMarcadoresVacios([]); }}
         initialTo={emailTo}
         initialAttachments={emailAttachments}
         initialSubject={emailSubject}
         initialBody={emailBody}
         perRecipientData={emailPerRecipientData}
+        marcadoresVacios={marcadoresVacios}
       />
     </div>
   );

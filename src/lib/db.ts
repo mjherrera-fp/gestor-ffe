@@ -639,6 +639,31 @@ function setupTables() {
 // Migraciones de esquema versionadas (PRAGMA user_version)
   runMigrations();
 
+  // Plantilla de correo de Convenios. Se declara fuera porque hace falta tanto
+  // en el seed de instalaciones nuevas como en la migración de las que ya
+  // tienen la tabla creada: si el texto viviera en los dos sitios, la primera
+  // vez que se retoque la plantilla se actualizaría una y la otra se quedaría
+  // con el texto viejo para siempre.
+  //
+  // `documents` pide el documento del convenio. El cuerpo no dice "adjuntamos"
+  // a propósito: el adjunto solo sale si el profesor ha subido alguna versión
+  // al gestor documental, y un texto que anuncie un adjunto que no está es
+  // peor que no mencionarlo.
+  const plantillaConvenio = {
+    plantillaId: 'convenio',
+    name: 'Envío de convenio',
+    description: 'Comunicar el convenio a la empresa',
+    subject: 'Convenio de prácticas {{convenio.numConvenio}}',
+    body: '<p>Estimado/a, {{empresa.personaContacto}}</p>\n<p>Nos dirigimos a ustedes desde el {{centro.nombre}} para comunicarles los datos del convenio de prácticas del curso {{curso.descripcion}}.</p>\n<ul>\n<li><strong>Nº de convenio:</strong> {{convenio.numConvenio}}</li>\n<li><strong>Fecha del convenio:</strong> {{convenio.fechaConvenio}}</li>\n</ul>\n<p>Rogamos confirmen la recepción de este correo y, si fuera necesario, nos indiquen cualquier corrección.</p>\n<p>Agradecemos de antemano su colaboración.</p>\n<p>Atentamente,</p>',
+    documents: JSON.stringify(['convenio']),
+    recipientTarget: 'empresa',
+    icon: 'send',
+    color: 'blue',
+    place: 'convenio',
+    tipo: 'sistema',
+    grupo: 'registro-individual',
+  } as Omit<PlantillaCorreoDB, 'id'>;
+
   // Seed: migrar plantillas si la tabla está vacía
   const count = db.prepare("SELECT COUNT(*) as count FROM plantillas_correo").get() as any;
   if (count.count === 0) {
@@ -654,6 +679,7 @@ function setupTables() {
       { plantillaId: 'carta-inicio', name: 'Envío de carta de inicio', description: 'Carta de inicio → Empresa', subject: 'Carta de inicio de las FFE', body: '<p>Estimado/a, {{empresa.personaContacto}}</p>\n<p>Adjuntamos la carta de inicio correspondiente a la fase de formación en empresa.</p>\n<p>En esta carta se especifican aspectos importantes relacionados con el inicio de las FFE, por lo que rogamos revisen el documento detenidamente.</p>\n<p>Agradecemos de antemano su colaboración.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['carta']), recipientTarget: 'empresa', icon: 'carta', color: 'amber', place: 'relaciones', tipo: 'sistema', grupo: 'registro-individual' },
       { plantillaId: 'cal', name: 'Envío de calendario', description: 'Calendario → Estudiante', subject: 'Calendario FFE', body: '<p>Estimado/a, {{empresa.personaContacto}}</p>\n<p>Adjuntamos el calendario correspondiente a la fase de formación en empresa.</p>\n<p>Rogamos revisen el documento detenidamente.</p>\n<p>Atentamente,</p>', documents: JSON.stringify(['calendario']), recipientTarget: 'estudiante_conditional', icon: 'calendario', color: 'green', place: 'relaciones', tipo: 'sistema', grupo: 'registro-individual' },
       { plantillaId: 'envio-cv', name: 'Envío de CV', description: 'Adjuntar CV del alumno a la empresa', subject: 'Candidatura para prácticas en empresa', body: '<p>Estimados señores:</p><p>Adjunto les remito mi currículum vitae para su consideración.</p><p>Quedo a su disposición para cualquier aclaración.</p><p>Atentamente,</p>', documents: JSON.stringify([]), recipientTarget: 'empresa', icon: 'send', color: 'blue', place: 'alumno', tipo: 'sistema', grupo: 'varios-registros' },
+      plantillaConvenio,
       { plantillaId: 'otros', name: 'Otros', description: 'Correo libre sin plantilla predefinida ni documentos adjuntos', subject: '', body: '', documents: JSON.stringify([]), recipientTarget: 'ninguno', icon: 'otros', color: 'slate', place: '', tipo: 'sistema', grupo: 'varios-registros' },
     ];
     const stmt = db.prepare(`INSERT INTO plantillas_correo (plantillaId, name, description, subject, body, documents, recipientTarget, icon, color, place, tipo, grupo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
@@ -667,6 +693,26 @@ function setupTables() {
   // Asegurar que la plantilla Envío de CV existe (migración para instalaciones existentes)
   db.prepare(`INSERT OR IGNORE INTO plantillas_correo (plantillaId, name, description, subject, body, documents, recipientTarget, icon, color, place, tipo, grupo)
     VALUES ('envio-cv', 'Envío de CV', 'Adjuntar CV del alumno a la empresa', 'Candidatura para prácticas en empresa', '<p>Estimados señores:</p><p>Adjunto les remito mi currículum vitae para su consideración.</p><p>Quedo a su disposición para cualquier aclaración.</p><p>Atentamente,</p>', '[]', 'empresa', 'send', 'blue', 'alumno', 'sistema', 'varios-registros')`).run();
+
+  // Asegurar que la plantilla Envío de convenio existe (migración para
+  // instalaciones existentes). `INSERT OR IGNORE` porque plantillaId es único: si
+  // el profesor ya la editó, su texto gana y no se pisa con el del código.
+  db.prepare(`INSERT OR IGNORE INTO plantillas_correo (plantillaId, name, description, subject, body, documents, recipientTarget, icon, color, place, tipo, grupo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .run(
+      plantillaConvenio.plantillaId, plantillaConvenio.name, plantillaConvenio.description,
+      plantillaConvenio.subject, plantillaConvenio.body, plantillaConvenio.documents,
+      plantillaConvenio.recipientTarget, plantillaConvenio.icon, plantillaConvenio.color,
+      plantillaConvenio.place, plantillaConvenio.tipo, plantillaConvenio.grupo,
+    );
+
+  // A las instalaciones donde la plantilla de convenio ya existía se les pone el
+  // adjunto, pero solo si siguen sin adjuntos. El `INSERT OR IGNORE` de arriba no
+  // sirve para esto: no pisa la fila que ya está, y el `documents` que trae el
+  // código solo lo leen las bases nuevas. La condición deja la fila tranquila si
+  // alguien ya la configuró, en vez de borrarle lo que haya puesto.
+  db.prepare("UPDATE plantillas_correo SET documents = ? WHERE plantillaId = 'convenio' AND documents = '[]'")
+    .run(plantillaConvenio.documents);
 
   // Seed: valoraciones finales FFE
   const vfCount = db.prepare("SELECT COUNT(*) as count FROM ffe_valoraciones_final").get() as any;

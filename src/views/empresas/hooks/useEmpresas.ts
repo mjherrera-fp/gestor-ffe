@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { Empresa, TutorEmpresa, EmpresaEstadistica, Curso } from '../../../types/index.ts';
 import { EmailAttachment } from '../../../types/email.ts';
 import { mostrarToast } from '../../../utils/toast.ts';
-import { interpolateBody, applyCustomMarkers } from '../../../../templates/emails/emailTemplates.ts';
+import { interpolarCuerpo, applyCustomMarkers } from '../../../../templates/emails/emailTemplates.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -598,12 +598,16 @@ export function useEmpresas(cursoId: number) {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [perRecipientData, setPerRecipientData] = useState<Record<string, Record<string, string>> | undefined>(undefined);
+  const [marcadoresVacios, setMarcadoresVacios] = useState<string[]>([]);
   const [contextualContactIds, setContextualContactIds] = useState<Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>>([]);
 
   const handleOpenIndividualEmail = async (empresa: Empresa) => {
     setEmailTo(empresa.email ? [empresa.email] : []);
     setEmailBcc([]);
     setEmailAttachments([]);
+    // Una plantilla sin marcadores no tiene nada que avisar, y se queda
+    // limpio el aviso del envío anterior.
+    setMarcadoresVacios([]);
     try {
       const res = await fetch(`/api/email-contexto?empresaId=${empresa.id}`);
       setContextualContactIds(await res.json());
@@ -636,11 +640,19 @@ export function useEmpresas(cursoId: number) {
       profesor: profesor ? { nombre: profesor.nombre, apellidos: profesor.apellidos } : null,
       centro: centros.length > 0 ? { nombre: centros[0].nombre } : null,
       curso: cursoInfo ? { descripcion: cursoInfo.descripcion } : null,
-      empresa: empresa ? { nombre: empresa.nombre, personaContacto: empresa.personaContacto } : null,
+      empresa: empresa ? { nombre: empresa.nombre, personaContacto: empresa.personaContacto, direccion: (empresa as any).direccion ?? '' } : null,
     };
 
     let body = applyCustomMarkers(cfg.body, marcadores);
-    body = interpolateBody(body, context);
+    const { texto, sinResolver } = interpolarCuerpo(body, context);
+    body = texto;
+
+    // El asunto se interpola también: antes se enviaba en crudo, y al correo lo
+    // lee la empresa, no el profesor.
+    const { texto: asunto, sinResolver: sinResolverAsunto } = interpolarCuerpo(
+      applyCustomMarkers(cfg.subject || '', marcadores),
+      context,
+    );
 
     const perData: Record<string, Record<string, string>> = {};
     for (const e of empresasConEmail) {
@@ -654,9 +666,10 @@ export function useEmpresas(cursoId: number) {
     setEmailTo(empresasConEmail.map(e => e.email!).filter(Boolean));
     setEmailBcc([]);
     setEmailAttachments([]);
-    setEmailSubject(cfg.subject);
+    setEmailSubject(asunto);
     setEmailBody(body);
     setPerRecipientData(perData);
+    setMarcadoresVacios([...new Set([...sinResolver, ...sinResolverAsunto])]);
     setShowPlantillaSelector(false);
     setShowEmailModal(true);
   };
@@ -704,6 +717,7 @@ export function useEmpresas(cursoId: number) {
     showPlantillaSelector, setShowPlantillaSelector,
     showEmailModal, setShowEmailModal,
     emailTo, emailBcc, emailAttachments, emailSubject, emailBody, perRecipientData, setPerRecipientData, contextualContactIds,
+    marcadoresVacios,
     handleOpenIndividualEmail, handleOpenBulkEmail, handleEmailConPlantilla,
     // Calendario
     calendarioEmpresaId,

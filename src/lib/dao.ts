@@ -1171,6 +1171,16 @@ export const DocComunicacionDATDAO = {
 export const DocConvenioDAO = {
   getByConvenioId: (convenioId: number): DocConvenio[] =>
       db.prepare('SELECT * FROM doc_convenio WHERE convenioId = ? ORDER BY version DESC').all(convenioId) as DocConvenio[],
+  /**
+   * La última versión subida, que es la que se manda por correo.
+   *
+   * Igual que en `DocRelacionDAO`: las versiones van de más a menos nueva, así
+   * que la primera es la última. El `LIMIT 1` no es un detalle: sin él la
+   * consulta traería el historial entero con su contenido en base64 para
+   * descartar casi todo en el cliente.
+   */
+  getUltimo: (convenioId: number): DocConvenio | undefined =>
+      db.prepare('SELECT * FROM doc_convenio WHERE convenioId = ? ORDER BY version DESC LIMIT 1').get(convenioId) as DocConvenio | undefined,
   getById: (id: number): DocConvenio | undefined =>
       db.prepare('SELECT * FROM doc_convenio WHERE id = ?').get(id) as DocConvenio | undefined,
   create: (doc: DocConvenio) => {
@@ -1186,10 +1196,19 @@ export const DocConvenioDAO = {
 };
 
 export const DocRelacionDAO = {
-  getByRelacionId: (relacionId: number): DocRelacion[] =>
-      db.prepare('SELECT * FROM doc_relacion WHERE relacionId = ? ORDER BY version DESC').all(relacionId) as DocRelacion[],
-  getById: (id: number): DocRelacion | undefined =>
-      db.prepare('SELECT * FROM doc_relacion WHERE id = ?').get(id) as DocRelacion | undefined,
+    getByRelacionId: (relacionId: number): DocRelacion[] =>
+        db.prepare('SELECT * FROM doc_relacion WHERE relacionId = ? ORDER BY version DESC').all(relacionId) as DocRelacion[],
+    /**
+     * La última versión subida, que es la que se manda por correo.
+     *
+     * Las versiones van de más a menos nueva, así que la primera es la última.
+     * Sin `LIMIT 1` la consulta traería el historial entero, y con él todo el
+     * contenido en base64, solo para descartar casi todo.
+     */
+    getUltimo: (relacionId: number): DocRelacion | undefined =>
+        db.prepare('SELECT * FROM doc_relacion WHERE relacionId = ? ORDER BY version DESC LIMIT 1').get(relacionId) as DocRelacion | undefined,
+    getById: (id: number): DocRelacion | undefined =>
+        db.prepare('SELECT * FROM doc_relacion WHERE id = ?').get(id) as DocRelacion | undefined,
   create: (doc: DocRelacion) => {
     const stmt = db.prepare('INSERT INTO doc_relacion (relacionId, nombreFichero, contenido, comentario, version) VALUES (?, ?, ?, ?, ?)');
     const info = stmt.run(doc.relacionId, doc.nombreFichero, doc.contenido, doc.comentario || null, doc.version);
@@ -1207,6 +1226,9 @@ function createDocAlumnoDAO(tableName: string, typeName: string) {
   return {
     getByRelacionIdAndAlumnoId: (relacionId: number, alumnoId: number): any[] =>
         db.prepare(`SELECT * FROM ${tableName} WHERE relacionId = ? AND alumnoId = ? ORDER BY version DESC`).all(relacionId, alumnoId),
+    /** Última versión del alumno en esta relación, la que se manda por correo. */
+    getUltimo: (relacionId: number, alumnoId: number): any | undefined =>
+        db.prepare(`SELECT * FROM ${tableName} WHERE relacionId = ? AND alumnoId = ? ORDER BY version DESC LIMIT 1`).get(relacionId, alumnoId),
     getById: (id: number): any | undefined =>
         db.prepare(`SELECT * FROM ${tableName} WHERE id = ?`).get(id),
     create: (doc: any) => {
@@ -2049,6 +2071,11 @@ export const FFEInformeDAO = {
 
       // Calculate horasRealizadas up to evalDate
       let horasRealizadas = 0;
+      // Las horas de *este* nivel que se llevan cumplidas. Para 2º, las horas
+      // del curso anterior van aparte y cuentan como realizadas, pero no son de
+      // las que hay que hacer en este nivel: por eso se lleva la cuenta
+      // separadas, que es lo que hace falta para saber cuántas faltan.
+      let horasDeEsteNivel = 0;
       const total = Number(r.totalHorasFFE) || 0;
       const startDate = r.fechaInicio ? new Date(r.fechaInicio) : null;
       const endDate = r.fechaFin ? new Date(r.fechaFin) : null;
@@ -2064,6 +2091,7 @@ export const FFEInformeDAO = {
         }
         const progress = daysElapsed / totalDays;
         const hoursInLevel = Math.round(total * progress);
+        horasDeEsteNivel = hoursInLevel;
         const isSecondYear = r.nivel === '2º';
         if (isSecondYear) {
           // 2nd year: total must sum to 500h; (500 - total) were done in 1st year
@@ -2120,6 +2148,11 @@ export const FFEInformeDAO = {
         nivel: r.nivel,
         totalHorasFFE: r.totalHorasFFE,
         horasRealizadas,
+        // Las pendientes se miden contra las horas de este nivel, no contra
+        // `horasRealizadas`: en 2º esas llevan las del curso anterior, y
+        // restarlas salía siempre en cero, que es justo lo contrario de lo que
+        // le dice al profesor que le queda.
+        horasPendientes: Math.max(0, total - horasDeEsteNivel),
         relacionId: r.relacionId,
         resultadoFFE,
         notaFinal,

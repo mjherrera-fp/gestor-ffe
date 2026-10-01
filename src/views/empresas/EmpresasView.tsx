@@ -305,6 +305,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
         initialSubject={ctx.emailSubject}
         initialBody={ctx.emailBody}
         perRecipientData={ctx.perRecipientData}
+        marcadoresVacios={ctx.marcadoresVacios}
         onGoToConfig={onGoToConfig}
         contextualContactIds={ctx.contextualContactIds}
       />

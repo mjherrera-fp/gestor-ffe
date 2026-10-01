@@ -20,6 +20,7 @@ import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/table-node/table-node.scss";
 import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss";
 import {
+  AlertTriangle,
   Briefcase,
   FileText,
   GraduationCap as StudentIcon,
@@ -305,6 +306,8 @@ interface EmailModalProps {
   initialSubject?: string;
   initialBody?: string;
   perRecipientData?: Record<string, Record<string, string>>;
+  /** Marcadores que la plantilla usaba y no se pudieron resolver. */
+  marcadoresVacios?: string[];
   onGoToConfig?: () => void;
   contextualContactIds?: Array<{ type: 'empresa' | 'tutor' | 'alumno'; id: number }>;
 }
@@ -318,6 +321,7 @@ export function EmailModal({
   initialSubject = '',
   initialBody = '',
   perRecipientData,
+  marcadoresVacios = [],
   onGoToConfig,
   contextualContactIds = [],
 }: EmailModalProps) {
@@ -337,11 +341,17 @@ export function EmailModal({
   const [signature, setSignature] = useState<string>('');
   const signatureAppendedRef = useRef(false);
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Destinatarios sin datos de personalización. Van en la lista de avisos. */
+  const [destinatariosSinDatos, setDestinatariosSinDatos] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
       signatureAppendedRef.current = false;
       setSignature('');
+      // El aviso se calcula al abrir. Sin limpiarlo, al cancelar un envío
+      // individual a medias y abrir otro que sí tiene los datos, el modal
+      // seguiría amenazando con un destinatario que ya no está en la lista.
+setDestinatariosSinDatos([]);
       fetch('/api/profesor/config/correo')
         .then(res => res.json())
           .then(cfg => {
@@ -413,6 +423,31 @@ export function EmailModal({
     editor.commands.setContent(bodyHtml + signature);
     signatureAppendedRef.current = true;
   }, [signature, editor, isOpen]);
+
+  /**
+   * `{{@clave}}` que no tiene valor para algún destinatario.
+   *
+   * Es distinto de `destinatariosSinDatos`: ahí al destinatario no le hay
+   * ficha y el envío se detiene. Aquí la tiene y lo que falta es un campo
+   * concreto (`{{@contacto}}` en una empresa sin persona de contacto). El hueco
+   * sale igual, así que no bloquea: lo que hace es nombrarlo, porque
+   * "Estimado/a, " en un correo a la empresa se lee como descuido del profesor
+   * cuando en realidad es un dato sin rellenar.
+   */
+  const marcadoresPorDestinatarioVacios = useMemo(() => {
+    const usados = [...new Set(
+      [...(editor?.getHTML() || '').matchAll(/\{\{@([\w.]+)\}\}/g)].map(m => m[1])
+    )];
+    if (!perRecipientData || usados.length === 0) return [];
+    const huecos: Array<{ clave: string; correo: string }> = [];
+    for (const correo of to.split(',').map(s => s.trim()).filter(Boolean)) {
+      const data = perRecipientData[correo] || {};
+      for (const clave of usados) {
+        if (!data[clave]) huecos.push({ clave, correo });
+      }
+    }
+    return huecos;
+  }, [editor, to, perRecipientData]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -524,10 +559,27 @@ export function EmailModal({
     const hasGroupMarkers = html.includes('{{@');
 
     if (sendIndividualMode && perRecipientData && hasGroupMarkers) {
+      // Se mira antes de enviar nada. Antes, un destinatario sin datos se saltaba
+      // con `continue`: no recibía el correo y no pasaba nada, con lo que el
+      // profesor creía que sí había salido. Ahora se avisa y no se envía, que es
+      // distinto pero mucho más honesto: el envío parcial no deja rastro de lo
+      // que falta, y reenviar después duplicaría lo que ya salió.
+      const sinDatos = toList.filter(correo => !perRecipientData[correo]);
+      if (sinDatos.length > 0) {
+        setDestinatariosSinDatos(sinDatos);
+        setSending(false);
+        return;
+      }
+
+      // Un destinatario puede tener ficha y aun así no tener el campo que pide
+      // la plantilla. El hueco sale igual y ya está avisado arriba; aquí solo
+      // se sustituye lo que hay.
+
       for (let i = 0; i < toList.length; i++) {
         const data = perRecipientData[toList[i]];
-        if (!data) continue;
-        const personalizedHtml = html.replace(/\{\{@(\w+)\}\}/g, (_, key: string) => data[key] ?? `{{@${key}}}`);
+        // Un marcador sin valor se queda vacío, nunca `{{@algo}}` en crudo: lo
+        // lee la empresa, no el profesor.
+        const personalizedHtml = html.replace(/\{\{@([\w.]+)\}\}/g, (_, key: string) => data[key] ?? '');
         const payload: EmailSendRequest = {
           to: [toList[i]],
           cc: ccList,
@@ -557,6 +609,7 @@ export function EmailModal({
       return;
     }
 
+    setDestinatariosSinDatos([]);
     const finalHtml = hasGroupMarkers ? stripMarkers(html) : html;
 
     const payload: EmailSendRequest = {
@@ -710,6 +763,43 @@ export function EmailModal({
                 {error && (
                   <div className="p-3 bg-danger-soft text-danger-strong rounded-lg text-sm border border-danger/20">
                     {error}
+                  </div>
+                )}
+
+                {/* Lo que va a salir con un hueco. No bloquea el envío: el
+                    correo se manda igual, pero un "Estimado/a, " sin nombre
+                    detrás es un fallo que conviene ver antes de que lo vea la
+                    empresa. */}
+                {(marcadoresVacios.length > 0 || destinatariosSinDatos.length > 0 || marcadoresPorDestinatarioVacios.length > 0) && (
+                  <div className="p-3 bg-warning-soft text-warning-strong rounded-lg text-sm border border-warning/20">
+                    <div className="font-semibold flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      Se enviará con estos huecos:
+                    </div>
+                    {marcadoresVacios.length > 0 && (
+                      <ul className="mt-1.5 ml-5 list-disc space-y-0.5">
+                        {marcadoresVacios.map(m => (
+                          <li key={m}>
+                            <code className="font-mono text-xs">{`{{${m}}}`}</code> se queda vacío
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {destinatariosSinDatos.length > 0 && (
+                      <p className="mt-1.5 ml-5 list-disc">
+                        Sin datos de personalización, sus <code className="font-mono text-xs">{`{{@...}}`}</code> saldrán vacíos:{' '}
+                        {destinatariosSinDatos.join(', ')}
+                      </p>
+                    )}
+                    {marcadoresPorDestinatarioVacios.length > 0 && (
+                      <ul className="mt-1.5 ml-5 list-disc space-y-0.5">
+                        {marcadoresPorDestinatarioVacios.map(({ clave, correo }) => (
+                          <li key={`${clave}-${correo}`}>
+                            <code className="font-mono text-xs">{`{{@${clave}}}`}</code> no tiene valor para {correo}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 )}
 

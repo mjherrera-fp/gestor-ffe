@@ -467,6 +467,8 @@ export interface FFEInformeRow {
   nivel: string;
   totalHorasFFE: number;
   horasRealizadas: number;
+  /** Horas de este nivel que faltan a la fecha de evaluación. */
+  horasPendientes: number;
   relacionId: number | null;
   resultadoFFE: string;
   notaFinal: string;
