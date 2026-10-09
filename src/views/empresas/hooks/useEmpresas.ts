@@ -608,6 +608,14 @@ export function useEmpresas(cursoId: number) {
     // Una plantilla sin marcadores no tiene nada que avisar, y se queda
     // limpio el aviso del envío anterior.
     setMarcadoresVacios([]);
+    // El asunto, el cuerpo y los datos por destinatario también se vacían: los
+    // deja escritos handleEmailConPlantilla() con la plantilla del envío
+    // masivo, y cancelar ese modal no los limpiaba. Por eso el correo a una
+    // sola empresa se abría precargado con la plantilla del masivo que se
+    // acababa de cancelar. El correo individual es un correo en blanco.
+    setEmailSubject('');
+    setEmailBody('');
+    setPerRecipientData(undefined);
     try {
       const res = await fetch(`/api/email-contexto?empresaId=${empresa.id}`);
       setContextualContactIds(await res.json());
