@@ -260,13 +260,12 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                 </td>
 
                 {/* Comentario */}
-                <td className="px-6 py-4 border-b border-border-base">
+                <td className="px-6 py-4 text-center border-b border-border-base">
                   {alumno.comentario?.trim() ? (
                     <Title text={alumno.comentario}>
-                      <div className="flex items-start gap-1.5 text-xs text-text-main font-medium max-w-60">
-                        <MessageSquare className="h-3.5 w-3.5 text-text-muted shrink-0 mt-0.5" />
-                        <span className="line-clamp-2 whitespace-pre-line">{alumno.comentario}</span>
-                      </div>
+                      <span className="inline-flex p-1.5 rounded-lg text-primary bg-primary/10 cursor-help">
+                        <MessageSquare className="h-4 w-4" />
+                      </span>
                     </Title>
                   ) : (
                     <span className="text-xs text-text-muted">—</span>

@@ -118,6 +118,13 @@ export function AlumnoGridCard({
           </h3>
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">DNI: {alumno.dni}</p>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {alumno.comentario?.trim() && (
+              <Title text={alumno.comentario}>
+                <span className="inline-flex p-1 rounded-full text-primary bg-primary/10 border border-primary/20 cursor-help">
+                  <MessageSquare className="h-3 w-3" />
+                </span>
+              </Title>
+            )}
             {!!alumno.anulacionesCount && onGoToAnulaciones && (
               <Title text="Ver anulaciones de FFE en el histórico">
                 <button
@@ -140,16 +147,6 @@ export function AlumnoGridCard({
             )}
           </div>
         </div>
-
-        {/* Comentario */}
-        {alumno.comentario?.trim() && (
-          <Title text={alumno.comentario} className="block mb-4">
-            <div className="flex items-start gap-2 text-xs text-text-main bg-surface-subtle border border-border-base rounded-md px-2.5 py-2">
-              <MessageSquare className="h-3.5 w-3.5 text-text-muted shrink-0 mt-0.5" />
-              <span className="line-clamp-3 whitespace-pre-line">{alumno.comentario}</span>
-            </div>
-          </Title>
-        )}
 
         {/* Datos contacto + estado */}
         <div className="space-y-2 border-t border-border-base pt-4 mt-auto">
