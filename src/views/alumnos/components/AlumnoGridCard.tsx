@@ -117,16 +117,16 @@ export function AlumnoGridCard({
             {alumno.nombre} {alumno.apellidos}
           </h3>
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">DNI: {alumno.dni}</p>
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+          <div className="mt-1.5 flex flex-wrap items-stretch gap-1.5">
             {alumno.comentario?.trim() && (
-              <Title text={alumno.comentario}>
-                <span className="inline-flex p-1 rounded-full text-primary bg-primary/10 border border-primary/20 cursor-help">
+              <Title text={alumno.comentario} className="flex">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-primary bg-primary/10 border border-primary/20 cursor-help">
                   <MessageSquare className="h-3 w-3" />
                 </span>
               </Title>
             )}
             {!!alumno.anulacionesCount && onGoToAnulaciones && (
-              <Title text="Ver anulaciones de FFE en el histórico">
+              <Title text="Ver anulaciones de FFE en el histórico" className="flex">
                 <button
                   onClick={() => onGoToAnulaciones(alumno)}
                   className="inline-flex items-center gap-1 px-2 py-0.5 bg-danger-soft text-danger-strong border border-danger/20 rounded-full text-[9px] font-black uppercase tracking-wide hover:bg-danger/15 transition-colors"

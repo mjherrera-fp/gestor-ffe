@@ -159,17 +159,18 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
           <col style={{ width: '210px' }} />
           <col style={{ width: '150px' }} />
           <col style={{ width: '150px' }} />
+          <col style={{ width: '120px' }} />
           <col style={{ width: '240px' }} />
         </colgroup>
         <thead ref={theadRef}>
           <tr className="bg-surface-subtle">
-            <th className="px-8 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-r border-border-base border-b border-border-base">Alumno</th>
+            <th className="px-8 py-5 sticky left-0 z-20 bg-surface-subtle text-[10px] font-black text-text-muted uppercase tracking-widest border-r border-border-base border-b border-border-base">Alumno</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">DNI / Pasaporte</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Contacto</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Email EducaMadrid</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Estado Asignación</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">FFE Pte.</th>
-            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Comentario</th>
+            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest text-center border-b border-border-base">Comentario</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest text-right border-b border-border-base">Acciones</th>
           </tr>
         </thead>
@@ -234,7 +235,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                       </span>
                     )}
                     {!!alumno.anulacionesCount && onGoToAnulaciones && (
-                      <Title text="Ver anulaciones de FFE en el histórico">
+                      <Title text="Ver anulaciones de FFE en el histórico" className="flex">
                         <button
                           onClick={() => onGoToAnulaciones(alumno.id!)}
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-danger-soft text-danger-strong text-[9px] font-black uppercase tracking-tight border border-danger/20 hover:bg-danger/15 transition-colors"
