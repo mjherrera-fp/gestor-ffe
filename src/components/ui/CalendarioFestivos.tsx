@@ -8,7 +8,8 @@ import { formatDate } from '../../lib/dateUtils.ts';
 interface CalendarioFestivosProps {
   rango: RangoCurso;
   festivos: Set<string>;
-  onToggle: (clave: string) => void;
+  /** Sin `onToggle` el calendario es de solo lectura: se ve pero no se marca. */
+  onToggle?: (clave: string) => void;
   /**
    * Dias lectivos del alumno, para teñirlos de verde. Es opcional porque al
    * definir los festivos de un centro o de una empresa no hay nadie a quien
@@ -86,7 +87,7 @@ export function CalendarioFestivos({ rango, festivos, onToggle, asiste }: Calend
                   key={clave}
                   type="button"
                   disabled={!habilitado}
-                  onClick={() => onToggle(clave)}
+                  onClick={() => onToggle?.(clave)}
                   title={[
                     formatDate(clave),
                     marcado ? 'no asiste' : va ? 'va a la empresa' : '',
@@ -100,10 +101,10 @@ export function CalendarioFestivos({ rango, festivos, onToggle, asiste }: Calend
                     // lectivo se ilumina en azul al pasar por encima, parece que
                     // va a cambiar a festivo, que es justo lo contrario de lo
                     // que significa.
-                    habilitado && !marcado
+                    onToggle && habilitado && !marcado
                       ? va ? 'hover:bg-success/25' : 'hover:bg-primary-light hover:text-primary'
                       : '',
-                    !habilitado ? 'cursor-default' : '',
+                    !habilitado || !onToggle ? 'cursor-default' : '',
                     estilo.contorno,
                     estilo.color,
                   ].join(' ')}

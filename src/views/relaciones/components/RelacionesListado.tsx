@@ -49,6 +49,8 @@ interface RelacionesListadoProps {
   onOpenStats: (rel: RelacionAlumno) => void;
   onCalendar: (rel: RelacionAlumno) => void;
   onAnularRelacion?: (rel: RelacionAlumno, alumno: Alumno) => void;
+  /** Abre el calendario de dias del alumno, de solo lectura. */
+  onVerDiasAlumno?: (rel: RelacionAlumno, alumno: Alumno) => void;
   listSearchTerm: string;
   onListSearchChange: (val: string) => void;
   statusFilters: {
@@ -90,6 +92,7 @@ export function RelacionesListado({
   relaciones, convenios, createRelacion, selectedRelacion,
   onSelectRelacion, onEdit, onDeleteRequest, onOpenStats, onCalendar,
   onAnularRelacion,
+  onVerDiasAlumno,
   listSearchTerm, onListSearchChange,
   statusFilters, onStatusFilterChange,
   dateFilters, onDateFilterChange,
@@ -443,16 +446,36 @@ className={`cursor-pointer transition-colors group align-top border-b-12 border-
                                   {alumno.totalHorasFFE}h
                                 </span>
                               </div>
-                              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-text-muted shrink-0">
-                                <Calendar className="h-3 w-3" />
-                                <span className="text-primary">
-                                  {alumno.fechaInicio ? formatDate(alumno.fechaInicio) : '—'}
-                                </span>
-                                <span className="text-text-muted">-</span>
-                                <span className="text-success">
-                                  {alumno.fechaFin ? formatDate(alumno.fechaFin) : '—'}
-                                </span>
-                              </div>
+                              {(() => {
+                                const fechas = (
+                                  <>
+                                    <Calendar className="h-3 w-3" />
+                                    <span className="text-primary">
+                                      {alumno.fechaInicio ? formatDate(alumno.fechaInicio) : '—'}
+                                    </span>
+                                    <span className="text-text-muted">-</span>
+                                    <span className="text-success">
+                                      {alumno.fechaFin ? formatDate(alumno.fechaFin) : '—'}
+                                    </span>
+                                  </>
+                                );
+                                // Sin las dos fechas no hay periodo que enseñar.
+                                return onVerDiasAlumno && alumno.fechaInicio && alumno.fechaFin ? (
+                                  <Title text="Ver días no lectivos" className="flex shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={e => { e.stopPropagation(); onVerDiasAlumno(rel, alumno); }}
+                                      className="flex items-center gap-1.5 text-[10px] font-semibold text-text-muted px-1.5 py-0.5 -mx-1.5 rounded-md hover:bg-surface-hover transition-colors"
+                                    >
+                                      {fechas}
+                                    </button>
+                                  </Title>
+                                ) : (
+                                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-text-muted shrink-0">
+                                    {fechas}
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </div>
                         ))}

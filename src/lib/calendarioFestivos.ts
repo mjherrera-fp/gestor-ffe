@@ -213,6 +213,24 @@ export function diasLaborablesEnRango(
   return laborables;
 }
 
+/**
+ * Cuantas jornadas va el alumno a la empresa en su periodo.
+ *
+ * Son los dias del periodo con horas en el horario menos los que el alumno no
+ * asiste (sus festivos efectivos: heredados mas su desvio). Es el mismo numero
+ * que el editor de dias enseña junto a "Va a la empresa", calculado igual, para
+ * que el formulario de la relacion y el calendario no puedan discrepar.
+ */
+export function jornadasPrevistas(
+  rango: RangoCurso | null | undefined,
+  diasConHoras: Set<string>,
+  noAsiste: Iterable<string>
+): number {
+  const laborables = diasLaborablesEnRango(rango, diasConHoras);
+  for (const dia of noAsiste) laborables.delete(dia);
+  return laborables.size;
+}
+
 /** Anade la fecha si no estaba, o la quita si estaba. Siempre deduplica y ordena. */
 export function alternarFestivo(festivos: string[], iso: string): string[] {
   const sinDuplicados = [...new Set(festivos)];

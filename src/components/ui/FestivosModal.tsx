@@ -44,7 +44,8 @@ interface FestivosModalProps {
    */
   rango: RangoCurso | null;
   festivos: string[];
-  onSave: (festivos: string[]) => void;
+  /** Obligatorio salvo en `soloLectura`, donde no hay nada que guardar. */
+  onSave?: (festivos: string[]) => void;
   /**
    * Slug de la localidad en calendariosnacionales.com. Lo resuelve quien abre
    * el modal, porque el centro educativo y la empresa sacan el slug de listas
@@ -117,6 +118,12 @@ interface FestivosModalProps {
    * horas movidas sin que nadie lo hubiera pedido.
    */
   previewAlumno?: (festivos: string[]) => PreviewAlumno;
+  /**
+   * Solo enseña los dias, sin poder tocarlos. Es lo que se abre desde el
+   * listado de relaciones al pulsar las fechas de un alumno: se consulta su
+   * calendario, pero se edita desde el formulario de la relacion.
+   */
+  soloLectura?: boolean;
 }
 
 /** Lo que el editor enseña mientras se tocan los dias de un alumno. */
@@ -140,7 +147,7 @@ export interface PreviewAlumno {
 export function FestivosModal({
   open, onClose, titulo, subtitulo, rango, festivos, onSave, slug, onIrACursos,
   textoGuardar = 'Guardar Festivos', zIndex, diasConHoras, descartarFueraDeRango = true,
-  nombreRango = 'curso', previewAlumno,
+  nombreRango = 'curso', previewAlumno, soloLectura = false,
 }: FestivosModalProps) {
   const [dates, setDates] = useState<string[]>(festivos);
   const [importando, setImportando] = useState(false);
@@ -319,7 +326,7 @@ export function FestivosModal({
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!rango) return;
+    if (!rango || !onSave) return;
     onSave(descartarFueraDeRango ? filtrarPorRango(dates, rango) : dates);
   };
 
@@ -376,7 +383,7 @@ export function FestivosModal({
           {/* Acciones */}
           <div className="px-6 py-3 border-b border-border-base flex flex-wrap items-center justify-between gap-3 shrink-0">
             <span className="text-sm font-semibold text-text-main">
-              {marcados.length} día{marcados.length === 1 ? '' : 's'} marcado{marcados.length === 1 ? '' : 's'}
+              {marcados.length} día{marcados.length === 1 ? '' : 's'} {soloLectura ? 'no lectivo' : 'marcado'}{marcados.length === 1 ? '' : 's'}
               {rangoVisible && (
                 <span className="ml-2 text-[10px] font-bold text-text-muted uppercase tracking-wider">
                   {formatDate(rangoVisible.inicio)} — {formatDate(rangoVisible.fin)}
@@ -403,7 +410,7 @@ export function FestivosModal({
                 </span>
               )}
             </span>
-            <div className="flex items-center gap-2">
+            {!soloLectura && <div className="flex items-center gap-2">
               {slug && (
                 <button
                   type="button"
@@ -426,7 +433,7 @@ export function FestivosModal({
                 <Trash2 className="h-3.5 w-3.5" />
                 Borrar todos
               </button>
-            </div>
+            </div>}
           </div>
 
           {/* Leyenda y avisos */}
@@ -492,7 +499,7 @@ export function FestivosModal({
             <CalendarioFestivos
               rango={rangoVisible ?? rango}
               festivos={marcadosSet}
-              onToggle={handleToggle}
+              onToggle={soloLectura ? undefined : handleToggle}
               asiste={asiste}
             />
           </div>
@@ -509,7 +516,7 @@ export function FestivosModal({
                     className="flex items-center gap-2 bg-danger-soft border border-danger/20 pl-3 pr-1 py-1 rounded-full text-xs font-medium text-danger-strong"
                   >
                     {formatDate(d)}
-                    <Title text={`Quitar ${formatDate(d)}`}>
+                    {!soloLectura && <Title text={`Quitar ${formatDate(d)}`}>
                       <button
                         type="button"
                         onClick={() => handleToggle(d)}
@@ -517,7 +524,7 @@ export function FestivosModal({
                       >
                         <X className="h-3 w-3" />
                       </button>
-                    </Title>
+                    </Title>}
                   </div>
                 ))}
               </div>
@@ -530,14 +537,16 @@ export function FestivosModal({
               onClick={onClose}
               className="flex-1 bg-surface-hover text-text-main py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-surface-strong transition-all"
             >
-              Cancelar
+              {soloLectura ? 'Cerrar' : 'Cancelar'}
             </button>
-            <button
-              type="submit"
-              className="flex-1 bg-primary text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
-            >
-              {textoGuardar}
-            </button>
+            {!soloLectura && (
+              <button
+                type="submit"
+                className="flex-1 bg-primary text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+              >
+                {textoGuardar}
+              </button>
+            )}
           </div>
         </form>
       )}
