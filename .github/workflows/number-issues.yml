@@ -1,0 +1,31 @@
+# Pone a cada tarea nueva (issue) el prefijo GF-NN- con el siguiente número.
+# También se puede lanzar a mano (Actions → Numerar tareas → Run workflow)
+# para numerar las issues abiertas que aún no lo estén.
+name: Numerar tareas
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+# De una en una, para que dos issues creadas a la vez no reciban el mismo número
+concurrency:
+  group: number-issues
+  cancel-in-progress: false
+
+jobs:
+  number:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const run = require('./.github/scripts/number-issues.cjs')
+            await run({ github, context, core })
