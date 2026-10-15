@@ -91,7 +91,6 @@ export function SeguridadSocialTab({ ctx }: { ctx: Ctx }) {
         </p>
         <ul className="text-xs text-text-muted mt-1 checklist list-emerald-600 pl-5">
           <li>Sólo se contabilizan los días según lo establecido en la relación de alumnos.</li>
-          <li>Se contabilizarán o no los días festivos según la configuración establecida.</li>
         </ul>
       </div>
 
