@@ -290,6 +290,19 @@ describe('dias no lectivos de un alumno', () => {
     ]);
   });
 
+  // Lo que pinta el calendario de solo lectura del listado: el festivo del
+  // centro que el alumno quito no aparece, y el dia que añadio si.
+  it('el listado los lee ya aplicados sobre los festivos heredados', async () => {
+    const res = await pedir(`/api/relaciones-alumnos/${relacionId}/dias-no-lectivos?alumnoId=${alumnoId}`, conToken);
+    expect(res.status, `Falló la lectura. Salida:\n${salida}`).toBe(200);
+    expect((await res.json()).festivos).toEqual(['2025-10-13']);
+  });
+
+  it('no los da para un alumno que no es de la relacion', async () => {
+    const res = await pedir(`/api/relaciones-alumnos/${relacionId}/dias-no-lectivos?alumnoId=999999`, conToken);
+    expect(res.status).toBe(404);
+  });
+
   it('se pueden cambiar y se guarda el ultimo estado', async () => {
     const alu = await guardarDiasDeTodos([{ fecha: '2025-10-20', tipo: 'ANADIR' }]);
     expect(alu.festivosPersonalizados).toEqual([{ fecha: '2025-10-20', tipo: 'ANADIR' }]);

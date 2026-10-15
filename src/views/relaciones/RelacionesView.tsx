@@ -19,7 +19,8 @@ import {RelacionDetalle} from './components/RelacionesDetalle.tsx';
 import {RelacionFormModal} from './components/RelacionesFormModal.tsx';
 import {RelacionEstadisticaFormModal} from './components/RelacionEstadisticaFormModal.tsx';
 import {AnulacionFFEModal} from './components/AnulacionFFEModal.tsx';
-import {calculateEndDateForHours} from './utils/relacionesUtils.ts';
+import {calculateEndDateForHours, diasConHorasDelHorario} from './utils/relacionesUtils.ts';
+import {FestivosModal} from '../../components/ui/FestivosModal.tsx';
 import {EmailModal} from '../../components/EmailModal.tsx';
 import {GestorDocumentalModal} from '../../components/GestorDocumentalModal.tsx';
 import {Modal} from '../../components/ui/Modal.tsx';
@@ -39,6 +40,22 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
   const ctx = useRelaciones(cursoId, detalleAcademicoId, profesor, preloadRelacion);
   const [plantillas, setPlantillas] = useState<any[]>([]);
   const [calendarioRelacion, setCalendarioRelacion] = useState<RelacionAlumno | null>(null);
+  // Calendario de dias de un alumno, de solo lectura, que se abre desde sus
+  // fechas en el listado. Los dias se piden al servidor al pulsar, porque los
+  // festivos heredados dependen del convenio de esa relacion y no de la que
+  // este abierta en el formulario.
+  const [diasAlumno, setDiasAlumno] = useState<{ rel: RelacionAlumno; alumno: Alumno; festivos: string[] } | null>(null);
+
+  const verDiasAlumno = async (rel: RelacionAlumno, alumno: Alumno) => {
+    try {
+      const res = await fetch(`/api/relaciones-alumnos/${rel.id}/dias-no-lectivos?alumnoId=${alumno.id}`);
+      if (!res.ok) throw new Error('respuesta');
+      const data = await res.json();
+      setDiasAlumno({ rel, alumno, festivos: Array.isArray(data.festivos) ? data.festivos : [] });
+    } catch {
+      mostrarToast('No se pudieron cargar los días no lectivos del alumno.', 'error');
+    }
+  };
     const [showDocManager, setShowDocManager] = useState(false);
     const [docManagerTarget, setDocManagerTarget] = useState<{
         rel: RelacionAlumno;
@@ -386,6 +403,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
           onOpenStats={ctx.handleOpenEstadistica}
           onCalendar={setCalendarioRelacion}
           onAnularRelacion={(rel, alumno) => ctx.setAnularAlumno({ rel, alumnoId: alumno.id! })}
+          onVerDiasAlumno={verDiasAlumno}
           listSearchTerm={ctx.listSearchTerm}
           onListSearchChange={ctx.setListSearchTerm}
           statusFilters={ctx.statusFilters}
@@ -608,6 +626,22 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
           tutorPreseleccionadoId={calendarioRelacion?.tutorEmpresaId ?? null}
           alumnos={calendarioRelacion?.alumnos}
           onClose={() => setCalendarioRelacion(null)}
+        />
+
+        {/* ── MODAL: Días no lectivos del alumno (solo lectura) ── */}
+        <FestivosModal
+          open={!!diasAlumno}
+          onClose={() => setDiasAlumno(null)}
+          soloLectura
+          titulo="Días no lectivos"
+          subtitulo={diasAlumno ? `${diasAlumno.alumno.nombre} ${diasAlumno.alumno.apellidos}` : undefined}
+          rango={diasAlumno?.alumno.fechaInicio && diasAlumno.alumno.fechaFin
+            ? { inicio: diasAlumno.alumno.fechaInicio, fin: diasAlumno.alumno.fechaFin }
+            : null}
+          festivos={diasAlumno?.festivos ?? []}
+          diasConHoras={diasAlumno ? diasConHorasDelHorario(diasAlumno.rel.horario) : undefined}
+          descartarFueraDeRango={false}
+          nombreRango="periodo"
         />
 
         {/* ── MODAL: Anular FFE ── */}

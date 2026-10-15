@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   alternarFestivo, aniosDelRango, celdasDeMes, celdasVaciasIniciales, claveDesdePartes,
   diasDelRango, diasEnMes, diaSemana, diasLaborablesEnRango, esClaveValida, esFinDeSemana,
-  estaEnRango, estilosCelda, filtrarPorRango, festivosFueraDeRango, mesesDelRango,
+  estaEnRango, estilosCelda, filtrarPorRango, festivosFueraDeRango, jornadasPrevistas, mesesDelRango,
   nombreDiaSemana, partes, rangoEsValido,
 } from '../src/lib/calendarioFestivos.ts';
 
@@ -458,5 +458,40 @@ describe('estilosCelda', () => {
     // Un dia laborable que no se esta editando se apaga igual que cualquier otro.
     expect(estilosCelda({ ...base, asiste: true, dentro: false }).color)
       .toBe('text-text-muted/30');
+  });
+});
+
+/**
+ * Las jornadas previstas son las que se ven en verde en el editor de dias: los
+ * laborables del horario menos los dias que el alumno no asiste.
+ */
+describe('jornadasPrevistas', () => {
+  const LAV = new Set(['lunes', 'martes', 'miercoles', 'jueves', 'viernes']);
+  const dosSemanas = { inicio: '2025-09-15', fin: '2025-09-28' };  // lunes a domingo
+
+  it('cuenta los dias con horas del periodo', () => {
+    expect(jornadasPrevistas(dosSemanas, LAV, [])).toBe(10);
+  });
+
+  it('resta los festivos que caen en dia con horas', () => {
+    expect(jornadasPrevistas(dosSemanas, LAV, ['2025-09-16', '2025-09-24'])).toBe(8);
+  });
+
+  it('no resta un festivo en dia sin horas ni uno fuera del periodo', () => {
+    // 2025-09-20 es sabado y 2025-10-01 cae despues del fin.
+    expect(jornadasPrevistas(dosSemanas, LAV, ['2025-09-20', '2025-10-01'])).toBe(10);
+  });
+
+  it('sigue el horario: con sabados son mas jornadas', () => {
+    expect(jornadasPrevistas(dosSemanas, new Set([...LAV, 'sabado']), [])).toBe(12);
+  });
+
+  it('un festivo repetido solo resta una vez', () => {
+    expect(jornadasPrevistas(dosSemanas, LAV, ['2025-09-16', '2025-09-16'])).toBe(9);
+  });
+
+  it('sin periodo valido no hay jornadas', () => {
+    expect(jornadasPrevistas(null, LAV, [])).toBe(0);
+    expect(jornadasPrevistas({ inicio: '2025-09-28', fin: '2025-09-15' }, LAV, [])).toBe(0);
   });
 });

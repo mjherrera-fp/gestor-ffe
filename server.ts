@@ -2547,6 +2547,56 @@ async function startServer() {
     }
   });
 
+  /**
+   * Los dias que un alumno de un convenio no va a la empresa: los festivos del
+   * centro y de la ciudad de la empresa (segun la configuracion) con su desvio
+   * aplicado.
+   *
+   * Los interruptores se aplican en `festivosHeredados` y no aqui, para que
+   * el servidor y la interfaz compongan el conjunto heredado igual. Luego se
+   * aplica el desvío del alumno: un dia que el alumno marcara como ANADIR
+   * aparece como no lectivo aunque no sea festivo oficial, y uno que
+   * marcara como QUITAR deja de aparecer aunque lo fuera.
+   */
+  const festivosNoLectivosAlumno = (convenio: { centroId?: number; empresaId?: number }, alumnoId: number): string[] => {
+    const profesor = ProfesorDAO.get();
+    let usarFestivos = true;
+    let usarFestivosEmpresa = false;
+    if (profesor?.id) {
+      const cfg = ConfiguracionDAO.getConfig(profesor.id, 'festivos');
+      usarFestivos = cfg.usar_festivos !== '0';
+      usarFestivosEmpresa = cfg.usar_festivos_empresa === '1';
+    }
+    const centro = convenio.centroId ? CentroDAO.getById(convenio.centroId) : undefined;
+    let festivosEmpresa: string[] = [];
+    const empresa = convenio.empresaId ? EmpresaDAO.getById(convenio.empresaId) : undefined;
+    if (profesor?.id && empresa?.ciudad) {
+      festivosEmpresa = EmpresaFestivosDAO.getByCiudad(profesor.id, empresa.ciudad);
+    }
+    const heredados = festivosHeredados({
+      centro: centro?.festivos || [],
+      usarCentro: usarFestivos,
+      empresa: festivosEmpresa,
+      usarEmpresa: usarFestivosEmpresa,
+    });
+    return aplicarPersonalizados(heredados, AlumnoFestivosDAO.getByAlumno(alumnoId));
+  };
+
+  // Los dias no lectivos de un alumno de la relacion, para el calendario de
+  // solo lectura del listado. Es la misma lista que pinta el documento de
+  // calendario.
+  app.get('/api/relaciones-alumnos/:id/dias-no-lectivos', (req, res) => {
+    const relacion = RelacionAlumnoDAO.getById(Number(req.params.id));
+    if (!relacion) return res.status(404).json({ error: 'Relación no encontrada' });
+    const alumnoId = Number(req.query.alumnoId);
+    if (!relacion.alumnos?.some(a => a.id === alumnoId)) {
+      return res.status(404).json({ error: 'Alumno no vinculado a esta relación' });
+    }
+    const convenio = ConvenioDAO.getById(relacion.convenioId);
+    if (!convenio) return res.status(404).json({ error: 'Convenio no encontrado' });
+    res.json({ festivos: festivosNoLectivosAlumno(convenio, alumnoId) });
+  });
+
   app.get('/api/relaciones-alumnos/:id/calendario', async (req, res) => {
     let browser;
     try {
@@ -2569,37 +2619,8 @@ async function startServer() {
       const detalle = DetalleAcademicoDAO.getById(alumno.detalleAcademicoId);
       const tutorias = detalle?.tutorias || [];
 
-      // Leer config para saber si se descuentan festivos
-      const profesor = ProfesorDAO.get();
-      let usarFestivos = true;
-      let usarFestivosEmpresa = false;
-      if (profesor?.id) {
-        const cfg = ConfiguracionDAO.getConfig(profesor.id, 'festivos');
-        usarFestivos = cfg.usar_festivos !== '0';
-        usarFestivosEmpresa = cfg.usar_festivos_empresa === '1';
-      }
-      const festivosCentro = centro?.festivos || [];
-
-      // Obtener festivos de empresa
-      let festivosEmpresa: string[] = [];
       const empresa = EmpresaDAO.getById(convenio.empresaId);
-      if (profesor?.id && empresa?.ciudad) {
-        festivosEmpresa = EmpresaFestivosDAO.getByCiudad(profesor.id, empresa.ciudad);
-      }
-
-      // Los interruptores se aplican en `festivosHeredados` y no aqui, para que
-      // el servidor y la interfaz compongan el conjunto heredado igual. Luego se
-      // aplica el desvío del alumno: un dia que el alumno marcara como ANADIR
-      // aparece como no lectivo aunque no sea festivo oficial, y uno que
-      // marcara como QUITAR deja de aparecer aunque lo fuera.
-      const heredados = festivosHeredados({
-        centro: festivosCentro,
-        usarCentro: usarFestivos,
-        empresa: festivosEmpresa,
-        usarEmpresa: usarFestivosEmpresa,
-      });
-      const personalizados = AlumnoFestivosDAO.getByAlumno(alumnoId);
-      const festivos = aplicarPersonalizados(heredados, personalizados);
+      const festivos = festivosNoLectivosAlumno(convenio, alumnoId);
 
       // --- LÓGICA DE GENERACIÓN DE MESES PARA EL CALENDARIO ---
       const mesesData = [];

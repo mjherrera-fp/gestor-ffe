@@ -13,7 +13,7 @@ import {
 import {CustomSelect} from '../../../components/CustomSelect.tsx';
 import {Modal} from '../../../components/ui/Modal.tsx';
 import {FestivosModal} from '../../../components/ui/FestivosModal.tsx';
-import {rangoEsValido} from '../../../lib/calendarioFestivos.ts';
+import {jornadasPrevistas, rangoEsValido} from '../../../lib/calendarioFestivos.ts';
 import {DEFAULT_HORARIO, diasConHorasDelHorario, getDayName, horarioTieneHoras} from '../utils/relacionesUtils.ts';
 import {BulkHorario} from '../hooks/useRelaciones.ts';
 import {formatDate} from '../../../lib/dateUtils.ts';
@@ -233,6 +233,11 @@ export function RelacionFormModal({
                         // añadido dias, despues.
                         const studentEndDate   = calculateEndDateForHours(studentStartDate, ar.totalHorasFFE, ar.festivosPersonalizados);
                         const diasPropios = (ar.festivosPersonalizados?.length ?? 0) > 0;
+                        // Las mismas que el editor de dias pinta en verde: los dias
+                        // con horas del periodo menos los que el alumno no asiste.
+                        const jornadas = studentStartDate && studentEndDate
+                          ? jornadasPrevistas({ inicio: studentStartDate, fin: studentEndDate }, diasConHoras, festivosEfectivosDe(ar.id!))
+                          : null;
                         return (
                           <div key={ar.id} className="bg-surface-card p-4 rounded-2xl border border-border-base shadow-sm space-y-3">
                             <div className="flex items-center justify-between">
@@ -293,11 +298,19 @@ export function RelacionFormModal({
                                   {!ar.fechaInicio ? 'Sin fecha inicio' : 'Sin fecha fin estimada'}
                                 </span>
                               )}
-                              <div className="flex items-center gap-2">
-                                <span className="text-[9px] font-bold text-text-muted uppercase">Fin Estimado</span>
-                                <span className="text-[10px] font-black text-success bg-success-soft px-2 py-0.5 rounded-md">
-                                  {studentEndDate ? formatDate(studentEndDate) : '—'}
-                                </span>
+                              <div className="flex flex-col items-end gap-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[9px] font-bold text-text-muted uppercase">Fin Estimado</span>
+                                  <span className="text-[10px] font-black text-success bg-success-soft px-2 py-0.5 rounded-md">
+                                    {studentEndDate ? formatDate(studentEndDate) : '—'}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[9px] font-bold text-text-muted uppercase">Jornadas previstas</span>
+                                  <span className="text-[10px] font-black text-text-main bg-surface-subtle px-2 py-0.5 rounded-md">
+                                    {jornadas ?? '—'}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </div>
