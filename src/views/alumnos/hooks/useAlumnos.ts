@@ -472,7 +472,8 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
         alumno.apellidos.toLowerCase().includes(q) ||
         alumno.dni.toLowerCase().includes(q) ||
         alumno.emailEduca.toLowerCase().includes(q) ||
-        alumno.emailPersonal.toLowerCase().includes(q);
+        alumno.emailPersonal.toLowerCase().includes(q) ||
+        (alumno.comentario ?? '').toLowerCase().includes(q);
       const isAssigned   = alumno.relacionId !== null;
       const matchesStatus =
         filterStatus === 'all' ||

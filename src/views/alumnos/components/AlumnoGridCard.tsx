@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   User, Mail, Phone, Edit2, Trash2, Send,
-  FileUp, CheckCircle, Clock, Eye, BadgeX, Loader2, X, TriangleAlert
+  FileUp, CheckCircle, Clock, Eye, BadgeX, Loader2, X, TriangleAlert, MessageSquare
 } from 'lucide-react';
 import { Alumno, FFEMotivoNoRealizacion } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
@@ -140,6 +140,16 @@ export function AlumnoGridCard({
             )}
           </div>
         </div>
+
+        {/* Comentario */}
+        {alumno.comentario?.trim() && (
+          <Title text={alumno.comentario} className="block mb-4">
+            <div className="flex items-start gap-2 text-xs text-text-main bg-surface-subtle border border-border-base rounded-md px-2.5 py-2">
+              <MessageSquare className="h-3.5 w-3.5 text-text-muted shrink-0 mt-0.5" />
+              <span className="line-clamp-3 whitespace-pre-line">{alumno.comentario}</span>
+            </div>
+          </Title>
+        )}
 
         {/* Datos contacto + estado */}
         <div className="space-y-2 border-t border-border-base pt-4 mt-auto">

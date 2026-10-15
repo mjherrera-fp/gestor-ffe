@@ -189,6 +189,16 @@ export function AlumnoFormModal({
               </p>
             )}
           </div>
+          <div className="md:col-span-2">
+            <label className={labelClass}>Comentario</label>
+            <textarea
+              rows={3}
+              className={`${inputClass} resize-y`}
+              placeholder="Casos particulares del alumno"
+              value={formData.comentario || ''}
+              onChange={e => setFormData(prev => ({ ...prev, comentario: e.target.value }))}
+            />
+          </div>
 
           {/* Botones */}
           <div className="md:col-span-2 flex flex-col sm:flex-row gap-3 pt-4">

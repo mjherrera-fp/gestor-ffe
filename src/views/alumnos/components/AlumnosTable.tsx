@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, Phone, GraduationCap, Edit2, Trash2, Send, CheckCircle, Clock, Search, Mail, BadgeX, Loader2, X, FileText, Upload, TriangleAlert } from 'lucide-react';
+import { User, Phone, GraduationCap, Edit2, Trash2, Send, CheckCircle, Clock, Search, Mail, BadgeX, Loader2, X, FileText, Upload, TriangleAlert, MessageSquare } from 'lucide-react';
 import { Alumno, FFEMotivoNoRealizacion } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
@@ -169,6 +169,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Email EducaMadrid</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Estado Asignación</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">FFE Pte.</th>
+            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Comentario</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest text-right border-b border-border-base">Acciones</th>
           </tr>
         </thead>
@@ -255,6 +256,20 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-soft text-success-strong text-[10px] font-black uppercase tracking-wider border border-success/20">
                       <CheckCircle className="h-3 w-3" /> Completado
                     </span>
+                  )}
+                </td>
+
+                {/* Comentario */}
+                <td className="px-6 py-4 border-b border-border-base">
+                  {alumno.comentario?.trim() ? (
+                    <Title text={alumno.comentario}>
+                      <div className="flex items-start gap-1.5 text-xs text-text-main font-medium max-w-60">
+                        <MessageSquare className="h-3.5 w-3.5 text-text-muted shrink-0 mt-0.5" />
+                        <span className="line-clamp-2 whitespace-pre-line">{alumno.comentario}</span>
+                      </div>
+                    </Title>
+                  ) : (
+                    <span className="text-xs text-text-muted">—</span>
                   )}
                 </td>
 
