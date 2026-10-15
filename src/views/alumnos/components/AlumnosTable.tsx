@@ -170,7 +170,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Email EducaMadrid</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Estado Asignación</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">FFE Pte.</th>
-            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest text-center border-b border-border-base">Comentario</th>
+            <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest text-center border-b border-border-base">Coment.</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest text-right border-b border-border-base">Acciones</th>
           </tr>
         </thead>
@@ -183,22 +183,24 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                 {/* Nombre */}
                 <td className="px-8 py-4 sticky left-0 z-10 bg-surface-card group-hover:bg-surface-hover border-r border-border-base border-b border-border-base">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-surface-hover rounded-xl flex items-center justify-center text-text-muted group-hover:bg-primary group-hover:text-white transition-colors">
+                    <div className="h-10 w-10 shrink-0 bg-surface-hover rounded-xl flex items-center justify-center text-text-muted group-hover:bg-primary group-hover:text-white transition-colors">
                       <User className="h-5 w-5" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="font-bold text-text-main text-sm">{alumno.nombre}</div>
                       <div className="text-[10px] text-text-muted font-bold uppercase tracking-tight">{alumno.apellidos}</div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                         {!alumno.numSS?.trim() && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-danger-soft text-danger-strong border border-danger/20 rounded-full text-[9px] font-bold uppercase tracking-wide">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-danger-soft text-danger-strong border border-danger/20 rounded-full text-[9px] font-bold uppercase tracking-wide whitespace-nowrap">
                             <TriangleAlert className="h-3 w-3" /> Falta NSS
                           </span>
                         )}
                         {!!alumno.alumnoIncompleto && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-warning-soft text-warning-strong border border-warning/20 rounded-full text-[9px] font-bold uppercase tracking-wide">
-                            <TriangleAlert className="h-3 w-3" /> Falta info estudiante
-                          </span>
+                          <Title text="Falta información del estudiante" className="flex">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-warning-soft text-warning-strong border border-warning/20 rounded-full text-[9px] font-bold uppercase tracking-wide whitespace-nowrap">
+                              <TriangleAlert className="h-3 w-3" /> Falta info
+                            </span>
+                          </Title>
                         )}
                       </div>
                     </div>
@@ -207,7 +209,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
 
                 {/* DNI */}
                 <td className="px-6 py-4 border-b border-border-base">
-                  <span className="text-sm font-medium text-text-main font-mono">{alumno.dni}</span>
+                  <span className="text-sm font-medium text-text-main">{alumno.dni}</span>
                 </td>
 
                 {/* Teléfono */}
@@ -219,7 +221,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
 
                 {/* Email */}
                 <td className="px-6 py-4 border-b border-border-base">
-                  <div className="text-sm text-text-muted truncate max-w-45 font-medium">{alumno.emailEduca}</div>
+                  <div className="text-sm text-text-main truncate font-medium" title={alumno.emailEduca}>{alumno.emailEduca}</div>
                 </td>
 
                 {/* Estado asignación */}
