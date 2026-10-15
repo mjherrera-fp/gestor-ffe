@@ -11,7 +11,7 @@ interface TitleProps {
 // Este componente envuelve a cualquier otro y le añade el tooltip
 export const Title = ({ text, children, className }: TitleProps) => {
   return (
-    <Tippy content={text} arrow={true}>
+    <Tippy content={<span className="whitespace-pre-line">{text}</span>} arrow={true}>
       <span className={className}>{children}</span>
     </Tippy>
   );

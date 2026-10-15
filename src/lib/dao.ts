@@ -718,13 +718,13 @@ export const AlumnoDAO = {
   getById: (id: number) => db.prepare('SELECT * FROM alumnos WHERE id = ?').get(id) as Alumno,
   getByRelacionId: (id: number) => db.prepare('SELECT * FROM alumnos WHERE relacionId = ?').get(id) as Alumno[],
   create: (alumno: Alumno) => {
-    const stmt = db.prepare('INSERT INTO alumnos (nombre, apellidos, dni, numSS, tlfn, emailEduca, emailPersonal, fechaNacimiento, cursoId, detalleAcademicoId, totalHorasFFE, fechaInicio, fechaFin, estadoPlanFormativo, estadoSeguimiento, estadoValoracion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE', alumno.estadoSeguimiento || 'PENDIENTE', alumno.estadoValoracion || 'PENDIENTE');
+    const stmt = db.prepare('INSERT INTO alumnos (nombre, apellidos, dni, numSS, tlfn, emailEduca, emailPersonal, fechaNacimiento, cursoId, detalleAcademicoId, totalHorasFFE, fechaInicio, fechaFin, estadoPlanFormativo, estadoSeguimiento, estadoValoracion, comentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo || 'PENDIENTE_ENVIAR_ESTUDIANTE', alumno.estadoSeguimiento || 'PENDIENTE', alumno.estadoValoracion || 'PENDIENTE', alumno.comentario?.trim() || null);
     return info.lastInsertRowid;
   },
   update: (id: number, alumno: Alumno) => {
-    const stmt = db.prepare('UPDATE alumnos SET nombre = ?, apellidos = ?, dni = ?, numSS = ?, tlfn = ?, emailEduca = ?, emailPersonal = ?, fechaNacimiento = ?, cursoId = ?, detalleAcademicoId = ?, totalHorasFFE = ?, fechaInicio = ?, fechaFin = ?, estadoPlanFormativo = ?, estadoSeguimiento = ?, estadoValoracion = ? WHERE id = ?');
-    stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo, alumno.estadoSeguimiento, alumno.estadoValoracion, id);
+    const stmt = db.prepare('UPDATE alumnos SET nombre = ?, apellidos = ?, dni = ?, numSS = ?, tlfn = ?, emailEduca = ?, emailPersonal = ?, fechaNacimiento = ?, cursoId = ?, detalleAcademicoId = ?, totalHorasFFE = ?, fechaInicio = ?, fechaFin = ?, estadoPlanFormativo = ?, estadoSeguimiento = ?, estadoValoracion = ?, comentario = ? WHERE id = ?');
+    stmt.run(alumno.nombre, alumno.apellidos, alumno.dni, alumno.numSS, alumno.tlfn, alumno.emailEduca, alumno.emailPersonal, alumno.fechaNacimiento, alumno.cursoId, alumno.detalleAcademicoId || null, alumno.totalHorasFFE, alumno.fechaInicio, alumno.fechaFin, alumno.estadoPlanFormativo, alumno.estadoSeguimiento, alumno.estadoValoracion, alumno.comentario?.trim() || null, id);
   },
   updateEstadoPlanFormativo: (id: number, estadoPlanFormativo: PlanFormativoEstado) => {
     const stmt = db.prepare('UPDATE alumnos SET estadoPlanFormativo = ? WHERE id = ?');

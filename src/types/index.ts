@@ -114,6 +114,8 @@ export interface Alumno {
   estadoPlanFormativo: PlanFormativoEstado;
   estadoSeguimiento: SeguimientoEstado;
   estadoValoracion: ValoracionEstado;
+  /** Nota libre para casos particulares del alumno. */
+  comentario?: string | null;
   /** Días en los que este alumno se desvía de los festivos del centro y la empresa. */
   festivosPersonalizados?: FestivoPersonalizado[];
   cvEnvioCount?: number;

@@ -350,6 +350,29 @@ describe('dias no lectivos de un alumno', () => {
 //  aqui no hay API que leer, lo que se comprueba es que la tabla se creo.
 // ─────────────────────────────────────────────────────────────────────────────
 
+describe('comentario de un alumno', () => {
+  const leerAlumno = async () => {
+    const res = await pedir('/api/alumnos', conToken);
+    expect(res.status, `Falló la lectura. Salida:\n${salida}`).toBe(200);
+    return (await res.json()).find((a: any) => a.id === alumnoId);
+  };
+  const guardarComentario = async (comentario: string) => {
+    const res = await pedir(`/api/alumnos/${alumnoId}`, conToken, 'PUT', { ...(await leerAlumno()), comentario });
+    expect(res.status, `Falló el guardado. Salida:\n${salida}`).toBe(200);
+    return leerAlumno();
+  };
+
+  it('se guarda y se vuelve a leer', async () => {
+    const alumno = await guardarComentario('Necesita adaptacion de horario.\nVer con jefatura.');
+    expect(alumno.comentario).toBe('Necesita adaptacion de horario.\nVer con jefatura.');
+  });
+
+  it('vaciarlo lo deja sin comentario', async () => {
+    const alumno = await guardarComentario('   ');
+    expect(alumno.comentario).toBeNull();
+  });
+});
+
 describe('migracion de una instalacion anterior', () => {
   let hijoMigra: ChildProcess | null = null;
   let dirMigra = '';
@@ -420,11 +443,14 @@ describe('migracion de una instalacion anterior', () => {
     const tablas = dbFinal
       .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='alumnos_festivos_personalizados'")
       .get();
+    const columnas = (dbFinal.prepare('PRAGMA table_info(alumnos)').all() as Array<{ name: string }>).map(c => c.name);
     const version = Number(dbFinal.pragma('user_version', { simple: true }));
     dbFinal.close();
 
     expect(tablas, 'La migracion no creo la tabla de dias').toBeTruthy();
-    expect(version).toBe(3);
+    // Las migraciones posteriores tambien se aplican en el mismo arranque.
+    expect(columnas, 'La migracion no creo la columna comentario').toContain('comentario');
+    expect(version).toBe(4);
   }, 90_000);
 
   afterAll(async () => {

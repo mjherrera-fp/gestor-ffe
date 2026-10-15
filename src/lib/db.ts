@@ -182,6 +182,10 @@ const SCHEMA_MIGRATIONS: Array<(db: any) => void> = [
         ON alumnos_festivos_personalizados (alumnoId);
     `);
   },
+  // v3 -> v4: comentario libre por alumno para anotar casos particulares.
+  (db) => {
+    ensureColumn(db, 'alumnos', 'comentario', 'comentario TEXT');
+  },
 ];
 
 const CURRENT_SCHEMA_VERSION = SCHEMA_MIGRATIONS.length;
@@ -406,6 +410,7 @@ function setupTables() {
     cursoId INTEGER,
     relacionId INTEGER,
     detalleAcademicoId INTEGER,
+    comentario TEXT,
     FOREIGN KEY(cursoId) REFERENCES cursos(id),
     FOREIGN KEY(relacionId) REFERENCES relaciones(id) ON DELETE SET NULL,
     FOREIGN KEY(detalleAcademicoId) REFERENCES detalles_academicos(id) ON DELETE SET NULL
