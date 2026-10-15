@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {Ban, Loader2, TriangleAlert, X} from 'lucide-react';
 import {Modal} from '../../../components/ui/Modal.tsx';
 import {AnulacionPreview, RelacionAlumno} from '../../../types/index.ts';
+import {formatDate} from '../../../lib/dateUtils.ts';
 
 const hoyLocal = (): string => {
   const now = new Date();
@@ -115,7 +116,7 @@ export function AnulacionFFEModal({ open, rel, alumnoId, onClose, onPreview, onS
               </div>
               <div className="flex justify-between">
                 <span className="text-text-muted font-semibold">Fecha inicio</span>
-                <span className="text-text-main">{alumno.fechaInicio ? alumno.fechaInicio : '—'}</span>
+                <span className="text-text-main">{formatDate(alumno.fechaInicio) || '—'}</span>
               </div>
             </div>
 
