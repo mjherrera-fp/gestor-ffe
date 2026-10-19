@@ -66,6 +66,8 @@ interface AlumnosToolbarProps {
   onImportZipClick: () => void;
   onNewAlumno: () => void;
   onBulkEmail: () => void;
+  /** Cuantos alumnos hay seleccionados: el correo masivo va solo a ellos. */
+  seleccionados: number;
 }
 
 export function AlumnosToolbar({
@@ -79,7 +81,7 @@ export function AlumnosToolbar({
   filterNSS, onFilterNSSChange,
   filterHorasFFE, onFilterHorasFFEChange,
   isImporting, isImportingZip, onDownloadTemplate, onImportClick, onImportZipClick, onNewAlumno,
-  onBulkEmail,
+  onBulkEmail, seleccionados,
 }: AlumnosToolbarProps) {
   const [showImportCVModal, setShowImportCVModal] = useState(false);
   return (
@@ -118,12 +120,16 @@ export function AlumnosToolbar({
               Importar CVs
             </button>
           </Title>
-          <Title text="Enviar correo a alumnos filtrados">
+          <Title text={seleccionados > 0
+            ? `Enviar correo a ${seleccionados} alumno${seleccionados === 1 ? '' : 's'} seleccionado${seleccionados === 1 ? '' : 's'}`
+            : 'Selecciona alumnos para enviarles un correo'}>
             <button
               onClick={onBulkEmail}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary-light text-primary px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/15 transition-all border border-primary-light"
+              disabled={seleccionados === 0}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary-light text-primary px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/15 transition-all border border-primary-light disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Mail className="h-4 w-4" />
+              {seleccionados > 0 && <span>{seleccionados}</span>}
             </button>
           </Title>
           <button

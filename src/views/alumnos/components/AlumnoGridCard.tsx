@@ -6,6 +6,7 @@ import {
 import { Alumno, FFEMotivoNoRealizacion } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
+import { Casilla } from '../../../components/BarraSeleccion.tsx';
 
 interface AlumnoGridCardProps {
   alumno: Alumno;
@@ -17,10 +18,13 @@ interface AlumnoGridCardProps {
   onFileDelete: (id: number) => void;
   onViewCV: (a: Alumno) => void;
   onGoToAnulaciones?: (a: Alumno) => void;
+  seleccionado: boolean;
+  onToggleSeleccion: () => void;
 }
 
 export function AlumnoGridCard({
-  alumno, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV, onGoToAnulaciones
+  alumno, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV, onGoToAnulaciones,
+  seleccionado, onToggleSeleccion,
 }: AlumnoGridCardProps) {
   const isAssigned = alumno.relacionId !== null;
   const [ffeMotivoModal, setFfeMotivoModal] = useState(false);
@@ -65,13 +69,20 @@ export function AlumnoGridCard({
   };
 
   return (<>
-    <div className="bg-surface-card rounded-xl border border-border-base shadow-sm hover:shadow-md transition-all group overflow-hidden flex flex-col h-full">
+    <div className={`bg-surface-card rounded-xl border shadow-sm hover:shadow-md transition-all group overflow-hidden flex flex-col h-full ${seleccionado ? 'border-primary ring-2 ring-primary/20' : 'border-border-base'}`}>
       <div className="p-6 flex flex-col grow">
 
         {/* Cabecera */}
         <div className="flex items-start justify-between mb-4">
-          <div className="bg-surface-subtle p-3 rounded-lg border border-border-base group-hover:bg-primary/5 transition-colors">
-            <User className="h-6 w-6 text-text-muted group-hover:text-primary transition-colors" />
+          <div className="flex items-center gap-3">
+            <Casilla
+              estado={seleccionado}
+              onChange={onToggleSeleccion}
+              etiqueta={`Seleccionar a ${alumno.nombre} ${alumno.apellidos}`}
+            />
+            <div className="bg-surface-subtle p-3 rounded-lg border border-border-base group-hover:bg-primary/5 transition-colors">
+              <User className="h-6 w-6 text-text-muted group-hover:text-primary transition-colors" />
+            </div>
           </div>
           <div className="flex gap-1.5">
             {!isAssigned && (

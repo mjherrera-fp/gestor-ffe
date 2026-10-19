@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Trash2, CheckCircle2, XCircle, AlertTriangle, FileText, Eye, Trash } from 'lucide-react';
+import { X, Trash2, CheckCircle2, XCircle, AlertTriangle, FileText, Eye, Trash, BadgeX, FileDown, Loader2 } from 'lucide-react';
 
 import { useAlumnos }           from './hooks/useAlumnos.ts';
 import { AlumnosToolbar }       from './components/AlumnosToolbar.tsx';
@@ -12,6 +12,8 @@ import { EmailTypeSelector }    from '../../components/EmailTypeSelector.tsx';
 import { Modal }                from '../../components/ui/Modal.tsx';
 import { Alumno }               from '../../types/index.ts';
 import { Title }                from '../../components/Title.tsx';
+import { BarraSeleccion }       from '../../components/BarraSeleccion.tsx';
+import { MotivoFFEMasivoModal } from './components/MotivoFFEMasivoModal.tsx';
 
 // ── Helper CV ──
 
@@ -75,6 +77,48 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig,
         onImportZipClick={() => ctx.zipFileInputRef.current?.click()}
         onNewAlumno={() => ctx.handleOpenForm(null)}
         onBulkEmail={ctx.handleOpenBulkEmail}
+        seleccionados={ctx.seleccion.seleccionadas.length}
+      />
+
+      {/* ── SELECCIÓN Y OPERACIONES MASIVAS ── */}
+      <div className="bg-surface-card px-4 py-3 rounded-xl border border-border-base shadow-sm">
+        <BarraSeleccion
+          estado={ctx.seleccion.estado}
+          seleccionadas={ctx.seleccion.seleccionadas.length}
+          totalVisibles={ctx.seleccion.totalVisibles}
+          nombre="alumno"
+          onTodas={ctx.seleccion.seleccionarTodas}
+          onNinguna={ctx.seleccion.seleccionarNinguna}
+        >
+          <Title text="Poner el motivo de no realización de las FFE a los seleccionados">
+            <button
+              type="button"
+              onClick={() => ctx.setShowMotivoMasivo(true)}
+              disabled={ctx.seleccion.seleccionadas.length === 0}
+              className="flex items-center gap-2 bg-warning-soft text-warning-strong px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-warning/15 transition-all border border-warning/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <BadgeX className="h-4 w-4" /> Motivo FFE
+            </button>
+          </Title>
+          <Title text="Descargar en un .zip los CV de los seleccionados">
+            <button
+              type="button"
+              onClick={ctx.handleDescargarCVs}
+              disabled={ctx.seleccion.seleccionadas.length === 0 || ctx.descargandoCVs}
+              className="flex items-center gap-2 bg-success-soft text-success-strong px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-success/15 transition-all border border-success/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {ctx.descargandoCVs ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+              Descargar CVs
+            </button>
+          </Title>
+        </BarraSeleccion>
+      </div>
+
+      <MotivoFFEMasivoModal
+        open={ctx.showMotivoMasivo}
+        alumnos={ctx.seleccion.seleccionadas}
+        onClose={() => ctx.setShowMotivoMasivo(false)}
+        onGuardado={() => { ctx.setShowMotivoMasivo(false); ctx.fetchAlumnos(); }}
       />
 
       {/* Input Excel oculto */}
@@ -161,6 +205,8 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig,
               onFileDelete={ctx.handleFileDelete}
               onViewCV={setViewingCV}
               onGoToAnulaciones={alumno => onGoToAnulaciones?.(alumno.id!)}
+              seleccionado={ctx.seleccion.estaSeleccionada(alumno.id)}
+              onToggleSeleccion={() => ctx.seleccion.alternar(alumno.id!)}
             />
           ))}
         </div>
@@ -175,6 +221,7 @@ export default function AlumnosView({ cursoId, detalleAcademicoId, onGoToConfig,
           onFileDelete={ctx.handleFileDelete}
           onViewCV={setViewingCV}
           onGoToAnulaciones={onGoToAnulaciones}
+          seleccion={ctx.seleccion}
         />
       )}
 

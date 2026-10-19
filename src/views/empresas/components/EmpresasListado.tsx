@@ -1,8 +1,10 @@
 import React from 'react';
-import { Building, Hash, Plus, Edit2, Trash2, Mail, Phone, X, Star, Filter, Download, FileSpreadsheet, Loader2, TriangleAlert, CalendarPlus } from 'lucide-react';
+import { Building, Hash, Edit2, Trash2, Mail, Phone, X, Star, Filter, TriangleAlert, CalendarPlus } from 'lucide-react';
 import { Empresa } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
+import { BarraSeleccion, Casilla } from '../../../components/BarraSeleccion.tsx';
+import type { Seleccion } from '../../../hooks/useSeleccion.ts';
 
 interface EmpresasListadoProps {
   empresas: Empresa[];
@@ -10,18 +12,12 @@ interface EmpresasListadoProps {
   searchTerm: string;
   onSearchChange: (v: string) => void;
   onSelectEmpresa: (emp: Empresa) => void;
-  onNew: () => void;
   onEdit: (emp: Empresa) => void;
   onDeleteRequest: (id: number) => void;
   // Email
   onIndividualEmail: (emp: Empresa) => void;
-  onBulkEmail: () => void;
   // Calendario
   onCalendar: (emp: Empresa) => void;
-  // Excel
-  onDownloadTemplate: () => void | Promise<void>;
-  onImportClick: () => void;
-  isImporting: boolean;
   // Filters
   filterValoracion: number;
   onFilterValoracionChange: (v: number) => void;
@@ -32,20 +28,20 @@ interface EmpresasListadoProps {
   filterContactado: 'todas' | 'contactada' | 'no_contactada';
   onFilterContactadoChange: (v: 'todas' | 'contactada' | 'no_contactada') => void;
   cursosUnicos: string[];
+  seleccion: Seleccion;
 }
 
 export function EmpresasListado({
   empresas, selectedEmpresa,
   searchTerm, onSearchChange,
-  onSelectEmpresa, onNew, onEdit, onDeleteRequest,
-  onIndividualEmail, onBulkEmail,
+  onSelectEmpresa, onEdit, onDeleteRequest,
+  onIndividualEmail,
   onCalendar,
-  onDownloadTemplate, onImportClick, isImporting,
   filterValoracion, onFilterValoracionChange,
   filterUltimosCursos, onFilterUltimosCursosChange,
   filterColaboracion, onFilterColaboracionChange,
   filterContactado, onFilterContactadoChange,
-  cursosUnicos,
+  cursosUnicos, seleccion,
 }: EmpresasListadoProps) {
 
   const emptyMsg = searchTerm
@@ -67,40 +63,6 @@ export function EmpresasListado({
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
               Empresas e Instituciones
             </span>
-          </div>
-          <div className="flex gap-2">
-            <Title text="Enviar correo a empresas filtradas">
-              <button
-                onClick={onBulkEmail}
-                className="flex items-center justify-center gap-2 bg-primary-light text-primary px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary-light/60 transition-all border border-primary-light"
-              >
-                <Mail className="h-4 w-4" />
-              </button>
-            </Title>
-            <Title text="Descargar plantilla Excel">
-              <button
-                onClick={onDownloadTemplate}
-                className="flex items-center justify-center gap-2 bg-surface-hover text-text-main px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-surface-strong transition-all border border-border-base"
-              >
-                <Download className="h-4 w-4" /> Plantilla
-              </button>
-            </Title>
-            <Title text="Importar desde Excel">
-              <button
-                onClick={onImportClick}
-                disabled={isImporting}
-                className="flex items-center justify-center gap-2 bg-success-soft text-success-strong px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-success-soft transition-all border border-success/20 disabled:opacity-50"
-              >
-                {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
-                {isImporting ? 'Importando...' : 'Importar Excel'}
-              </button>
-            </Title>
-            <button
-              onClick={onNew}
-              className="bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-            >
-              <Plus className="h-4 w-4" /> Nueva Empresa
-            </button>
           </div>
         </div>
 
@@ -202,6 +164,19 @@ export function EmpresasListado({
             </button>
           )}
         </div>
+
+        {/* Selección para operaciones masivas */}
+        <div className="pt-3 border-t border-border-base">
+          <BarraSeleccion
+            estado={seleccion.estado}
+            seleccionadas={seleccion.seleccionadas.length}
+            totalVisibles={seleccion.totalVisibles}
+            nombre="empresa"
+            femenino
+            onTodas={seleccion.seleccionarTodas}
+            onNinguna={seleccion.seleccionarNinguna}
+          />
+        </div>
       </div>
 
       {/* ── Mobile cards ── */}
@@ -213,7 +188,13 @@ export function EmpresasListado({
             className={`p-5 cursor-pointer transition-colors ${selectedEmpresa?.id === emp.id ? 'bg-primary-light/30' : 'hover:bg-surface-hover'}`}
           >
             <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
+              <Casilla
+                estado={seleccion.estaSeleccionada(emp.id)}
+                onChange={() => seleccion.alternar(emp.id!)}
+                etiqueta={`Seleccionar ${emp.nombre}`}
+                className="mt-0.5"
+              />
+              <div className="min-w-0 flex-1">
                 <h4 className="font-bold text-text-main text-sm truncate">{emp.nombre}</h4>
                 <p className="text-[9px] text-text-muted font-bold mt-1">{emp.cif?.trim() ? `CIF: ${emp.cif}` : 'Sin CIF'}</p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -284,6 +265,13 @@ export function EmpresasListado({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-surface-subtle border-b border-border-base">
+              <th className="pl-5 pr-0 py-3 w-9">
+                <Casilla
+                  estado={seleccion.estado}
+                  onChange={seleccion.estado === 'todas' ? seleccion.seleccionarNinguna : seleccion.seleccionarTodas}
+                  etiqueta={seleccion.estado === 'todas' ? 'Deseleccionar todas' : 'Seleccionar todas las empresas visibles'}
+                />
+              </th>
               <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Entidad</th>
               <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">Contacto</th>
               <th className="px-5 py-3 text-[10px] font-bold text-text-muted uppercase tracking-wider text-right">Acciones</th>
@@ -294,8 +282,16 @@ export function EmpresasListado({
               <tr
                 key={emp.id}
                 onClick={() => onSelectEmpresa(emp)}
-                className={`cursor-pointer transition-colors ${selectedEmpresa?.id === emp.id ? 'bg-primary-light' : 'hover:bg-surface-hover'}`}
+                className={`cursor-pointer transition-colors ${selectedEmpresa?.id === emp.id ? 'bg-primary-light' : seleccion.estaSeleccionada(emp.id) ? 'bg-primary-light/40 hover:bg-surface-hover' : 'hover:bg-surface-hover'}`}
               >
+                <td className="pl-5 pr-0 py-4 align-top">
+                  <Casilla
+                    estado={seleccion.estaSeleccionada(emp.id)}
+                    onChange={() => seleccion.alternar(emp.id!)}
+                    etiqueta={`Seleccionar ${emp.nombre}`}
+                    className="mt-0.5"
+                  />
+                </td>
                 <td className="px-5 py-4">
                   <p className="font-bold text-text-main text-sm">{emp.nombre}</p>
                   <p className="text-[10px] text-text-muted">{emp.cif?.trim() || 'Sin CIF'}</p>
@@ -356,7 +352,7 @@ export function EmpresasListado({
             ))}
             {empresas.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-5 py-12 text-center text-text-muted text-sm italic">
+                <td colSpan={4} className="px-5 py-12 text-center text-text-muted text-sm italic">
                   {emptyMsg}
                 </td>
               </tr>

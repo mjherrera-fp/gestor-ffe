@@ -4,6 +4,8 @@ import { Alumno, DetalleAcademico, RelacionAlumno } from '../../../types/index.t
 import { EmailAttachment, EmailTargetType } from '../../../types/email.ts';
 import { cargarContextoFechas, crearResolutorFechas } from '../../../lib/calculoFechas.ts';
 import { mostrarToast } from '../../../utils/toast.ts';
+import { useSeleccion } from '../../../hooks/useSeleccion.ts';
+import { descargarCVs } from '../../../utils/descargarCVs.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -527,9 +529,34 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     setShowEmailTypeSelector(true);
   };
 
+  // ── Selección para operaciones masivas ──
+  // Solo sobre lo que se ve: al filtrar, lo que deja de verse sale de la
+  // selección (ver src/lib/seleccion.ts).
+  const seleccion = useSeleccion(filteredAndSortedAlumnos);
+  const [showMotivoMasivo, setShowMotivoMasivo] = useState(false);
+  const [descargandoCVs, setDescargandoCVs] = useState(false);
+
   const handleOpenBulkEmail = () => {
+    if (seleccion.seleccionadas.length === 0) return;
     setPendingEmailTarget({ type: 'bulk' });
     setShowEmailTypeSelector(true);
+  };
+
+  const handleDescargarCVs = async () => {
+    if (seleccion.seleccionadas.length === 0) return;
+    setDescargandoCVs(true);
+    try {
+      const { incluidos, sinCV } = await descargarCVs(seleccion.seleccionadas);
+      if (incluidos === 0) {
+        mostrarToast('Ninguno de los alumnos seleccionados tiene CV.', 'info');
+      } else if (sinCV.length > 0) {
+        mostrarToast(`Descargados ${incluidos} CV. ${sinCV.length} alumno${sinCV.length === 1 ? ' no tiene' : 's no tienen'} CV.`, 'info');
+      }
+    } catch {
+      mostrarToast('No se pudieron descargar los CV.', 'error');
+    } finally {
+      setDescargandoCVs(false);
+    }
   };
 
   const handleEmailTypeConfirm = async (tipo: EmailTargetType) => {
@@ -555,7 +582,7 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
       }
     } else if (pendingEmailTarget.type === 'bulk') {
       const emails: string[] = [];
-      for (const a of filteredAndSortedAlumnos) {
+      for (const a of seleccion.seleccionadas) {
         if (tipo === 'educamadrid' || tipo === 'ambos') {
           if (a.emailEduca) emails.push(a.emailEduca);
         }
@@ -625,5 +652,9 @@ export function useAlumnos(cursoId: number, detalleAcademicoId?: number) {
     emailTo, emailBcc, emailAttachments, contextualContactIds,
     handleOpenIndividualEmail, handleOpenBulkEmail,
     handleEmailTypeConfirm,
+    // Selección y operaciones masivas
+    seleccion,
+    showMotivoMasivo, setShowMotivoMasivo,
+    descargandoCVs, handleDescargarCVs,
   };
 }
