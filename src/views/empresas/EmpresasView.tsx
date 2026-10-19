@@ -219,7 +219,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
           <div className="space-y-2 text-sm text-text-muted">
             <p><span className="font-bold text-success-strong">{ctx.importResult?.success}</span> empresas nuevas</p>
             <p><span className="font-bold text-primary">{ctx.importResult?.updated}</span> empresas actualizadas</p>
-            <p><span className="font-bold text-warning-strong">{ctx.importResult?.duplicated}</span> empresas omitidas (CIF repetido en el archivo)</p>
+            <p><span className="font-bold text-warning-strong">{ctx.importResult?.duplicated}</span> empresas omitidas (repetidas en el archivo por CIF o, si no tienen CIF, por nombre)</p>
           </div>
           <button
             onClick={() => ctx.setImportResult(null)}

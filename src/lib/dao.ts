@@ -889,15 +889,21 @@ export const EmpresaDAO = {
     FROM empresas e
   `).all() as Empresa[],
   getById: (id: number) => db.prepare('SELECT * FROM empresas WHERE id = ?').get(id) as Empresa,
-  getByCif: (cif: string): Empresa | undefined => db.prepare("SELECT * FROM empresas WHERE LOWER(TRIM(cif)) = LOWER(TRIM(?))").get(cif) as Empresa | undefined,
+  // El CIF no es obligatorio (empresas contactadas de las que aun no se tiene):
+  // sin CIF no hay nada con lo que comparar, y dos empresas sin CIF no son la
+  // misma empresa.
+  getByCif: (cif: string | null | undefined): Empresa | undefined => {
+    if (!cif?.trim()) return undefined;
+    return db.prepare("SELECT * FROM empresas WHERE LOWER(TRIM(cif)) = LOWER(TRIM(?))").get(cif) as Empresa | undefined;
+  },
   create: (empresa: Empresa) => {
     const stmt = db.prepare('INSERT INTO empresas (nombre, direccion, ciudad, cif, email, tlfn, comentarios, personaContacto, comunidad, provincia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, empresa.comentarios ?? null, empresa.personaContacto ?? null, empresa.comunidad ?? null, empresa.provincia ?? null);
+    const info = stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, (empresa.cif ?? '').trim(), empresa.email, empresa.tlfn, empresa.comentarios ?? null, empresa.personaContacto ?? null, empresa.comunidad ?? null, empresa.provincia ?? null);
     return info.lastInsertRowid;
   },
   update: (id: number, empresa: Empresa) => {
     const stmt = db.prepare('UPDATE empresas SET nombre = ?, direccion = ?, ciudad = ?, cif = ?, email = ?, tlfn = ?, comentarios = ?, personaContacto = ?, comunidad = ?, provincia = ? WHERE id = ?');
-    stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, empresa.cif, empresa.email, empresa.tlfn, empresa.comentarios ?? null, empresa.personaContacto ?? null, empresa.comunidad ?? null, empresa.provincia ?? null, id);
+    stmt.run(empresa.nombre, empresa.direccion, empresa.ciudad, (empresa.cif ?? '').trim(), empresa.email, empresa.tlfn, empresa.comentarios ?? null, empresa.personaContacto ?? null, empresa.comunidad ?? null, empresa.provincia ?? null, id);
   },
   delete: (id: number) => db.prepare('DELETE FROM empresas WHERE id = ?').run(id),
   getLocalidadesConRelaciones: (): string[] => {

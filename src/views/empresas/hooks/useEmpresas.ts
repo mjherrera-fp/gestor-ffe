@@ -247,22 +247,28 @@ export function useEmpresas(cursoId: number) {
         for (const row of data) {
           const nombre       = (row['Nombre'] || '').toString().trim();
           const cif          = (row['CIF'] || '').toString().trim();
-          if (!nombre || !cif) continue;
+          if (!nombre) continue;
 
-          const cifKey = cif.toLowerCase();
-          if (procesados.has(cifKey)) {
+          // El CIF no es obligatorio. Con CIF, la empresa se identifica por el;
+          // sin el, por el nombre, que es lo unico que queda para no darla de
+          // alta dos veces.
+          const clave = cif ? `cif:${cif.toLowerCase()}` : `nombre:${nombre.toLowerCase()}`;
+          if (procesados.has(clave)) {
             duplicatedCount++;
             continue;
           }
 
           let empresaId: number | null = null;
-          const existingEmpresa = empresas.find(e => e.cif.trim().toLowerCase() === cifKey);
+          const existingEmpresa = cif
+            ? empresas.find(e => (e.cif ?? '').trim().toLowerCase() === cif.toLowerCase())
+            : empresas.find(e => e.nombre.trim().toLowerCase() === nombre.toLowerCase());
 
           const empresaData = {
             nombre,
             direccion: (row['Dirección'] || '').toString().trim(),
             ciudad:    (row['Ciudad'] || '').toString().trim(),
-            cif,
+            // Una fila sin CIF no borra el que ya tuviera la empresa.
+            cif:       cif || existingEmpresa?.cif || '',
             email:     (row['Email'] || '').toString().trim(),
             tlfn:      (row['Teléfono'] || '').toString().trim(),
             comentarios: (row['Comentarios'] || '').toString().trim(),
@@ -287,7 +293,7 @@ export function useEmpresas(cursoId: number) {
               empresaId = result.id;
               successCount++;
             }
-            procesados.add(cifKey);
+            procesados.add(clave);
           } catch {
             console.error('Error al procesar empresa:', nombre);
             continue;
@@ -563,7 +569,7 @@ export function useEmpresas(cursoId: number) {
     if (!emp.id) return false;
 
     const matchesSearch = emp.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.cif.toLowerCase().includes(searchTerm.toLowerCase());
+      (emp.cif ?? '').toLowerCase().includes(searchTerm.toLowerCase());
     if (!matchesSearch) return false;
 
     if (filterValoracion > 0) {
