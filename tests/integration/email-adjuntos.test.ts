@@ -562,3 +562,19 @@ describe('el CV adjunto desde Intereses', () => {
     expect(adjunto.size).toBe(pdf.length);
   });
 });
+
+/**
+ * El nombre de un documento del gestor se escribe a mano. Con un caracter
+ * fuera de latin1 la descarga daba error (ERR_INVALID_CHAR en la cabecera) y
+ * el documento se quedaba sin adjuntar al correo.
+ */
+describe('un documento del gestor con un nombre raro', () => {
+  it('se descarga igual, y la cabecera lleva su nombre real', async () => {
+    const nombre = 'Presupuesto 100€ “final”.pdf';
+    const doc = await subirDocumento('relacion', { relacionId }, nombre, '%PDF-1.4 euros');
+    const res = await pedir(`/api/documentos/relacion/${doc.id}/download`, conToken);
+    expect(res.status, `Falló la descarga. Salida:\n${salida}`).toBe(200);
+    expect(await res.text()).toBe('%PDF-1.4 euros');
+    expect(res.headers.get('content-disposition')).toContain(`filename*=UTF-8''${encodeURIComponent(nombre)}`);
+  });
+});
