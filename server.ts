@@ -68,6 +68,7 @@ import {
 import {aplicarPersonalizados, festivosHeredados} from './src/lib/festivosAlumno.ts';
 import {Alumno, DetalleAcademico, DocConvenio, DocRelacion} from './src/types/index.ts';
 import {appendToSentFolder} from './src/lib/imap.ts';
+import {cvABuffer} from './src/lib/cv.ts';
 import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -946,7 +947,7 @@ async function startServer() {
       const safeName = Date.now() + '-' + Math.round(Math.random() * 1e9) + '-' + filename;
       const outputPath = path.join(emailUploadDir, safeName);
       try {
-        const buffer = Buffer.from(alumno.cvPath, 'base64');
+        const buffer = cvABuffer(alumno.cvPath);
         fs.writeFileSync(outputPath, buffer);
         attachments.push({ filename, path: outputPath, size: buffer.length });
       } catch { /* skip alumno */ }
