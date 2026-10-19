@@ -3,6 +3,8 @@ import { User, Phone, GraduationCap, Edit2, Trash2, Send, CheckCircle, Clock, Se
 import { Alumno, FFEMotivoNoRealizacion } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
+import { Casilla } from '../../../components/BarraSeleccion.tsx';
+import type { Seleccion } from '../../../hooks/useSeleccion.ts';
 
 interface AlumnosTableProps {
   alumnos: Alumno[];
@@ -14,9 +16,10 @@ interface AlumnosTableProps {
   onFileDelete: (id: number) => void;
   onViewCV: (a: Alumno) => void;
   onGoToAnulaciones?: (alumnoId: number) => void;
+  seleccion: Seleccion;
 }
 
-export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV, onGoToAnulaciones }: AlumnosTableProps) {
+export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV, onGoToAnulaciones, seleccion }: AlumnosTableProps) {
   const [ffeModalAlumnoId, setFfeModalAlumnoId] = useState<number | null>(null);
   const [ffeMotivos, setFfeMotivos] = useState<FFEMotivoNoRealizacion[]>([]);
   const [ffeMotivoSelected, setFfeMotivoSelected] = useState<number | null>(null);
@@ -153,7 +156,7 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
       )}
       <table className="w-full text-left border-separate border-spacing-0 table-fixed">
         <colgroup>
-          <col style={{ width: '240px' }} />
+          <col style={{ width: '270px' }} />
           <col style={{ width: '140px' }} />
           <col style={{ width: '180px' }} />
           <col style={{ width: '210px' }} />
@@ -164,7 +167,16 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
         </colgroup>
         <thead ref={theadRef}>
           <tr className="bg-surface-subtle">
-            <th className="px-8 py-5 sticky left-0 z-20 bg-surface-subtle text-[10px] font-black text-text-muted uppercase tracking-widest border-r border-border-base border-b border-border-base">Alumno</th>
+            <th className="px-8 py-5 sticky left-0 z-20 bg-surface-subtle text-[10px] font-black text-text-muted uppercase tracking-widest border-r border-border-base border-b border-border-base">
+              <div className="flex items-center gap-3">
+                <Casilla
+                  estado={seleccion.estado}
+                  onChange={seleccion.estado === 'todas' ? seleccion.seleccionarNinguna : seleccion.seleccionarTodas}
+                  etiqueta={seleccion.estado === 'todas' ? 'Deseleccionar todos' : 'Seleccionar todos los alumnos visibles'}
+                />
+                Alumno
+              </div>
+            </th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">DNI / Pasaporte</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Contacto</th>
             <th className="px-6 py-5 text-[10px] font-black text-text-muted uppercase tracking-widest border-b border-border-base">Email EducaMadrid</th>
@@ -178,11 +190,16 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
           {alumnos.map(alumno => {
             const isAssigned = alumno.relacionId !== null;
             return (
-              <tr key={alumno.id} className="hover:bg-surface-hover/50 transition-colors group font-sans">
+              <tr key={alumno.id} className={`hover:bg-surface-hover/50 transition-colors group font-sans ${seleccion.estaSeleccionada(alumno.id) ? 'bg-primary-light/40' : ''}`}>
 
                 {/* Nombre */}
                 <td className="px-8 py-4 sticky left-0 z-10 bg-surface-card group-hover:bg-surface-hover border-r border-border-base border-b border-border-base">
                   <div className="flex items-center gap-3">
+                    <Casilla
+                      estado={seleccion.estaSeleccionada(alumno.id)}
+                      onChange={() => seleccion.alternar(alumno.id!)}
+                      etiqueta={`Seleccionar a ${alumno.nombre} ${alumno.apellidos}`}
+                    />
                     <div className="h-10 w-10 shrink-0 bg-surface-hover rounded-xl flex items-center justify-center text-text-muted group-hover:bg-primary group-hover:text-white transition-colors">
                       <User className="h-5 w-5" />
                     </div>

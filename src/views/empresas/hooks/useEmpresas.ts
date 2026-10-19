@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { useSeleccion } from '../../../hooks/useSeleccion.ts';
 import * as XLSX from 'xlsx';
 import { Empresa, TutorEmpresa, EmpresaEstadistica, Curso } from '../../../types/index.ts';
 import { EmailAttachment } from '../../../types/email.ts';
@@ -631,7 +632,13 @@ export function useEmpresas(cursoId: number) {
     setShowEmailModal(true);
   };
 
+  // ── Selección para operaciones masivas ──
+  // Solo sobre lo que se ve: al filtrar, lo que deja de verse sale de la
+  // selección (ver src/lib/seleccion.ts).
+  const seleccion = useSeleccion(filteredEmpresas);
+
   const handleOpenBulkEmail = () => {
+    if (seleccion.seleccionadas.length === 0) return;
     setShowPlantillaSelector(true);
   };
 
@@ -647,7 +654,7 @@ export function useEmpresas(cursoId: number) {
     const marcadoresRes = await fetch('/api/marcadores-personalizados');
     const marcadores = marcadoresRes.ok ? await marcadoresRes.json() : [];
 
-    const empresasConEmail = filteredEmpresas.filter(e => e.email);
+    const empresasConEmail = seleccion.seleccionadas.filter(e => e.email);
     const empresa = empresasConEmail[0];
 
     const context: Record<string, any> = {
@@ -733,6 +740,7 @@ export function useEmpresas(cursoId: number) {
     emailTo, emailBcc, emailAttachments, emailSubject, emailBody, perRecipientData, setPerRecipientData, contextualContactIds,
     marcadoresVacios,
     handleOpenIndividualEmail, handleOpenBulkEmail, handleEmailConPlantilla,
+    seleccion,
     // Calendario
     calendarioEmpresaId,
     handleOpenCalendar,

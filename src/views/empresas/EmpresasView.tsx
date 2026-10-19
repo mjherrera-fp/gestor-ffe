@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, X, BarChart3, Users, Building2, User, Handshake, MoreHorizontal, PencilRuler, FileText } from 'lucide-react';
+import { Trash2, X, BarChart3, Users, Building2, User, Handshake, MoreHorizontal, PencilRuler, FileText, Download, FileSpreadsheet, Loader2, Mail, Plus } from 'lucide-react';
+import { Title } from '../../components/Title.tsx';
 
 import { useEmpresas }                from './hooks/useEmpresas.ts';
 import { EmpresasListado }            from './components/EmpresasListado.tsx';
@@ -32,8 +33,8 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
 
   return (
     <>
-      {/* ── CABECERA ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      {/* ── CABECERA: título + botones, como en Alumnos ── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-xl lg:text-2xl font-bold font-sans text-text-main tracking-tight">
             Empresas e Instituciones Colaboradoras
@@ -41,6 +42,44 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
           <p className="text-xs lg:text-sm text-text-muted mt-1 leading-relaxed">
             Configura la información de las empresas e instituciones colaboradoras.
           </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Title text="Descargar plantilla Excel">
+            <button
+              onClick={ctx.downloadTemplate}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-surface-hover text-text-main px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-surface-strong transition-all border border-border-base"
+            >
+              <Download className="h-4 w-4" /> Plantilla
+            </button>
+          </Title>
+          <Title text="Importar desde Excel">
+            <button
+              onClick={() => ctx.fileInputRef.current?.click()}
+              disabled={ctx.isImporting}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-success-soft text-success-strong px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-success/15 transition-all border border-success/20 disabled:opacity-50"
+            >
+              {ctx.isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
+              {ctx.isImporting ? 'Importando...' : 'Importar Excel'}
+            </button>
+          </Title>
+          <Title text={ctx.seleccion.seleccionadas.length > 0
+            ? `Enviar correo a ${ctx.seleccion.seleccionadas.length} empresa${ctx.seleccion.seleccionadas.length === 1 ? '' : 's'} seleccionada${ctx.seleccion.seleccionadas.length === 1 ? '' : 's'}`
+            : 'Selecciona empresas para enviarles un correo'}>
+            <button
+              onClick={ctx.handleOpenBulkEmail}
+              disabled={ctx.seleccion.seleccionadas.length === 0}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary-light text-primary px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/15 transition-all border border-primary-light disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Mail className="h-4 w-4" />
+              {ctx.seleccion.seleccionadas.length > 0 && <span>{ctx.seleccion.seleccionadas.length}</span>}
+            </button>
+          </Title>
+          <button
+            onClick={ctx.handleOpenNewEmpresa}
+            className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+          >
+            <Plus className="h-4 w-4" /> Nueva Empresa
+          </button>
         </div>
       </div>
 
@@ -54,15 +93,10 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
           searchTerm={ctx.searchTerm}
           onSearchChange={ctx.setSearchTerm}
           onSelectEmpresa={ctx.handleSelectEmpresa}
-          onNew={ctx.handleOpenNewEmpresa}
           onEdit={ctx.handleOpenEditEmpresa}
           onDeleteRequest={id => ctx.setShowDeleteConfirm({ id, type: 'empresa' })}
           onIndividualEmail={ctx.handleOpenIndividualEmail}
-          onBulkEmail={ctx.handleOpenBulkEmail}
           onCalendar={ctx.handleOpenCalendar}
-          onDownloadTemplate={ctx.downloadTemplate}
-          onImportClick={() => ctx.fileInputRef.current?.click()}
-          isImporting={ctx.isImporting}
           filterValoracion={ctx.filterValoracion}
           onFilterValoracionChange={ctx.setFilterValoracion}
           filterUltimosCursos={ctx.filterUltimosCursos}
@@ -72,6 +106,7 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
           filterContactado={ctx.filterContactado}
           onFilterContactadoChange={ctx.setFilterContactado}
           cursosUnicos={ctx.cursosUnicos}
+          seleccion={ctx.seleccion}
         />
 
         {/* Input Excel oculto */}
