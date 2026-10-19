@@ -68,6 +68,8 @@ import {
 import {aplicarPersonalizados, festivosHeredados} from './src/lib/festivosAlumno.ts';
 import {Alumno, DetalleAcademico, DocConvenio, DocRelacion} from './src/types/index.ts';
 import {appendToSentFolder} from './src/lib/imap.ts';
+import {cvABuffer} from './src/lib/cv.ts';
+import {contentDispositionInline, normalizarAdjunto} from './src/lib/adjuntos.ts';
 import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -315,7 +317,10 @@ async function startServer() {
     }
   });
 
-  const uploadEmail = multer({ storage: emailStorage });
+  // Los navegadores mandan el nombre del fichero en UTF-8 sin declararlo, y
+  // multer lo lee por defecto como latin1: "Relación.pdf" llegaba como
+  // "RelaciÃ³n.pdf" y asi se adjuntaba.
+  const uploadEmail = multer({ storage: emailStorage, defParamCharset: 'utf8' });
 
   function limpiarFilasActiveX(docxBuffer: Buffer): Buffer {
     try {
@@ -689,10 +694,16 @@ async function startServer() {
       const fromEmail = smtp_email || `${smtp_user}@educa.madrid.org`;
       const fromStr = `"${profesor.nombre} ${profesor.apellidos}" <${fromEmail}>`;
 
-      const mailAttachments = (attachments || []).map((a: { filename: string; path: string }) => ({
-        filename: a.filename,
-        path: a.path,
-      }));
+      // Todos los adjuntos pasan por aqui, salgan de donde salgan (CV, gestor
+      // documental, documentos generados o subidos a mano). El nombre y el tipo
+      // se ajustan a lo que el archivo contiene: ver src/lib/adjuntos.ts.
+      const mailAttachments = (attachments || []).map((a: { filename: string; path: string }) => {
+        try {
+          return { ...normalizarAdjunto(a.filename, fs.readFileSync(a.path)), path: a.path };
+        } catch {
+          return { filename: a.filename, path: a.path };
+        }
+      });
 
       const sendDelay = delayMs || (emailCfg.send_delay_ms ? parseInt(emailCfg.send_delay_ms, 10) : (profesor.send_delay_ms || 1500));
 
@@ -744,7 +755,7 @@ async function startServer() {
 
       // Registrar en histórico
       try {
-        const adjNames = (attachments || []).map((a: { filename: string }) => a.filename);
+        const adjNames = mailAttachments.map((a: { filename: string }) => a.filename);
         HistoricoDAO.logComunicacion(
           Array.isArray(to) ? to.join(', ') : (to || ''),
           Array.isArray(cc) ? cc.join(', ') : (cc || ''),
@@ -946,7 +957,7 @@ async function startServer() {
       const safeName = Date.now() + '-' + Math.round(Math.random() * 1e9) + '-' + filename;
       const outputPath = path.join(emailUploadDir, safeName);
       try {
-        const buffer = Buffer.from(alumno.cvPath, 'base64');
+        const buffer = cvABuffer(alumno.cvPath);
         fs.writeFileSync(outputPath, buffer);
         attachments.push({ filename, path: outputPath, size: buffer.length });
       } catch { /* skip alumno */ }
@@ -1396,7 +1407,7 @@ async function startServer() {
 
     const buffer = Buffer.from(matches[2], 'base64');
     res.setHeader('Content-Type', matches[1]);
-    res.setHeader('Content-Disposition', `inline; filename="${doc.nombreFichero}"`);
+    res.setHeader('Content-Disposition', contentDispositionInline(doc.nombreFichero));
     res.send(buffer);
   });
 
@@ -1459,7 +1470,7 @@ async function startServer() {
 
     const buffer = Buffer.from(matches[2], 'base64');
     res.setHeader('Content-Type', matches[1]);
-    res.setHeader('Content-Disposition', `inline; filename="${doc.nombreFichero}"`);
+    res.setHeader('Content-Disposition', contentDispositionInline(doc.nombreFichero));
     res.send(buffer);
   });
 
@@ -1524,7 +1535,7 @@ async function startServer() {
 
       const buffer = Buffer.from(matches[2], 'base64');
       res.setHeader('Content-Type', matches[1]);
-      res.setHeader('Content-Disposition', `inline; filename="${doc.nombreFichero}"`);
+      res.setHeader('Content-Disposition', contentDispositionInline(doc.nombreFichero));
       res.send(buffer);
     });
 
@@ -1624,7 +1635,7 @@ async function startServer() {
 
     const buffer = Buffer.from(matches[2], 'base64');
     res.setHeader('Content-Type', matches[1]);
-    res.setHeader('Content-Disposition', `inline; filename="${doc.nombreFichero}"`);
+    res.setHeader('Content-Disposition', contentDispositionInline(doc.nombreFichero));
     res.send(buffer);
   });
 

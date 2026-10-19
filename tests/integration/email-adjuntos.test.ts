@@ -530,3 +530,51 @@ describe('el modo externo del anexo de relación', () => {
     expect(nombre).toBe('autogenerado');
   });
 });
+/**
+ * El CV se guarda como data URI y se adjunta desde Intereses. Lo que llega al
+ * destinatario tiene que ser exactamente el PDF que se subio: antes se
+ * decodificaba tambien la cabecera `data:application/pdf;base64,`, el adjunto
+ * salia con bytes de mas delante de `%PDF` y el correo lo marcaba como
+ * sospechoso ("esperado pdf y encontrado .bin").
+ */
+describe('el CV adjunto desde Intereses', () => {
+  it('es el mismo PDF que se subio, byte a byte', async () => {
+    // Una cabecera de PDF real y bytes fuera de ASCII, que es donde cualquier
+    // desplazamiento en el base64 se notaria.
+    const pdf = Buffer.concat([
+      Buffer.from('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n', 'latin1'),
+      Buffer.from(Array.from({ length: 512 }, (_, i) => i % 256)),
+      Buffer.from('\n%%EOF\n'),
+    ]);
+    const form = new FormData();
+    form.append('cv', new Blob([pdf], { type: 'application/pdf' }), 'cv.pdf');
+    const subida = await fetch(`${base}/api/alumnos/${alumnoId}/cv`, { method: 'POST', headers: conToken, body: form });
+    expect(subida.status, `Falló la subida. Salida:\n${salida}`).toBe(200);
+
+    const res = await pedir('/api/alumnos/cv/preparar-attachments', conToken, 'POST', { alumnoIds: [alumnoId] });
+    expect(res.status, `Falló la preparación. Salida:\n${salida}`).toBe(200);
+    const [adjunto] = await res.json();
+
+    expect(adjunto.filename).toMatch(/_cv\.pdf$/);
+    const enviado = fs.readFileSync(adjunto.path);
+    expect(enviado.subarray(0, 5).toString()).toBe('%PDF-');
+    expect(enviado.equals(pdf)).toBe(true);
+    expect(adjunto.size).toBe(pdf.length);
+  });
+});
+
+/**
+ * El nombre de un documento del gestor se escribe a mano. Con un caracter
+ * fuera de latin1 la descarga daba error (ERR_INVALID_CHAR en la cabecera) y
+ * el documento se quedaba sin adjuntar al correo.
+ */
+describe('un documento del gestor con un nombre raro', () => {
+  it('se descarga igual, y la cabecera lleva su nombre real', async () => {
+    const nombre = 'Presupuesto 100€ “final”.pdf';
+    const doc = await subirDocumento('relacion', { relacionId }, nombre, '%PDF-1.4 euros');
+    const res = await pedir(`/api/documentos/relacion/${doc.id}/download`, conToken);
+    expect(res.status, `Falló la descarga. Salida:\n${salida}`).toBe(200);
+    expect(await res.text()).toBe('%PDF-1.4 euros');
+    expect(res.headers.get('content-disposition')).toContain(`filename*=UTF-8''${encodeURIComponent(nombre)}`);
+  });
+});
