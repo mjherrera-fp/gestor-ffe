@@ -523,6 +523,7 @@ export default function RelacionesView({ cursoId, detalleAcademicoId, onGoToConf
         onRemoveAlumno={ctx.removeAlumnoFromRelacion}
         onUpdateStudentHours={ctx.updateStudentHours}
         onUpdateStudentStartDate={ctx.updateStudentStartDate}
+        fechasHabilitadas={ctx.fechasHabilitadas}
         calculateEndDateForHours={calcEndDate}
         festivosAlumnoId={ctx.festivosAlumnoId}
         onOpenFestivosAlumno={ctx.setFestivosAlumnoId}

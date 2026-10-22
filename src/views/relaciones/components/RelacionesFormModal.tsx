@@ -1,5 +1,5 @@
 import React from 'react';
-import {ArrowLeftRight, Building2, Calendar, CalendarOff, Clock, Plus, User, X} from 'lucide-react';
+import {ArrowLeftRight, Building2, Calendar, CalendarOff, Clock, Info, Plus, User, X} from 'lucide-react';
 import {
   Alumno,
   Convenio,
@@ -30,6 +30,20 @@ const RULES = {
   estado: [required('Estado de Tramitación')],
 };
 
+/**
+ * Por que las fechas estan deshabilitadas. La fecha fin se calcula saltando los
+ * festivos del centro del convenio, asi que sin convenio no se puede saber.
+ */
+function AvisoConvenio() {
+  return (
+    <p className="flex items-start gap-2 text-[10px] font-medium text-info-strong bg-info-soft border border-info-strong/20 rounded-xl px-3 py-2">
+      <Info className="h-3.5 w-3.5 shrink-0 mt-px" />
+      Selecciona primero el convenio: no se pueden establecer fechas hasta tenerlo, porque la fecha fin
+      depende de los festivos de su centro.
+    </p>
+  );
+}
+
 interface RelacionFormModalProps {
   open: boolean;
   editing: RelacionAlumno | null;
@@ -44,6 +58,11 @@ interface RelacionFormModalProps {
   onRemoveAlumno: (id: number) => void;
   onUpdateStudentHours: (id: number, h: number) => void;
   onUpdateStudentStartDate: (id: number, d: string) => void;
+  /**
+   * Si ya se pueden poner fechas: hace falta el convenio, porque la fecha fin
+   * depende de los festivos de su centro y de la ciudad de la empresa.
+   */
+  fechasHabilitadas: boolean;
   calculateEndDateForHours: (start: string, hours: number, personalizados?: FestivoPersonalizado[]) => string | null;
   // Dias no lectivos propios de cada alumno
   /** Alumno al que se le esta editando el calendario de dias no lectivos. */
@@ -88,7 +107,7 @@ interface RelacionFormModalProps {
 export function RelacionFormModal({
   open, editing, formData, setFormData,
   alumnos, searchTermAlumno, setSearchTermAlumno, filteredAlumnos,
-  onAddAlumno, onRemoveAlumno, onUpdateStudentHours, onUpdateStudentStartDate, calculateEndDateForHours,
+  onAddAlumno, onRemoveAlumno, onUpdateStudentHours, onUpdateStudentStartDate, fechasHabilitadas, calculateEndDateForHours,
   festivosAlumnoId,   onOpenFestivosAlumno, onCloseFestivosAlumno, festivosEfectivosDe, onSaveFestivosAlumno,
   onPreviewFestivosAlumno, festivosAlumnoNombre,
   targetStartDate, setTargetStartDate, targetEndDate, setTargetEndDate,
@@ -224,6 +243,7 @@ export function RelacionFormModal({
                           a un día del horario, o indica la fecha fin a mano.
                         </p>
                       )}
+                      {!fechasHabilitadas && (formData.alumnos?.length ?? 0) > 0 && <AvisoConvenio />}
                       <div className="space-y-3 max-h-[35vh] overflow-y-auto pr-2">
                       {formData.alumnos?.map(ar => {
                         const alum            = alumnos.find(a => a.id === ar.id);
@@ -266,7 +286,9 @@ export function RelacionFormModal({
                                 <label className="text-[9px] font-bold text-text-muted uppercase block mb-1">Fecha Inicio</label>
                                 <input
                                   type="date"
-                                  className="w-full bg-surface-subtle border border-border-base rounded-lg px-3 py-2 text-xs font-bold text-text-main focus:ring-2 focus:ring-primary/10 outline-none"
+                                  disabled={!fechasHabilitadas}
+                                  title={fechasHabilitadas ? undefined : 'Selecciona primero el convenio'}
+                                  className="w-full bg-surface-subtle border border-border-base rounded-lg px-3 py-2 text-xs font-bold text-text-main focus:ring-2 focus:ring-primary/10 outline-none disabled:bg-surface-hover disabled:text-text-muted disabled:cursor-not-allowed"
                                   value={ar.fechaInicio || ''}
                                   onChange={e => onUpdateStudentStartDate(ar.id!, e.target.value)}
                                 />
@@ -330,6 +352,7 @@ export function RelacionFormModal({
                   <h4 className="text-[10px] font-black text-text-muted uppercase tracking-widest flex items-center gap-2">
                     <Calendar className="h-3.5 w-3.5" /> Periodo general
                   </h4>
+                  {!fechasHabilitadas && <AvisoConvenio />}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <div className="flex items-center justify-between mb-1">
@@ -337,7 +360,7 @@ export function RelacionFormModal({
                         <button
                           type="button"
                           onClick={onApplyStartDateToAll}
-                          disabled={!formData.alumnos?.length}
+                          disabled={!formData.alumnos?.length || !fechasHabilitadas}
                           className="text-[9px] font-bold text-primary hover:underline uppercase tracking-tight disabled:text-text-muted disabled:no-underline disabled:cursor-not-allowed"
                         >
                           Aplicar a todos
@@ -345,7 +368,7 @@ export function RelacionFormModal({
                       </div>
                       <input
                         type="date"
-                        disabled={!formData.alumnos?.length}
+                        disabled={!formData.alumnos?.length || !fechasHabilitadas}
                         className="w-full bg-surface-card border border-border-base rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none disabled:bg-surface-hover disabled:text-text-muted disabled:cursor-not-allowed"
                         value={targetStartDate}
                         onChange={e => setTargetStartDate(e.target.value)}
@@ -357,7 +380,7 @@ export function RelacionFormModal({
                         <button
                           type="button"
                           onClick={onApplyTargetEndDate}
-                          disabled={!formData.alumnos?.length}
+                          disabled={!formData.alumnos?.length || !fechasHabilitadas}
                           className="text-[9px] font-bold text-success hover:underline uppercase tracking-tight disabled:text-text-muted disabled:no-underline disabled:cursor-not-allowed"
                         >
                           Cálculo retroactivo
@@ -365,7 +388,7 @@ export function RelacionFormModal({
                       </div>
                       <input
                         type="date"
-                        disabled={!formData.alumnos?.length}
+                        disabled={!formData.alumnos?.length || !fechasHabilitadas}
                         className="w-full bg-surface-card border border-border-base rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none disabled:bg-surface-hover disabled:text-text-muted disabled:cursor-not-allowed"
                         value={targetEndDate}
                         onChange={e => setTargetEndDate(e.target.value)}

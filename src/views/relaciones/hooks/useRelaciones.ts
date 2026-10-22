@@ -70,6 +70,11 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     const [usarFestivosEmpresa, setUsarFestivosEmpresa] = useState(false);
     const [empresaFestivosMap, setEmpresaFestivosMap] = useState<Record<string, string[]>>({});
     const [empresaFestivosActuales, setEmpresaFestivosActuales] = useState<string[]>([]);
+    // Si ya han llegado los festivos del convenio elegido. La fecha fin depende
+    // de ellos (los del centro y los de la ciudad de la empresa), asi que las
+    // fechas no se dejan poner hasta tenerlos: antes, fijar la fecha de inicio
+    // sin convenio calculaba el fin sin festivos.
+    const [festivosConvenioCargados, setFestivosConvenioCargados] = useState(false);
 
     // Resolvedor de fechas con la configuracion de festivos ya atada. Antes
     // cada calculo repetia a mano los siete argumentos.
@@ -336,30 +341,38 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
 
     // Cargar tutores cuando cambia el convenio seleccionado
     useEffect(() => {
-        if (formData.convenioId) {
-            const conv = convenios.find(c => c.id === formData.convenioId);
-            if (conv) {
-                fetch(`/api/empresas/${conv.empresaId}/tutores`)
-                    .then(res => res.json())
-                    .then(setTutores);
-                fetch(`/api/centros/${conv.centroId}`)
-                    .then(res => res.json())
-                    .then(centro => setCentroFestivos(centro.festivos || []))
-                    .catch(() => setCentroFestivos([]));
-                // Cargar empresa para obtener su ciudad y luego los festivos de empresa
-                fetch(`/api/empresas/${conv.empresaId}`)
-                    .then(res => res.json())
-                    .then(empresa => {
-                        if (empresa?.ciudad && empresaFestivosMap[empresa.ciudad]) {
-                            setEmpresaFestivosActuales(empresaFestivosMap[empresa.ciudad]);
-                        } else {
-                            setEmpresaFestivosActuales([]);
-                        }
-                    })
-                    .catch(() => setEmpresaFestivosActuales([]));
-            }
-        }
+        setFestivosConvenioCargados(false);
+        if (!formData.convenioId) return;
+        const conv = convenios.find(c => c.id === formData.convenioId);
+        if (!conv) return;
+        // Si se cambia de convenio antes de que respondan, las respuestas del
+        // anterior no deben pisar los festivos del nuevo.
+        let vigente = true;
+        fetch(`/api/empresas/${conv.empresaId}/tutores`)
+            .then(res => res.json())
+            .then(t => { if (vigente) setTutores(t); });
+        const centro = fetch(`/api/centros/${conv.centroId}`)
+            .then(res => res.json())
+            .then(c => { if (vigente) setCentroFestivos(c.festivos || []); })
+            .catch(() => { if (vigente) setCentroFestivos([]); });
+        // Cargar empresa para obtener su ciudad y luego los festivos de empresa
+        const empresa = fetch(`/api/empresas/${conv.empresaId}`)
+            .then(res => res.json())
+            .then(e => {
+                if (!vigente) return;
+                if (e?.ciudad && empresaFestivosMap[e.ciudad]) {
+                    setEmpresaFestivosActuales(empresaFestivosMap[e.ciudad]);
+                } else {
+                    setEmpresaFestivosActuales([]);
+                }
+            })
+            .catch(() => { if (vigente) setEmpresaFestivosActuales([]); });
+        Promise.all([centro, empresa]).then(() => { if (vigente) setFestivosConvenioCargados(true); });
+        return () => { vigente = false; };
     }, [formData.convenioId, convenios, empresaFestivosMap]);
+
+    /** Las fechas solo se pueden poner con el convenio elegido y sus festivos cargados. */
+    const fechasHabilitadas = !!formData.convenioId && festivosConvenioCargados;
 
     // Cargar tutores cuando se selecciona una relación existente
     useEffect(() => {
@@ -663,6 +676,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     };
 
     const updateStudentStartDate = (id: number, date: string) => {
+        if (!fechasHabilitadas) return;
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
@@ -674,7 +688,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     };
 
     const applyTargetEndDate = () => {
-        if (!targetEndDate) return;
+        if (!targetEndDate || !fechasHabilitadas) return;
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).map(a => ({
@@ -686,7 +700,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
     };
 
     const applyStartDateToAll = () => {
-        if (!targetStartDate) return;
+        if (!targetStartDate || !fechasHabilitadas) return;
         setFormData(prev => ({
             ...prev,
             alumnos: (prev.alumnos || []).map(a => {
@@ -2189,6 +2203,7 @@ export function useRelaciones(cursoId: number, detalleAcademicoId?: number, prof
         handleOpenForm, handleSubmit, handleDelete, closeForm,
         addAlumnoToRelacion, removeAlumnoFromRelacion,
     updateStudentHours, updateStudentStartDate,
+    fechasHabilitadas,
     festivosAlumnoId, setFestivosAlumnoId, festivosEfectivosAlumno, saveFestivosAlumno,
     previewFestivosAlumno,
         festivosAlumnoNombre,
