@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GraduationCap, Search, X, ArrowUpDown, Send, Building2, GitCompare, ChevronDown, ChevronUp } from 'lucide-react';
 import { Alumno } from '../../../types/index.ts';
 import { SortField, SortOrder, FilterMatchStatus } from '../hooks/useIntereses.ts';
+import type { CoincidenciaEmpresa } from '../../../lib/interesesBusqueda.ts';
 
 interface AlumnosSidebarProps {
   alumnos: Alumno[];
@@ -20,6 +21,8 @@ interface AlumnosSidebarProps {
   onFilterEmpresasInteresadasChange: (v: 'all' | 'con' | 'sin') => void;
   filterMatchStatus: FilterMatchStatus;
   onFilterMatchStatusChange: (v: FilterMatchStatus) => void;
+  /** Empresas por las que sale cada alumno al buscar una empresa. */
+  coincidenciasPorAlumno: Map<number, CoincidenciaEmpresa[]>;
 }
 
 export function AlumnosSidebar({
@@ -31,6 +34,7 @@ export function AlumnosSidebar({
   filterMinCVEnvios, onFilterMinCVEnviosChange,
   filterEmpresasInteresadas, onFilterEmpresasInteresadasChange,
   filterMatchStatus, onFilterMatchStatusChange,
+  coincidenciasPorAlumno,
 }: AlumnosSidebarProps) {
   const anyFilterActive = filterMinCVEnvios > 0 || filterEmpresasInteresadas !== 'all' || filterMatchStatus !== 'all';
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -52,7 +56,7 @@ export function AlumnosSidebar({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
           <input
             type="text"
-            placeholder="Buscar alumno..."
+            placeholder="Buscar alumno o empresa..."
             value={searchAlumno}
             onChange={e => onSearchChange(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 bg-surface-card border border-border-base rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-sans"
@@ -208,6 +212,22 @@ export function AlumnosSidebar({
                       {solicitudes} Solics
                     </span>
                   </div>
+                  {/* Al buscar una empresa: por que sale este alumno */}
+                  {(coincidenciasPorAlumno.get(al.id!) ?? []).map(c => (
+                    <div key={c.empresaId} className="flex items-center gap-1.5 text-[9px] font-bold text-text-muted min-w-0">
+                      <Building2 className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{c.nombre}</span>
+                      <span className={`shrink-0 px-1.5 py-0.5 rounded-full border ${
+                        c.envio && c.solicitud
+                          ? 'bg-warning-soft text-warning-strong border-warning/20'
+                          : c.envio
+                            ? 'bg-primary-light text-primary border-primary-light'
+                            : 'bg-success-soft text-success-strong border-success/20'
+                      }`}>
+                        {c.envio && c.solicitud ? 'Match' : c.envio ? 'Envío' : 'Solicitud'}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
