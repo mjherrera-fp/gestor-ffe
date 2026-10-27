@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Alumno, Empresa, InteresAlumnoEmpresa } from '../../../types/index.ts';
+import { buscarAlumno, empresasQueCoinciden, type CoincidenciaEmpresa } from '../../../lib/interesesBusqueda.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -122,11 +123,27 @@ export function useIntereses(cursoId: number, detalleAcademicoId?: number) {
     solicitudes: intereses.filter(i => i.alumnoId === alumnoId && i.interesado === 'empresa').length,
   });
 
+  // La busqueda es por alumno o por empresa: con una empresa salen los alumnos
+  // que le han enviado el CV, los que ha solicitado y los match. Ver
+  // src/lib/interesesBusqueda.ts.
+  const empresasBuscadas = useMemo(
+    () => empresasQueCoinciden(empresas, searchAlumno),
+    [empresas, searchAlumno]
+  );
+
+  // Por que empresas sale cada alumno (solo cuando no sale por su nombre).
+  const coincidenciasPorAlumno = useMemo(() => {
+    const mapa = new Map<number, CoincidenciaEmpresa[]>();
+    for (const al of alumnos) {
+      const r = buscarAlumno(al, searchAlumno, intereses, empresasBuscadas);
+      if (r.coincide) mapa.set(al.id!, r.porEmpresas);
+    }
+    return mapa;
+  }, [alumnos, searchAlumno, intereses, empresasBuscadas]);
+
   const filteredAlumnos = useMemo(() => {
     const filtered = alumnos.filter(al => {
-      if (!al.nombre.toLowerCase().includes(searchAlumno.toLowerCase()) &&
-          !al.apellidos.toLowerCase().includes(searchAlumno.toLowerCase()))
-        return false;
+      if (!coincidenciasPorAlumno.has(al.id!)) return false;
 
       const envios = intereses.filter(i => i.alumnoId === al.id && i.interesado === 'alumno').length;
       if (filterMinCVEnvios > 0 && envios < filterMinCVEnvios) return false;
@@ -151,7 +168,7 @@ export function useIntereses(cursoId: number, detalleAcademicoId?: number) {
       return sortOrder === 'asc' ? cmp : -cmp;
     });
     return filtered;
-  }, [alumnos, searchAlumno, filterMinCVEnvios, filterEmpresasInteresadas, filterMatchStatus, sortBy, sortOrder, intereses]);
+  }, [alumnos, coincidenciasPorAlumno, filterMinCVEnvios, filterEmpresasInteresadas, filterMatchStatus, sortBy, sortOrder, intereses]);
 
   const toggleSort = (field: SortField) => {
     if (sortBy === field) setSortOrder(o => o === 'asc' ? 'desc' : 'asc');
@@ -170,6 +187,7 @@ export function useIntereses(cursoId: number, detalleAcademicoId?: number) {
   return {
     // Datos derivados
     filteredAlumnos, filteredEmpresas, empresas,
+    coincidenciasPorAlumno,
     // UI
     selectedAlumno, setSelectedAlumno,
     selectedAlumnoIds, toggleSelection, clearSelection, selectOnly,
