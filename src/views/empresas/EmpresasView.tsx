@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, X, BarChart3, Users, Building2, User, Handshake, MoreHorizontal, PencilRuler, FileText, Download, FileSpreadsheet, Loader2, Mail, Plus } from 'lucide-react';
+import { Trash2, X, BarChart3, Users, Building2, Info, User, Handshake, MoreHorizontal, PencilRuler, FileText, Download, FileSpreadsheet, Loader2, Mail, Plus } from 'lucide-react';
 import { Title } from '../../components/Title.tsx';
 
 import { useEmpresas }                from './hooks/useEmpresas.ts';
@@ -8,6 +8,7 @@ import { TutoresPanel }               from './components/TutoresPanel.tsx';
 import { EmpresaFormModal }           from './components/EmpresaFormModal.tsx';
 import { TutorFormModal }             from './components/TutorFormModal.tsx';
 import { EmpresaEstadisticasPanel }   from './components/EmpresaEstadisticasPanel.tsx';
+import { EmpresaInfoPanel }           from './components/EmpresaInfoPanel.tsx';
 import { EmailModal }                 from '../../components/EmailModal.tsx';
 import { Modal }                      from '../../components/ui/Modal.tsx';
 import { CalendarioEventoModal }      from '../../components/CalendarioEventoModal.tsx';
@@ -128,12 +129,23 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
               </div>
               <h3 className="text-base font-bold text-text-main mb-2">Selecciona una empresa</h3>
               <p className="text-xs text-text-muted leading-relaxed">
-                Haz clic en una empresa para gestionar sus tutores y estadísticas.
+                Haz clic en una empresa para ver su información, sus tutores y sus estadísticas.
               </p>
             </div>
           ) : (
             <>
               <div className="flex border-b border-border-base shrink-0">
+                <button
+                  onClick={() => ctx.setActiveTab('info')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    ctx.activeTab === 'info'
+                      ? 'text-primary border-b-2 border-primary bg-primary-light/30'
+                      : 'text-text-muted hover:text-text-main hover:bg-surface-hover'
+                  }`}
+                >
+                  <Info className="h-3.5 w-3.5" />
+                  Info
+                </button>
                 <button
                   onClick={() => ctx.setActiveTab('estadisticas')}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
@@ -158,7 +170,16 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
                 </button>
               </div>
 
-              {ctx.activeTab === 'estadisticas' ? (
+              {ctx.activeTab === 'info' ? (
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                  {/* La de la lista y no la seleccionada: esa es una copia que no
+                      se refresca al editar, y la ficha enseñaria datos viejos. */}
+                  <EmpresaInfoPanel
+                    empresa={ctx.empresas.find(e => e.id === ctx.selectedEmpresa!.id) ?? ctx.selectedEmpresa}
+                    onEdit={ctx.handleOpenEditEmpresa}
+                  />
+                </div>
+              ) : ctx.activeTab === 'estadisticas' ? (
                 <div className="flex-1 min-h-0 overflow-y-auto">
                   <EmpresaEstadisticasPanel
                     selectedEmpresa={ctx.selectedEmpresa}
