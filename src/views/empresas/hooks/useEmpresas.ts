@@ -72,7 +72,7 @@ export function useEmpresas(cursoId: number) {
   // ── Estadísticas ──
   const [estadisticas,      setEstadisticas]      = useState<EmpresaEstadistica[]>([]);
   const [allEstadisticas,   setAllEstadisticas]   = useState<EmpresaEstadistica[]>([]);
-  const [activeTab,         setActiveTab]         = useState<'tutores' | 'estadisticas'>('estadisticas');
+  const [activeTab,         setActiveTab]         = useState<'info' | 'tutores' | 'estadisticas'>('info');
 
   // ── Importación Excel ──
   const [isImporting,  setIsImporting]  = useState(false);
@@ -537,7 +537,8 @@ export function useEmpresas(cursoId: number) {
     setSelectedEmpresa(emp);
     fetchTutores(emp.id!);
     fetchEstadisticas(emp.id!);
-    setActiveTab('estadisticas');
+    // La ficha de la empresa es lo primero que se ve al elegirla.
+    setActiveTab('info');
   };
 
   // ─────────────────────────────────────────
