@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
   ComunicacionDATEstadoLabels,
   ConvenioEstadoLabels,
+  EstadoSeleccionLabels,
   PanelResumenRow,
   PlanFormativoEstadoLabels,
   RelacionEstadoLabels,
@@ -24,6 +25,7 @@ interface Props {
 }
 
 function getStatusLabels(col: ColumnMeta): Record<string, string> | null {
+  if (col.id === 'estadoSeleccion') return EstadoSeleccionLabels;
   if (col.id === 'estadoConvenio') return ConvenioEstadoLabels;
   if (col.id === 'estadoRelacion') return RelacionEstadoLabels;
   if (col.id === 'estadoDAT') return ComunicacionDATEstadoLabels;
@@ -185,6 +187,7 @@ const badgeColors: Record<string, string> = {
   'PENDIENTE': 'bg-surface-subtle text-text-muted border-border-base',
   'ENVIADO_A_EMPRESA': 'bg-primary-light text-primary border-primary-light',
   'RECIBIDO': 'bg-success-soft text-success-strong border-success/20',
+  'SELECCIONADO': 'bg-success-soft text-success-strong border-success/20',
 };
 
 function StatusBadge({ estado, labels }: { estado: string; labels: Record<string, string> }) {
