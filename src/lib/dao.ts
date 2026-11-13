@@ -1502,7 +1502,14 @@ export const PanelDAO = {
         r.numRelacion, r.estado as estadoRelacion, r.horario,
         cd.fecha as fechaEnvioDAT, cd.estado as estadoDAT,
         r.firmaRelacion, r.firmaPlanFormativo, r.firmaSeguimiento,
-        r.firmaValoracion
+        r.firmaValoracion,
+        -- Lo mismo que cuenta la pantalla de Intereses: a cuantas empresas se
+        -- ha enviado el CV, y si alguna empresa ha solicitado al alumno.
+        (SELECT COUNT(DISTINCT i.empresaId) FROM intereses i
+          WHERE i.alumnoId = a.id AND i.interesado = 'alumno') as envios,
+        CASE WHEN EXISTS (SELECT 1 FROM intereses i
+          WHERE i.alumnoId = a.id AND i.interesado = 'empresa')
+          THEN 'SELECCIONADO' ELSE 'PENDIENTE' END as estadoSeleccion
       FROM alumnos a
       LEFT JOIN relaciones r ON a.relacionId = r.id
       LEFT JOIN convenios c ON r.convenioId = c.id

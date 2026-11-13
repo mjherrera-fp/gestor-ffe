@@ -382,6 +382,13 @@ export interface SelectedDocs {
   carta: boolean
 }
 
+export type EstadoSeleccion = 'PENDIENTE' | 'SELECCIONADO';
+
+export const EstadoSeleccionLabels: Record<EstadoSeleccion, string> = {
+  PENDIENTE: 'Pendiente',
+  SELECCIONADO: 'Seleccionado',
+};
+
 export interface PanelResumenRow {
   alumnoId: number;
   nombre: string;
@@ -402,6 +409,10 @@ export interface PanelResumenRow {
   estadoPlanFormativo: PlanFormativoEstado;
   estadoSeguimiento: SeguimientoEstado;
   estadoValoracion: ValoracionEstado;
+  /** Empresas distintas a las que se ha enviado el CV del alumno. */
+  envios: number;
+  /** SELECCIONADO si alguna empresa ha solicitado al alumno. */
+  estadoSeleccion: EstadoSeleccion;
   firmaRelacion?: string;
   firmaPlanFormativo?: string;
   firmaSeguimiento?: string;

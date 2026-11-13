@@ -2,6 +2,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {
   ComunicacionDATEstadoLabels,
   ConvenioEstadoLabels,
+  EstadoSeleccionLabels,
   PanelResumenRow,
   PlanFormativoEstadoLabels,
   RelacionEstadoLabels,
@@ -12,7 +13,7 @@ import {
 import {formatDate} from '../../../lib/dateUtils.ts';
 
 export type ColumnId =
-  | 'alumno' | 'fechaInicio' | 'fechaFin' | 'empresa'
+  | 'alumno' | 'envios' | 'estadoSeleccion' | 'fechaInicio' | 'fechaFin' | 'empresa'
   | 'numConvenio' | 'numRelacion'
   | 'horasFFE' | 'horasRealizadas' | 'horasPendientes'
   | 'estadoConvenio' | 'estadoRelacion' | 'estadoPlanFormativo'
@@ -50,6 +51,8 @@ const fmtHoras = (n?: number | null) => (n == null ? '' : Number.isInteger(n) ? 
 
 export const COLUMNS: ColumnMeta[] = [
   { id: 'alumno', label: 'Alumno', type: 'text', getValue: r => `${r.apellidos}, ${r.nombre}` },
+  { id: 'envios', label: 'Envíos', type: 'number', getValue: r => String(r.envios ?? 0) },
+  { id: 'estadoSeleccion', label: 'Estado Selección', type: 'status', statusLabels: EstadoSeleccionLabels, getValue: r => r.estadoSeleccion },
   { id: 'fechaInicio', label: 'Inicio', type: 'date', getValue: r => r.fechaInicio },
   { id: 'fechaFin', label: 'Fin', type: 'date', getValue: r => r.fechaFin },
   { id: 'empresa', label: 'Empresa', type: 'text', getValue: r => r.empresaNombre },
@@ -73,7 +76,7 @@ export const COLUMNS: ColumnMeta[] = [
   { id: 'estadoValoracion', label: 'Valoración', type: 'status', statusLabels: ValoracionEstadoLabels, getValue: r => r.estadoValoracion },
 ];
 
-const HORAS_COLS: ColumnId[] = ['horasFFE', 'horasRealizadas', 'horasPendientes'];
+const HORAS_COLS: ColumnId[] = ['envios', 'horasFFE', 'horasRealizadas', 'horasPendientes'];
 
 function compareValues(a: string | null | undefined, b: string | null | undefined, col: ColumnId, dir: SortDir): number {
   let cmp = 0;
