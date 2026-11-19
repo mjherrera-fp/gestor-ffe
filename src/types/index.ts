@@ -413,6 +413,8 @@ export interface PanelResumenRow {
   envios: number;
   /** SELECCIONADO si alguna empresa ha solicitado al alumno. */
   estadoSeleccion: EstadoSeleccion;
+  /** 1 si tiene match en Intereses: envio y solicitud con la misma empresa. */
+  tieneMatch: number;
   firmaRelacion?: string;
   firmaPlanFormativo?: string;
   firmaSeguimiento?: string;

@@ -11,6 +11,7 @@ import {
   ValoracionEstadoLabels
 } from '../../../types/index.ts';
 import {formatDate} from '../../../lib/dateUtils.ts';
+import {alumnosConMatch, cvPorAlumno} from '../../../lib/estadisticasIntereses.ts';
 
 export type ColumnId =
   | 'alumno' | 'envios' | 'estadoSeleccion' | 'fechaInicio' | 'fechaFin' | 'empresa'
@@ -220,6 +221,10 @@ export function usePanel(cursoId: number, detalleAcademicoId?: number, datNecesa
       .slice(0, 15);
   }, [resumen]);
 
+  // Estadisticas de la pantalla de Intereses (ver src/lib/estadisticasIntereses.ts).
+  const statsCV = useMemo(() => cvPorAlumno(resumen), [resumen]);
+  const statsMatch = useMemo(() => alumnosConMatch(resumen), [resumen]);
+
   const statsFFE = useMemo(() => {
     const conFFE = resumen.filter(r => r.relacionId !== null).length;
     const sinFFE = resumen.filter(r => r.relacionId === null).length;
@@ -314,6 +319,8 @@ export function usePanel(cursoId: number, detalleAcademicoId?: number, datNecesa
     activeFiltersCount,
     empresasConAlumnos,
     statsFFE,
+    statsCV,
+    statsMatch,
     distribucionConvenio,
     distribucionRelacion,
     distribucionPlanFormativo,
