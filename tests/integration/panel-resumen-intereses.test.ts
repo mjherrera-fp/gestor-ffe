@@ -149,4 +149,22 @@ describe('resumen del panel con los datos de Intereses', () => {
     expect(marta.envios).toBe(0);
     expect(marta.estadoSeleccion).toBe('PENDIENTE');
   });
+
+  // GF-73: match = envio y solicitud con la MISMA empresa.
+  it('enviar CV o ser solicitado por separado no es match', async () => {
+    expect((await fila('Ana')).tieneMatch).toBe(0);
+    expect((await fila('Luis')).tieneMatch).toBe(0);
+  });
+
+  it('enviar el CV a la empresa que lo ha solicitado es match', async () => {
+    const empresas = await (await pedir('/api/empresas')).json();
+    const e1 = empresas.find((e: { nombre: string }) => e.nombre === 'Empresa 1').id;
+    const e2 = empresas.find((e: { nombre: string }) => e.nombre === 'Empresa 2').id;
+    // A otra empresa: sigue sin match.
+    await crear('/api/intereses', { alumnoId: alumnos.Luis, empresaId: e2, interesado: 'alumno' });
+    expect((await fila('Luis')).tieneMatch).toBe(0);
+    // A la que lo solicito: match.
+    await crear('/api/intereses', { alumnoId: alumnos.Luis, empresaId: e1, interesado: 'alumno' });
+    expect((await fila('Luis')).tieneMatch).toBe(1);
+  });
 });

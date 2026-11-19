@@ -1509,7 +1509,12 @@ export const PanelDAO = {
           WHERE i.alumnoId = a.id AND i.interesado = 'alumno') as envios,
         CASE WHEN EXISTS (SELECT 1 FROM intereses i
           WHERE i.alumnoId = a.id AND i.interesado = 'empresa')
-          THEN 'SELECCIONADO' ELSE 'PENDIENTE' END as estadoSeleccion
+          THEN 'SELECCIONADO' ELSE 'PENDIENTE' END as estadoSeleccion,
+        -- Match: ha enviado el CV a una empresa y esa misma empresa lo ha solicitado.
+        CASE WHEN EXISTS (SELECT 1 FROM intereses ia JOIN intereses ie
+          ON ie.alumnoId = ia.alumnoId AND ie.empresaId = ia.empresaId
+          WHERE ia.alumnoId = a.id AND ia.interesado = 'alumno' AND ie.interesado = 'empresa')
+          THEN 1 ELSE 0 END as tieneMatch
       FROM alumnos a
       LEFT JOIN relaciones r ON a.relacionId = r.id
       LEFT JOIN convenios c ON r.convenioId = c.id
