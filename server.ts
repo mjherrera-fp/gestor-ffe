@@ -70,6 +70,7 @@ import {Alumno, DetalleAcademico, DocConvenio, DocRelacion} from './src/types/in
 import {appendToSentFolder} from './src/lib/imap.ts';
 import {cvABuffer} from './src/lib/cv.ts';
 import {contentDispositionInline, normalizarAdjunto} from './src/lib/adjuntos.ts';
+import {escucharEnPrimerPuertoLibre} from './src/lib/escucharPuerto.ts';
 import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -3261,14 +3262,15 @@ async function startServer() {
     });
   }
 
-  function listenOnFirstFreePort(candidates: number[], host: string, delayMs = 400): void {
-    const [primero, ...resto] = candidates;
-
-    const intentar = (port: number, pendientes: number[]): void => {
-      const server = app.listen(port, host);
-      server.once('listening', () => {
-        const asintado = server.address() as { port: number } | null;
-        puertoReal = asintado?.port ?? port;
+  // Escucha en el primer puerto disponible. Un puerto no vale si lo tiene
+  // otro programa o si Windows lo tiene reservado (ver src/lib/escucharPuerto.ts):
+  // en los dos casos se prueba el siguiente y, al final, uno del sistema.
+  function listenOnFirstFreePort(candidates: number[], host: string): void {
+    escucharEnPrimerPuertoLibre({
+      candidatos: candidates,
+      escuchar: port => app.listen(port, host),
+      alEscuchar: port => {
+        puertoReal = port;
         console.log(`Server running on http://${host}:${puertoReal}`);
         bindIpv6Loopback(puertoReal);
         // main.js abre la ventana contra este puerto, no contra el que él
@@ -3277,28 +3279,13 @@ async function startServer() {
         if (process.send) {
           process.send({ type: 'ffe-server-ready', port: puertoReal });
         }
-      });
-      server.once('error', (err: any) => {
-        if (err?.code !== 'EADDRINUSE') {
-          console.error('Error al iniciar el servidor: ' + err?.message);
-          process.exit(1);
-          return;
-        }
-        if (pendientes.length > 0) {
-          console.log(`Puerto ${port} ocupado; probando el siguiente...`);
-          setTimeout(() => intentar(pendientes[0], pendientes.slice(1)), delayMs);
-        } else if (port !== 0) {
-          // Último recurso: el sistema nos asigna cualquier puerto libre.
-          console.log('Todos los puertos candidatos ocupados; pidiendo uno al sistema.');
-          setTimeout(() => intentar(0, []), delayMs);
-        } else {
-          console.error('No se ha podido encontrar un puerto libre: ' + err?.message);
-          process.exit(1);
-        }
-      });
-    };
-
-    intentar(primero, resto);
+      },
+      alFallar: (err: any) => {
+        console.error('Error al iniciar el servidor: ' + err?.message);
+        process.exit(1);
+      },
+      aviso: mensaje => console.log(mensaje),
+    });
   }
 
   // El puerto de por defecto y los siguientes. El 0 queda fuera de la lista
