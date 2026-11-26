@@ -277,3 +277,49 @@ describe('los adjuntos que llegan al destinatario', () => {
     expect(a.bytes.equals(PDF)).toBe(true);
   });
 });
+
+/**
+ * GF-74: "Descargar todos" en la ventana de correo baja los adjuntos en un
+ * zip, con los mismos nombres con los que se enviarian, y solo de uploads/temp.
+ */
+describe('descargar todos los adjuntos en un zip', () => {
+  const pedirZip = (adjuntos: { filename: string; path: string }[]) =>
+    pedir('/api/email/adjuntos/zip', 'POST', { adjuntos });
+
+  it('trae cada adjunto con su nombre de envio, sin pisarse', async () => {
+    const a = await subir(PDF, 'tmp.bin');
+    const b = await subir(PDF, 'tmp.bin');
+    const c = await subir(DOCX, 'tmp.bin');
+    const res = await pedirZip([
+      { filename: 'Convenio firmado', path: a.path },
+      { filename: 'Convenio firmado.pdf', path: b.path },
+      { filename: 'Plan.pdf', path: c.path },
+    ]);
+    expect(res.status, `Salida:\n${salida}`).toBe(200);
+    expect(res.headers.get('content-type')).toContain('application/zip');
+
+    const JSZip = (await import('jszip')).default;
+    const zip = await JSZip.loadAsync(Buffer.from(await res.arrayBuffer()));
+    expect(Object.keys(zip.files).sort()).toEqual(['Convenio firmado (2).pdf', 'Convenio firmado.pdf', 'Plan.docx']);
+    expect((await zip.file('Convenio firmado.pdf')!.async('nodebuffer')).equals(PDF)).toBe(true);
+    expect((await zip.file('Plan.docx')!.async('nodebuffer')).equals(DOCX)).toBe(true);
+  });
+
+  it('no sirve ficheros de fuera de uploads/temp', async () => {
+    const ajeno = path.resolve(__dirname, '../../package.json');
+    const res = await pedirZip([{ filename: 'package.json', path: ajeno }]);
+    expect(res.status).toBe(404);
+  });
+
+  it('una ruta con ../ no escapa de la carpeta', async () => {
+    const a = await subir(PDF, 'tmp.bin');
+    const res = await pedirZip([
+      { filename: 'bueno.pdf', path: a.path },
+      { filename: 'malo.json', path: `${path.dirname(a.path)}/../../package.json` },
+    ]);
+    expect(res.status).toBe(200);
+    const JSZip = (await import('jszip')).default;
+    const zip = await JSZip.loadAsync(Buffer.from(await res.arrayBuffer()));
+    expect(Object.keys(zip.files)).toEqual(['bueno.pdf']);
+  });
+});

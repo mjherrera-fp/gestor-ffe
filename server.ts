@@ -69,7 +69,7 @@ import {aplicarPersonalizados, festivosHeredados} from './src/lib/festivosAlumno
 import {Alumno, DetalleAcademico, DocConvenio, DocRelacion} from './src/types/index.ts';
 import {appendToSentFolder} from './src/lib/imap.ts';
 import {cvABuffer} from './src/lib/cv.ts';
-import {contentDispositionInline, normalizarAdjunto} from './src/lib/adjuntos.ts';
+import {contentDispositionInline, nombresUnicos, normalizarAdjunto} from './src/lib/adjuntos.ts';
 import {escucharEnPrimerPuertoLibre} from './src/lib/escucharPuerto.ts';
 import {fileURLToPath} from 'url';
 
@@ -662,6 +662,31 @@ async function startServer() {
     } catch {
       res.status(500).json({ error: 'Error al eliminar el archivo' });
     }
+  });
+
+  // Descargar en un zip los adjuntos de la ventana de correo. Solo se leen
+  // ficheros de uploads/temp, que es donde estan todos los adjuntos: la ruta
+  // la manda el cliente y sin esta comprobacion serviria para descargar
+  // cualquier fichero del equipo.
+  app.post('/api/email/adjuntos/zip', async (req, res) => {
+    const adjuntos: { filename?: string; path?: string }[] = Array.isArray(req.body?.adjuntos) ? req.body.adjuntos : [];
+    const ficheros: { nombre: string; contenido: Buffer }[] = [];
+    for (const a of adjuntos) {
+      const ruta = a.path ? resolverRutaDentro(emailUploadDir, path.basename(a.path)) : null;
+      if (!ruta || !fs.existsSync(ruta)) continue;
+      const contenido = fs.readFileSync(ruta);
+      // El mismo nombre con el que se envia (ver normalizarAdjunto).
+      ficheros.push({ nombre: normalizarAdjunto(a.filename || path.basename(ruta), contenido).filename, contenido });
+    }
+    if (ficheros.length === 0) return res.status(404).json({ error: 'No hay adjuntos que descargar' });
+
+    const zip = new JSZip();
+    const nombres = nombresUnicos(ficheros.map(f => f.nombre));
+    ficheros.forEach((f, i) => zip.file(nombres[i], f.contenido));
+    const buffer = await zip.generateAsync({ type: 'nodebuffer' });
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="adjuntos.zip"');
+    res.send(buffer);
   });
 
   // Enviar email

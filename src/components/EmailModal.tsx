@@ -22,6 +22,7 @@ import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss"
 import {
   AlertTriangle,
   Briefcase,
+  Download,
   FileText,
   GraduationCap as StudentIcon,
   Info,
@@ -37,6 +38,7 @@ import {
 import {EmailAttachment, EmailSendRequest, GrupoContacto} from '../types/email.ts';
 import {deleteAttachment, uploadAttachment} from '../utils/emailUtils.ts';
 import {Title} from './Title.tsx';
+import {mostrarToast} from '../utils/toast.ts';
 import {Toolbar, ToolbarGroup, ToolbarSeparator} from '@/components/tiptap-ui-primitive/toolbar';
 import {UndoRedoButton} from '@/components/tiptap-ui/undo-redo-button';
 import {HeadingDropdownMenu} from '@/components/tiptap-ui/heading-dropdown-menu';
@@ -463,6 +465,33 @@ setDestinatariosSinDatos([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  // Descarga en un .zip todos los adjuntos, tal y como se van a enviar.
+  const [descargandoAdjuntos, setDescargandoAdjuntos] = useState(false);
+  const handleDescargarAdjuntos = async () => {
+    if (attachments.length === 0) return;
+    setDescargandoAdjuntos(true);
+    try {
+      const res = await fetch('/api/email/adjuntos/zip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adjuntos: attachments.map(a => ({ filename: a.filename, path: a.path })) }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const url = URL.createObjectURL(await res.blob());
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = 'adjuntos.zip';
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      mostrarToast('No se pudieron descargar los adjuntos.', 'error');
+    } finally {
+      setDescargandoAdjuntos(false);
+    }
+  };
+
   const handleRemoveAttachment = async (attachment: EmailAttachment) => {
     try {
       await deleteAttachment(attachment.path);
@@ -713,7 +742,22 @@ setDestinatariosSinDatos([]);
               <input ref={fileInputRef} type="file" multiple onChange={handleFileSelect} className="hidden" />
 
               <div>
-                <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Adjuntos</h3>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Adjuntos</h3>
+                  {attachments.length > 0 && (
+                    <Title text="Descargar todos los adjuntos en un .zip">
+                      <button
+                        type="button"
+                        onClick={handleDescargarAdjuntos}
+                        disabled={descargandoAdjuntos}
+                        className="flex items-center gap-1 text-[10px] font-bold text-primary hover:underline uppercase tracking-wider disabled:opacity-50"
+                      >
+                        {descargandoAdjuntos ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                        Descargar todos
+                      </button>
+                    </Title>
+                  )}
+                </div>
                 {attachments.length > 0 ? (
                   <div className="space-y-1.5">
                     {attachments.map(att => (

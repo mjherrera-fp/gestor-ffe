@@ -159,6 +159,8 @@ export default function InteresesView({ cursoId, detalleAcademicoId, onCreateRel
         searchAlumno={ctx.searchAlumno}
         onSearchChange={ctx.setSearchAlumno}
         coincidenciasPorAlumno={ctx.coincidenciasPorAlumno}
+        onDescargarCVs={ctx.handleDescargarCVs}
+        descargandoCVs={ctx.descargandoCVs}
         onToggleSelection={ctx.toggleSelection}
         onClearSelection={ctx.clearSelection}
         getAlumnoStats={ctx.getAlumnoStats}

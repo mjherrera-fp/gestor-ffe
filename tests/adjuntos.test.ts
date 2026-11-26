@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateHeaderValue } from 'http';
-import { contentDispositionInline, normalizarAdjunto, tipoPorContenido } from '../src/lib/adjuntos.ts';
+import { contentDispositionInline, nombresUnicos, normalizarAdjunto, tipoPorContenido } from '../src/lib/adjuntos.ts';
 
 const PDF = Buffer.from('%PDF-1.7\n...');
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0]);
@@ -72,5 +72,15 @@ describe('contentDispositionInline', () => {
     const cabecera = contentDispositionInline('Relación "José".pdf');
     expect(cabecera).toContain('filename="Relacion _Jose_.pdf"');
     expect(cabecera).toContain(`filename*=UTF-8''${encodeURIComponent('Relación "José".pdf')}`);
+  });
+});
+
+describe('nombresUnicos', () => {
+  it('no toca nombres distintos', () => {
+    expect(nombresUnicos(['a.pdf', 'b.pdf'])).toEqual(['a.pdf', 'b.pdf']);
+  });
+
+  it('numera los repetidos antes de la extension, sin distinguir mayusculas', () => {
+    expect(nombresUnicos(['cv.pdf', 'CV.pdf', 'cv.pdf', 'notas'])).toEqual(['cv.pdf', 'CV (2).pdf', 'cv (3).pdf', 'notas']);
   });
 });
