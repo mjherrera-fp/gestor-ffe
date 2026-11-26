@@ -1,20 +1,22 @@
 import React, {useEffect, useState} from 'react';
-import {Cloud, FileText, Mail, Settings, ShieldCheck} from 'lucide-react';
+import {Cloud, FileText, Link2, Mail, Settings, ShieldCheck} from 'lucide-react';
 import {useConfiguracion} from './hooks/useConfiguracion.ts';
 import {TabGeneral} from './components/TabGeneral.tsx';
 import {TabDocumentos} from './components/TabDocumentos.tsx';
 import {TabCorreo} from './components/TabCorreo.tsx';
 import {TabSeguridad} from './components/TabSeguridad.tsx';
 import {TabCloud} from './components/TabCloud.tsx';
+import {TabEnlaces} from './components/TabEnlaces.tsx';
 import type {RangoCurso} from '../../lib/calendarioFestivos.ts';
 
-type TabId = 'general' | 'documentos' | 'correo' | 'seguridad' | 'cloud';
+type TabId = 'general' | 'documentos' | 'correo' | 'seguridad' | 'cloud' | 'enlaces';
 
 const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'general', label: 'General', icon: Settings },
   { id: 'documentos', label: 'Documentos', icon: FileText },
   { id: 'correo', label: 'Correo', icon: Mail },
   {id: 'cloud', label: 'Cloud', icon: Cloud},
+  { id: 'enlaces', label: 'Enlaces', icon: Link2 },
   { id: 'seguridad', label: 'Seguridad', icon: ShieldCheck },
 ];
 
@@ -76,6 +78,7 @@ export default function ConfiguracionView({ initialTab, rangoCurso, onIrACursos 
         />
       )}
       {activeTab === 'cloud' && <TabCloud/>}
+      {activeTab === 'enlaces' && <TabEnlaces />}
       {activeTab === 'seguridad' && (
         <TabSeguridad
           isEncrypted={ctx.isEncrypted}

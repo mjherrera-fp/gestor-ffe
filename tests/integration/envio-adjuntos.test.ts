@@ -323,3 +323,35 @@ describe('descargar todos los adjuntos en un zip', () => {
     expect(Object.keys(zip.files)).toEqual(['bueno.pdf']);
   });
 });
+
+/** GF-75: enlaces personalizados (Configuracion -> Enlaces). */
+describe('enlaces personalizados', () => {
+  const lista = async () => (await (await pedir('/api/enlaces')).json()) as { id: number; nombre: string; url: string }[];
+
+  it('se crean normalizando la URL y salen en orden de alta', async () => {
+    expect(await lista()).toEqual([]);
+    expect((await pedir('/api/enlaces', 'POST', { nombre: 'Raíces', url: 'raices.madrid.org' })).status).toBe(200);
+    expect((await pedir('/api/enlaces', 'POST', { nombre: 'EducaMadrid', url: 'https://www.educa2.madrid.org/' })).status).toBe(200);
+    expect((await lista()).map(e => [e.nombre, e.url])).toEqual([
+      ['Raíces', 'https://raices.madrid.org/'],
+      ['EducaMadrid', 'https://www.educa2.madrid.org/'],
+    ]);
+  });
+
+  it('rechaza URLs que no son web y enlaces sin nombre', async () => {
+    expect((await pedir('/api/enlaces', 'POST', { nombre: 'Malo', url: 'javascript:alert(1)' })).status).toBe(400);
+    expect((await pedir('/api/enlaces', 'POST', { nombre: 'Malo', url: 'file:///C:/Windows' })).status).toBe(400);
+    expect((await pedir('/api/enlaces', 'POST', { nombre: '', url: 'https://a.es' })).status).toBe(400);
+    expect(await lista()).toHaveLength(2);
+  });
+
+  it('se editan, se reordenan y se borran', async () => {
+    const [raices, educa] = await lista();
+    expect((await pedir(`/api/enlaces/${raices.id}`, 'PUT', { nombre: 'Raíces FFE', url: 'https://raices.madrid.org/ffe' })).status).toBe(200);
+    expect((await pedir(`/api/enlaces/${raices.id}`, 'PUT', { nombre: 'X', url: 'javascript:x' })).status).toBe(400);
+    await pedir('/api/enlaces/orden', 'PUT', { ids: [educa.id, raices.id] });
+    expect((await lista()).map(e => e.nombre)).toEqual(['EducaMadrid', 'Raíces FFE']);
+    await pedir(`/api/enlaces/${educa.id}`, 'DELETE');
+    expect((await lista()).map(e => e.nombre)).toEqual(['Raíces FFE']);
+  });
+});

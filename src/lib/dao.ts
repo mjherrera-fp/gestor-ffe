@@ -1,6 +1,7 @@
 import {db, lockDB, unlockDB} from './db.ts';
 import { safeParse } from './json.ts';
 import { contarDiasCotizacion } from './seguridadSocial.ts';
+import type { Enlace } from './enlaces.ts';
 import {
   Alumno,
   AnulacionFFE,
@@ -1688,6 +1689,23 @@ export const PlantillaCorreoDAO = {
   count: (): number => {
     const row = db.prepare('SELECT COUNT(*) as count FROM plantillas_correo').get() as any;
     return row.count;
+  },
+};
+
+export const EnlaceDAO = {
+  getAll: (): Enlace[] =>
+    db.prepare('SELECT id, nombre, url, orden FROM enlaces ORDER BY orden ASC, id ASC').all() as Enlace[],
+  create: (nombre: string, url: string): number => {
+    const siguiente = (db.prepare('SELECT COALESCE(MAX(orden), -1) + 1 AS n FROM enlaces').get() as { n: number }).n;
+    return Number(db.prepare('INSERT INTO enlaces (nombre, url, orden) VALUES (?, ?, ?)').run(nombre, url, siguiente).lastInsertRowid);
+  },
+  update: (id: number, nombre: string, url: string): boolean =>
+    db.prepare('UPDATE enlaces SET nombre = ?, url = ? WHERE id = ?').run(nombre, url, id).changes > 0,
+  delete: (id: number): boolean => db.prepare('DELETE FROM enlaces WHERE id = ?').run(id).changes > 0,
+  /** Guarda el orden en que llegan los ids. */
+  reordenar: (ids: number[]): void => {
+    const stmt = db.prepare('UPDATE enlaces SET orden = ? WHERE id = ?');
+    db.transaction(() => ids.forEach((id, i) => stmt.run(i, id)))();
   },
 };
 

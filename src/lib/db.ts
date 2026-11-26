@@ -186,6 +186,18 @@ const SCHEMA_MIGRATIONS: Array<(db: any) => void> = [
   (db) => {
     ensureColumn(db, 'alumnos', 'comentario', 'comentario TEXT');
   },
+  // v4 -> v5: enlaces personalizados (Configuracion -> Enlaces). Mismo DDL
+  // idempotente que en setupTables.
+  (db) => {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS enlaces (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        url TEXT NOT NULL,
+        orden INTEGER NOT NULL DEFAULT 0
+      );
+    `);
+  },
 ];
 
 const CURRENT_SCHEMA_VERSION = SCHEMA_MIGRATIONS.length;
@@ -575,6 +587,14 @@ function setupTables() {
   `);
 
   db.exec(`
+    -- Enlaces del profesor que se listan en la cabecera (GF-75).
+    CREATE TABLE IF NOT EXISTS enlaces (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre TEXT NOT NULL,
+      url TEXT NOT NULL,
+      orden INTEGER NOT NULL DEFAULT 0
+    );
+
     CREATE TABLE IF NOT EXISTS avisos (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       fecha_aviso TEXT NOT NULL,
