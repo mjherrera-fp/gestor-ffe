@@ -51,6 +51,7 @@ import TermsView from './components/TermsView.tsx';
 import HistoricoView from './views/historico/HistoricoView.tsx';
 import ToastContainer from './components/ToastContainer.tsx';
 import NotificationBell from './components/NotificationBell.tsx';
+import EnlacesMenu from './components/EnlacesMenu.tsx';
 import CreateNotificationModal from './components/CreateNotificationModal.tsx';
 import UpdateBanner from './views/updater/UpdateBanner.tsx';
 import UpdateButton from './views/updater/UpdateButton.tsx';
@@ -559,6 +560,8 @@ export default function App() {
                 {theme === 'claro' ? <Sun className="h-5 w-5" /> : theme === 'oscuro' ? <Moon className="h-5 w-5" /> : <Laptop className="h-5 w-5" />}
               </button>
             </Title>
+            {/* Solo aparece si hay algun enlace (Configuracion -> Enlaces). */}
+            <EnlacesMenu />
             <NotificationBell
               avisos={avisos}
               onDescartar={handleDescartarAviso}

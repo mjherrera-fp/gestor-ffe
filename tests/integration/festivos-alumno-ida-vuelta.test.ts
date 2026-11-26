@@ -457,13 +457,15 @@ describe('migracion de una instalacion anterior', () => {
       .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='alumnos_festivos_personalizados'")
       .get();
     const columnas = (dbFinal.prepare('PRAGMA table_info(alumnos)').all() as Array<{ name: string }>).map(c => c.name);
+    const tablaEnlaces = dbFinal.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='enlaces'").get();
     const version = Number(dbFinal.pragma('user_version', { simple: true }));
     dbFinal.close();
 
     expect(tablas, 'La migracion no creo la tabla de dias').toBeTruthy();
     // Las migraciones posteriores tambien se aplican en el mismo arranque.
     expect(columnas, 'La migracion no creo la columna comentario').toContain('comentario');
-    expect(version).toBe(4);
+    expect(tablaEnlaces, 'La migracion no creo la tabla de enlaces').toBeTruthy();
+    expect(version).toBe(5);
   }, 90_000);
 
   afterAll(async () => {

@@ -56,6 +56,7 @@ import {
   isDatabaseLocked,
   lockDatabase,
   MarcadorPersonalizadoDAO,
+  EnlaceDAO,
   PanelDAO,
   PlantillaCorreoDAO,
   ProfesorDAO,
@@ -71,6 +72,7 @@ import {appendToSentFolder} from './src/lib/imap.ts';
 import {cvABuffer} from './src/lib/cv.ts';
 import {contentDispositionInline, nombresUnicos, normalizarAdjunto} from './src/lib/adjuntos.ts';
 import {escucharEnPrimerPuertoLibre} from './src/lib/escucharPuerto.ts';
+import {errorEnlace, normalizarUrl} from './src/lib/enlaces.ts';
 import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -1222,6 +1224,36 @@ async function startServer() {
   });
 
   // ─── MARCADORES PERSONALIZADOS ────────────────────────
+
+  // Enlaces personalizados (Configuracion -> Enlaces). La URL se valida
+  // tambien aqui: solo http/https, porque se abre fuera de la app.
+  app.get('/api/enlaces', (_req, res) => res.json(EnlaceDAO.getAll()));
+  app.post('/api/enlaces', (req, res) => {
+    const nombre = String(req.body?.nombre ?? '');
+    const url = String(req.body?.url ?? '');
+    const error = errorEnlace(nombre, url);
+    if (error) return res.status(400).json({ error });
+    res.json({ id: EnlaceDAO.create(nombre.trim(), normalizarUrl(url)!) });
+  });
+  app.put('/api/enlaces/orden', (req, res) => {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(Number).filter(Number.isInteger) : [];
+    EnlaceDAO.reordenar(ids);
+    res.json({ success: true });
+  });
+  app.put('/api/enlaces/:id', (req, res) => {
+    const nombre = String(req.body?.nombre ?? '');
+    const url = String(req.body?.url ?? '');
+    const error = errorEnlace(nombre, url);
+    if (error) return res.status(400).json({ error });
+    if (!EnlaceDAO.update(Number(req.params.id), nombre.trim(), normalizarUrl(url)!)) {
+      return res.status(404).json({ error: 'Enlace no encontrado' });
+    }
+    res.json({ success: true });
+  });
+  app.delete('/api/enlaces/:id', (req, res) => {
+    EnlaceDAO.delete(Number(req.params.id));
+    res.json({ success: true });
+  });
 
   app.get('/api/marcadores-personalizados', (req, res) => {
     res.json(MarcadorPersonalizadoDAO.getAll());
