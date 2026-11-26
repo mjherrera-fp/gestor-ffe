@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GraduationCap, Search, X, ArrowUpDown, Send, Building2, GitCompare, ChevronDown, ChevronUp } from 'lucide-react';
+import { GraduationCap, Search, X, ArrowUpDown, Send, Building2, GitCompare, ChevronDown, ChevronUp, FileDown, Loader2 } from 'lucide-react';
 import { Alumno } from '../../../types/index.ts';
 import { SortField, SortOrder, FilterMatchStatus } from '../hooks/useIntereses.ts';
 import type { CoincidenciaEmpresa } from '../../../lib/interesesBusqueda.ts';
@@ -23,6 +23,8 @@ interface AlumnosSidebarProps {
   onFilterMatchStatusChange: (v: FilterMatchStatus) => void;
   /** Empresas por las que sale cada alumno al buscar una empresa. */
   coincidenciasPorAlumno: Map<number, CoincidenciaEmpresa[]>;
+  onDescargarCVs: () => void;
+  descargandoCVs: boolean;
 }
 
 export function AlumnosSidebar({
@@ -34,7 +36,7 @@ export function AlumnosSidebar({
   filterMinCVEnvios, onFilterMinCVEnviosChange,
   filterEmpresasInteresadas, onFilterEmpresasInteresadasChange,
   filterMatchStatus, onFilterMatchStatusChange,
-  coincidenciasPorAlumno,
+  coincidenciasPorAlumno, onDescargarCVs, descargandoCVs,
 }: AlumnosSidebarProps) {
   const anyFilterActive = filterMinCVEnvios > 0 || filterEmpresasInteresadas !== 'all' || filterMatchStatus !== 'all';
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -75,12 +77,23 @@ export function AlumnosSidebar({
             {selectedAlumnoIds.length} seleccionados
           </span>
           {selectedAlumnoIds.length > 0 && (
-            <button
-              onClick={onClearSelection}
-              className="text-[10px] font-bold text-primary hover:text-primary uppercase tracking-wider"
-            >
-              Limpiar
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onDescargarCVs}
+                disabled={descargandoCVs}
+                title="Descargar en un .zip los CV de los seleccionados"
+                className="flex items-center gap-1 text-[10px] font-bold text-primary hover:underline uppercase tracking-wider disabled:opacity-50"
+              >
+                {descargandoCVs ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileDown className="h-3 w-3" />}
+                CVs
+              </button>
+              <button
+                onClick={onClearSelection}
+                className="text-[10px] font-bold text-primary hover:text-primary uppercase tracking-wider"
+              >
+                Limpiar
+              </button>
+            </div>
           )}
         </div>
       </div>

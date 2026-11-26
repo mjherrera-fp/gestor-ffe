@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Alumno, Empresa, InteresAlumnoEmpresa } from '../../../types/index.ts';
 import { buscarAlumno, empresasQueCoinciden, type CoincidenciaEmpresa } from '../../../lib/interesesBusqueda.ts';
+import { descargarCVs } from '../../../utils/descargarCVs.ts';
+import { mostrarToast } from '../../../utils/toast.ts';
 
 // ─────────────────────────────────────────
 //  TIPOS
@@ -86,6 +88,26 @@ export function useIntereses(cursoId: number, detalleAcademicoId?: number) {
   };
 
   const clearSelection = () => setSelectedAlumnoIds([]);
+
+  // ── Descargar los CV de los seleccionados (mismo .zip que en Alumnos) ──
+  const [descargandoCVs, setDescargandoCVs] = useState(false);
+  const handleDescargarCVs = async () => {
+    const seleccionados = alumnos.filter(a => selectedAlumnoIds.includes(a.id!));
+    if (seleccionados.length === 0) return;
+    setDescargandoCVs(true);
+    try {
+      const { incluidos, sinCV } = await descargarCVs(seleccionados);
+      if (incluidos === 0) {
+        mostrarToast('Ninguno de los alumnos seleccionados tiene CV.', 'info');
+      } else if (sinCV.length > 0) {
+        mostrarToast(`Descargados ${incluidos} CV. ${sinCV.length} alumno${sinCV.length === 1 ? ' no tiene' : 's no tienen'} CV.`, 'info');
+      }
+    } catch {
+      mostrarToast('No se pudieron descargar los CV.', 'error');
+    } finally {
+      setDescargandoCVs(false);
+    }
+  };
 
   const selectOnly = (alumno: Alumno) => {
     setSelectedAlumno(alumno);
@@ -191,6 +213,7 @@ export function useIntereses(cursoId: number, detalleAcademicoId?: number) {
     // UI
     selectedAlumno, setSelectedAlumno,
     selectedAlumnoIds, toggleSelection, clearSelection, selectOnly,
+    descargandoCVs, handleDescargarCVs,
     searchAlumno, setSearchAlumno,
     searchEmpresa, setSearchEmpresa,
     sortBy, sortOrder, toggleSort,

@@ -104,3 +104,21 @@ export function contentDispositionInline(nombre: string): string {
     .replace(/[^\x20-\x7e]|["\\]/g, '_');
   return `inline; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(nombre)}`;
 }
+
+/**
+ * Nombres sin repetir para meter varios ficheros en un mismo zip: si dos se
+ * llaman igual, al segundo se le añade " (2)" antes de la extension, y asi.
+ * Sin esto, el segundo pisaria al primero dentro del zip.
+ */
+export function nombresUnicos(nombres: string[]): string[] {
+  const usados = new Set<string>();
+  return nombres.map(nombre => {
+    const punto = nombre.lastIndexOf('.');
+    const base = punto > 0 ? nombre.slice(0, punto) : nombre;
+    const ext = punto > 0 ? nombre.slice(punto) : '';
+    let candidato = nombre;
+    for (let n = 2; usados.has(candidato.toLowerCase()); n++) candidato = `${base} (${n})${ext}`;
+    usados.add(candidato.toLowerCase());
+    return candidato;
+  });
+}
