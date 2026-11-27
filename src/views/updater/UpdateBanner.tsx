@@ -1,4 +1,4 @@
-import { Download, ExternalLink, RefreshCw, X } from 'lucide-react';
+import { CheckCircle2, Download, ExternalLink, RefreshCw, TriangleAlert, X } from 'lucide-react';
 import { useUpdaterStatus } from './useUpdaterStatus.tsx';
 
 // UpdateStatus es un tipo global declarado en src/global.d.ts. Aquí no hace
@@ -14,9 +14,69 @@ import { useUpdaterStatus } from './useUpdaterStatus.tsx';
 const SUBTLE_TEXT = 'font-bold text-text-main uppercase tracking-wider';
 
 export function UpdateBanner() {
-  const { status, visible, dismiss } = useUpdaterStatus();
+  const { status, visible, dismiss, cerrarResultado } = useUpdaterStatus();
 
   if (!window.updater || !visible || !status) return null;
+
+  // GF-77: como ha ido la actualizacion aplicada al reiniciar.
+  if (status.state === 'updated') {
+    return (
+      <div className="fixed top-24 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-success/20 px-5 py-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-success-soft flex items-center justify-center shrink-0">
+              <CheckCircle2 className="h-5 w-5 text-success-strong" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-text-main leading-tight">Actualización completada</p>
+              <p className="text-xs text-text-muted mt-0.5">Ya estás en la versión {status.version}.</p>
+            </div>
+          </div>
+          <button onClick={cerrarResultado} className="text-text-muted hover:text-text-main p-1 -m-1" aria-label="Cerrar">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (status.state === 'apply-error') {
+    return (
+      <div className="fixed top-24 right-5 z-[70] w-80 max-w-[calc(100vw-2rem)] bg-surface-card rounded-2xl shadow-2xl border border-danger/20 px-5 py-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-danger-soft flex items-center justify-center shrink-0">
+              <TriangleAlert className="h-5 w-5 text-danger" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-text-main leading-tight">
+                No se pudo actualizar{status.version ? ` a la ${status.version}` : ''}
+              </p>
+              <p className="text-xs text-text-muted mt-0.5 break-words">{status.message}</p>
+            </div>
+          </div>
+          <button onClick={cerrarResultado} className="text-text-muted hover:text-text-main p-1 -m-1" aria-label="Cerrar">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => window.updater!.applyAndRestart()}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary text-white py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary/90 transition-all"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Reintentar
+          </button>
+          <button
+            onClick={cerrarResultado}
+            className="px-4 py-2.5 rounded-xl text-[10px] font-bold text-text-muted uppercase tracking-widest hover:bg-surface-subtle transition-all"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (status.state === 'available' || status.state === 'ready') {
     const isReady = status.state === 'ready';

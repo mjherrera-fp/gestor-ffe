@@ -110,6 +110,7 @@
       "dist/**/*",
       "dist-server/**/*",
       "src/lib/updater.js",
+      "src/lib/updaterScript.js",
       "src/lib/update-secret.js",
       "templates/**/*",
       "main.js",
