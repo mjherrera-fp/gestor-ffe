@@ -57,6 +57,7 @@ import {HorizontalRuleButton} from '@/components/tiptap-ui/horizontal-rule-butto
 import {EmojiPicker} from '@/components/tiptap-ui/emoji-picker';
 import {ImageInsertButton} from '@/components/tiptap-ui/image-insert-button';
 import {WordCharacterCount} from '@/components/tiptap-ui/word-character-count';
+import { useEmailHabilitado } from '../hooks/useEnvioEmail.ts';
 
 interface EmailContact {
   id: number;
@@ -327,6 +328,7 @@ export function EmailModal({
   onGoToConfig,
   contextualContactIds = [],
 }: EmailModalProps) {
+  const emailHabilitado = useEmailHabilitado();
   const [to, setTo] = useState('');
   const [cc, setCc] = useState('');
   const [bcc, setBcc] = useState('');
@@ -672,7 +674,8 @@ setDestinatariosSinDatos([]);
     }
   };
 
-  if (!isOpen) return null;
+  // GF-76: con el envio desactivado o sin configurar no hay modal de correo.
+  if (!isOpen || !emailHabilitado) return null;
 
   const totalRecipients = parseEmails(to).length + parseEmails(cc).length + parseEmails(bcc).length;
   const hasGroupMarkers = initialBody.includes('{{@');

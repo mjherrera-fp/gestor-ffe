@@ -7,6 +7,7 @@ import { Alumno, FFEMotivoNoRealizacion } from '../../../types/index.ts';
 import { Title } from '../../../components/Title.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { Casilla } from '../../../components/BarraSeleccion.tsx';
+import { useEmailHabilitado } from '../../../hooks/useEnvioEmail.ts';
 
 interface AlumnoGridCardProps {
   alumno: Alumno;
@@ -26,6 +27,7 @@ export function AlumnoGridCard({
   alumno, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV, onGoToAnulaciones,
   seleccionado, onToggleSeleccion,
 }: AlumnoGridCardProps) {
+  const emailHabilitado = useEmailHabilitado();
   const isAssigned = alumno.relacionId !== null;
   const [ffeMotivoModal, setFfeMotivoModal] = useState(false);
   const [ffeMotivos, setFfeMotivos] = useState<FFEMotivoNoRealizacion[]>([]);
@@ -95,14 +97,16 @@ export function AlumnoGridCard({
                 </button>
               </Title>
             )}
-            <Title text="Enviar correo">
-              <button
-                onClick={() => onEmail(alumno)}
-                className="p-1.5 text-text-muted hover:text-primary transition-colors hover:bg-primary-light rounded-md"
-              >
-                <Mail className="h-4 w-4" />
-              </button>
-            </Title>
+            {emailHabilitado && (
+              <Title text="Enviar correo">
+                <button
+                  onClick={() => onEmail(alumno)}
+                  className="p-1.5 text-text-muted hover:text-primary transition-colors hover:bg-primary-light rounded-md"
+                >
+                  <Mail className="h-4 w-4" />
+                </button>
+              </Title>
+            )}
             <Title text="Editar estudiante">
               <button
                 onClick={() => onEdit(alumno)}

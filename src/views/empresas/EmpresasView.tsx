@@ -12,6 +12,7 @@ import { EmpresaInfoPanel }           from './components/EmpresaInfoPanel.tsx';
 import { EmailModal }                 from '../../components/EmailModal.tsx';
 import { Modal }                      from '../../components/ui/Modal.tsx';
 import { CalendarioEventoModal }      from '../../components/CalendarioEventoModal.tsx';
+import { useEmailHabilitado } from '../../hooks/useEnvioEmail.ts';
 
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
+  const emailHabilitado = useEmailHabilitado();
   const ctx = useEmpresas(cursoId);
   const [plantillas, setPlantillas] = useState<any[]>([]);
 
@@ -63,18 +65,20 @@ export default function EmpresasView({ cursoId, onGoToConfig }: Props) {
               {ctx.isImporting ? 'Importando...' : 'Importar Excel'}
             </button>
           </Title>
-          <Title text={ctx.seleccion.seleccionadas.length > 0
-            ? `Enviar correo a ${ctx.seleccion.seleccionadas.length} empresa${ctx.seleccion.seleccionadas.length === 1 ? '' : 's'} seleccionada${ctx.seleccion.seleccionadas.length === 1 ? '' : 's'}`
-            : 'Selecciona empresas para enviarles un correo'}>
-            <button
-              onClick={ctx.handleOpenBulkEmail}
-              disabled={ctx.seleccion.seleccionadas.length === 0}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary-light text-primary px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/15 transition-all border border-primary-light disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Mail className="h-4 w-4" />
-              {ctx.seleccion.seleccionadas.length > 0 && <span>{ctx.seleccion.seleccionadas.length}</span>}
-            </button>
-          </Title>
+          {emailHabilitado && (
+            <Title text={ctx.seleccion.seleccionadas.length > 0
+              ? `Enviar correo a ${ctx.seleccion.seleccionadas.length} empresa${ctx.seleccion.seleccionadas.length === 1 ? '' : 's'} seleccionada${ctx.seleccion.seleccionadas.length === 1 ? '' : 's'}`
+              : 'Selecciona empresas para enviarles un correo'}>
+              <button
+                onClick={ctx.handleOpenBulkEmail}
+                disabled={ctx.seleccion.seleccionadas.length === 0}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary-light text-primary px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/15 transition-all border border-primary-light disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Mail className="h-4 w-4" />
+                {ctx.seleccion.seleccionadas.length > 0 && <span>{ctx.seleccion.seleccionadas.length}</span>}
+              </button>
+            </Title>
+          )}
           <button
             onClick={ctx.handleOpenNewEmpresa}
             className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"

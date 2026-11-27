@@ -73,6 +73,7 @@ import {cvABuffer} from './src/lib/cv.ts';
 import {contentDispositionInline, nombresUnicos, normalizarAdjunto} from './src/lib/adjuntos.ts';
 import {escucharEnPrimerPuertoLibre} from './src/lib/escucharPuerto.ts';
 import {errorEnlace, normalizarUrl} from './src/lib/enlaces.ts';
+import {conservarClavesAparte, estadoEnvioEmail} from './src/lib/envioEmail.ts';
 import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -496,6 +497,18 @@ async function startServer() {
     ProfesorDAO.updateConfigEmail(existing.id!, req.body);
     res.json({ success: true });
   });
+  // GF-76: si se pueden enviar correos (interruptor activado y SMTP configurado).
+  app.get('/api/email/estado', (req, res) => {
+    const existing = ProfesorDAO.get();
+    if (!existing) return res.json(estadoEnvioEmail({}));
+    res.json(estadoEnvioEmail(ConfiguracionDAO.getConfig(existing.id!, 'correo'), existing));
+  });
+  app.post('/api/email/estado', (req, res) => {
+    const existing = ProfesorDAO.get();
+    if (!existing) return res.status(400).json({ error: 'No hay profesor' });
+    ConfiguracionDAO.upsertConfigKey(existing.id!, 'correo', 'envio_activo', req.body?.activo ? '1' : '0');
+    res.json(estadoEnvioEmail(ConfiguracionDAO.getConfig(existing.id!, 'correo'), existing));
+  });
   app.get('/api/profesor/config/:tipo', (req, res) => {
     const existing = ProfesorDAO.get();
     if (!existing) return res.status(400).json({ error: 'No hay profesor' });
@@ -507,7 +520,12 @@ async function startServer() {
     if (!existing) return res.status(400).json({ error: 'No hay profesor' });
 
     // Extraer empresa_festivos antes de guardar el resto de la config
-    const { empresa_festivos, ...configData } = req.body;
+    const { empresa_festivos, ...datos } = req.body;
+    // El formulario de correo no trae la firma ni el interruptor de envio,
+    // que se guardan aparte: se conservan para no borrarlos.
+    const configData = req.params.tipo === 'correo'
+      ? conservarClavesAparte(ConfiguracionDAO.getConfig(existing.id!, 'correo'), datos)
+      : datos;
     ConfiguracionDAO.setConfig(existing.id!, req.params.tipo, configData);
 
     // Guardar empresa festivos por localidad si se enviaron
@@ -701,6 +719,9 @@ async function startServer() {
 
       // Leer config de correo desde tabla configuracion
       const emailCfg = ConfiguracionDAO.getConfig(profesor.id!, 'correo');
+      if (!estadoEnvioEmail(emailCfg, profesor).activo) {
+        return res.status(403).json({ error: "El envío de correos está desactivado en Configuración > Correo" });
+      }
       const smtp_host = emailCfg.smtp_host || profesor.smtp_host || 'smtp01.educa.madrid.org';
       const smtp_port = emailCfg.smtp_port ? parseInt(emailCfg.smtp_port, 10) : (profesor.smtp_port || 465);
       const smtp_user = emailCfg.smtp_user || profesor.smtp_user || '';

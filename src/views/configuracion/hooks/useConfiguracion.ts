@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { crearCredencialBiometrica, plataformaBiometricaDisponible } from '../../../utils/webauthn.ts';
+import { recargarEnvioEmail } from '../../../hooks/useEnvioEmail.ts';
 
 export type Message = { type: 'success' | 'error' | ''; text: string };
 
@@ -253,6 +254,7 @@ export function useConfiguracion() {
       const data = await res.json();
       if (res.ok && data.success) {
         setSuccessEmail(true);
+        recargarEnvioEmail(); // GF-76: puede pasar a estar configurado
         setTimeout(() => setSuccessEmail(false), 3000);
       } else {
         setErrorEmail('Error al guardar en el servidor');

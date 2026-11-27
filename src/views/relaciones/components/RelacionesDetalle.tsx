@@ -39,6 +39,7 @@ import {
 import {Title} from '@/src/components/Title.tsx';
 import {Modal} from '../../../components/ui/Modal.tsx';
 import {mostrarToast} from '../../../utils/toast.ts';
+import { useEmailHabilitado } from '../../../hooks/useEnvioEmail.ts';
 
 const FIRMA_CICLO: FirmaTipo[] = [FirmaTipo.SIN_ASIGNAR, FirmaTipo.DIGITAL, FirmaTipo.MANUAL];
 const COMPARADOR_NATURAL = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
@@ -130,6 +131,7 @@ export function RelacionDetalle({
                                   anexoRelacionExterno = false,
                                   anexoRelacionUrl = ''
 }: RelacionDetalleProps) {
+  const emailHabilitado = useEmailHabilitado();
 
   const [sendingEmail, setSendingEmail] = useState<string | null>(null);
   const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
@@ -264,14 +266,16 @@ export function RelacionDetalle({
 
 
         {/* Botón de Enviar Todo */}
-        <Title text="Enviar documentación seleccionada por correo a la empresa">
-          <button
-            onClick={() => { if (selectedRelacion) setTargetEmailRelaciones([selectedRelacion]); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 mr-3 bg-primary-light text-primary hover:bg-primary/15 border border-primary-light rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
-          >
-            <Mail className="h-3.5 w-3.5" />
-          </button>
-        </Title>
+        {emailHabilitado && (
+          <Title text="Enviar documentación seleccionada por correo a la empresa">
+            <button
+              onClick={() => { if (selectedRelacion) setTargetEmailRelaciones([selectedRelacion]); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 mr-3 bg-primary-light text-primary hover:bg-primary/15 border border-primary-light rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 shrink-0"
+            >
+              <Mail className="h-3.5 w-3.5" />
+            </button>
+          </Title>
+        )}
 
         {/* Botón de Descargar Todo */}
         <Title text="Descargar todos los documentos">
@@ -339,15 +343,17 @@ export function RelacionDetalle({
                     </Title>
                   </>
                 )}
-                <Title text="Enviar por correo">
-                  <button
-                    onClick={async () => { setSendingEmail('relacion'); try { await onEmailRelacion('pdf'); } finally { setSendingEmail(null); } }}
-                    disabled={sendingEmail === 'relacion'}
-                    className="h-8 px-2.5 flex items-center justify-center gap-1 bg-primary-light text-primary rounded-lg hover:bg-primary/15 transition-colors border border-primary-light text-[10px] font-bold uppercase disabled:opacity-50"
-                  >
-                    {sendingEmail === 'relacion' ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-                  </button>
-                </Title>
+                {emailHabilitado && (
+                  <Title text="Enviar por correo">
+                    <button
+                      onClick={async () => { setSendingEmail('relacion'); try { await onEmailRelacion('pdf'); } finally { setSendingEmail(null); } }}
+                      disabled={sendingEmail === 'relacion'}
+                      className="h-8 px-2.5 flex items-center justify-center gap-1 bg-primary-light text-primary rounded-lg hover:bg-primary/15 transition-colors border border-primary-light text-[10px] font-bold uppercase disabled:opacity-50"
+                    >
+                      {sendingEmail === 'relacion' ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                    </button>
+                  </Title>
+                )}
                 <Title text="Gestor documental">
                   <button
                       onClick={() => onOpenDocManager(selectedRelacion, 'relacion')}
@@ -438,15 +444,17 @@ export function RelacionDetalle({
                               className="h-8 px-2 bg-surface-card border border-border-base text-danger rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-danger-soft transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
                             />
                           </Title>
-                          <Title text="Enviar por correo">
-                            <button
-                              onClick={async () => { const key = `plan-${alumno.id}`; setSendingEmail(key); try { await onEmailPlanFormativo('pdf', alumno); } finally { setSendingEmail(null); } }}
-                              disabled={sendingEmail === `plan-${alumno.id}`}
-                              className="h-8 px-2.5 flex items-center justify-center gap-1 bg-primary-light text-primary rounded-lg hover:bg-primary/15 transition-colors border border-primary-light text-[10px] font-bold uppercase disabled:opacity-50"
-                            >
-                              {sendingEmail === `plan-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-                            </button>
-                          </Title>
+                          {emailHabilitado && (
+                            <Title text="Enviar por correo">
+                              <button
+                                onClick={async () => { const key = `plan-${alumno.id}`; setSendingEmail(key); try { await onEmailPlanFormativo('pdf', alumno); } finally { setSendingEmail(null); } }}
+                                disabled={sendingEmail === `plan-${alumno.id}`}
+                                className="h-8 px-2.5 flex items-center justify-center gap-1 bg-primary-light text-primary rounded-lg hover:bg-primary/15 transition-colors border border-primary-light text-[10px] font-bold uppercase disabled:opacity-50"
+                              >
+                                {sendingEmail === `plan-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                              </button>
+                            </Title>
+                          )}
                           <Title text="Gestor documental">
                             <button
                                 onClick={() => onOpenDocManager(selectedRelacion, 'plan-formativo', alumno)}
@@ -536,15 +544,17 @@ export function RelacionDetalle({
                             showText={true}
                             className="h-8 px-2 bg-surface-card border border-border-base text-primary rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-primary-light transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
                           />
-                          <Title text="Enviar por correo">
-                            <button
-                              onClick={async () => { const key = `seg-${alumno.id}`; setSendingEmail(key); try { await onEmailSeguimiento(alumno); } finally { setSendingEmail(null); } }}
-                              disabled={sendingEmail === `seg-${alumno.id}`}
-                              className="h-8 px-2.5 flex items-center justify-center gap-1 bg-primary-light text-primary rounded-lg hover:bg-primary/15 transition-colors border border-primary-light text-[10px] font-bold uppercase disabled:opacity-50"
-                            >
-                              {sendingEmail === `seg-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-                            </button>
-                          </Title>
+                          {emailHabilitado && (
+                            <Title text="Enviar por correo">
+                              <button
+                                onClick={async () => { const key = `seg-${alumno.id}`; setSendingEmail(key); try { await onEmailSeguimiento(alumno); } finally { setSendingEmail(null); } }}
+                                disabled={sendingEmail === `seg-${alumno.id}`}
+                                className="h-8 px-2.5 flex items-center justify-center gap-1 bg-primary-light text-primary rounded-lg hover:bg-primary/15 transition-colors border border-primary-light text-[10px] font-bold uppercase disabled:opacity-50"
+                              >
+                                {sendingEmail === `seg-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                              </button>
+                            </Title>
+                          )}
                           <Title text="Gestor documental">
                             <button
                                 onClick={() => onOpenDocManager(selectedRelacion, 'seguimiento', alumno)}
@@ -634,15 +644,17 @@ export function RelacionDetalle({
                             showText={true}
                             className="h-8 px-2 bg-surface-card border border-border-base text-primary rounded-lg text-[9px] uppercase whitespace-nowrap hover:bg-primary-light transition-colors flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
                           />
-                          <Title text="Enviar por correo">
-                            <button
-                              onClick={async () => { const key = `val-${alumno.id}`; setSendingEmail(key); try { await onEmailValoracion(alumno); } finally { setSendingEmail(null); } }}
-                              disabled={sendingEmail === `val-${alumno.id}`}
-                              className="h-8 px-2.5 flex items-center justify-center gap-1 bg-primary-light text-primary rounded-lg hover:bg-primary/15 transition-colors border border-primary-light text-[10px] font-bold uppercase disabled:opacity-50"
-                            >
-                              {sendingEmail === `val-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-                            </button>
-                          </Title>
+                          {emailHabilitado && (
+                            <Title text="Enviar por correo">
+                              <button
+                                onClick={async () => { const key = `val-${alumno.id}`; setSendingEmail(key); try { await onEmailValoracion(alumno); } finally { setSendingEmail(null); } }}
+                                disabled={sendingEmail === `val-${alumno.id}`}
+                                className="h-8 px-2.5 flex items-center justify-center gap-1 bg-primary-light text-primary rounded-lg hover:bg-primary/15 transition-colors border border-primary-light text-[10px] font-bold uppercase disabled:opacity-50"
+                              >
+                                {sendingEmail === `val-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                              </button>
+                            </Title>
+                          )}
                           <Title text="Gestor documental">
                             <button
                                 onClick={() => onOpenDocManager(selectedRelacion, 'valoracion', alumno)}
@@ -713,15 +725,17 @@ export function RelacionDetalle({
                 />
               </Title>
             </div>
-            <Title text="Enviar por correo">
-              <button
-                onClick={async () => { setSendingEmail('carta'); try { await onEmailCarta(); } finally { setSendingEmail(null); } }}
-                disabled={sendingEmail === 'carta'}
-                className="h-10 px-3 flex items-center justify-center gap-1 bg-primary-light/40 text-primary rounded-lg hover:bg-primary-light/60 transition-colors border border-primary/15 shrink-0 text-[10px] font-bold uppercase disabled:opacity-50"
-              >
-                {sendingEmail === 'carta' ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-              </button>
-            </Title>
+            {emailHabilitado && (
+              <Title text="Enviar por correo">
+                <button
+                  onClick={async () => { setSendingEmail('carta'); try { await onEmailCarta(); } finally { setSendingEmail(null); } }}
+                  disabled={sendingEmail === 'carta'}
+                  className="h-10 px-3 flex items-center justify-center gap-1 bg-primary-light/40 text-primary rounded-lg hover:bg-primary-light/60 transition-colors border border-primary/15 shrink-0 text-[10px] font-bold uppercase disabled:opacity-50"
+                >
+                  {sendingEmail === 'carta' ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                </button>
+              </Title>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
@@ -753,15 +767,17 @@ export function RelacionDetalle({
                       />
                     </Title>
                   </div>
-                  <Title text="Enviar por correo">
-                    <button
-                      onClick={async () => { const key = `cal-${alumno.id}`; setSendingEmail(key); try { await onEmailCalendario(alumno); } finally { setSendingEmail(null); } }}
-                      disabled={sendingEmail === `cal-${alumno.id}`}
-                      className="h-8 px-2.5 flex items-center justify-center gap-1 bg-primary-light text-primary rounded-lg hover:bg-primary/15 transition-colors border border-primary-light shrink-0 text-[10px] font-bold uppercase disabled:opacity-50"
-                    >
-                      {sendingEmail === `cal-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
-                    </button>
-                  </Title>
+                  {emailHabilitado && (
+                    <Title text="Enviar por correo">
+                      <button
+                        onClick={async () => { const key = `cal-${alumno.id}`; setSendingEmail(key); try { await onEmailCalendario(alumno); } finally { setSendingEmail(null); } }}
+                        disabled={sendingEmail === `cal-${alumno.id}`}
+                        className="h-8 px-2.5 flex items-center justify-center gap-1 bg-primary-light text-primary rounded-lg hover:bg-primary/15 transition-colors border border-primary-light shrink-0 text-[10px] font-bold uppercase disabled:opacity-50"
+                      >
+                        {sendingEmail === `cal-${alumno.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Mail className="h-3.5 w-3.5" />} Mail
+                      </button>
+                    </Title>
+                  )}
                 </div>
               </div>
             ))}

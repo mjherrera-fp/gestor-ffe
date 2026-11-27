@@ -8,6 +8,7 @@ import {ConvenioFormModal} from './components/ConvenioFormModal.tsx';
 import {GestorDocumentalModal} from '../../components/GestorDocumentalModal.tsx';
 import {CalendarioEventoModal} from '../../components/CalendarioEventoModal.tsx';
 import {EmailModal} from '../../components/EmailModal.tsx';
+import { useEmailHabilitado } from '../../hooks/useEnvioEmail.ts';
 
 interface Props {
   cursoId: number;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function ConveniosView({cursoId, centroId, detalleAcademicoId, onGoToConfig}: Props) {
+  const emailHabilitado = useEmailHabilitado();
   const ctx = useConvenios(cursoId, centroId);
   const [calendarioConvenio, setCalendarioConvenio] = useState<ConvenioExtendido | null>(null);
 
@@ -47,7 +49,7 @@ export default function ConveniosView({cursoId, centroId, detalleAcademicoId, on
           else { ctx.setBy('estado'); ctx.setSortOrder('asc'); }
         }}
         onUploadDocument={ctx.handleOpenDocManager}
-        onEmail={ctx.handleEmailConvenio}
+        onEmail={emailHabilitado ? ctx.handleEmailConvenio : undefined}
         conveniosUrl={ctx.conveniosUrl}
       />
 

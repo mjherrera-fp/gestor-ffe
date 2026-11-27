@@ -5,6 +5,7 @@ import { Title } from '../../../components/Title.tsx';
 import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { BarraSeleccion, Casilla } from '../../../components/BarraSeleccion.tsx';
 import type { Seleccion } from '../../../hooks/useSeleccion.ts';
+import { useEmailHabilitado } from '../../../hooks/useEnvioEmail.ts';
 
 interface EmpresasListadoProps {
   empresas: Empresa[];
@@ -43,6 +44,7 @@ export function EmpresasListado({
   filterContactado, onFilterContactadoChange,
   cursosUnicos, seleccion,
 }: EmpresasListadoProps) {
+  const emailHabilitado = useEmailHabilitado();
 
   const emptyMsg = searchTerm
     ? 'No se encontraron empresas para esta búsqueda.'
@@ -227,14 +229,16 @@ export function EmpresasListado({
                     <CalendarPlus className="h-4 w-4" />
                   </button>
                 </Title>
-                <Title text="Enviar correo">
-                  <button
-                    onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
-                    className="p-2 text-text-muted hover:text-primary"
-                  >
-                    <Mail className="h-4 w-4" />
-                  </button>
-                </Title>
+                {emailHabilitado && (
+                  <Title text="Enviar correo">
+                    <button
+                      onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
+                      className="p-2 text-text-muted hover:text-primary"
+                    >
+                      <Mail className="h-4 w-4" />
+                    </button>
+                  </Title>
+                )}
                 <Title text="Editar empresa">
                   <button
                     onClick={e => { e.stopPropagation(); onEdit(emp); }}
@@ -322,14 +326,16 @@ export function EmpresasListado({
                         <CalendarPlus className="h-4 w-4" />
                       </button>
                     </Title>
-                    <Title text="Enviar correo">
-                      <button
-                        onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
-                        className="p-1.5 text-text-muted hover:text-primary transition-colors"
-                      >
-                        <Mail className="h-4 w-4" />
-                      </button>
-                    </Title>
+                    {emailHabilitado && (
+                      <Title text="Enviar correo">
+                        <button
+                          onClick={e => { e.stopPropagation(); onIndividualEmail(emp); }}
+                          className="p-1.5 text-text-muted hover:text-primary transition-colors"
+                        >
+                          <Mail className="h-4 w-4" />
+                        </button>
+                      </Title>
+                    )}
                     <Title text="Editar empresa">
                       <button
                         onClick={e => { e.stopPropagation(); onEdit(emp); }}

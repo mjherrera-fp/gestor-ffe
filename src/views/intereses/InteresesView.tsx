@@ -6,6 +6,7 @@ import { InteresesGrid }             from './components/InteresesGrid.tsx';
 import { EmailModal }                from '../../components/EmailModal.tsx';
 import { EmailAttachment }           from '../../types/email.ts';
 import { interpolarCuerpo, applyCustomMarkers } from '../../../templates/emails/emailTemplates.ts';
+import { useEmailHabilitado } from '../../hooks/useEnvioEmail.ts';
 
 interface Props {
   cursoId: number;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function InteresesView({ cursoId, detalleAcademicoId, onCreateRelacion }: Props) {
+  const emailHabilitado = useEmailHabilitado();
   const ctx = useIntereses(cursoId, detalleAcademicoId);
 
   // Cuando hay exactamente 1 seleccionado, usamos su info para la cabecera del grid
@@ -59,7 +61,8 @@ export default function InteresesView({ cursoId, detalleAcademicoId, onCreateRel
     ctx.fetchData();
 
     // Si se activó 'alumno' (Envío de CV), preparar email con CVs adjuntos
-    if (interesado === 'alumno' && anyActivated) {
+    // (solo si el envío de correos está habilitado, GF-76)
+    if (interesado === 'alumno' && anyActivated && emailHabilitado) {
       const empresa = ctx.empresas.find(e => e.id === empresaId);
       if (!empresa) return;
 
