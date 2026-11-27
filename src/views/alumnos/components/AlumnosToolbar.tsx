@@ -8,6 +8,7 @@ import { CustomSelect } from '../../../components/CustomSelect.tsx';
 import { Title } from '../../../components/Title.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { SortField, SortOrder, FilterStatus, FilterRelacionStatus, FilterHorasFFE, ViewMode } from '../hooks/useAlumnos.ts';
+import { useEmailHabilitado } from '../../../hooks/useEnvioEmail.ts';
 
 const FILTER_OPTIONS = [
   { id: 'all',      label: 'Todos los Estudiantes' },
@@ -83,6 +84,7 @@ export function AlumnosToolbar({
   isImporting, isImportingZip, onDownloadTemplate, onImportClick, onImportZipClick, onNewAlumno,
   onBulkEmail, seleccionados,
 }: AlumnosToolbarProps) {
+  const emailHabilitado = useEmailHabilitado();
   const [showImportCVModal, setShowImportCVModal] = useState(false);
   return (
     <div className="space-y-4">
@@ -120,18 +122,20 @@ export function AlumnosToolbar({
               Importar CVs
             </button>
           </Title>
-          <Title text={seleccionados > 0
-            ? `Enviar correo a ${seleccionados} alumno${seleccionados === 1 ? '' : 's'} seleccionado${seleccionados === 1 ? '' : 's'}`
-            : 'Selecciona alumnos para enviarles un correo'}>
-            <button
-              onClick={onBulkEmail}
-              disabled={seleccionados === 0}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary-light text-primary px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/15 transition-all border border-primary-light disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Mail className="h-4 w-4" />
-              {seleccionados > 0 && <span>{seleccionados}</span>}
-            </button>
-          </Title>
+          {emailHabilitado && (
+            <Title text={seleccionados > 0
+              ? `Enviar correo a ${seleccionados} alumno${seleccionados === 1 ? '' : 's'} seleccionado${seleccionados === 1 ? '' : 's'}`
+              : 'Selecciona alumnos para enviarles un correo'}>
+              <button
+                onClick={onBulkEmail}
+                disabled={seleccionados === 0}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary-light text-primary px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-primary/15 transition-all border border-primary-light disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Mail className="h-4 w-4" />
+                {seleccionados > 0 && <span>{seleccionados}</span>}
+              </button>
+            </Title>
+          )}
           <button
             onClick={onNewAlumno}
             className="w-full sm:w-auto bg-primary text-white px-3 py-2 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/90 transition-all font-sans shadow-lg shadow-primary/20 flex items-center justify-center gap-2"

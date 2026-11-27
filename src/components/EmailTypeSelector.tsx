@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Mail } from 'lucide-react';
 import { EmailTargetType } from '../types/email.ts';
 import { Modal } from './ui/Modal.tsx';
+import { useEmailHabilitado } from '../hooks/useEnvioEmail.ts';
 
 interface EmailTypeSelectorProps {
   open: boolean;
@@ -16,6 +17,7 @@ export function EmailTypeSelector({
   onConfirm,
   nombreAlumno,
 }: EmailTypeSelectorProps) {
+  const emailHabilitado = useEmailHabilitado();
   const [selected, setSelected] = React.useState<EmailTargetType>('educamadrid');
 
   const options: { value: EmailTargetType; label: string; description: string; color: string }[] = [
@@ -25,7 +27,7 @@ export function EmailTypeSelector({
   ];
 
   return (
-    <Modal open={open} onClose={onClose} maxWidth="sm" backdropClass="bg-overlay backdrop-blur-sm">
+    <Modal open={open && emailHabilitado} onClose={onClose} maxWidth="sm" backdropClass="bg-overlay backdrop-blur-sm">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-base">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary-light text-primary">

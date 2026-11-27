@@ -225,6 +225,54 @@ afterAll(async () => {
   }
 });
 
+/** GF-76: el envio de correos se activa a mano y por defecto esta desactivado. */
+describe('activar y desactivar el envío de correos', () => {
+  const estado = async () => (await (await pedir('/api/email/estado')).json()) as { activo: boolean; configurado: boolean; habilitado: boolean };
+  const configCorreo = async () => (await (await pedir('/api/profesor/config/correo')).json()) as Record<string, string>;
+  let smtpGuardado: Record<string, string>;
+
+  it('por defecto está desactivado aunque el SMTP esté configurado', async () => {
+    expect(await estado()).toEqual({ activo: false, configurado: true, habilitado: false });
+  });
+
+  it('desactivado, el servidor no envía', async () => {
+    const res = await pedir('/api/send-email', 'POST', { to: ['empresa@test.local'], subject: 'No', html: '<p>No</p>' });
+    expect(res.status).toBe(403);
+    expect(mensajes).toHaveLength(0);
+  });
+
+  it('al activarlo queda habilitado, y desactivarlo no borra la configuración', async () => {
+    smtpGuardado = await configCorreo();
+    expect((await pedir('/api/email/estado', 'POST', { activo: true })).status).toBe(200);
+    expect(await estado()).toEqual({ activo: true, configurado: true, habilitado: true });
+
+    await pedir('/api/email/estado', 'POST', { activo: false });
+    expect(await estado()).toMatchObject({ activo: false, habilitado: false });
+    const tras = await configCorreo();
+    expect(tras.smtp_user).toBe('profe');
+    expect(tras.smtp_pass).toBe('clave');
+  });
+
+  it('guardar el formulario SMTP no borra la firma ni el interruptor', async () => {
+    await pedir('/api/email/estado', 'POST', { activo: true });
+    await pedir('/api/profesor/config/correo/firma', 'POST', { firma_correo: '<p>Un saludo</p>' });
+    const { firma_correo: _f, envio_activo: _e, ...formulario } = smtpGuardado;
+    expect((await pedir('/api/profesor/config/correo', 'POST', formulario)).status).toBe(200);
+    const tras = await configCorreo();
+    expect(tras.firma_correo).toBe('<p>Un saludo</p>');
+    expect(tras.envio_activo).toBe('1');
+  });
+
+  it('activado pero sin usuario ni contraseña no está habilitado', async () => {
+    const { smtp_user: _u, smtp_pass: _p, ...sinCredenciales } = smtpGuardado;
+    await pedir('/api/profesor/config/correo', 'POST', sinCredenciales);
+    expect(await estado()).toEqual({ activo: true, configurado: false, habilitado: false });
+    // Se deja como estaba para el resto de pruebas.
+    await pedir('/api/profesor/config/correo', 'POST', smtpGuardado);
+    expect(await estado()).toEqual({ activo: true, configurado: true, habilitado: true });
+  });
+});
+
 describe('los adjuntos que llegan al destinatario', () => {
   let recibidos: AdjuntoRecibido[] = [];
 

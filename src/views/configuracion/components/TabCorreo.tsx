@@ -26,6 +26,7 @@ import {
   X
 } from 'lucide-react';
 import {CustomSelect} from '../../../components/CustomSelect.tsx';
+import {cambiarEnvioEmail, useEnvioEmail} from '../../../hooks/useEnvioEmail.ts';
 import {Contacto, GrupoContacto} from '../../../types/email.ts';
 import { marcadoresAjenos, marcadoresDeAmbito, textoMarcador } from '../../../../templates/emails/emailTemplates.ts';
 import {EditorContent, EditorContext, useEditor} from '@tiptap/react';
@@ -210,6 +211,22 @@ function Modal({ open, onClose, children, maxWidth = 'md' }: { open: boolean; on
 
 export function TabCorreo({ emailConfig, onChange, saving, success, error, onSubmit, testing, testResult, onTest, profesorEmail, profesorNombre, profesorApellidos }: Props) {
   const [showPassword, setShowPassword] = useState(false);
+  // GF-76: interruptor del envio de correos. Se guarda al pulsarlo y no
+  // toca la configuracion SMTP, que se conserva aunque se desactive.
+  const envio = useEnvioEmail();
+  const [cambiandoEnvio, setCambiandoEnvio] = useState(false);
+  const [errorEnvio, setErrorEnvio] = useState('');
+  const alternarEnvio = async () => {
+    setCambiandoEnvio(true);
+    setErrorEnvio('');
+    try {
+      await cambiarEnvioEmail(!envio.activo);
+    } catch {
+      setErrorEnvio('No se pudo guardar el cambio. Inténtalo de nuevo.');
+    } finally {
+      setCambiandoEnvio(false);
+    }
+  };
 
   // Template state
   const [plantillas, setPlantillas] = useState<PlantillaEdit[]>([]);
@@ -735,7 +752,43 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
             </div>
           </div>
         </div>
-        <div className="p-6">
+        <div className="p-6 border-b border-border-base space-y-3">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={envio.activo}
+            onClick={alternarEnvio}
+            disabled={cambiandoEnvio}
+            className="flex items-center gap-3 w-full p-3 rounded-xl bg-surface-subtle border border-border-base hover:bg-surface-hover transition-colors text-left disabled:opacity-60"
+          >
+            <span className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${envio.activo ? 'bg-success' : 'bg-border-base'}`}>
+              <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${envio.activo ? 'translate-x-6' : 'translate-x-1'}`} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-text-main">Permitir el envío de correos</span>
+              <span className="block text-xs text-text-muted">
+                {envio.activo
+                  ? 'Las opciones de envío aparecen en la aplicación cuando el correo está configurado.'
+                  : 'Desactivado: no aparece ninguna opción de envío de correo en la aplicación.'}
+              </span>
+            </span>
+            {cambiandoEnvio && <Loader2 className="h-4 w-4 animate-spin text-text-muted ml-auto shrink-0" />}
+          </button>
+          {errorEnvio && <p className="text-xs font-medium text-danger">{errorEnvio}</p>}
+          {envio.activo && !envio.configurado && (
+            <div className="bg-warning-soft rounded-lg p-3 border border-warning/20">
+              <p className="text-xs text-warning-strong font-medium">
+                El envío está activado pero falta guardar el usuario y la contraseña. Hasta entonces no aparecerán las opciones de envío.
+              </p>
+            </div>
+          )}
+          {!envio.activo && (
+            <p className="text-xs text-text-muted">
+              Si ya tenías el correo configurado, la configuración se conserva y vuelve a usarse al activarlo.
+            </p>
+          )}
+        </div>
+        <div className={envio.activo ? 'p-6' : 'hidden'}>
           {error && (
             <div className="mb-4 p-3 bg-danger-soft text-danger rounded-lg text-sm border border-danger/20">{error}</div>
           )}
@@ -923,6 +976,10 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
         </div>
       </div>
 
+      {/* Con el envio desactivado se ocultan las secciones de correo. Se
+          ocultan con CSS, sin desmontarlas, para no perder el estado de los
+          editores. */}
+      <div className={envio.activo ? 'space-y-6' : 'hidden'}>
       {/* Firma Section */}
       <div className="bg-surface-card rounded-xl shadow-sm border border-border-base overflow-hidden">
         <div className="p-6 border-b border-border-base bg-surface-subtle">
@@ -1405,6 +1462,7 @@ export function TabCorreo({ emailConfig, onChange, saving, success, error, onSub
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* Template Edit Modal */}

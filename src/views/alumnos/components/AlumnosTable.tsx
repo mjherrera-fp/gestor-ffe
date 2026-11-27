@@ -5,6 +5,7 @@ import { Title } from '../../../components/Title.tsx';
 import { Modal } from '../../../components/ui/Modal.tsx';
 import { Casilla } from '../../../components/BarraSeleccion.tsx';
 import type { Seleccion } from '../../../hooks/useSeleccion.ts';
+import { useEmailHabilitado } from '../../../hooks/useEnvioEmail.ts';
 
 interface AlumnosTableProps {
   alumnos: Alumno[];
@@ -20,6 +21,7 @@ interface AlumnosTableProps {
 }
 
 export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEmail, onFileUpload, onFileDelete, onViewCV, onGoToAnulaciones, seleccion }: AlumnosTableProps) {
+  const emailHabilitado = useEmailHabilitado();
   const [ffeModalAlumnoId, setFfeModalAlumnoId] = useState<number | null>(null);
   const [ffeMotivos, setFfeMotivos] = useState<FFEMotivoNoRealizacion[]>([]);
   const [ffeMotivoSelected, setFfeMotivoSelected] = useState<number | null>(null);
@@ -323,14 +325,16 @@ export function AlumnosTable({ alumnos, onEdit, onDelete, onAcademicDetail, onEm
                       className="hidden"
                       onChange={e => e.target.files && onFileUpload(alumno.id!, e.target.files[0])}
                     />
-                    <Title text="Enviar correo">
-                      <button
-                        onClick={() => onEmail(alumno)}
-                        className="p-2 text-text-muted hover:text-primary hover:bg-primary-light rounded-lg transition-all"
-                      >
-                        <Mail className="h-4 w-4" />
-                      </button>
-                    </Title>
+                    {emailHabilitado && (
+                      <Title text="Enviar correo">
+                        <button
+                          onClick={() => onEmail(alumno)}
+                          className="p-2 text-text-muted hover:text-primary hover:bg-primary-light rounded-lg transition-all"
+                        >
+                          <Mail className="h-4 w-4" />
+                        </button>
+                      </Title>
+                    )}
                     <Title text="Editar estudiante">
                       <button
                         onClick={() => onEdit(alumno)}
