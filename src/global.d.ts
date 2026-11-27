@@ -1,7 +1,9 @@
 declare module '*.css';
 
 interface UpdateStatus {
-  state: 'checking' | 'none' | 'available' | 'downloading' | 'ready' | 'error';
+  state: 'checking' | 'none' | 'available' | 'downloading' | 'ready' | 'error'
+    // GF-77: resultado de la actualización aplicada en el arranque anterior.
+    | 'updated' | 'apply-error';
   version?: string;
   received?: number;
   total?: number;

@@ -8,13 +8,19 @@ interface UpdaterCtxValue {
   visible: boolean;
   dismiss: (v?: string) => void;
   reShow: (v?: string) => void;
+  /** Cierra el aviso del resultado de la ultima actualizacion (GF-77). */
+  cerrarResultado: () => void;
 }
+
+/** Estados que cuentan como acabo la actualizacion aplicada al reiniciar. */
+const esResultado = (s: UpdateStatus | null) => s?.state === 'updated' || s?.state === 'apply-error';
 
 const UpdaterCtx = createContext<UpdaterCtxValue | null>(null);
 
 export function UpdaterProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<UpdateStatus | null>(null);
   const [dismissedVersions, setDismissedVersions] = useState<Record<string, boolean>>({});
+  const [resultadoCerrado, setResultadoCerrado] = useState(false);
 
   useEffect(() => {
     if (!window.updater) return;
@@ -37,6 +43,17 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(dismissedKey(v), '1');
   };
 
+  // Al cerrar el aviso de error la descarga sigue pendiente: se vuelve a
+  // comprobar para que el icono de la cabecera permita reintentar, pero sin
+  // abrir otra vez el aviso grande encima.
+  const cerrarResultado = () => {
+    setResultadoCerrado(true);
+    if (status?.state === 'apply-error') {
+      dismiss(status.version);
+      window.updater?.checkNow();
+    }
+  };
+
   const reShow = (v?: string) => {
     if (!v) return;
     setDismissedVersions((d) => {
@@ -52,10 +69,12 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
       status && (status.state === 'available' || status.state === 'ready') ? status : null;
     const visible = Boolean(
       status &&
-        (status.state === 'downloading' || (relevant && !dismissedVersions[relevant.version || '']))
+        (status.state === 'downloading' ||
+          (esResultado(status) && !resultadoCerrado) ||
+          (relevant && !dismissedVersions[relevant.version || '']))
     );
-    return { status, relevant, visible, dismiss, reShow };
-  }, [status, dismissedVersions]);
+    return { status, relevant, visible, dismiss, reShow, cerrarResultado };
+  }, [status, dismissedVersions, resultadoCerrado]);
 
   return <UpdaterCtx.Provider value={value}>{children}</UpdaterCtx.Provider>;
 }

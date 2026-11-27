@@ -333,6 +333,9 @@ app.on('before-quit', () => {
   ipcMain.on('updater-apply', () => {
     if (applyUpdateAndRestart()) {
       app.quit();
+    } else {
+      // No queda la descarga (p. ej. se borro %TEMP%): se vuelve a bajar.
+      startAvailableDownload({ send: sendUpdateStatus });
     }
   });
 

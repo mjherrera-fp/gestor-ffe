@@ -11,13 +11,18 @@
 //      %TEMP%\gestor-ffe-update como fichero aparte (nunca se sobrescribe
 //      el exe actual mientras está en ejecución).
 //   4. "Reiniciar y actualizar" escribe un script .cmd independiente que
-//      espera el cierre de la app, borra el exe antiguo, mueve el nuevo a
-//      la carpeta portable con su nombre de versión y relanza la app.
+//      espera el cierre de la app, aparta el exe antiguo, mueve el nuevo a
+//      la carpeta portable y relanza la app (ver updaterScript.js).
+//   5. Al arrancar se lee el resultado que dejó el script y se avisa de si
+//      la actualización se completó o por qué falló (GF-77).
 // =====================================================================
 import { app, net } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import { spawn } from 'child_process';
+import { compareVersions, interpretarResultado, scriptAplicar } from './updaterScript.js';
+
+export { compareVersions };
 
 // ─────────────────────────────────────────────────────────────────────
 // CONFIGURACIÓN: rellena owner/repo antes de empaquetar
@@ -69,50 +74,10 @@ const UPDATE_SUBDIR = 'gestor-ffe-update';
 
 const tmpDir = () => path.join(app.getPath('temp'), UPDATE_SUBDIR);
 const pendingFile = () => path.join(app.getPath('userData'), 'update-pending.json');
+const resultFile = () => path.join(app.getPath('userData'), 'update-result.json');
 
 const portableFilePath = () =>
   process.env.PORTABLE_EXECUTABLE_FILE || process.execPath;
-
-// ─────────────────────────────────────────────────────────────────────
-// Utilidades de versión (semver-lite, tolera prereleases: 0.1.0-alpha)
-// ─────────────────────────────────────────────────────────────────────
-function parseVersion(v) {
-  const m = String(v ?? '').trim().match(/^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$/);
-  if (!m) return null;
-  return { nums: [Number(m[1]), Number(m[2]), Number(m[3])], pre: m[4] || '' };
-}
-
-function comparePrerelease(a, b) {
-  if (!a && !b) return 0;
-  if (!a) return 1; // release > prerelease
-  if (!b) return -1;
-  const pa = a.split('.');
-  const pb = b.split('.');
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const x = pa[i];
-    const y = pb[i];
-    if (x === undefined) return -1;
-    if (y === undefined) return 1;
-    if (x === y) continue;
-    const xNum = /^\d+$/.test(x);
-    const yNum = /^\d+$/.test(y);
-    if (xNum && yNum) return Number(x) - Number(y);
-    if (xNum) return -1; // numérico < alfanumérico
-    if (yNum) return 1;
-    return x < y ? -1 : 1;
-  }
-  return 0;
-}
-
-// >0 si a > b, 0 si igual, <0 si a < b
-export function compareVersions(a, b) {
-  const pa = parseVersion(a) || { nums: [0, 0, 0], pre: '' };
-  const pb = parseVersion(b) || { nums: [0, 0, 0], pre: '' };
-  for (let i = 0; i < 3; i++) {
-    if (pa.nums[i] !== pb.nums[i]) return pa.nums[i] - pb.nums[i];
-  }
-  return comparePrerelease(pa.pre, pb.pre);
-}
 
 // ─────────────────────────────────────────────────────────────────────
 // GitHub
@@ -221,6 +186,15 @@ export async function checkForUpdates({ send } = {}) {
     // aplicada con éxito, lo borramos (rollback ya no necesario).
     cleanupRollback();
 
+    // Si se acaba de aplicar una actualización, se dice cómo ha ido. Con el
+    // aviso en pantalla no se sigue comprobando: si falló, la descarga sigue
+    // pendiente y el propio aviso permite reintentar.
+    const resultado = leerResultadoArranque();
+    if (resultado) {
+      resultadoArranque = null; // solo se enseña una vez
+      return send && send(resultado);
+    }
+
     if (!UPDATE_CONFIG.owner || !UPDATE_CONFIG.repo || UPDATE_CONFIG.repo.startsWith('RELLENA')) {
       return;
     }
@@ -277,12 +251,10 @@ export async function startAvailableDownload({ send } = {}) {
 // Aplicar actualización (portable): proceso .cmd independiente
 // ─────────────────────────────────────────────────────────────────────
 // El exe nuevo YA está descargado como fichero aparte y nunca se escribe
-// sobre el actual (%TEMP%\gestor-ffe-update\{nombre-asset}). Un script
-// .cmd independiente: espera el cierre de la app, BORRA el exe antiguo y
-// MUEVE el nuevo a la carpeta portable con SU NOMBRE DE VERSIÓN (p. ej.
-// Gestor.FFE.0.1.1-alpha.exe) antes de relanzarlo con entorno limpio (sin
-// las PORTABLE_EXECUTABLE_* heredadas, que hacían fallar al SFX con
-// "Invalid file descriptor to ICU data received"). La BBDD vive en
+// sobre el actual mientras está en uso. El script (updaterScript.js) espera
+// al cierre, aparta el exe antiguo reintentando hasta que el lanzador lo
+// suelte, mueve el nuevo, comprueba que se ha movido y deja el resultado en
+// update-result.json para el siguiente arranque. La BBDD vive en
 // PORTABLE_EXECUTABLE_DIR (la carpeta del exe), no depende de su nombre.
 function writeApplyScript() {
   const pending = readPending();
@@ -290,58 +262,38 @@ function writeApplyScript() {
 
   const target = portableFilePath();
   const fileName = pending.fileName || `${pending.version}.exe`;
-  const finalPath = path.join(path.dirname(target), fileName);
-  // Escapado mínimo para un .cmd: '%' -> '%%' y '&' -> '^&'
-  const esc = (s) => s.replace(/%/g, '%%').replace(/&/g, '^&');
+  const script = scriptAplicar({
+    app: target,
+    final: path.join(path.dirname(target), fileName),
+    nuevo: pending.exePath,
+    resultado: resultFile(),
+    version: pending.version,
+    pid: process.pid,
+  });
 
-  const script = [
-    '@echo off',
-    'setlocal',
-    `set "APP=${esc(target)}"`,
-    `set "FINAL=${esc(finalPath)}"`,
-    `set "NEW=${esc(pending.exePath)}"`,
-    `set "PID=${process.pid}"`,
-    '',
-    // Espera al cierre del proceso. Con PowerShell no hay ambigüedad de
-    // localización ni falsos positivos (get-process con PID inexistente
-    // -> error 0). Tope: ~60 s; después, cierre forzoso.
-    'set /a w=0',
-    ':wait',
-    'powershell -NoProfile -Command "if (Get-Process -Id %PID% -ErrorAction SilentlyContinue) { exit 1 } else { exit 0 }"',
-    'if not errorlevel 1 goto go',
-    'set /a w+=1',
-    'if %w% GEQ 60 goto force',
-    'timeout /t 1 /nobreak >nul',
-    'goto wait',
-    ':force',
-    'powershell -NoProfile -Command "Stop-Process -Id %PID% -Force -ErrorAction SilentlyContinue"',
-    'timeout /t 3 /nobreak >nul',
-    ':go',
-    '',
-    // 1) Borrar el exe antiguo (ya cerrado)  2) Mover el nuevo a la carpeta
-    // portable con su nombre de versión (p. ej. Gestor.FFE.0.1.1-alpha.exe).
-    'if exist "%APP%" del /f /q "%APP%"',
-    'move /y "%NEW%" "%FINAL%" >nul',
-    'if not exist "%FINAL%" goto fail',
-    '',
-    // Entorno limpio para que el SFX recalcule sus propias variables.
-    'set "PORTABLE_EXECUTABLE_FILE="',
-    'set "PORTABLE_EXECUTABLE_DIR="',
-    'set "PORTABLE_EXECUTABLE_APP_FILENAME="',
-    '',
-    'start "" "%FINAL%"',
-    'goto end',
-    '',
-    ':fail',
-    'echo [updater] no se pudo sustituir el exe > "%FINAL%.update-fallido.txt"',
-    ':end',
-    'del /f /q "%~f0" 2>nul',
-    'endlocal',
-  ].join('\r\n');
-
+  try { fs.unlinkSync(resultFile()); } catch { /* noop */ }
   const bat = path.join(app.getPath('userData'), 'update-apply.cmd');
   fs.writeFileSync(bat, script, 'utf8');
   return bat;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Resultado de la última actualización aplicada (GF-77)
+// ─────────────────────────────────────────────────────────────────────
+// Se lee una sola vez por arranque: el fichero se borra al leerlo y el
+// estado se guarda para enviarlo cuando el renderer pida la comprobación.
+let resultadoLeido = false;
+let resultadoArranque = null;
+
+function leerResultadoArranque() {
+  if (resultadoLeido) return resultadoArranque;
+  resultadoLeido = true;
+  let contenido = null;
+  try { contenido = fs.readFileSync(resultFile(), 'utf8'); } catch { return null; }
+  try { fs.unlinkSync(resultFile()); } catch { /* noop */ }
+  resultadoArranque = interpretarResultado(contenido, app.getVersion());
+  if (resultadoArranque?.state === 'updated') clearPending();
+  return resultadoArranque;
 }
 
 export function applyUpdateAndRestart() {
